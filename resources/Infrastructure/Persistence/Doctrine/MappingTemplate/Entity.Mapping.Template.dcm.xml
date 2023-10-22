@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping>
+    <entity name="PATH\TO\FULLYQUALIFIEDCLASSnAME" 
+            table="DB_TABLE_NAME"
+            repository-class="Query\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository"
+            repository-class="PATH\TO\REPOSITORYCLASS" 
+            inheritance-type="SINGLE_TABLE"
+    >
+        <discriminator-column name="DISCRIMINATOR_FIELD" type="string" />
+        <discriminator-map>
+            <discriminator-mapping value="CLASS_ONE" class="PATH\TO\CLASSONE" />
+            <discriminator-mapping value="CLASS_TWO" class="PATH\TO\CLASSTWO" />
+        </discriminator-map>
+        
+        <id name="id" type="guid" />
+        <field name="disabled" type="boolean">
+            <options><option name="default">0</option></options>
+        </field>
+        <field name="lastModifiedTime" type="datetime_immutable" nullable="true"/>
+        
+        <id name="id" type="guid" />
+	<id name="ASSOCIATEDENTITY" association-key="true" />
+        
+        <field name="SMALLINTEGER" column="SMALL_INTEGER" type="smallint" nullable="true" />
+        <field name="SMALLINTEGER" column="SMALL_INTEGER" type="smallint" nullable="true">
+            <options>
+                <option name="comment">comment about string column</option>
+                <option name="default">default strin value</option>
+                <option name="unsigned">false</option>
+                <option name="fixed">false</option>
+            </options>
+        </field>
+        <field name="INTEGER" column="INTEGER" type="integer" nullable="true"/>
+        <field name="BIGINTEGER" column="BIG_INTEGER" type="bigint" nullable="true"/>
+        <field name="DECIMAL" column="DECIMAL" type="decimal" nullable="true"/>
+        <field name="FLOAT" column="FLOAT" type="float" nullable="true"/>
+        
+        <field name="name" type="string" length="255" nullable="false"/>
+        <field name="description" type="string" length="1024" nullable="true"/>
+        <field name="STRING" column="STRING" type="string" length="255" nullable="true"/>
+        <field name="STRING" column="STRING" type="string" length="255" nullable="true">
+            <options>
+                <option name="default">default strin value</option>
+                <option name="comment">comment about string column</option>
+                <option name="fixed">false</option>
+            </options>
+        </field>
+        <field name="TEXT" column="TEXT" type="text" nullable="true"/>
+        
+        <field name="BINARY" column="BINARY" type="binary" length="64" nullable="true"/>
+        <field name="BLOB" column="BLOB" type="blob" nullable="true"/>
+        
+        <field name="BOOLEAN" column="BOOLEAN" type="boolean" />
+        <field name="BOOLEAN" column="BOOLEAN" type="boolean">
+            <options>
+                <option name="default">0</option>
+                <option name="comment">comment about boolean column</option>
+                <option name="fixed">false</option>
+            </options>
+        </field>
+        
+        <field name="DATE" column="DATE" type="date" nullable="true"/>
+        <field name="DATEIMMUTABLE" column="DATE_IMMUTABLE" type="date_immutable" nullable="true"/>
+        <field name="DATETIME" column="DATETIME" type="datetime" nullable="true"/>
+        <field name="DATETIMEIMMUTABLE" column="DATETIME_IMMUTABLE" type="datetime_immutable" nullable="true"/>
+        <field name="DATETIMEWITHTIMEZINE" column="DATETIME_WITH_TIMEZONE" type="datetimetz" nullable="true"/>
+        <field name="DATETIMEIMMUTABLEWITHTIMEZINE" column="DATETIME_IMMUTABLE_WITH_TIMEZONE" type="datetimetz_immutable" nullable="true"/>
+        <field name="TIME" column="TIME" type="time" nullable="true"/>
+        <field name="TIMEIMMUTABLE" column="TIME_IMMUTABLE" type="time_immutable" nullable="true"/>
+        <field name="DATEINTERVAL" column="DATE_INTERVAL" type="dateinterval" nullable="true"/>
+        
+        <field name="ARRAY" column="ARRAY" type="array" nullable="true"/>
+        <field name="SIMPLEARRAY" column="SIMPLE_ARRAY" type="simple_array" nullable="true"/>
+        <field name="JSON" column="JSON" type="json" nullable="true"/>
+        <field name="OBJECT" column="OBJECT" type="object" nullable="true"/>
+        
+        <unique-constraints>
+            <unique-constraint columns="name,user_email" name="search_idx" />
+        </unique-constraints>
+        
+        <embedded name="VALUEOBJECT" class="PATH\TO\VALUEOBJECTCLASS" use-column-prefix="false" />
+        <embedded name="VALUEOBJECT" class="PATH\TO\VALUEOBJECTCLASS" column-prefix="myPrefix_" />
+        
+        <one-to-one field="TARGET" 
+                    target-entity="PATH\TO\TARGETCLASS"
+                    mapped-by="SOURCE"
+        >
+            <cascade><cascade-persist /></cascade>
+        </one-to-one>
+        <one-to-one field="SOURCE" 
+                    target-entity="PATH\TO\SOURCECLASS"
+                    inversed-by="TARGET"
+        >
+            <join-column name="SOURCE_ID" referenced-column-name="id" />
+        </one-to-one>
+        
+        <one-to-many  field="TARGETS" 
+                      target-entity="PATH\TO\TARGETCALSS"
+                      mapped-by="SOURCE"
+        >
+            <!--<cascade><cascade-all /></cascade>-->
+            <cascade><cascade-persist /></cascade>
+        </one-to-many>
+        <many-to-one  field="SOURCE" 
+                      target-entity="PATH\TO\SOURCECLASS"
+                      inversed-by="TARGETS"
+        >
+            <join-column name="SOURCE_ID" referenced-column-name="id" />
+        </many-to-one>
+        
+        <one-to-many field="BRANCHES" 
+                     target-entity="PATH\TO\THISCLASS" 
+                     mapped-by="PARENT"
+        >
+            <!--<cascade><cascade-all /></cascade>-->
+            <cascade><cascade-persist /></cascade>
+        </one-to-many>
+        <many-to-one field="PARENT" 
+                     target-entity="PATH\TO\THISCLASS" 
+                     inversed-by="BRANCHES"
+                     fetch="EAGER"
+        >
+            <join-column name="PARENT_ID" referenced-column-name="id" />
+        </many-to-one>
+        
+    </entity>
+</doctrine-mapping>

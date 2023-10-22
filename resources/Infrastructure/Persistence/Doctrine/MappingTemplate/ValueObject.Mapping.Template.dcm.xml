@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping>
+    <embeddable name="Path\To\FullyQualifiedValueObjectClass">
+        <field name="ENUM_FIELD" column="ENUM_COLUMN" column-definition="ENUM('VALUE_ONE', 'VALUE_TWO')" />
+        
+        <field name="SMALLINTEGER" column="SMALL_INTEGER" type="smallint" nullable="true"/>
+        <field name="INTEGER" column="INTEGER" type="int" nullable="true"/>
+        <field name="BIGINTEGER" column="BIG_INTEGER" type="bigint" nullable="true"/>
+        <field name="DECIMAL" column="DECIMAL" type="decimal" nullable="true"/>
+        <field name="FLOAT" column="FLOAT" type="float" nullable="true"/>
+        
+        <field name="STRING" column="STRING" type="string" length="255" nullable="true"/>
+        <field name="TEXT" column="TEXT" type="text" nullable="true"/>
+        
+        <field name="BINARY" column="BINARY" type="binary" length="64" nullable="true"/>
+        <field name="BLOB" column="BLOB" type="blob" nullable="true"/>
+        
+        <field name="BOOLEAN" column="BOOLEAN" type="boolean" />
+        
+        <field name="DATE" column="DATE" type="date" nullable="true"/>
+        <field name="DATEIMMUTABLE" column="DATE_IMMUTABLE" type="date_immutable" nullable="true"/>
+        <field name="DATETIME" column="DATETIME" type="datetime" nullable="true"/>
+        <field name="DATETIMEIMMUTABLE" column="DATETIME_IMMUTABLE" type="datetime_immutable" nullable="true"/>
+        <field name="DATETIMEWITHTIMEZINE" column="DATETIME_WITH_TIMEZONE" type="datetimez" nullable="true"/>
+        <field name="DATETIMEIMMUTABLEWITHTIMEZINE" column="DATETIME_IMMUTABLE_WITH_TIMEZONE" type="datetimez" nullable="true"/>
+        <field name="TIME" column="TIME" type="time" nullable="true"/>
+        <field name="TIMEIMMUTABLE" column="TIME_IMMUTABLE" type="time_immutable" nullable="true"/>
+        <field name="DATEINTERVAL" column="DATE_INTERVAL" type="dateinterval" nullable="true"/>
+        
+        <field name="ARRAY" column="ARRAY" type="array" nullable="true"/>
+        <field name="SIMPLEARRAY" column="SIMPLE_ARRAY" type="simple_array" nullable="true"/>
+        <field name="JSON" column="JSON" type="json" nullable="true"/>
+        <field name="OBJECT" column="OBJECT" type="object" nullable="true"/>
+    </embeddable>
+</doctrine-mapping>

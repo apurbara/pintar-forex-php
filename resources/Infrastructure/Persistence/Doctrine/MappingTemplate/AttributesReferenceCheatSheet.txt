@@ -1,0 +1,88 @@
+
+#[Entity]
+#[Entity(repositoryClass: DoctrineEntityRepository::class)]
+#[Entity(repositoryClass: DoctrineEntityRepository::class, readOnly: false)]
+#[Table(name: "user")]
+#[Table(name: "user", schema: "schema_name")]
+#[UniqueConstraint(name: "mail_idx", columns: ["name", "user_email"])]
+
+#[Embeddable]
+    #[Embedded(class: Label::class, columnPrefix: false)]
+
+    #[Id, Column(type: "guid")]
+
+    #[Column(type: "smallint", nullable: true)]
+    #[Column(type: "smallint", name: "SMALL_INT_COLUMN", nullable: true, options: ["default" => 0, "unsigned" => false])]
+    #[Column(type: "integer", nullable: true)]
+    #[Column(type: "bigint", nullable: true)]
+    #[Column(type: "decimal", nullable: true)]
+    #[Column(type: "float", nullable: true)]
+
+    #[Column(type: "string", length: 255, nullable: false)]
+    protected string $name;
+    #[Column(type: "string", length: 1024, nullable: true)]
+    protected ?string $description;
+    #[Column(type: "string", length: 60, nullable: false)]
+    protected string $password;
+    #[Column(type: "string", name: "STRING_COLUMN", length: 255, nullable: true, options: ["default" => "default string value"])]
+    #[Column(type: "text", nullable: true)]
+    #[Column(type: "binary", length:64, nullable: true)]
+    #[Column(type: "blob", nullable: true)]
+
+    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
+    #[Column(type: "boolean", name: "BOOLEAN_COLUMN", nullable: false, options: ["default" => 0])]
+
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    #[Column(type: "datetimetz", nullable: true)]
+    #[Column(type: "date", nullable: true)]
+    #[Column(type: "date_immutable", nullable: true)]
+    #[Column(type: "datetime", nullable: true)]
+    #[Column(type: "datetime_immutable", nullable: true)]
+    #[Column(type: "time", nullable: true)]
+    #[Column(type: "time_immutable", nullable: true)]
+    #[Column(type: "dateinterval", nullable: true)]
+
+    #[Column(type: "string", enumType: enum::class)]
+    #[Column(type: "simple_array", nullable: true)]
+    #[Column(type: "array", nullable: true)]
+    #[Column(type: "json", nullable: true)]
+    #[Column(type: "object", nullable: true)]
+
+class AggregateClass
+    #[OneToOne(targetEntity: Composition::class, cascade: ["persist"])]
+    #[JoinColumn(name: "Composition_id", referencedColumnName: "id")]
+    protected Composition $composition;
+
+class Source
+    #[Composed(class: Target::class)]
+    #[OneToOne(targetEntity: Target::class, cascade: ["persist"])]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    #[OneToOne(targetEntity: Target::class, inversedBy: "source", cascade: ["persist"])]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    protected Target $target;
+
+    #[OneToMany(targetEntity: Target::class, mappedBy: "source", cascade: ["persist"])]
+    #[OrderBy(["name" => "ASC"])]
+    protected Target $targets;
+
+    #[ManyToMany(targetEntity: Target::class, mappedBy: "sources", cascade: ["persist"])]
+    #[OrderBy(["name" => "ASC"])]
+    protected Target $targets;
+
+class Target
+    #[OneToOne(targetEntity: Source::class, inversedBy: "target")]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    protected Source $source;
+
+    #[ManyToOne(targetEntity: Source::class)]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    #[ManyToOne(targetEntity: Source::class, inversedBy: "targets", fetch: "LAZY")]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    #[ManyToOne(targetEntity: Source::class, inversedBy: "targets", fetch: "EAGER")]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    protected Source $source;
+
+    #[ManyToMany(targetEntity: Source::class, inversedBy: "targets", fetch: "LAZY")]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    protected Target $sources;
+
