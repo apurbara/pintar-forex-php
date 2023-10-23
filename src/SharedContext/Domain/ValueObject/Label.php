@@ -12,22 +12,22 @@ class Label
 {
 
     #[Column(type: "string", length: 255, nullable: false)]
-    protected string $title;
+    protected string $name;
 
     #[Column(type: "string", length: 1024, nullable: true)]
     protected ?string $description = null;
 
-    protected function setTitle(string $title): void
+    protected function setName(string $title): void
     {
         ValidationService::build()
                 ->addRule(ValidationRule::notEmpty())
                 ->execute($title, 'bad request: title is mandatory');
-        $this->title = $title;
+        $this->name = $title;
     }
 
     public function __construct(LabelData $labelData)
     {
-        $this->setTitle($labelData->title);
+        $this->setName($labelData->name);
         $this->description = $labelData->description;
     }
 

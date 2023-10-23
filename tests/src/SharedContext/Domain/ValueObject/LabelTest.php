@@ -10,21 +10,21 @@ class LabelTest extends TestBase
     protected $data;
     protected $label;
     protected $otherLabel;
-    protected $title = 'new label title', $description = 'new label description';
+    protected $name = 'new label name', $description = 'new label description';
 
     protected function setUp(): void
     {
         parent::setUp();
-        $data = new LabelData('title', 'description');
+        $data = new LabelData('name', 'description');
         $this->label = new TestableLabel($data);
 
-        $otherData = new LabelData('other title', 'other description');
+        $otherData = new LabelData('other name', 'other description');
         $this->otherLabel = new TestableLabel($otherData);
     }
 
     protected function buildLabelData()
     {
-        return new LabelData($this->title, $this->description);
+        return new LabelData($this->name, $this->description);
     }
     
     //
@@ -36,13 +36,13 @@ class LabelTest extends TestBase
     public function test_construct_setProperties()
     {
         $label = $this->executeConstruct();
-        $this->assertEquals($this->title, $label->title);
+        $this->assertEquals($this->name, $label->name);
         $this->assertEquals($this->description, $label->description);
     }
 
     public function test_construct_emptyTitle_badRequest()
     {
-        $this->title = '';
+        $this->name = '';
         $operation = function () {
             $this->executeConstruct();
         };
@@ -58,7 +58,7 @@ class LabelTest extends TestBase
     public function test_update_returnUpdatedLabel()
     {
         $newLabel = $this->update();
-        $this->assertSame($this->title, $newLabel->title);
+        $this->assertSame($this->name, $newLabel->name);
         $this->assertSame($this->description, $newLabel->description);
     }
 
@@ -75,7 +75,7 @@ class LabelTest extends TestBase
 
     public function test_sameValueAs_sameValue_returnTrue()
     {
-        $this->otherLabel->title = $this->label->title;
+        $this->otherLabel->name = $this->label->name;
         $this->otherLabel->description = $this->label->description;
         $this->assertTrue($this->sameValueAs());
     }
@@ -84,6 +84,6 @@ class LabelTest extends TestBase
 class TestableLabel extends Label
 {
 
-    public string $title;
+    public string $name;
     public ?string $description = null;
 }
