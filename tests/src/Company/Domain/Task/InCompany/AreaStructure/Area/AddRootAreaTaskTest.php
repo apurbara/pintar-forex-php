@@ -56,4 +56,10 @@ class AddRootAreaTaskTest extends TaskInCompanyTestBase
                 ->willReturn(false);
         $this->assertRegularExceptionThrowed(fn() => $this->executeInCompany(), 'Conflict', 'area name is unavailable');
     }
+    public function test_execute_assertAreaStructureActive()
+    {
+        $this->areaStructure->expects($this->once())
+                ->method('assertActive');
+        $this->executeInCompany();
+    }
 }

@@ -34,4 +34,9 @@ class DoctrinePersonnelRepository extends DoctrineEntityRepository implements Pe
         ];
         return empty($this->fetchOneBy($filters));
     }
+
+    public function ofId(string $id): Personnel
+    {
+        return $this->findOneByIdOrDie($id);
+    }
 }

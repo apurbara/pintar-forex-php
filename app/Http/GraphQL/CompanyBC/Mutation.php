@@ -7,6 +7,8 @@ use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Task\AreaMutation;
 use App\Http\GraphQL\CompanyBC\Task\AreaStructureMutation;
+use App\Http\GraphQL\CompanyBC\Task\ManagerMutation;
+use App\Http\GraphQL\CompanyBC\Task\PersonnelMutation;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\Personnel;
@@ -31,6 +33,7 @@ class Mutation extends ObjectType
             ...$this->personnelMutation(),
             ...$this->areaStructureMutation(),
             ...$this->areaMutation(),
+            ...$this->managerMutation(),
         ];
     }
 
@@ -51,6 +54,14 @@ class Mutation extends ObjectType
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(Personnel::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new PersonnelController())
                         ->add($app->user, new GraphqlInputRequest($args))
+            ],
+            'personnel' => [
+                'type' => TypeRegistry::type(PersonnelMutation::class),
+                'args' => ['personnelId' => Type::nonNull(Type::id())],
+                'resolve' => function ($root, $args, AppContext $app) {
+                    $app->setAggregateRootId('personnelId', $args['personnelId']);
+                    return TypeRegistry::type(PersonnelMutation::class);
+                }
             ],
         ];
     }
@@ -84,6 +95,20 @@ class Mutation extends ObjectType
                 'resolve' => function ($root, $args, AppContext $app) {
                     $app->setAggregateRootId('areaId', $args['areaId']);
                     return TypeRegistry::type(AreaMutation::class);
+                }
+            ],
+        ];
+    }
+
+    protected function managerMutation(): array
+    {
+        return [
+            'manager' => [
+                'type' => TypeRegistry::type(ManagerMutation::class),
+                'args' => ['managerId' => Type::nonNull(Type::id())],
+                'resolve' => function ($root, $args, AppContext $app) {
+                    $app->setAggregateRootId('managerId', $args['managerId']);
+                    return TypeRegistry::type(ManagerMutation::class);
                 }
             ],
         ];

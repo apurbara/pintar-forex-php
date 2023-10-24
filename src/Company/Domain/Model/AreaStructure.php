@@ -45,13 +45,18 @@ class AreaStructure
         $this->label = new Label($data->labelData);
         $this->parent = null;
     }
+    
+    //
+    public function assertActive(): void
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('inactive area structure');
+        }
+    }
 
     //
     public function createChild(AreaStructureData $data): static
     {
-        if ($this->disabled) {
-            throw RegularException::forbidden('can only create child of active area structure');
-        }
         $child = new static($data);
         $child->parent = $this;
         return $child;
@@ -59,14 +64,14 @@ class AreaStructure
 
     public function createRootArea(AreaData $areaData): Area
     {
-        if ($this->disabled || $this->parent) {
+        if ($this->parent) {
             throw RegularException::forbidden('can only create root area in active root structure');
         }
         return new Area($this, $areaData);
     }
 
-    public function isActiveChildOfParent(AreaStructure $parent): bool
+    public function isChildOf(AreaStructure $parent): bool
     {
-        return !$this->disabled && $this->parent === $parent;
+        return $this->parent === $parent;
     }
 }

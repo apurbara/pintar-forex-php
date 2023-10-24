@@ -54,6 +54,22 @@ class AreaStructureTest extends TestBase
     }
     
     //
+    protected function assertActive()
+    {
+        $this->areaStructure->assertActive();
+    }
+    public function test_assertActive_inactive_forbidden()
+    {
+        $this->areaStructure->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive area structure');
+    }
+    public function test_assertActive_active_void()
+    {
+        $this->assertActive();
+        $this->markAsSuccess();
+    }
+    
+    //
     protected function createChild()
     {
         return $this->areaStructure->createChild($this->createAreaStructureData());
@@ -62,11 +78,6 @@ class AreaStructureTest extends TestBase
     {
         $child = $this->createChild();
         $this->assertSame($this->areaStructure, $child->parent);
-    }
-    public function test_createChild_disabledArea_forbidden()
-    {
-        $this->areaStructure->disabled = true;
-        $this->assertRegularExceptionThrowed(fn() => $this->createChild(), 'Forbidden', 'can only create child of active area structure');
     }
     
     //
@@ -79,13 +90,6 @@ class AreaStructureTest extends TestBase
         $this->areaStructure->parent = null;
         $this->assertInstanceOf(Area::class, $this->createRootArea());
     }
-    public function test_createRootArea_disabledStructure_forbidden()
-    {
-        $this->areaStructure->disabled = true;
-        $this->areaStructure->parent = null;
-        $this->assertRegularExceptionThrowed(
-                fn() => $this->createRootArea(), 'Forbidden', 'can only create root area in active root structure');
-    }
     public function test_createRootArea_nonRootStructure_forbidden()
     {
         $this->assertRegularExceptionThrowed(
@@ -93,23 +97,18 @@ class AreaStructureTest extends TestBase
     }
     
     //
-    protected function isActiveChildOfParent()
+    protected function isChildOf()
     {
-        return $this->areaStructure->isActiveChildOfParent($this->parent);
+        return $this->areaStructure->isChildOf($this->parent);
     }
-    public function test_isActiveChildOfParent_returnTrue()
+    public function test_isChildOf_returnTrue()
     {
-        $this->assertTrue($this->isActiveChildOfParent());
-    }
-    public function test_isActiveChildOfParent_disabled_returnFalse()
-    {
-        $this->areaStructure->disabled = true;
-        $this->assertFalse($this->isActiveChildOfParent());
+        $this->assertTrue($this->isChildOf());
     }
     public function test_isActiveChildOfParent_differentParent_returnFalse()
     {
         $this->areaStructure->parent = $this->buildMockOfClass(AreaStructure::class);
-        $this->assertFalse($this->isActiveChildOfParent());
+        $this->assertFalse($this->isChildOf());
     }
 }
 

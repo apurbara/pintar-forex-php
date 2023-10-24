@@ -4,12 +4,16 @@ namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
+use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\Personnel;
+use Company\Domain\Model\Personnel\Manager;
+use Company\Domain\Model\Personnel\Manager\Sales;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
@@ -32,6 +36,8 @@ class Query extends ObjectType
             ...$this->personnelQuery(),
             ...$this->areaStructureQuery(),
             ...$this->areaQuery(),
+            ...$this->managerQuery(),
+            ...$this->salesQuery(),
         ];
     }
 
@@ -85,6 +91,42 @@ class Query extends ObjectType
                 'args' => ['areaId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
                         ->viewDetail($app->user, $args['areaId'])
+            ],
+        ];
+    }
+
+    protected function managerQuery(): array
+    {
+        return [
+            'managerList' => [
+                'type' => new Pagination(TypeRegistry::objectType(Manager::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new ManagerController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'managerDetail' => [
+                'type' => TypeRegistry::objectType(Manager::class),
+                'args' => ['managerId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new ManagerController())
+                        ->viewDetail($app->user, $args['managerId'])
+            ],
+        ];
+    }
+
+    protected function salesQuery(): array
+    {
+        return [
+            'salesList' => [
+                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'salesDetail' => [
+                'type' => TypeRegistry::objectType(Sales::class),
+                'args' => ['salesId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesController())
+                        ->viewDetail($app->user, $args['salesId'])
             ],
         ];
     }

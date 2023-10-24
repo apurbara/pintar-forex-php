@@ -23,8 +23,11 @@ class AddChildAreaStructureTask implements AdminTaskInCompany
             throw RegularException::conflict('name is unavailable');
         }
         $payload->setId($this->areaStructureRepository->nextIdentity());
-        $areaStructure = $this->areaStructureRepository->ofId($payload->parentId)
-                ->createChild($payload);
+        
+        $parent = $this->areaStructureRepository->ofId($payload->parentId);
+        $parent->assertActive();
+        
+        $areaStructure = $parent->createChild($payload);
         $this->areaStructureRepository->add($areaStructure);
     }
 }

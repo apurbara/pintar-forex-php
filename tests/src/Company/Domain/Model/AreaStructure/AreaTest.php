@@ -53,7 +53,7 @@ class AreaTest extends TestBase
     protected function createChild()
     {
         $this->childAreaStructure->expects($this->any())
-                ->method('isActiveChildOfParent')
+                ->method('isChildOf')
                 ->willReturn(true);
         return $this->area->createChild($this->childAreaStructure, $this->createAreaData());
     }
@@ -62,18 +62,29 @@ class AreaTest extends TestBase
         $child = $this->createChild();
         $this->assertSame($this->area, $child->parent);
     }
-    public function test_createChild_disabledArea_forbidden()
-    {
-        $this->area->disabled = true;
-        $this->assertRegularExceptionThrowed(fn() => $this->createChild(), 'Forbidden', 'can only create child of active area');
-    }
     public function test_createChild_assertChildStructureIsActiveChildOfAreaStructure()
     {
         $this->childAreaStructure->expects($this->once())
-                ->method('isActiveChildOfParent')
+                ->method('isChildOf')
                 ->with($this->areaStructure)
                 ->willReturn(false);
         $this->assertRegularExceptionThrowed(fn() => $this->createChild(), 'Forbidden', 'child area must associate with active structure descendant');
+    }
+    
+    //
+    protected function assertActive()
+    {
+        $this->area->assertActive();
+    }
+    public function test_assertActive_inactiveArea_forbidden()
+    {
+        $this->area->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), "Forbidden", 'inactive area');
+    }
+    public function test_assertActive_activeArea_void()
+    {
+        $this->assertActive();
+        $this->markAsSuccess();
     }
 }
 

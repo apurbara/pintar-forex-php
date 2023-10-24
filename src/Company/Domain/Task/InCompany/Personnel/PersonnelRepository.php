@@ -11,6 +11,8 @@ interface PersonnelRepository
 
     public function add(Personnel $personnel): void;
     
+    public function ofId(string $id): Personnel;
+    
     public function isEmailAvailable(string $email): bool;
 
     public function viewPersonnelList(array $paginationSchema): array;

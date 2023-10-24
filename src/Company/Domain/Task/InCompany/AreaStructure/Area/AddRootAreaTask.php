@@ -26,7 +26,11 @@ class AddRootAreaTask implements AdminTaskInCompany
             throw RegularException::conflict('area name is unavailable');
         }
         $payload->setId($this->areaRepository->nextIdentity());
-        $area = $this->areaStructureRepository->ofId($payload->areaStructureId)->createRootArea($payload);
+        
+        $areaStructure = $this->areaStructureRepository->ofId($payload->areaStructureId);
+        $areaStructure->assertActive();
+        
+        $area = $areaStructure->createRootArea($payload);
         $this->areaRepository->add($area);
     }
 }

@@ -50,18 +50,23 @@ class Area
         $this->label = new Label($data->labelData);
         $this->parent = null;
     }
-
+    
     //
     public function createChild(AreaStructure $childAreaStructure, AreaData $childData): static
     {
-        if ($this->disabled) {
-            throw RegularException::forbidden('can only create child of active area');
-        }
-        if (!$childAreaStructure->isActiveChildOfParent($this->areaStructure)) {
+        if (!$childAreaStructure->isChildOf($this->areaStructure)) {
             throw RegularException::forbidden('child area must associate with active structure descendant');
         }
         $area = new static($childAreaStructure, $childData);
         $area->parent = $this;
         return $area;
+    }
+    
+    //
+    public function assertActive(): void
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('inactive area');
+        }
     }
 }
