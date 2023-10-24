@@ -8,6 +8,7 @@ use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
+use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
@@ -16,6 +17,7 @@ use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\Manager\Sales;
+use Company\Domain\Model\SalesActivity;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
@@ -41,6 +43,7 @@ class Query extends ObjectType
             ...$this->managerQuery(),
             ...$this->salesQuery(),
             ...$this->customerVerificationQuery(),
+            ...$this->salesActivityQuery(),
         ];
     }
 
@@ -148,6 +151,24 @@ class Query extends ObjectType
                 'args' => ['customerVerificationId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
                         ->viewDetail($app->user, $args['customerVerificationId'])
+            ],
+        ];
+    }
+
+    protected function salesActivityQuery(): array
+    {
+        return [
+            'salesActivityList' => [
+                'type' => new Pagination(TypeRegistry::objectType(SalesActivity::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'salesActivityDetail' => [
+                'type' => TypeRegistry::objectType(SalesActivity::class),
+                'args' => ['salesActivityId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
+                        ->viewDetail($app->user, $args['salesActivityId'])
             ],
         ];
     }

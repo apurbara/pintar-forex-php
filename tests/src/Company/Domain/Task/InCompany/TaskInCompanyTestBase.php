@@ -8,12 +8,14 @@ use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\Manager\Sales;
+use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
+use Company\Domain\Task\InCompany\SalesActivity\SalesActivityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
@@ -102,5 +104,19 @@ class TaskInCompanyTestBase extends TestBase
 //                ->method('ofId')
 //                ->with($this->customerVerificationId)
 //                ->willReturn($this->customerVerification);
+    }
+    
+    protected MockObject $salesActivityRepository;
+    protected MockObject $salesActivity;
+    protected string $salesActivityId = 'salesActivityId';
+    protected function prepareSalesActivityDependency(): void
+    {
+        $this->salesActivityRepository = $this->buildMockOfInterface(SalesActivityRepository::class);
+        $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
+        //
+//        $this->salesActivityRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->salesActivityId)
+//                ->willReturn($this->salesActivity);
     }
 }

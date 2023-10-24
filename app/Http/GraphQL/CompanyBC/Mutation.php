@@ -5,6 +5,7 @@ namespace App\Http\GraphQL\CompanyBC;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
+use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Task\AreaMutation;
 use App\Http\GraphQL\CompanyBC\Task\AreaStructureMutation;
@@ -14,6 +15,7 @@ use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
+use Company\Domain\Model\SalesActivity;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -37,6 +39,7 @@ class Mutation extends ObjectType
             ...$this->areaMutation(),
             ...$this->managerMutation(),
             ...$this->customerVerificationMutation(),
+            ...$this->salesActivityMutation(),
         ];
     }
 
@@ -128,4 +131,23 @@ class Mutation extends ObjectType
             ],
         ];
     }
+
+    protected function salesActivityMutation(): array
+    {
+        return [
+            'setInitialSalesActivity' => [
+                'type' => TypeRegistry::objectType(SalesActivity::class),
+                'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivity::class),
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
+                        ->setInitial($app->user, new GraphqlInputRequest($args))
+            ],
+            'addSalesActivity' => [
+                'type' => TypeRegistry::objectType(SalesActivity::class),
+                'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivity::class),
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
+                        ->add($app->user, new GraphqlInputRequest($args))
+            ],
+        ];
+    }
+
 }
