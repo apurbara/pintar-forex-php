@@ -4,6 +4,7 @@ namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
@@ -11,6 +12,7 @@ use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\Manager\Sales;
@@ -38,6 +40,7 @@ class Query extends ObjectType
             ...$this->areaQuery(),
             ...$this->managerQuery(),
             ...$this->salesQuery(),
+            ...$this->customerVerificationQuery(),
         ];
     }
 
@@ -127,6 +130,24 @@ class Query extends ObjectType
                 'args' => ['salesId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesController())
                         ->viewDetail($app->user, $args['salesId'])
+            ],
+        ];
+    }
+
+    protected function customerVerificationQuery(): array
+    {
+        return [
+            'customerVerificationList' => [
+                'type' => new Pagination(TypeRegistry::objectType(CustomerVerification::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'customerVerificationDetail' => [
+                'type' => TypeRegistry::objectType(CustomerVerification::class),
+                'args' => ['customerVerificationId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
+                        ->viewDetail($app->user, $args['customerVerificationId'])
             ],
         ];
     }

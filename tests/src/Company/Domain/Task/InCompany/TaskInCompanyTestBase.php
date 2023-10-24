@@ -4,11 +4,13 @@ namespace Tests\src\Company\Domain\Task\InCompany;
 
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
+use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
@@ -86,5 +88,19 @@ class TaskInCompanyTestBase extends TestBase
 //                ->method('ofId')
 //                ->with($this->salesId)
 //                ->willReturn($this->sales);
+    }
+    
+    protected MockObject $customerVerificationRepository;
+    protected MockObject $customerVerification;
+    protected string $customerVerificationId = 'customerVerificationId';
+    protected function prepareCustomerVerificationDependency(): void
+    {
+        $this->customerVerificationRepository = $this->buildMockOfInterface(CustomerVerificationRepository::class);
+        $this->customerVerification = $this->buildMockOfClass(CustomerVerification::class);
+        //
+//        $this->customerVerificationRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->customerVerificationId)
+//                ->willReturn($this->customerVerification);
     }
 }

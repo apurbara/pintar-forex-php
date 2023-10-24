@@ -3,6 +3,7 @@
 namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Task\AreaMutation;
@@ -11,6 +12,7 @@ use App\Http\GraphQL\CompanyBC\Task\ManagerMutation;
 use App\Http\GraphQL\CompanyBC\Task\PersonnelMutation;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
+use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -34,6 +36,7 @@ class Mutation extends ObjectType
             ...$this->areaStructureMutation(),
             ...$this->areaMutation(),
             ...$this->managerMutation(),
+            ...$this->customerVerificationMutation(),
         ];
     }
 
@@ -110,6 +113,18 @@ class Mutation extends ObjectType
                     $app->setAggregateRootId('managerId', $args['managerId']);
                     return TypeRegistry::type(ManagerMutation::class);
                 }
+            ],
+        ];
+    }
+
+    protected function customerVerificationMutation(): array
+    {
+        return [
+            'addCustomerVerification' => [
+                'type' => TypeRegistry::objectType(CustomerVerification::class),
+                'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(CustomerVerification::class),
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
+                        ->add($app->user, new GraphqlInputRequest($args))
             ],
         ];
     }
