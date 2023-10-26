@@ -6,6 +6,7 @@ use App\Http\Controllers\SalesBC\AssignedCustomerController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\SalesBC\Task\AssignedCustomerMutation;
+use App\Http\GraphQL\SalesBC\Task\SalesActivityScheduleMutation;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -29,6 +30,7 @@ class Mutation extends ObjectType
             'name' => 'salesMutation', 
             'fields' => fn() => [
                 ...$this->assignedCustomerMutation(),
+                ...$this->salesActivityScheduleMutation(),
             ],
         ]);
         return [
@@ -61,6 +63,20 @@ class Mutation extends ObjectType
                 'resolve' => function($root, $args, AppContext $app) {
                     $app->setAggregateRootId('assignedCustomerId', $args['assignedCustomerId']);
                     return TypeRegistry::type(AssignedCustomerMutation::class);
+                }
+            ],
+        ];
+    }
+
+    protected function salesActivityScheduleMutation(): array
+    {
+        return [
+            'salesActivitySchedule' => [
+                'type' => TypeRegistry::type(SalesActivityScheduleMutation::class),
+                'args' => [ 'salesActivityScheduleId' => Type::nonNull(Type::id()) ],
+                'resolve' => function($root, $args, AppContext $app) {
+                    $app->setAggregateRootId('salesActivityScheduleId', $args['salesActivityScheduleId']);
+                    return TypeRegistry::type(SalesActivityScheduleMutation::class);
                 }
             ],
         ];

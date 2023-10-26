@@ -9,11 +9,13 @@ use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
 use Sales\Domain\Model\SalesActivity;
 use Sales\Domain\Task\Area\AreaRepository;
 use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
 use Sales\Domain\Task\Customer\CustomerRepository;
 use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
+use Sales\Domain\Task\SalesActivityReport\SalesActivityReportRepository;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
 use Tests\TestBase;
 
@@ -97,5 +99,19 @@ class SalesTaskTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->salesActivityScheduleId)
                 ->willReturn($this->salesActivitySchedule);
+    }
+    
+    protected MockObject $salesActivityReportRepository;
+    protected MockObject $salesActivityReport;
+    protected string $salesActivityReportId = 'salesActivityReportId';
+    protected function prepareSalesActivityReportDependency()
+    {
+        $this->salesActivityReportRepository = $this->buildMockOfInterface(SalesActivityReportRepository::class);
+        $this->salesActivityReport = $this->buildMockOfClass(SalesActivityReport::class);
+        
+//        $this->salesActivityReportRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->salesActivityReportId)
+//                ->willReturn($this->salesActivityReport);
     }
 }

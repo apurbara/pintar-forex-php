@@ -106,7 +106,7 @@ class DoctrineGraphqlFieldsBuilder
             $isFieldUncontrollerByUser = match ($propertyReflection->getName()) {
                 'id' => true,
                 'disabled', 'cancelled', 'removed' => true,
-                'createdTime', 'lastModifiedTime' => true,
+                'createdTime', 'lastModifiedTime', 'submitTime' => true,
                 default => false,
             };
             if ($isFieldUncontrollerByUser && !static::getAttribute($propertyReflection, IncludeInInput::class)) {

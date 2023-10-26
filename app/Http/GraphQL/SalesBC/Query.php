@@ -3,6 +3,7 @@
 namespace App\Http\GraphQL\SalesBC;
 
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
+use App\Http\Controllers\SalesBC\SalesActivityReportController;
 use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
@@ -13,6 +14,7 @@ use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
 
 class Query extends ObjectType
 {
@@ -31,6 +33,7 @@ class Query extends ObjectType
             'fields' => fn() => [
                 ...$this->assignedCustomerQuery(),
                 ...$this->salesActivityScheduleQuery(),
+                ...$this->salesActivityReportQuery(),
             ],
         ]);
         return [
@@ -77,6 +80,24 @@ class Query extends ObjectType
                 'args' => ['salesActivityScheduleId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewDetail($app->user, $args['salesActivityScheduleId'])
+            ],
+        ];
+    }
+
+    protected function salesActivityReportQuery(): array
+    {
+        return [
+            'salesActivityReportList' => [
+                'type' => new Pagination(TypeRegistry::objectType(SalesActivityReport::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityReportController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'salesActivityReportDetail' => [
+                'type' => TypeRegistry::objectType(SalesActivityReport::class),
+                'args' => ['salesActivityReportId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityReportController())
+                        ->viewDetail($app->user, $args['salesActivityReportId'])
             ],
         ];
     }

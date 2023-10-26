@@ -2,7 +2,7 @@
 
 namespace SharedContext\Domain\Enum;
 
-enum ScheduledSalesActivityStatus: string
+enum SalesActivityScheduleStatus: string
 {
 
     case SCHEDULED = 'SCHEDULED';

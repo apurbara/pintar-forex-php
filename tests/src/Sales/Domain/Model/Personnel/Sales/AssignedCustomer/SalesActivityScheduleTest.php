@@ -3,9 +3,12 @@
 namespace Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 
 use DateTimeImmutable;
+use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\SalesActivity;
-use SharedContext\Domain\Enum\ScheduledSalesActivityStatus;
+use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use SharedContext\Domain\ValueObject\HourlyTimeInterval;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
@@ -15,9 +18,11 @@ class SalesActivityScheduleTest extends TestBase
 
     protected $assignedCustomer;
     protected $salesActivity;
-    protected $scheduledSalesActivity;
+    protected $salesActivitySchedule;
     //
     protected $id = 'newId', $hourlyTimeIntervalData;
+    //
+    protected $sales;
 
     protected function setUp(): void
     {
@@ -27,8 +32,10 @@ class SalesActivityScheduleTest extends TestBase
 
         $this->hourlyTimeIntervalData = new HourlyTimeIntervalData('next week');
         $data = (new SalesActivityScheduleData(new HourlyTimeIntervalData('tomorrow')))->setId('id');
-        $this->scheduledSalesActivity = new TestableSalesActivitySchedule($this->assignedCustomer,
+        $this->salesActivitySchedule = new TestableSalesActivitySchedule($this->assignedCustomer,
                 $this->salesActivity, $data);
+        //
+        $this->sales = $this->buildMockOfClass(Sales::class);
     }
 
     //
@@ -51,13 +58,42 @@ class SalesActivityScheduleTest extends TestBase
         $this->assertSame($this->id, $schedule->id);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($schedule->createdTime);
         $this->assertInstanceOf(HourlyTimeInterval::class, $schedule->schedule);
-        $this->assertEquals(ScheduledSalesActivityStatus::SCHEDULED, $schedule->status);
+        $this->assertEquals(SalesActivityScheduleStatus::SCHEDULED, $schedule->status);
     }
     public function test_construct_assertSalesActivityActive()
     {
         $this->salesActivity->expects($this->once())
                 ->method('assertActive');
         $this->construct();
+    }
+    
+    //
+    protected function assertBelongsToSales()
+    {
+        $this->salesActivitySchedule->assertBelongsToSales($this->sales);
+    }
+    public function test_assertBelongsToSales_assetAssignedCustomerBelongsToSales()
+    {
+        $this->assignedCustomer->expects($this->once())
+                ->method('assertBelongsToSales')
+                ->with($this->sales);
+        $this->assertBelongsToSales();
+    }
+    
+    //
+    protected function submitReport()
+    {
+        $salesActivityReportData = (new SalesActivityReportData('report content'))->setId('reportId');
+        return $this->salesActivitySchedule->submitReport($salesActivityReportData);
+    }
+    public function test_submitReport_returnReport()
+    {
+        $this->assertInstanceOf(SalesActivityReport::class, $this->submitReport());
+    }
+    public function test_submitReport_nonScheduledStatus_forbidden()
+    {
+        $this->salesActivitySchedule->status = SalesActivityScheduleStatus::COMPLETED;
+        $this->assertRegularExceptionThrowed(fn() => $this->submitReport(), 'Forbidden', 'schedule concluded');
     }
 }
 
@@ -69,5 +105,5 @@ class TestableSalesActivitySchedule extends SalesActivitySchedule
     public string $id;
     public DateTimeImmutable $createdTime;
     public HourlyTimeInterval $schedule;
-    public ScheduledSalesActivityStatus $status;
+    public SalesActivityScheduleStatus $status;
 }
