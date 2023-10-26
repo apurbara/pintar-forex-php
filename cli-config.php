@@ -14,17 +14,21 @@ $config = new PhpFile('migration.php');
 $path = array(
     BASE_PATH . "/src/SharedContext/Domain/ValueObject",
 //    BASE_PATH . "/src/SharedContext/Domain/Model",
-//    BASE_PATH . "/src/SharedContext/Domain/Enum",
+    BASE_PATH . "/src/SharedContext/Domain/Enum",
     BASE_PATH . "/src/Company/Domain/Model",
+    BASE_PATH . "/src/Sales/Domain/Model",
 );
 $isDevMode = true; //generate proxy manually if entity not found
 
 // $ormConfig = Setup::createAttributeMetadataConfiguration($path, $isDevMode);
 $ormConfig = ORMSetup::createAttributeMetadataConfiguration($path, $isDevMode);
-//$ormConfig->setSchemaIgnoreClasses([
-//    \Innov\Domain\Model\Firm::class,
-//    \Innov\Domain\Model\Firm\Manager::class,
-//]);
+$ormConfig->setSchemaIgnoreClasses([
+        \Sales\Domain\Model\Personnel::class,
+        \Sales\Domain\Model\Personnel\Sales::class,
+        \Sales\Domain\Model\SalesActivity::class,
+        \Sales\Domain\Model\AreaStructure\Area::class,
+    
+]);
 
 $conn = array(
     'driver' => 'pdo_mysql',

@@ -3,9 +3,10 @@
 namespace Company\Domain\Task\InCompany\CustomerVerification;
 
 use Company\Domain\Model\AdminTaskInCompany;
+use Company\Domain\Model\PersonnelTaskInCompany;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
-class ViewCustomerVerificationDetailTask implements AdminTaskInCompany
+class ViewCustomerVerificationDetailTask implements AdminTaskInCompany, PersonnelTaskInCompany
 {
 
     public function __construct(protected CustomerVerificationRepository $customerVerificationRepository)

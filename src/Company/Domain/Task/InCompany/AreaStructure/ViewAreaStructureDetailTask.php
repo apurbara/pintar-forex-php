@@ -3,9 +3,10 @@
 namespace Company\Domain\Task\InCompany\AreaStructure;
 
 use Company\Domain\Model\AdminTaskInCompany;
+use Company\Domain\Model\PersonnelTaskInCompany;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
-class ViewAreaStructureDetailTask implements AdminTaskInCompany
+class ViewAreaStructureDetailTask implements AdminTaskInCompany, PersonnelTaskInCompany
 {
 
     public function __construct(protected AreaStructureRepository $areaStructureRepository)

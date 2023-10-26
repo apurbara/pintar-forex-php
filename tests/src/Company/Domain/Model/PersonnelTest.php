@@ -15,6 +15,8 @@ class PersonnelTest extends TestBase
     //
     protected $accountInfoData;
     protected $id = 'newPersonnelId';
+    //
+    protected $task, $payload = 'string represent task payload';
 
     protected function setUp(): void
     {
@@ -24,6 +26,7 @@ class PersonnelTest extends TestBase
         $data = (new PersonnelData($this->accountInfoData))->setId('id');
         $this->personnel = new TestablePersonnel($data);
         //
+        $this->task = $this->buildMockOfInterface(PersonnelTaskInCompany::class);
     }
 
     //
@@ -62,6 +65,24 @@ class PersonnelTest extends TestBase
     {
         $this->assertActive();
         $this->markAsSuccess();
+    }
+    
+    //
+    protected function executeTaskInCompany()
+    {
+        $this->personnel->executeTaskInCompany($this->task, $this->payload);
+    }
+    public function test_executeTaskInCompany_executeTask()
+    {
+        $this->task->expects($this->once())
+                ->method('executeInCompany')
+                ->with($this->payload);
+        $this->executeTaskInCompany();
+    }
+    public function test_executeTaskInCompany_disabledPersonnel_forbidden()
+    {
+        $this->personnel->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->executeTaskInCompany(), 'Forbidden', 'only active personnel can  make this request');
     }
     
     //

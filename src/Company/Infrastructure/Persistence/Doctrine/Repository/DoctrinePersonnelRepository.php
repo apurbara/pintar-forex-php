@@ -2,13 +2,14 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
+use Company\Application\Service\Personnel\PersonnelRepository as PersonnelRepositoryInApplicationService;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 
-class DoctrinePersonnelRepository extends DoctrineEntityRepository implements PersonnelRepository
+class DoctrinePersonnelRepository extends DoctrineEntityRepository implements PersonnelRepository, PersonnelRepositoryInApplicationService
 {
     
     public function add(Personnel $personnel): void

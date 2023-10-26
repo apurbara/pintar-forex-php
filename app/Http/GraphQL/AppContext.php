@@ -8,7 +8,7 @@ use function request;
 class AppContext
 {
 
-    public readonly object $user;
+    public object $user;
     protected array $aggregateRoot = [];
 
     public function __construct()

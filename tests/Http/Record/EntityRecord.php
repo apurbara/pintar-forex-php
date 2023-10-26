@@ -75,15 +75,21 @@ class EntityRecord implements IRecord
 
     protected function getInitialColumnValue(ReflectionAttribute $columnAttributeReflection, string $colName, $index)
     {
-        return match ($columnAttributeReflection->getArguments()['type']) {
-            'guid' => strtolower($this->tableName) . "-{$index}-id",
-            'boolean' => false,
-            'integer', 'smallint', 'bigint' => 999,
-            'float', 'decimal' => 999.99,
-            'string', 'text', 'binary', 'blob' => "{$this->tableName} $index $colName",
-            'json' => json_encode([]),
-            'datetimetz_immutable', 'datetimetz', 'datetime', 'datetime_immutable' => (new DateTimeImmutable('-1 months'))->format('Y-m-d H:i:s'),
-        };
+        $enumType = $columnAttributeReflection->getArguments()['enumType'] ?? null;
+        if ($enumType) {
+            $enumReflection = new \ReflectionEnum($enumType);
+            return $enumReflection->getCases()[0]->getName();
+        } else {
+            return match ($columnAttributeReflection->getArguments()['type']) {
+                'guid' => strtolower($this->tableName) . "-{$index}-id",
+                'boolean' => false,
+                'integer', 'smallint', 'bigint' => 999,
+                'float', 'decimal' => 999.99,
+                'string', 'text', 'binary', 'blob' => "{$this->tableName} $index $colName",
+                'json' => json_encode([]),
+                'datetimetz_immutable', 'datetimetz', 'datetime', 'datetime_immutable' => (new DateTimeImmutable('-1 months'))->format('Y-m-d H:i:s'),
+            };
+        }
     }
 
     protected function getAttribute(Reflector $reflection, string $attributeMetadata): ?\ReflectionAttribute

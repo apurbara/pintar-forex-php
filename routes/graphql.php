@@ -17,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::post('/company', function (Request $request) {
     return require __DIR__ .  '../../app/Http/GraphQL/CompanyBC/graphql.php';
 });
+Route::post('/sales', function (Request $request) {
+    return require __DIR__ .  '../../app/Http/GraphQL/SalesBC/graphql.php';
+});

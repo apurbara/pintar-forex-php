@@ -48,6 +48,15 @@ class Personnel
     }
 
     //
+    public function executeTaskInCompany(PersonnelTaskInCompany $task, $payload): void
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('only active personnel can  make this request');
+        }
+        $task->executeInCompany($payload);
+    }
+
+    //
     public function assignAsManager(ManagerData $managerData): Manager
     {
         if ($this->disabled) {

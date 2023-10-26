@@ -3,9 +3,10 @@
 namespace Company\Domain\Task\InCompany\SalesActivity;
 
 use Company\Domain\Model\AdminTaskInCompany;
+use Company\Domain\Model\PersonnelTaskInCompany;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
-class ViewSalesActivityDetail implements AdminTaskInCompany
+class ViewSalesActivityDetail implements AdminTaskInCompany, PersonnelTaskInCompany
 {
     public function __construct(protected SalesActivityRepository $salesActivityRepository)
     {
