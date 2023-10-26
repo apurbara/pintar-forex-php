@@ -2,30 +2,32 @@
 
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
-use Sales\Domain\Task\ScheduledSalesActivity\ScheduledSalesActivityRepository;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
+use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
 
-class DoctrineScheduledSalesActivityRepository extends DoctrineEntityRepository
-        implements ScheduledSalesActivityRepository
+class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
+        implements SalesActivityScheduleRepository
 {
-    
+
     //
-    protected function createCoreQueryBuilder(): \Doctrine\DBAL\Query\QueryBuilder
+    protected function createCoreQueryBuilder(): QueryBuilder
     {
         $qb = parent::createCoreQueryBuilder();
-        $qb->innerJoin('ScheduledSalesActivity', 'AssignedCustomer', 'AssignedCustomer', 'ScheduledSalesActivity.AssignedCustomer_id = AssignedCustomer.id');
+        $qb->innerJoin('SalesActivitySchedule', 'AssignedCustomer', 'AssignedCustomer',
+                'SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id');
         return $qb;
     }
 
-    public function add(ScheduledSalesActivity $scheduledSalesActivity): void
+    public function add(SalesActivitySchedule $scheduledSalesActivity): void
     {
         $this->persist($scheduledSalesActivity);
     }
 
-    public function ofId(string $id): ScheduledSalesActivity
+    public function ofId(string $id): SalesActivitySchedule
     {
         return $this->findOneByIdOrDie($id);
     }
@@ -34,7 +36,7 @@ class DoctrineScheduledSalesActivityRepository extends DoctrineEntityRepository
     {
         $filters = [
             new Filter($salesId, 'AssignedCustomer.Sales_id'),
-            new Filter($id, 'ScheduledSalesActivity.id'),
+            new Filter($id, 'SalesActivitySchedule.id'),
         ];
         return $this->fetchOneOrDie($filters);
     }

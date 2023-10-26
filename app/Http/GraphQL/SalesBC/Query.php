@@ -3,7 +3,7 @@
 namespace App\Http\GraphQL\SalesBC;
 
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
-use App\Http\Controllers\SalesBC\ScheduledSalesActivityController;
+use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\ObjectType;
@@ -12,7 +12,7 @@ use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 
 class Query extends ObjectType
 {
@@ -30,7 +30,7 @@ class Query extends ObjectType
             'name' => 'salesQuery', 
             'fields' => fn() => [
                 ...$this->assignedCustomerQuery(),
-                ...$this->scheduledSalesActivityQuery(),
+                ...$this->salesActivityScheduleQuery(),
             ],
         ]);
         return [
@@ -63,20 +63,20 @@ class Query extends ObjectType
         ];
     }
 
-    protected function scheduledSalesActivityQuery(): array
+    protected function salesActivityScheduleQuery(): array
     {
         return [
-            'scheduledSalesActivityList' => [
-                'type' => new Pagination(TypeRegistry::objectType(ScheduledSalesActivity::class)),
+            'salesActivityScheduleList' => [
+                'type' => new Pagination(TypeRegistry::objectType(SalesActivitySchedule::class)),
                 'args' => InputListSchema::paginationListSchema(),
-                'resolve' => fn($root, $args, AppContext $app) => (new ScheduledSalesActivityController())
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
-            'scheduledSalesActivityDetail' => [
-                'type' => TypeRegistry::objectType(ScheduledSalesActivity::class),
-                'args' => ['scheduledSalesActivityId' => Type::nonNull(Type::id())],
-                'resolve' => fn($root, $args, AppContext $app) => (new ScheduledSalesActivityController())
-                        ->viewDetail($app->user, $args['scheduledSalesActivityId'])
+            'salesActivityScheduleDetail' => [
+                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
+                'args' => ['salesActivityScheduleId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
+                        ->viewDetail($app->user, $args['salesActivityScheduleId'])
             ],
         ];
     }

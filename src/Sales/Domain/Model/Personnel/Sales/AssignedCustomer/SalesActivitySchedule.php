@@ -13,12 +13,12 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Resources\Attributes\FetchableEntity;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\SalesActivity;
-use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineScheduledSalesActivityRepository;
+use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\Enum\ScheduledSalesActivityStatus;
 use SharedContext\Domain\ValueObject\HourlyTimeInterval;
 
-#[Entity(repositoryClass: DoctrineScheduledSalesActivityRepository::class)]
-class ScheduledSalesActivity
+#[Entity(repositoryClass: DoctrineSalesActivityScheduleRepository::class)]
+class SalesActivitySchedule
 {
     
     #[FetchableEntity(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
@@ -44,7 +44,7 @@ class ScheduledSalesActivity
     protected ScheduledSalesActivityStatus $status;
 
     public function __construct(
-            AssignedCustomer $assignedCustomer, SalesActivity $salesActivity, ScheduledSalesActivityData $data)
+            AssignedCustomer $assignedCustomer, SalesActivity $salesActivity, SalesActivityScheduleData $data)
     {
         $salesActivity->assertActive();
         

@@ -5,7 +5,7 @@ namespace Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 
-readonly class ScheduledSalesActivityData extends AbstractEntityMutationPayload
+readonly class SalesActivityScheduleData extends AbstractEntityMutationPayload
 {
 
     public string $assignedCustomerId;

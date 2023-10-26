@@ -15,8 +15,8 @@ use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivityData;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
@@ -67,11 +67,11 @@ class AssignedCustomer implements ContainEventsInterface
 
     //
     public function submitSalesActivitySchedule(
-            SalesActivity $salesActivity, ScheduledSalesActivityData $scheduledSalesActivityData): ScheduledSalesActivity
+            SalesActivity $salesActivity, SalesActivityScheduleData $scheduledSalesActivityData): SalesActivitySchedule
     {
         if ($this->disabled) {
             throw RegularException::forbidden('inactive customer assignment');
         }
-        return new ScheduledSalesActivity($this, $salesActivity, $scheduledSalesActivityData);
+        return new SalesActivitySchedule($this, $salesActivity, $scheduledSalesActivityData);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Sales\Domain\Task\ScheduledSalesActivity;
+namespace Sales\Domain\Task\SalesActivitySchedule;
 
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivityData;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\src\Sales\Domain\Task\SalesTaskTestBase;
 
@@ -15,16 +15,16 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->prepareScheduledSalesActivityDependency();
+        $this->prepareSalesActivityScheduleDependency();
         $this->prepareAssignedCustomerDependency();
         $this->prepareSalesActivityDependency();
 
-        $this->task = new SubmitScheduleTask($this->scheduledSalesActivityRepository,
+        $this->task = new SubmitScheduleTask($this->salesActivityScheduleRepository,
                 $this->assignedCustomerRepository, $this->salesActivityRepository);
 
         //
         $timeIntervalData = new HourlyTimeIntervalData('next week');
-        $this->payload = (new ScheduledSalesActivityData($timeIntervalData))
+        $this->payload = (new SalesActivityScheduleData($timeIntervalData))
                 ->setAssignedCustomerId($this->assignedCustomerId)
                 ->setSalesActivityId($this->salesActivityId);
     }
@@ -32,9 +32,9 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
     //
     protected function execute()
     {
-        $this->scheduledSalesActivityRepository->expects($this->any())
+        $this->salesActivityScheduleRepository->expects($this->any())
                 ->method('nextIdentity')
-                ->willReturn($this->scheduledSalesActivityId);
+                ->willReturn($this->salesActivityScheduleId);
         
         $this->task->executeBySales($this->sales, $this->payload);
     }
@@ -43,10 +43,10 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
         $this->assignedCustomer->expects($this->once())
                 ->method('submitSalesActivitySchedule')
                 ->with($this->salesActivity, $this->payload)
-                ->willReturn($this->scheduledSalesActivity);
-        $this->scheduledSalesActivityRepository->expects($this->once())
+                ->willReturn($this->salesActivitySchedule);
+        $this->salesActivityScheduleRepository->expects($this->once())
                 ->method('add')
-                ->with($this->scheduledSalesActivity);
+                ->with($this->salesActivitySchedule);
         $this->execute();
     }
     public function test_execute_assertAssignedCustomerBelongsToSales()
@@ -59,6 +59,6 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
     public function test_execute_setPayloadId()
     {
         $this->execute();
-        $this->assertSame($this->scheduledSalesActivityId, $this->payload->id);
+        $this->assertSame($this->salesActivityScheduleId, $this->payload->id);
     }
 }

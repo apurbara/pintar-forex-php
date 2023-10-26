@@ -1,15 +1,15 @@
 <?php
 
-namespace Sales\Domain\Task\ScheduledSalesActivity;
+namespace Sales\Domain\Task\SalesActivitySchedule;
 
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Task\SalesTask;
 
-class ViewScheduledSalesActivityListTask implements SalesTask
+class ViewSalesActivityScheduleListTask implements SalesTask
 {
 
-    public function __construct(protected ScheduledSalesActivityRepository $scheduledSalesActivityRepository)
+    public function __construct(protected SalesActivityScheduleRepository $scheduledSalesActivityRepository)
     {
         
     }

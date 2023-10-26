@@ -6,10 +6,10 @@ use Company\Domain\Model\SalesActivity;
 use DateTime;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Tests\Http\Record\EntityRecord;
 
-class ScheduledSalesActivityControllerTest extends SalesBCTestCase
+class SalesActivityScheduleControllerTest extends SalesBCTestCase
 {
     protected $salesActivity;
     
@@ -21,8 +21,8 @@ class ScheduledSalesActivityControllerTest extends SalesBCTestCase
     protected $assignedCustomerOne;
     protected $assignedCustomerTwo;
     
-    protected $scheduledSalesActivityOne;
-    protected $scheduledSalesActivityTwo;
+    protected $salesActivityScheduleOne;
+    protected $salesActivityScheduleTwo;
     
     protected $submitScheduleRequest;
 
@@ -32,7 +32,7 @@ class ScheduledSalesActivityControllerTest extends SalesBCTestCase
         $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('AssignedCustomer')->truncate();
-        $this->connection->table('ScheduledSalesActivity')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
         
         $this->salesActivity = new EntityRecord(SalesActivity::class, 'main');
         
@@ -50,12 +50,12 @@ class ScheduledSalesActivityControllerTest extends SalesBCTestCase
         $this->assignedCustomerTwo->columns['Customer_id'] = $this->customerTwo->columns['id'];
         $this->assignedCustomerTwo->columns['Sales_id'] = $this->sales->columns['id'];
         
-        $this->scheduledSalesActivityOne = new EntityRecord(ScheduledSalesActivity::class, 1);
-        $this->scheduledSalesActivityOne->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
-        $this->scheduledSalesActivityOne->columns['AssignedCustomer_id'] = $this->assignedCustomerOne->columns['id'];
-        $this->scheduledSalesActivityTwo = new EntityRecord(ScheduledSalesActivity::class, 2);
-        $this->scheduledSalesActivityTwo->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
-        $this->scheduledSalesActivityTwo->columns['AssignedCustomer_id'] = $this->assignedCustomerTwo->columns['id'];
+        $this->salesActivityScheduleOne = new EntityRecord(SalesActivitySchedule::class, 1);
+        $this->salesActivityScheduleOne->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
+        $this->salesActivityScheduleOne->columns['AssignedCustomer_id'] = $this->assignedCustomerOne->columns['id'];
+        $this->salesActivityScheduleTwo = new EntityRecord(SalesActivitySchedule::class, 2);
+        $this->salesActivityScheduleTwo->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
+        $this->salesActivityScheduleTwo->columns['AssignedCustomer_id'] = $this->assignedCustomerTwo->columns['id'];
         
         $this->submitScheduleRequest = [
             'salesActivityId' => $this->salesActivity->columns['id'],
@@ -68,7 +68,7 @@ class ScheduledSalesActivityControllerTest extends SalesBCTestCase
 //        $this->connection->table('SalesActivity')->truncate();
 //        $this->connection->table('Customer')->truncate();
 //        $this->connection->table('AssignedCustomer')->truncate();
-//        $this->connection->table('ScheduledSalesActivity')->truncate();
+//        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
@@ -112,7 +112,7 @@ _QUERY;
             ],
         ]);
         
-        $this->seeInDatabase('ScheduledSalesActivity', [
+        $this->seeInDatabase('SalesActivitySchedule', [
             'SalesActivity_id' => $this->salesActivity->columns['id'],
             'AssignedCustomer_id' => $this->assignedCustomer->columns['id'],
             'status' => 'SCHEDULED',
@@ -132,13 +132,13 @@ _QUERY;
         $this->assignedCustomerOne->insert($this->connection);
         $this->assignedCustomerTwo->insert($this->connection);
         
-        $this->scheduledSalesActivityOne->insert($this->connection);
-        $this->scheduledSalesActivityTwo->insert($this->connection);
+        $this->salesActivityScheduleOne->insert($this->connection);
+        $this->salesActivityScheduleTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!) {
     sales ( salesId: $salesId ) {
-        scheduledSalesActivityList {
+        salesActivityScheduleList {
             list {
                 id, status, startTime, endTime
                 assignedCustomer {
@@ -160,10 +160,10 @@ _QUERY;
         $this->seeJsonContains([
             'list' => [
                 [
-                    'id' => $this->scheduledSalesActivityOne->columns['id'],
-                    'status' => $this->scheduledSalesActivityOne->columns['status'],
-                    'startTime' => $this->jakartaDateTimeFormat($this->scheduledSalesActivityOne->columns['startTime']),
-                    'endTime' => $this->jakartaDateTimeFormat($this->scheduledSalesActivityOne->columns['endTime']),
+                    'id' => $this->salesActivityScheduleOne->columns['id'],
+                    'status' => $this->salesActivityScheduleOne->columns['status'],
+                    'startTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleOne->columns['startTime']),
+                    'endTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleOne->columns['endTime']),
                     'assignedCustomer' => [
                         'id' => $this->assignedCustomerOne->columns['id'],
                         'customer' => [
@@ -173,10 +173,10 @@ _QUERY;
                     ],
                 ],
                 [
-                    'id' => $this->scheduledSalesActivityTwo->columns['id'],
-                    'status' => $this->scheduledSalesActivityTwo->columns['status'],
-                    'startTime' => $this->jakartaDateTimeFormat($this->scheduledSalesActivityTwo->columns['startTime']),
-                    'endTime' => $this->jakartaDateTimeFormat($this->scheduledSalesActivityTwo->columns['endTime']),
+                    'id' => $this->salesActivityScheduleTwo->columns['id'],
+                    'status' => $this->salesActivityScheduleTwo->columns['status'],
+                    'startTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleTwo->columns['startTime']),
+                    'endTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleTwo->columns['endTime']),
                     'assignedCustomer' => [
                         'id' => $this->assignedCustomerTwo->columns['id'],
                         'customer' => [
@@ -204,12 +204,12 @@ _QUERY;
         
         $this->assignedCustomerOne->insert($this->connection);
         
-        $this->scheduledSalesActivityOne->insert($this->connection);
+        $this->salesActivityScheduleOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        scheduledSalesActivityDetail ( scheduledSalesActivityId: $id ) {
+        salesActivityScheduleDetail ( salesActivityScheduleId: $id ) {
             id, status, startTime, endTime
             assignedCustomer {
                 id, 
@@ -220,17 +220,17 @@ query ( $salesId: ID!, $id: ID!) {
 }
 _QUERY;
         $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
-        $this->graphqlVariables['id'] = $this->scheduledSalesActivityOne->columns['id'];
+        $this->graphqlVariables['id'] = $this->salesActivityScheduleOne->columns['id'];
         $this->postGraphqlRequest($this->personnel->token);
     }
     public function test_viewDetail_200()
     {
         $this->viewDetail();
         $this->seeJsonContains([
-            'id' => $this->scheduledSalesActivityOne->columns['id'],
-            'status' => $this->scheduledSalesActivityOne->columns['status'],
-            'startTime' => $this->jakartaDateTimeFormat($this->scheduledSalesActivityOne->columns['startTime']),
-            'endTime' => $this->jakartaDateTimeFormat($this->scheduledSalesActivityOne->columns['endTime']),
+            'id' => $this->salesActivityScheduleOne->columns['id'],
+            'status' => $this->salesActivityScheduleOne->columns['status'],
+            'startTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleOne->columns['startTime']),
+            'endTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleOne->columns['endTime']),
             'assignedCustomer' => [
                 'id' => $this->assignedCustomerOne->columns['id'],
                 'customer' => [

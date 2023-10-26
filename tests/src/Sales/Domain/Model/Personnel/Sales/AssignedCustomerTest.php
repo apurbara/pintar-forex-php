@@ -5,7 +5,7 @@ namespace Sales\Domain\Model\Personnel\Sales;
 use DateTimeImmutable;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivityData;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
@@ -73,12 +73,12 @@ class AssignedCustomerTest extends TestBase
     protected function submitSalesActivitySchedule()
     {
         $hourlyTimeIntervalData = new HourlyTimeIntervalData('next week');
-        $scheduledSalesActivityData = (new ScheduledSalesActivityData($hourlyTimeIntervalData))->setId('scheduleId');
+        $scheduledSalesActivityData = (new SalesActivityScheduleData($hourlyTimeIntervalData))->setId('scheduleId');
         return $this->assignedCustomer->submitSalesActivitySchedule($this->salesActivity, $scheduledSalesActivityData);
     }
     public function test_submitSalesActivitySchedule_returnScheduledSalesActivity()
     {
-        $this->assertInstanceOf(AssignedCustomer\ScheduledSalesActivity::class, $this->submitSalesActivitySchedule());
+        $this->assertInstanceOf(AssignedCustomer\SalesActivitySchedule::class, $this->submitSalesActivitySchedule());
     }
     public function test_submitSalesActivitySchedule_inactiveAssignment_forbidden()
     {

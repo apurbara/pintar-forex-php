@@ -2,14 +2,14 @@
 
 namespace App\Http\GraphQL\SalesBC\Task;
 
-use App\Http\Controllers\SalesBC\ScheduledSalesActivityController;
+use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 
 class AssignedCustomerMutation extends ObjectType
 {
@@ -25,12 +25,12 @@ class AssignedCustomerMutation extends ObjectType
     {
         return [
             'submitSalesActivitySchedule' => [
-                'type' => TypeRegistry::objectType(ScheduledSalesActivity::class),
+                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
                 'args' => [
                     'salesActivityId' => Type::nonNull(Type::id()),
-                    ...DoctrineGraphqlFieldsBuilder::buildInputFields(ScheduledSalesActivity::class),
+                    ...DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivitySchedule::class),
                 ],
-                'resolve' => fn($root, $args, AppContext $app) => (new ScheduledSalesActivityController())
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->submitSchedule($app->user, $app->getAggregateRootId('assignedCustomerId'),
                                 new GraphqlInputRequest($args))
             ],

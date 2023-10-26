@@ -10,7 +10,7 @@ use SharedContext\Domain\ValueObject\HourlyTimeInterval;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 
-class ScheduledSalesActivityTest extends TestBase
+class SalesActivityScheduleTest extends TestBase
 {
 
     protected $assignedCustomer;
@@ -26,22 +26,22 @@ class ScheduledSalesActivityTest extends TestBase
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
 
         $this->hourlyTimeIntervalData = new HourlyTimeIntervalData('next week');
-        $data = (new ScheduledSalesActivityData(new HourlyTimeIntervalData('tomorrow')))->setId('id');
-        $this->scheduledSalesActivity = new TestableScheduledSalesActivity($this->assignedCustomer,
+        $data = (new SalesActivityScheduleData(new HourlyTimeIntervalData('tomorrow')))->setId('id');
+        $this->scheduledSalesActivity = new TestableSalesActivitySchedule($this->assignedCustomer,
                 $this->salesActivity, $data);
     }
 
     //
     protected function createData()
     {
-        return (new ScheduledSalesActivityData($this->hourlyTimeIntervalData))
+        return (new SalesActivityScheduleData($this->hourlyTimeIntervalData))
                 ->setId($this->id);
     }
     
     //
     protected function construct()
     {
-        return new TestableScheduledSalesActivity($this->assignedCustomer, $this->salesActivity, $this->createData());
+        return new TestableSalesActivitySchedule($this->assignedCustomer, $this->salesActivity, $this->createData());
     }
     public function test_construct_setProperties()
     {
@@ -61,7 +61,7 @@ class ScheduledSalesActivityTest extends TestBase
     }
 }
 
-class TestableScheduledSalesActivity extends ScheduledSalesActivity
+class TestableSalesActivitySchedule extends SalesActivitySchedule
 {
 
     public AssignedCustomer $assignedCustomer;

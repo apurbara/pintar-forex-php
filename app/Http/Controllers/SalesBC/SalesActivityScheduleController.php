@@ -6,20 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\SalesActivity;
-use Sales\Domain\Task\ScheduledSalesActivity\SubmitScheduleTask;
-use Sales\Domain\Task\ScheduledSalesActivity\ViewScheduledSalesActivityDetailTask;
-use Sales\Domain\Task\ScheduledSalesActivity\ViewScheduledSalesActivityListTask;
-use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineScheduledSalesActivityRepository;
+use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
+use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
+use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
+use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 
-class ScheduledSalesActivityController extends Controller
+class SalesActivityScheduleController extends Controller
 {
 
-    protected function repository(): DoctrineScheduledSalesActivityRepository
+    protected function repository(): DoctrineSalesActivityScheduleRepository
     {
-        return $this->em->getRepository(ScheduledSalesActivity::class);
+        return $this->em->getRepository(SalesActivitySchedule::class);
     }
 
     //
@@ -31,7 +31,7 @@ class ScheduledSalesActivityController extends Controller
         $task = new SubmitScheduleTask($repository, $assignedCustomerRepository, $salesActivityRepository);
 
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($input->get('startTime'));
-        $payload = (new AssignedCustomer\ScheduledSalesActivityData($hourlyTimeIntervalData))
+        $payload = (new AssignedCustomer\SalesActivityScheduleData($hourlyTimeIntervalData))
                 ->setAssignedCustomerId($assignedCustomerId)
                 ->setSalesActivityId($input->get('salesActivityId'));
         
@@ -41,7 +41,7 @@ class ScheduledSalesActivityController extends Controller
     
     public function viewList(SalesRoleInterface $user, InputRequest $input)
     {
-        $task = new ViewScheduledSalesActivityListTask($this->repository());
+        $task = new ViewSalesActivityScheduleListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
         $user->executeTask($task, $payload);
         
@@ -50,7 +50,7 @@ class ScheduledSalesActivityController extends Controller
     
     public function viewDetail(SalesRoleInterface $user, string $id)
     {
-        $task = new ViewScheduledSalesActivityDetailTask($this->repository());
+        $task = new ViewSalesActivityScheduleDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);
         $user->executeTask($task, $payload);
         

@@ -8,13 +8,13 @@ use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\SalesActivity;
 use Sales\Domain\Task\Area\AreaRepository;
 use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
 use Sales\Domain\Task\Customer\CustomerRepository;
 use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
-use Sales\Domain\Task\ScheduledSalesActivity\ScheduledSalesActivityRepository;
+use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
 use Tests\TestBase;
 
 class SalesTaskTestBase extends TestBase
@@ -85,17 +85,17 @@ class SalesTaskTestBase extends TestBase
                 ->willReturn($this->salesActivity);
     }
     
-    protected MockObject $scheduledSalesActivityRepository;
-    protected MockObject $scheduledSalesActivity;
-    protected string $scheduledSalesActivityId = 'scheduledSalesActivityId';
-    protected function prepareScheduledSalesActivityDependency()
+    protected MockObject $salesActivityScheduleRepository;
+    protected MockObject $salesActivitySchedule;
+    protected string $salesActivityScheduleId = 'salesActivityScheduleId';
+    protected function prepareSalesActivityScheduleDependency()
     {
-        $this->scheduledSalesActivityRepository = $this->buildMockOfInterface(ScheduledSalesActivityRepository::class);
-        $this->scheduledSalesActivity = $this->buildMockOfClass(ScheduledSalesActivity::class);
+        $this->salesActivityScheduleRepository = $this->buildMockOfInterface(SalesActivityScheduleRepository::class);
+        $this->salesActivitySchedule = $this->buildMockOfClass(SalesActivitySchedule::class);
         
-        $this->scheduledSalesActivityRepository->expects($this->any())
+        $this->salesActivityScheduleRepository->expects($this->any())
                 ->method('ofId')
-                ->with($this->scheduledSalesActivityId)
-                ->willReturn($this->scheduledSalesActivity);
+                ->with($this->salesActivityScheduleId)
+                ->willReturn($this->salesActivitySchedule);
     }
 }
