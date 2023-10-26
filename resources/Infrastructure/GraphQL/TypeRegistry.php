@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use ReflectionClass;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\CustomTypes\DateTimeZ;
 use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
 use Resources\Infrastructure\GraphQL\ViewList\KeywordSearchInput;
 use Resources\Infrastructure\GraphQL\ViewPaginationList\CursorLimitInput;
@@ -22,6 +23,7 @@ class TypeRegistry
         'FilterInput' => FilterInput::class,
         'CursorLimitInput' => CursorLimitInput::class,
         'OffsetLimitInput' => OffsetLimitInput::class,
+        'DateTimeZ' => DateTimeZ::class,
     ];
 
     private static $types = [];

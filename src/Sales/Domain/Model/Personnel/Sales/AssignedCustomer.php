@@ -12,8 +12,12 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Resources\Attributes\FetchableEntity;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
+use Resources\Exception\RegularException;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivityData;
+use Sales\Domain\Model\SalesActivity;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 
@@ -28,18 +32,17 @@ class AssignedCustomer implements ContainEventsInterface
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
-
     #[FetchableEntity(targetEntity: Customer::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Customer::class, cascade: ["persist"])]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
-    
+
     #[Id, Column(type: "guid")]
     protected string $id;
-    
+
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
-    
+
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
 
@@ -52,5 +55,23 @@ class AssignedCustomer implements ContainEventsInterface
         $this->createdTime = new DateTimeImmutable();
 
         $this->recordEvent(new CustomerAssignedEvent($this->id));
+    }
+
+    //
+    public function assertBelongsToSales(Sales $sales): void
+    {
+        if ($this->sales !== $sales) {
+            throw RegularException::forbidden('unmanaged assigned customer');
+        }
+    }
+
+    //
+    public function submitSalesActivitySchedule(
+            SalesActivity $salesActivity, ScheduledSalesActivityData $scheduledSalesActivityData): ScheduledSalesActivity
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('inactive customer assignment');
+        }
+        return new ScheduledSalesActivity($this, $salesActivity, $scheduledSalesActivityData);
     }
 }

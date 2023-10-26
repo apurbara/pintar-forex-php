@@ -5,6 +5,7 @@ namespace App\Http\GraphQL\SalesBC;
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
+use App\Http\GraphQL\SalesBC\Task\AssignedCustomerMutation;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -53,6 +54,14 @@ class Mutation extends ObjectType
                 ],
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->registerNewCustomer($app->user, new GraphqlInputRequest($args))
+            ],
+            'assignedCustomer' => [
+                'type' => TypeRegistry::type(AssignedCustomerMutation::class),
+                'args' => [ 'assignedCustomerId' => Type::nonNull(Type::id()) ],
+                'resolve' => function($root, $args, AppContext $app) {
+                    $app->setAggregateRootId('assignedCustomerId', $args['assignedCustomerId']);
+                    return TypeRegistry::type(AssignedCustomerMutation::class);
+                }
             ],
         ];
     }

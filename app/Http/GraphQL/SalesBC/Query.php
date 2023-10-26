@@ -3,6 +3,7 @@
 namespace App\Http\GraphQL\SalesBC;
 
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
+use App\Http\Controllers\SalesBC\ScheduledSalesActivityController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\ObjectType;
@@ -11,6 +12,7 @@ use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ScheduledSalesActivity;
 
 class Query extends ObjectType
 {
@@ -28,6 +30,7 @@ class Query extends ObjectType
             'name' => 'salesQuery', 
             'fields' => fn() => [
                 ...$this->assignedCustomerQuery(),
+                ...$this->scheduledSalesActivityQuery(),
             ],
         ]);
         return [
@@ -56,6 +59,24 @@ class Query extends ObjectType
                 'args' => ['assignedCustomerId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->viewDetail($app->user, $args['assignedCustomerId'])
+            ],
+        ];
+    }
+
+    protected function scheduledSalesActivityQuery(): array
+    {
+        return [
+            'scheduledSalesActivityList' => [
+                'type' => new Pagination(TypeRegistry::objectType(ScheduledSalesActivity::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new ScheduledSalesActivityController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'scheduledSalesActivityDetail' => [
+                'type' => TypeRegistry::objectType(ScheduledSalesActivity::class),
+                'args' => ['scheduledSalesActivityId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new ScheduledSalesActivityController())
+                        ->viewDetail($app->user, $args['scheduledSalesActivityId'])
             ],
         ];
     }
