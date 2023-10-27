@@ -85,7 +85,14 @@ class DoctrineGraphqlFieldsBuilder
                 $repositoryClass = app(EntityManager::class)->getRepository($targetEntityMetadata);
                 $fields[$propertyReflection->getName()] = [
                     'type' => TypeRegistry::objectType($targetEntityMetadata),
-                    'resolve' => fn($root) => $repositoryClass->fetchOneById($root[$joinColumnName])
+                    'resolve' => function($root) use($repositoryClass, $joinColumnName) {
+                        if ($root[$joinColumnName]) {
+                            return $repositoryClass->fetchOneById($root[$joinColumnName]);
+                        } else {
+                            return null;
+                        }
+                    }
+//                    'resolve' => fn($root) => $repositoryClass->fetchOneById($root[$joinColumnName])
                 ];
                 continue;
             }
