@@ -1,0 +1,143 @@
+<?php
+
+namespace Tests\Http\GraphQL\UserBC\Guest;
+
+use Sales\Domain\Model\Personnel\Sales;
+use Tests\Http\GraphQL\GraphqlTestCase;
+use Tests\Http\Record\EntityRecord;
+use Tests\Http\Record\Model\AdminRecord;
+use Tests\Http\Record\Model\PersonnelRecord;
+
+class LoginControllerTest extends GraphqlTestCase
+{
+
+    protected AdminRecord $admin;
+    protected PersonnelRecord $personnel;
+    protected EntityRecord $sales;
+    protected EntityRecord $manager;
+    
+    protected $adminLoginRequest;
+    protected $personnelLoginRequest;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->connection->table('Admin')->truncate();
+        $this->connection->table('Personnel')->truncate();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('Manager')->truncate();
+
+        $this->admin = new AdminRecord('main');
+        $this->personnel = new PersonnelRecord('main');
+        $this->sales = new EntityRecord(Sales::class, 'main');
+        $this->sales->columns['Personnel_id'] = $this->personnel->columns['id'];
+
+        $this->adminLoginRequest = [
+            'email' => $this->admin->columns['email'],
+            'password' => $this->admin->rawPassword,
+        ];
+        $this->personnelLoginRequest = [
+            'email' => $this->personnel->columns['email'],
+            'password' => $this->personnel->rawPassword,
+        ];
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->connection->table('Admin')->truncate();
+        $this->connection->table('Personnel')->truncate();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('Manager')->truncate();
+    }
+    
+    //
+    protected function graphqlUri(): string
+    {
+        return 'graphql/user';
+    }
+
+    //
+    protected function adminLogin()
+    {
+        $this->admin->insert($this->connection);
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $email: String!, $password: String! ) {
+    byGuest {
+        adminLogin ( email: $email, password: $password ) {
+            id, aSuperUser, name, token
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = $this->adminLoginRequest;
+        $this->postGraphqlRequest();
+    }
+
+    public function test_adminLogin_200()
+    {
+        $this->disableExceptionHandling();
+        $this->adminLogin();
+        $this->seeStatusCode(200);
+
+        $response = [
+            'id' => $this->admin->columns['id'],
+            'aSuperUser' => $this->admin->columns['aSuperUser'],
+            'name' => $this->admin->columns['name'],
+        ];
+        $this->seeJsonContains($response);
+//$this->seeJsonContains(['print']);
+//        $this->response->dump(); //to check generated JWT token;
+    }
+
+    //
+    protected function personnelLogin()
+    {
+        $this->personnel->insert($this->connection);
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $email: String!, $password: String! ) {
+    byGuest {
+        personnelLogin ( email: $email, password: $password ) {
+            id, name, token,
+            activeSales { id }
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = $this->personnelLoginRequest;
+        $this->postGraphqlRequest();
+    }
+
+    public function test_personnelLogin_200()
+    {
+        $this->disableExceptionHandling();
+        $this->personnelLogin();
+        $this->seeStatusCode(200);
+
+        $response = [
+            'id' => $this->personnel->columns['id'],
+            'name' => $this->personnel->columns['name'],
+        ];
+        $this->seeJsonContains($response);
+//$this->seeJsonContains(['print']);
+//        $this->response->dump(); //to check generated JWT token;
+    }
+    public function test_personnelLogin_hasActiveSalesRole()
+    {
+        $this->sales->insert($this->connection);
+        $this->personnelLogin();
+        $this->seeStatusCode(200);
+
+        $response = [
+            'id' => $this->personnel->columns['id'],
+            'name' => $this->personnel->columns['name'],
+            'activeSales' => [
+                'id' => $this->sales->columns['id'],
+            ],
+        ];
+        $this->seeJsonContains($response);
+//$this->seeJsonContains(['print']);
+//        $this->response->dump(); //to check generated JWT token;
+    }
+
+}

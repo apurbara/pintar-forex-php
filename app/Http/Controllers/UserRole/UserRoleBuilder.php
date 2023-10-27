@@ -49,7 +49,8 @@ class UserRoleBuilder
                 throw RegularException::unauthorized('token expired');
             }
         } else {
-            return new GuestRole();
+//            return new GuestRole();
+            return null;
         }
     }
 }

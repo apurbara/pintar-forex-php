@@ -8,7 +8,7 @@ use function request;
 class AppContext
 {
 
-    public object $user;
+    public object|null $user;
     protected array $aggregateRoot = [];
 
     public function __construct()
@@ -25,5 +25,4 @@ class AppContext
     {
         return $this->aggregateRoot[$aggregateName] ?? null;
     }
-    
 }
