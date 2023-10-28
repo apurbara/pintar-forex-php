@@ -5,10 +5,10 @@ namespace App\Http\GraphQL\CompanyBC\Object;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\Personnel\Manager\SalesGraph;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager\Sales;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\Pagination;
@@ -30,7 +30,7 @@ class PersonnelGraph extends GraphqlObjectType
                 }
             ],
             'salesAssignments' => [
-                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
+                'type' => new Pagination(TypeRegistry::objectType(SalesGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'Sales.Personnel_id', 'value' => $root['id']];
