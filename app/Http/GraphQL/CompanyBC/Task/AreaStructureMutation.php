@@ -5,6 +5,8 @@ namespace App\Http\GraphQL\CompanyBC\Task;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
+use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
@@ -26,14 +28,14 @@ class AreaStructureMutation extends ObjectType
     {
         return [
             'addChild' => [
-                'type' => TypeRegistry::objectType(AreaStructure::class),
+                'type' => TypeRegistry::objectType(AreaStructureGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(AreaStructure::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaStructureController())
                         ->addChild($app->user, $app->getAggregateRootId('areaStructureId'),
                                 new GraphqlInputRequest($args))
             ],
             'addRootArea' => [
-                'type' => TypeRegistry::objectType(Area::class),
+                'type' => TypeRegistry::objectType(AreaGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(Area::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
                         ->addRoot($app->user, $app->getAggregateRootId('areaStructureId'),

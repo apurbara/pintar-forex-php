@@ -4,6 +4,7 @@ namespace App\Http\GraphQL\CompanyBC\Task;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure\Area;
 use GraphQL\Type\Definition\ObjectType;
@@ -25,7 +26,7 @@ class AreaMutation extends ObjectType
     {
         return [
             'addChild' => [
-                'type' => TypeRegistry::objectType(Area::class),
+                'type' => TypeRegistry::objectType(AreaGraph::class),
                 'args' => [
                     'areaStructureId' => Type::nonNull(Type::id()),
                     ...DoctrineGraphqlFieldsBuilder::buildInputFields(Area::class)

@@ -4,6 +4,7 @@ namespace App\Http\GraphQL\CompanyBC\Task;
 
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\Personnel\Manager\SalesGraph;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\Personnel\Manager\Sales;
 use GraphQL\Type\Definition\ObjectType;
@@ -25,7 +26,7 @@ class ManagerMutation extends ObjectType
     {
         return [
             'assignSales' => [
-                'type' => TypeRegistry::objectType(Sales::class),
+                'type' => TypeRegistry::objectType(SalesGraph::class),
                 'args' => [
                     'personnelId' => Type::nonNull(Type::id()),
                     'areaId' => Type::nonNull(Type::id()),

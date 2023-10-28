@@ -10,6 +10,7 @@ class AreaStructureControllerTest extends CompanyBCTestCase
 {
     protected EntityRecord $areaStructureOne;
     protected EntityRecord $areaStructureTwo;
+    protected EntityRecord $areaStructureThree;
     
     protected $addAreaStructureRequest = [
         'name' => "new area structure name",
@@ -22,6 +23,9 @@ class AreaStructureControllerTest extends CompanyBCTestCase
         
         $this->areaStructureOne = new EntityRecord(AreaStructure::class, 1);
         $this->areaStructureTwo = new EntityRecord(AreaStructure::class, 2);
+        $this->areaStructureTwo->columns['AreaStructure_idOfParent'] = $this->areaStructureOne->columns['id'];
+        $this->areaStructureThree = new EntityRecord(AreaStructure::class, 3);
+        $this->areaStructureThree->columns['AreaStructure_idOfParent'] = $this->areaStructureTwo->columns['id'];
     }
     protected function tearDown(): void
     {
@@ -161,15 +165,19 @@ _QUERY;
     {
         $this->prepareAdminDependency();
         $this->areaStructureOne->insert($this->connection);
+        $this->areaStructureTwo->insert($this->connection);
+        $this->areaStructureThree->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query AreaStructureDetail ( $areaStructureId: ID! ) {
     areaStructureDetail ( areaStructureId: $areaStructureId ) {
-        id, disabled, createdTime, name, description
+        id, disabled, createdTime, name, description, 
+        parent { id, name },
+        children { list { id, name } }
     }
 }
 _QUERY;
-        $this->graphqlVariables['areaStructureId'] = $this->areaStructureOne->columns['id'];
+        $this->graphqlVariables['areaStructureId'] = $this->areaStructureTwo->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()
@@ -177,11 +185,23 @@ _QUERY;
         $this->viewDetail();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'id' => $this->areaStructureOne->columns['id'],
-            'disabled' => $this->areaStructureOne->columns['disabled'],
-            'createdTime' => $this->jakartaDateTimeFormat($this->areaStructureOne->columns['createdTime']),
-            'name' => $this->areaStructureOne->columns['name'],
-            'description' => $this->areaStructureOne->columns['description'],
+            'id' => $this->areaStructureTwo->columns['id'],
+            'disabled' => $this->areaStructureTwo->columns['disabled'],
+            'createdTime' => $this->jakartaDateTimeFormat($this->areaStructureTwo->columns['createdTime']),
+            'name' => $this->areaStructureTwo->columns['name'],
+            'description' => $this->areaStructureTwo->columns['description'],
+            'parent' => [
+                'id' => $this->areaStructureOne->columns['id'],
+                'name' => $this->areaStructureOne->columns['name'],
+            ],
+            'children' => [
+                'list' => [
+                    [
+                        'id' => $this->areaStructureThree->columns['id'],
+                        'name' => $this->areaStructureThree->columns['name'],
+                    ],
+                ],
+            ],
         ]);
     }
 }

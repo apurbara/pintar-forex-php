@@ -4,6 +4,7 @@ namespace App\Http\GraphQL\CompanyBC\Task;
 
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
 use Company\Domain\Model\Personnel\Manager;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -23,7 +24,7 @@ class PersonnelMutation extends ObjectType
     {
         return [
             'assignManager' => [
-                'type' => TypeRegistry::objectType(Manager::class),
+                'type' => TypeRegistry::objectType(ManagerGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(Manager::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new ManagerController())
                         ->assign($app->user, $app->getAggregateRootId('personnelId'))

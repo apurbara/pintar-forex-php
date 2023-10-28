@@ -35,7 +35,7 @@ class CustomerVerificationControllerTest extends CompanyBCTestCase
         $this->prepareAdminDependency();
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation AddCustomerVerification( $name: String, $description: String){
+mutation ( $name: String, $description: String){
     addCustomerVerification(name: $name, description: $description ){
         id, disabled, createdTime, name, description
     }
@@ -72,7 +72,7 @@ $this->disableExceptionHandling();
         $this->customerVerificationTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query CustomerVerificationList{
+query {
     customerVerificationList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }

@@ -10,14 +10,14 @@ use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
+use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
+use App\Http\GraphQL\CompanyBC\Object\CustomerVerificationGraph;
+use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
+use App\Http\GraphQL\CompanyBC\Object\PersonnelGraph;
+use App\Http\GraphQL\CompanyBC\Object\SalesActivityGraph;
 use App\Http\GraphQL\GraphqlInputRequest;
-use Company\Domain\Model\AreaStructure;
-use Company\Domain\Model\AreaStructure\Area;
-use Company\Domain\Model\CustomerVerification;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Model\Personnel\Manager\Sales;
-use Company\Domain\Model\SalesActivity;
+use App\Http\GraphQL\SalesBC\Object\SalesGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
@@ -51,13 +51,13 @@ class Query extends ObjectType
     {
         return [
             'personnelList' => [
-                'type' => new Pagination(TypeRegistry::objectType(Personnel::class)),
+                'type' => new Pagination(TypeRegistry::objectType(PersonnelGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new PersonnelController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'personnelDetail' => [
-                'type' => TypeRegistry::objectType(Personnel::class),
+                'type' => TypeRegistry::objectType(PersonnelGraph::class),
                 'args' => ['personnelId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new PersonnelController())
                         ->viewDetail($app->user, $args['personnelId'])
@@ -69,13 +69,13 @@ class Query extends ObjectType
     {
         return [
             'areaStructureList' => [
-                'type' => new Pagination(TypeRegistry::objectType(AreaStructure::class)),
+                'type' => new Pagination(TypeRegistry::objectType(AreaStructureGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaStructureController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'areaStructureDetail' => [
-                'type' => TypeRegistry::objectType(AreaStructure::class),
+                'type' => TypeRegistry::objectType(AreaStructureGraph::class),
                 'args' => ['areaStructureId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaStructureController())
                         ->viewDetail($app->user, $args['areaStructureId'])
@@ -87,13 +87,13 @@ class Query extends ObjectType
     {
         return [
             'areaList' => [
-                'type' => new Pagination(TypeRegistry::objectType(Area::class)),
+                'type' => new Pagination(TypeRegistry::objectType(AreaGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'areaDetail' => [
-                'type' => TypeRegistry::objectType(Area::class),
+                'type' => TypeRegistry::objectType(AreaGraph::class),
                 'args' => ['areaId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
                         ->viewDetail($app->user, $args['areaId'])
@@ -105,13 +105,13 @@ class Query extends ObjectType
     {
         return [
             'managerList' => [
-                'type' => new Pagination(TypeRegistry::objectType(Manager::class)),
+                'type' => new Pagination(TypeRegistry::objectType(ManagerGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new ManagerController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'managerDetail' => [
-                'type' => TypeRegistry::objectType(Manager::class),
+                'type' => TypeRegistry::objectType(ManagerGraph::class),
                 'args' => ['managerId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new ManagerController())
                         ->viewDetail($app->user, $args['managerId'])
@@ -123,13 +123,13 @@ class Query extends ObjectType
     {
         return [
             'salesList' => [
-                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
+                'type' => new Pagination(TypeRegistry::objectType(SalesGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'salesDetail' => [
-                'type' => TypeRegistry::objectType(Sales::class),
+                'type' => TypeRegistry::objectType(SalesGraph::class),
                 'args' => ['salesId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesController())
                         ->viewDetail($app->user, $args['salesId'])
@@ -141,13 +141,13 @@ class Query extends ObjectType
     {
         return [
             'customerVerificationList' => [
-                'type' => new Pagination(TypeRegistry::objectType(CustomerVerification::class)),
+                'type' => new Pagination(TypeRegistry::objectType(CustomerVerificationGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'customerVerificationDetail' => [
-                'type' => TypeRegistry::objectType(CustomerVerification::class),
+                'type' => TypeRegistry::objectType(CustomerVerificationGraph::class),
                 'args' => ['customerVerificationId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
                         ->viewDetail($app->user, $args['customerVerificationId'])
@@ -159,13 +159,13 @@ class Query extends ObjectType
     {
         return [
             'salesActivityList' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivity::class)),
+                'type' => new Pagination(TypeRegistry::objectType(SalesActivityGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'salesActivityDetail' => [
-                'type' => TypeRegistry::objectType(SalesActivity::class),
+                'type' => TypeRegistry::objectType(SalesActivityGraph::class),
                 'args' => ['salesActivityId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
                         ->viewDetail($app->user, $args['salesActivityId'])

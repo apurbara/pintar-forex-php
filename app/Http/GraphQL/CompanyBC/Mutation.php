@@ -7,6 +7,10 @@ use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\GraphQL\AppContext;
+use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
+use App\Http\GraphQL\CompanyBC\Object\CustomerVerificationGraph;
+use App\Http\GraphQL\CompanyBC\Object\PersonnelGraph;
+use App\Http\GraphQL\CompanyBC\Object\SalesActivityGraph;
 use App\Http\GraphQL\CompanyBC\Task\AreaMutation;
 use App\Http\GraphQL\CompanyBC\Task\AreaStructureMutation;
 use App\Http\GraphQL\CompanyBC\Task\ManagerMutation;
@@ -56,7 +60,7 @@ class Mutation extends ObjectType
     {
         return [
             'addPersonnel' => [
-                'type' => TypeRegistry::objectType(Personnel::class),
+                'type' => TypeRegistry::objectType(PersonnelGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(Personnel::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new PersonnelController())
                         ->add($app->user, new GraphqlInputRequest($args))
@@ -76,7 +80,7 @@ class Mutation extends ObjectType
     {
         return [
             'addRootAreaStructure' => [
-                'type' => TypeRegistry::objectType(AreaStructure::class),
+                'type' => TypeRegistry::objectType(AreaStructureGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(AreaStructure::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaStructureController())
                         ->addRoot($app->user, new GraphqlInputRequest($args))
@@ -124,7 +128,7 @@ class Mutation extends ObjectType
     {
         return [
             'addCustomerVerification' => [
-                'type' => TypeRegistry::objectType(CustomerVerification::class),
+                'type' => TypeRegistry::objectType(CustomerVerificationGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(CustomerVerification::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
                         ->add($app->user, new GraphqlInputRequest($args))
@@ -136,13 +140,13 @@ class Mutation extends ObjectType
     {
         return [
             'setInitialSalesActivity' => [
-                'type' => TypeRegistry::objectType(SalesActivity::class),
+                'type' => TypeRegistry::objectType(SalesActivityGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivity::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
                         ->setInitial($app->user, new GraphqlInputRequest($args))
             ],
             'addSalesActivity' => [
-                'type' => TypeRegistry::objectType(SalesActivity::class),
+                'type' => TypeRegistry::objectType(SalesActivityGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivity::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
                         ->add($app->user, new GraphqlInputRequest($args))
