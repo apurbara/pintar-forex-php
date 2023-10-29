@@ -2,11 +2,11 @@
 
 namespace User\Domain\Task\ByPersonnel\Manager;
 
-use Resources\Domain\TaskPayload\ViewPayload;
+use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 use User\Domain\Model\Personnel;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 
-class ViewActiveMangerAssignmentBelongsToPersonnel implements PersonnelTask
+class ViewMangerAssignmentList implements PersonnelTask
 {
 
     public function __construct(protected ManagerRepository $managerRepository)
@@ -17,12 +17,13 @@ class ViewActiveMangerAssignmentBelongsToPersonnel implements PersonnelTask
     /**
      * 
      * @param Personnel $personnel
-     * @param ViewPayload $payload
+     * @param ViewPaginationListPayload $payload
      * @return void
      */
     public function executeByPersonnel(Personnel $personnel, $payload): void
     {
-        $result = $this->managerRepository->activeManagerAssignmentBelongsToPersonnel($personnel->getId());
+        $result = $this->managerRepository->managerAssignmentListBelongsToPersonnel(
+                $personnel->getId(), $payload->paginationSchema);
         $payload->setResult($result);
     }
 }

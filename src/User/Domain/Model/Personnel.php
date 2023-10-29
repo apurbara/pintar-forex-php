@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Resources\Exception\RegularException;
 use SharedContext\Domain\ValueObject\AccountInfo;
+use User\Domain\Task\ByPersonnel\PersonnelTask;
 use User\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
 
 #[Entity(repositoryClass: DoctrinePersonnelRepository::class)]
@@ -44,5 +45,11 @@ class Personnel
             throw RegularException::unauthorized('inactive account or invalid email and password');
         }
         return $this->id;
+    }
+
+    //
+    public function executeTask(PersonnelTask $task, $payload): void
+    {
+        
     }
 }

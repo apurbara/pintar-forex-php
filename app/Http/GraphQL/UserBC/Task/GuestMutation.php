@@ -3,6 +3,8 @@
 namespace App\Http\GraphQL\UserBC\Task;
 
 use App\Http\Controllers\UserBC\ByGuest\LoginController;
+use App\Http\Controllers\UserRole\PersonnelRole;
+use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\UserBC\Object\AdminLoginResponseGraph;
 use App\Http\GraphQL\UserBC\Object\PersonnelLoginResponseGraph;
@@ -38,8 +40,11 @@ class GuestMutation extends ObjectType
                     'email' => Type::nonNull(Type::string()),
                     'password' => Type::nonNull(Type::string()),
                 ],
-                'resolve' => fn($root, $args) => (new LoginController())
-                        ->personnelLogin(new GraphqlInputRequest($args))
+                'resolve' => function($root, $args, AppContext $app){
+                    $result = (new LoginController())->personnelLogin(new GraphqlInputRequest($args));
+                    $app->user = new PersonnelRole($root['id']);
+                    return $result;
+                }
             ],
         ];
     }

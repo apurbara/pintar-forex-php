@@ -27,7 +27,6 @@ class AssignedCustomer implements ContainEventsInterface
 
     use ContainEventsTrait;
 
-    #[FetchableEntity(targetEntity: SalesInCompanyBC::class, joinColumnName: "Sales_id")]
     #[ManyToOne(targetEntity: Sales::class)]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;

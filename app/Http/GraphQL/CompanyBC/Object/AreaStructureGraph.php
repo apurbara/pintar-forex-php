@@ -20,8 +20,11 @@ class AreaStructureGraph extends GraphqlObjectType
             ...parent::fieldDefinition(),
             'parent' => [
                 'type' => TypeRegistry::objectType(AreaStructureGraph::class),
-                'resolve' => fn($root, $args, AppContext $app) =>
-                (new AreaStructureController())->viewDetail($app->user, $root['AreaStructure_idOfParent'])
+                'resolve' => function ($root, $args, AppContext $app) {
+                    if ($root['AreaStructure_idOfParent']) {
+                        return (new AreaStructureController())->viewDetail($app->user, $root['AreaStructure_idOfParent']);
+                    }
+                },
             ],
             'children' => [
                 'type' => new Pagination(TypeRegistry::objectType(AreaStructureGraph::class)),

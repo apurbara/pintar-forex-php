@@ -26,13 +26,15 @@ class AreaGraph extends GraphqlObjectType
             ...parent::fieldDefinition(),
             'areaStructure' => [
                 'type' => TypeRegistry::objectType(AreaStructureGraph::class),
-                'resolve' => fn($root) =>
-                (new DoctrineAreaStructureRepository(app(EntityManager::class), new ClassMetadata(AreaStructure::class)))->fetchOneById($root['AreaStructure_id'])
+                'resolve' => fn ($root) => (new DoctrineAreaStructureRepository(app(EntityManager::class), new ClassMetadata(AreaStructure::class)))->fetchOneById($root['AreaStructure_id'])
             ],
             'parent' => [
                 'type' => TypeRegistry::objectType(AreaGraph::class),
-                'resolve' => fn($root, $args, AppContext $app) =>
-                (new AreaController())->viewDetail($app->user, $root['Area_idOfParent'])
+                'resolve' => function ($root, $args, AppContext $app) {
+                    if ($root['Area_idOfParent']) {
+                        return (new AreaController())->viewDetail($app->user, $root['Area_idOfParent']);
+                    }
+                }
             ],
             'children' => [
                 'type' => new Pagination(TypeRegistry::objectType(AreaGraph::class)),

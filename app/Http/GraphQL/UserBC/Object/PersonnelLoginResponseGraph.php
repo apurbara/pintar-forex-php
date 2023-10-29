@@ -27,12 +27,12 @@ class PersonnelLoginResponseGraph extends GraphqlObjectType
                 'type' => Type::string(),
                 'resolve' => fn($root) => UserRoleBuilder::generateJwtToken(UserRoleBuilder::ADMIN, $root['id']),
             ],
-            'activeSales' => [
+            'salesAssignments' => [
                 'type' => TypeRegistry::objectType(SalesInSalesBCGraph::class),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $em = app(EntityManager::class);
                     $sales = (new DoctrineSalesRepository($em, new ClassMetadata(Sales::class)))
-                            ->activeSalesAssignmentBelongsToPersonnel($root['id']);
+                            ->salesAssignmentListBelongsToPersonnel($root['id']);
                     if (!empty($sales)) {
                         $app->user = (new PersonnelRole($root['id']))->authorizedAsSales($sales['id']);
                     }

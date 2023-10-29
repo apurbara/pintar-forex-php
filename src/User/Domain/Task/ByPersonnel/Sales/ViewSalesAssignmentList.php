@@ -2,11 +2,11 @@
 
 namespace User\Domain\Task\ByPersonnel\Sales;
 
-use Resources\Domain\TaskPayload\ViewPayload;
+use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 use User\Domain\Model\Personnel;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 
-class ViewActiveSalesAssignmentBelongsToPersonnel implements PersonnelTask
+class ViewSalesAssignmentList implements PersonnelTask
 {
 
     public function __construct(protected SalesRepository $salesRepository)
@@ -17,12 +17,13 @@ class ViewActiveSalesAssignmentBelongsToPersonnel implements PersonnelTask
     /**
      * 
      * @param Personnel $personnel
-     * @param ViewPayload $payload
+     * @param ViewPaginationListPayload $payload
      * @return void
      */
     public function executeByPersonnel(Personnel $personnel, $payload): void
     {
-        $result = $this->salesRepository->activeSalesAssignmentBelongsToPersonnel($personnel->getId());
+        $result = $this->salesRepository->salesAssignmentListBelongsToPersonnel(
+                $personnel->getId(), $payload->paginationSchema);
         $payload->setResult($result);
     }
 }

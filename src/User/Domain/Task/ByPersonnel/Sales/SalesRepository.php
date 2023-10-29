@@ -5,5 +5,5 @@ namespace User\Domain\Task\ByPersonnel\Sales;
 interface SalesRepository
 {
 
-    public function activeSalesAssignmentBelongsToPersonnel(string $personnelId): ?array;
+    public function salesAssignmentListBelongsToPersonnel(string $personnelId, array $paginationSchema): ?array;
 }
