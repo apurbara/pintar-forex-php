@@ -42,7 +42,7 @@ class GuestMutation extends ObjectType
                 ],
                 'resolve' => function($root, $args, AppContext $app){
                     $result = (new LoginController())->personnelLogin(new GraphqlInputRequest($args));
-                    $app->user = new PersonnelRole($root['id']);
+                    $app->user = new PersonnelRole($result['id']);
                     return $result;
                 }
             ],

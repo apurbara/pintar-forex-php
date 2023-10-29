@@ -6,7 +6,7 @@ use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 use User\Domain\Model\Personnel;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 
-class ViewMangerAssignmentList implements PersonnelTask
+class ViewManagerAssignmentList implements PersonnelTask
 {
 
     public function __construct(protected ManagerRepository $managerRepository)

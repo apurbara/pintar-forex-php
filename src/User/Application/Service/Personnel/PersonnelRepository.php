@@ -6,5 +6,8 @@ use User\Domain\Model\Personnel;
 
 interface PersonnelRepository
 {
+
     public function ofId(string $id): Personnel;
+
+    public function update(): void;
 }

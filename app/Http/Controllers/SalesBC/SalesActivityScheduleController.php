@@ -35,7 +35,7 @@ class SalesActivityScheduleController extends Controller
                 ->setAssignedCustomerId($assignedCustomerId)
                 ->setSalesActivityId($input->get('salesActivityId'));
         
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         return $repository->fetchOneByIdOrDie($payload->id);
     }
     
@@ -43,7 +43,7 @@ class SalesActivityScheduleController extends Controller
     {
         $task = new ViewSalesActivityScheduleListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $payload->result;
     }
@@ -52,7 +52,7 @@ class SalesActivityScheduleController extends Controller
     {
         $task = new ViewSalesActivityScheduleDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $payload->result;
     }

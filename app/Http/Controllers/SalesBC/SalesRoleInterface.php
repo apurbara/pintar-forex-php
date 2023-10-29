@@ -7,5 +7,5 @@ use Sales\Domain\Task\SalesTask;
 interface SalesRoleInterface
 {
 
-    public function executeTask(SalesTask $task, $payload): void;
+    public function executeSalesTask(SalesTask $task, $payload): void;
 }

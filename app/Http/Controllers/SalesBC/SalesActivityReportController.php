@@ -31,7 +31,7 @@ class SalesActivityReportController extends Controller
         $payload = (new SalesActivityReportData($input->get('content')))
                 ->setSalesActivityScheduleId($salesActivityScheduleId);
         
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         return $repository->fetchOneByIdOrDie($payload->id);
     }
     
@@ -39,7 +39,7 @@ class SalesActivityReportController extends Controller
     {
         $task = new ViewSalesActivityReportListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $payload->result;
     }
@@ -48,7 +48,7 @@ class SalesActivityReportController extends Controller
     {
         $task = new ViewSalesActivityReportDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $payload->result;
     }

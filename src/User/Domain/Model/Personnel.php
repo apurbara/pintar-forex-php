@@ -50,6 +50,9 @@ class Personnel
     //
     public function executeTask(PersonnelTask $task, $payload): void
     {
-        
+        if ($this->disabled) {
+            throw RegularException::forbidden('only active personnel can make this request');
+        }
+        $task->executeByPersonnel($this, $payload);
     }
 }

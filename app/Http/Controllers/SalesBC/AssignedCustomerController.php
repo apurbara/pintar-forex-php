@@ -39,7 +39,7 @@ class AssignedCustomerController extends Controller
         $email = $input->get('email');
         $customerData = new Area\CustomerData($name, $email);
         $payload = new RegisterNewCustomerPayload($areaId, $customerData);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $repository->fetchOneByIdOrDie($payload->id);
     }
@@ -48,7 +48,7 @@ class AssignedCustomerController extends Controller
     {
         $task = new ViewAssignedCustomerList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $payload->result;
     }
@@ -57,7 +57,7 @@ class AssignedCustomerController extends Controller
     {
         $task = new ViewAssignedCustomerDetail($this->repository());
         $payload = new ViewDetailPayload($assignedCustomerId);
-        $user->executeTask($task, $payload);
+        $user->executeSalesTask($task, $payload);
         
         return $payload->result;
     }

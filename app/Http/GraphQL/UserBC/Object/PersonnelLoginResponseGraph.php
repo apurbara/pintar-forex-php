@@ -2,19 +2,19 @@
 
 namespace App\Http\GraphQL\UserBC\Object;
 
-use App\Http\Controllers\UserRole\PersonnelRole;
+use App\Http\Controllers\UserBC\ByPersonnel\ManagerAssignmentController;
+use App\Http\Controllers\UserBC\ByPersonnel\SalesAssignmentController;
 use App\Http\Controllers\UserRole\UserRoleBuilder;
 use App\Http\GraphQL\AppContext;
-use App\Http\GraphQL\SalesBC\Object\SalesInSalesBCGraph;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
+use Resources\Infrastructure\GraphQL\InputListSchema;
+use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use User\Domain\Model\Personnel;
+use User\Domain\Model\Personnel\Manager;
 use User\Domain\Model\Personnel\Sales;
-use User\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
-use function app;
 
 class PersonnelLoginResponseGraph extends GraphqlObjectType
 {
@@ -28,15 +28,17 @@ class PersonnelLoginResponseGraph extends GraphqlObjectType
                 'resolve' => fn($root) => UserRoleBuilder::generateJwtToken(UserRoleBuilder::ADMIN, $root['id']),
             ],
             'salesAssignments' => [
-                'type' => TypeRegistry::objectType(SalesInSalesBCGraph::class),
+                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
+                'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
-                    $em = app(EntityManager::class);
-                    $sales = (new DoctrineSalesRepository($em, new ClassMetadata(Sales::class)))
-                            ->salesAssignmentListBelongsToPersonnel($root['id']);
-                    if (!empty($sales)) {
-                        $app->user = (new PersonnelRole($root['id']))->authorizedAsSales($sales['id']);
-                    }
-                    return $sales;
+                    return (new SalesAssignmentController())->viewList($app->user, new GraphqlInputRequest($args));
+                }
+            ],
+            'managerAssignments' => [
+                'type' => new Pagination(TypeRegistry::objectType(Manager::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => function ($root, $args, AppContext $app) {
+                    return (new ManagerAssignmentController())->viewList($app->user, new GraphqlInputRequest($args));
                 }
             ],
         ];

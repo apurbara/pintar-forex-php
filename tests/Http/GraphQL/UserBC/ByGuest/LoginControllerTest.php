@@ -7,6 +7,7 @@ use Tests\Http\GraphQL\GraphqlTestCase;
 use Tests\Http\Record\EntityRecord;
 use Tests\Http\Record\Model\AdminRecord;
 use Tests\Http\Record\Model\PersonnelRecord;
+use User\Domain\Model\Personnel\Manager;
 
 class LoginControllerTest extends GraphqlTestCase
 {
@@ -31,6 +32,9 @@ class LoginControllerTest extends GraphqlTestCase
         $this->personnel = new PersonnelRecord('main');
         $this->sales = new EntityRecord(Sales::class, 'main');
         $this->sales->columns['Personnel_id'] = $this->personnel->columns['id'];
+        
+        $this->manager = new EntityRecord(Manager::class, 'main');
+        $this->manager->columns['Personnel_id'] = $this->personnel->columns['id'];
 
         $this->adminLoginRequest = [
             'email' => $this->admin->columns['email'],
@@ -44,11 +48,11 @@ class LoginControllerTest extends GraphqlTestCase
 
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('Admin')->truncate();
-        $this->connection->table('Personnel')->truncate();
-        $this->connection->table('Sales')->truncate();
-        $this->connection->table('Manager')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('Admin')->truncate();
+//        $this->connection->table('Personnel')->truncate();
+//        $this->connection->table('Sales')->truncate();
+//        $this->connection->table('Manager')->truncate();
     }
     
     //
@@ -95,22 +99,33 @@ _QUERY;
     {
         $this->personnel->insert($this->connection);
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $email: String!, $password: String! ) {
+mutation ( $email: String!, $password: String!, $salesAssignmentFilters: [FilterInput], $managerAssignmentFilters: [FilterInput] ) {
     byGuest {
         personnelLogin ( email: $email, password: $password ) {
             id, name, token,
-            activeSales { id }
+            salesAssignments ( filters: $salesAssignmentFilters) { list { id, disabled } }
+            managerAssignments ( filters: $managerAssignmentFilters) { list { id, disabled } }
         }
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->personnelLoginRequest;
+        $this->graphqlVariables = [
+            ...$this->personnelLoginRequest,
+            'salesAssignmentFilters' => [
+                ['column' => 'Sales.disabled', 'value' => false],
+            ],
+            'managerAssignmentFilters' => [
+                ['column' => 'Manager.disabled', 'value' => false],
+            ],
+            
+        ];
         $this->postGraphqlRequest();
     }
 
     public function test_personnelLogin_200()
     {
         $this->disableExceptionHandling();
+        
         $this->personnelLogin();
         $this->seeStatusCode(200);
 
@@ -125,19 +140,50 @@ _QUERY;
     public function test_personnelLogin_hasActiveSalesRole()
     {
         $this->sales->insert($this->connection);
+        $this->manager->insert($this->connection);
+        
         $this->personnelLogin();
         $this->seeStatusCode(200);
 
         $response = [
             'id' => $this->personnel->columns['id'],
             'name' => $this->personnel->columns['name'],
-            'activeSales' => [
-                'id' => $this->sales->columns['id'],
+            'salesAssignments' => [
+                'list' => [
+                    [
+                        'id' => $this->sales->columns['id'],
+                        'disabled' => $this->sales->columns['disabled'],
+                    ]
+                ],
+            ],
+            'managerAssignments' => [
+                'list' => [
+                    [
+                        'id' => $this->manager->columns['id'],
+                        'disabled' => $this->manager->columns['disabled'],
+                    ]
+                ],
             ],
         ];
         $this->seeJsonContains($response);
 //$this->seeJsonContains(['print']);
 //        $this->response->dump(); //to check generated JWT token;
+    }
+    public function test_personnelLogin_hideDisabledSalesAssignment_200()
+    {
+        $this->sales->columns['disabled'] = true;
+        $this->sales->insert($this->connection);
+        
+        $this->personnelLogin();
+        $this->seeJsonDoesntContains(['id' => $this->sales->columns['id']]);
+    }
+    public function test_personnelLogin_hideDisabledManagerAssignment_200()
+    {
+        $this->manager->columns['disabled'] = true;
+        $this->manager->insert($this->connection);
+        
+        $this->personnelLogin();
+        $this->seeJsonDoesntContains(['id' => $this->manager->columns['id']]);
     }
 
 }
