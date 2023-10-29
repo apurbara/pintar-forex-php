@@ -5,7 +5,7 @@ namespace App\Http\GraphQL\SalesBC\Object;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Sales\Domain\Model\Personnel\Sales;
 
-class SalesGraph extends GraphqlObjectType
+class SalesInSalesBCGraph extends GraphqlObjectType
 {
 
     protected function getClassMetadata(): string

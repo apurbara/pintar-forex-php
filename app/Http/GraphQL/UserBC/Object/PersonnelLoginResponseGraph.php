@@ -5,7 +5,7 @@ namespace App\Http\GraphQL\UserBC\Object;
 use App\Http\Controllers\UserRole\PersonnelRole;
 use App\Http\Controllers\UserRole\UserRoleBuilder;
 use App\Http\GraphQL\AppContext;
-use App\Http\GraphQL\SalesBC\Object\SalesGraph;
+use App\Http\GraphQL\SalesBC\Object\SalesInSalesBCGraph;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use GraphQL\Type\Definition\Type;
@@ -28,7 +28,7 @@ class PersonnelLoginResponseGraph extends GraphqlObjectType
                 'resolve' => fn($root) => UserRoleBuilder::generateJwtToken(UserRoleBuilder::ADMIN, $root['id']),
             ],
             'activeSales' => [
-                'type' => TypeRegistry::objectType(SalesGraph::class),
+                'type' => TypeRegistry::objectType(SalesInSalesBCGraph::class),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $em = app(EntityManager::class);
                     $sales = (new DoctrineSalesRepository($em, new ClassMetadata(Sales::class)))
