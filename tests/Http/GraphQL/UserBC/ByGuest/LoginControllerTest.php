@@ -2,6 +2,7 @@
 
 namespace Tests\Http\GraphQL\UserBC\Guest;
 
+use Company\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\Personnel\Sales;
 use Tests\Http\GraphQL\GraphqlTestCase;
 use Tests\Http\Record\EntityRecord;
@@ -16,6 +17,7 @@ class LoginControllerTest extends GraphqlTestCase
     protected PersonnelRecord $personnel;
     protected EntityRecord $sales;
     protected EntityRecord $manager;
+    protected EntityRecord $area;
     
     protected $adminLoginRequest;
     protected $personnelLoginRequest;
@@ -25,13 +27,18 @@ class LoginControllerTest extends GraphqlTestCase
         parent::setUp();
         $this->connection->table('Admin')->truncate();
         $this->connection->table('Personnel')->truncate();
+        $this->connection->table('Area')->truncate();
         $this->connection->table('Sales')->truncate();
         $this->connection->table('Manager')->truncate();
 
         $this->admin = new AdminRecord('main');
         $this->personnel = new PersonnelRecord('main');
+        
+        $this->area = new EntityRecord(Area::class, 'main');
+        
         $this->sales = new EntityRecord(Sales::class, 'main');
         $this->sales->columns['Personnel_id'] = $this->personnel->columns['id'];
+        $this->sales->columns['Area_id'] = $this->area->columns['id'];
         
         $this->manager = new EntityRecord(Manager::class, 'main');
         $this->manager->columns['Personnel_id'] = $this->personnel->columns['id'];
@@ -51,6 +58,7 @@ class LoginControllerTest extends GraphqlTestCase
 //        parent::tearDown();
 //        $this->connection->table('Admin')->truncate();
 //        $this->connection->table('Personnel')->truncate();
+//        $this->connection->table('Area')->truncate();
 //        $this->connection->table('Sales')->truncate();
 //        $this->connection->table('Manager')->truncate();
     }
@@ -103,7 +111,7 @@ mutation ( $email: String!, $password: String!, $salesAssignmentFilters: [Filter
     byGuest {
         personnelLogin ( email: $email, password: $password ) {
             id, name, token,
-            salesAssignments ( filters: $salesAssignmentFilters) { list { id, disabled } }
+            salesAssignments ( filters: $salesAssignmentFilters) { list { id, disabled, area { id, name } } }
             managerAssignments ( filters: $managerAssignmentFilters) { list { id, disabled } }
         }
     }
@@ -139,6 +147,7 @@ _QUERY;
     }
     public function test_personnelLogin_hasActiveSalesRole()
     {
+        $this->area->insert($this->connection);
         $this->sales->insert($this->connection);
         $this->manager->insert($this->connection);
         
@@ -153,6 +162,10 @@ _QUERY;
                     [
                         'id' => $this->sales->columns['id'],
                         'disabled' => $this->sales->columns['disabled'],
+                        'area' => [
+                            'id' => $this->area->columns['id'],
+                            'name' => $this->area->columns['name'],
+                        ],
                     ]
                 ],
             ],
