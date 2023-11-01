@@ -36,7 +36,7 @@ $conn = array(
     'host' => 'localhost',
     'user' => 'root',
     'password' => 'astarte1',
-    'dbname' => 'pintar-forex_dev',
+    'dbname' => 'pintar-forex_test',
 );
 $entityManager = EntityManager::create($conn, $ormConfig);
 
