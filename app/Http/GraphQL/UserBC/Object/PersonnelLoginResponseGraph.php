@@ -25,7 +25,7 @@ class PersonnelLoginResponseGraph extends GraphqlObjectType
             ...parent::fieldDefinition(),
             'token' => [
                 'type' => Type::string(),
-                'resolve' => fn($root) => UserRoleBuilder::generateJwtToken(UserRoleBuilder::ADMIN, $root['id']),
+                'resolve' => fn($root) => UserRoleBuilder::generateJwtToken(UserRoleBuilder::PERSONNEL, $root['id']),
             ],
             'salesAssignments' => [
                 'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
