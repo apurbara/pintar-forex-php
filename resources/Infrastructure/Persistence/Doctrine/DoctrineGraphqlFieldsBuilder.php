@@ -5,6 +5,7 @@ namespace Resources\Infrastructure\Persistence\Doctrine;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
+use Doctrine\ORM\Mapping\JoinColumn;
 use GraphQL\Type\Definition\Type;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -56,6 +57,13 @@ class DoctrineGraphqlFieldsBuilder
                 continue;
             }
 
+            $joinAttributeReflection = static::getAttribute($propertyReflection, JoinColumn::class);
+            if ($joinAttributeReflection) {
+                $colName = $columnPrefix . $joinAttributeReflection->getArguments()['name'];
+                $fields[$colName] = Type::id();
+                continue;
+            }
+
             $embeddedAttributeReflection = static::getAttribute($propertyReflection, Embedded::class);
             if ($embeddedAttributeReflection) {
                 $fields = [
@@ -81,11 +89,11 @@ class DoctrineGraphqlFieldsBuilder
             if ($fetchableEntityAttributeReflection) {
                 $targetEntityMetadata = $fetchableEntityAttributeReflection->getArguments()['targetEntity'];
                 $joinColumnName = $fetchableEntityAttributeReflection->getArguments()['joinColumnName'];
-                
+
                 $repositoryClass = app(EntityManager::class)->getRepository($targetEntityMetadata);
                 $fields[$propertyReflection->getName()] = [
                     'type' => TypeRegistry::objectType($targetEntityMetadata),
-                    'resolve' => function($root) use($repositoryClass, $joinColumnName) {
+                    'resolve' => function ($root) use ($repositoryClass, $joinColumnName) {
                         if ($root[$joinColumnName]) {
                             return $repositoryClass->fetchOneById($root[$joinColumnName]);
                         } else {

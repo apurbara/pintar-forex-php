@@ -3,19 +3,39 @@
 namespace Sales\Domain\Model\AreaStructure\Area;
 
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Sales\Domain\Model\AreaStructure\Area;
+use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
+use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
+use Sales\Domain\Model\CustomerVerification;
 use Tests\TestBase;
 
 class CustomerTest extends TestBase
 {
     protected $area;
+    protected $customer;
+    protected $verificationReport;
     //
-    protected $id = 'newId', $name = 'new customer name', $email = 'customer@email.org';
-    
+    protected $id = 'newId', $name = 'new customer name', $email = 'newcustomer@email.org';
+    //
+    protected $customerVerification, $verificationReportData;
+
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->area = $this->buildMockOfClass(Area::class);
+        
+        $data = (new CustomerData('name', 'customer@email.org'))->setId('id');
+        $this->customer = new TestableCustomer($this->area, $data);
+        
+        $this->verificationReport = $this->buildMockOfClass(VerificationReport::class);
+        $this->customer->verificationReports = new ArrayCollection();
+        $this->customer->verificationReports->add($this->verificationReport);
+        //
+        $this->customerVerification = $this->buildMockOfClass(CustomerVerification::class);
+        $this->verificationReportData = new VerificationReportData('note');
     }
     
     //
@@ -50,6 +70,43 @@ class CustomerTest extends TestBase
         $this->assertRegularExceptionThrowed(fn() => $this->construct(), 'Bad Request', 'customer email is mandatory and must be in valid email address format');
     }
     
+    //
+    protected function submitVerificationReport()
+    {
+        $this->customer->submitVerificationReport($this->customerVerification, $this->verificationReportData);
+    }
+    public function test_submitVerificationReport_addVerificationReportToCollection()
+    {
+        $this->submitVerificationReport();
+        $this->assertEquals(2, $this->customer->verificationReports->count());
+        $this->assertInstanceOf(VerificationReport::class, $this->customer->verificationReports->last());
+    }
+    public function test_submitVerificationReport_setVerificationReportDataId()
+    {
+        $this->submitVerificationReport();
+        $this->assertNotNull($this->verificationReportData->id);
+    }
+    public function test_submitVerificationReport_hasReportAssociateWithCustomerVerification_updateCorrespondingReport()
+    {
+        $this->verificationReport->expects($this->once())
+                ->method('associateWithCustomerVerification')
+                ->with($this->customerVerification)
+                ->willReturn(true);
+        $this->verificationReport->expects($this->once())
+                ->method('update')
+                ->with($this->verificationReportData);
+        $this->submitVerificationReport();
+    }
+    public function test_submitVerificationReport_hasReportAssociateWithCustomerVerification_preventAddNewReport()
+    {
+        $this->verificationReport->expects($this->once())
+                ->method('associateWithCustomerVerification')
+                ->with($this->customerVerification)
+                ->willReturn(true);
+        $this->submitVerificationReport();
+        $this->assertEquals(1, $this->customer->verificationReports->count());
+    }
+    
 }
 
 class TestableCustomer extends Customer
@@ -60,4 +117,5 @@ class TestableCustomer extends Customer
     public string $name;
     public string $email;
     public Area $area;
+    public Collection $verificationReports;
 }

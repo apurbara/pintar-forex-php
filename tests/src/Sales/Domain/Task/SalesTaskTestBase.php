@@ -6,14 +6,20 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Resources\Event\Dispatcher;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequest;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequest;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
 use Sales\Domain\Model\SalesActivity;
 use Sales\Domain\Task\Area\AreaRepository;
 use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
+use Sales\Domain\Task\ClosingRequest\ClosingRequestRepository;
 use Sales\Domain\Task\Customer\CustomerRepository;
+use Sales\Domain\Task\CustomerVerification\CustomerVerificationRepository;
+use Sales\Domain\Task\RecycleRequest\RecycleRequestRepository;
 use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
 use Sales\Domain\Task\SalesActivityReport\SalesActivityReportRepository;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
@@ -113,5 +119,47 @@ class SalesTaskTestBase extends TestBase
 //                ->method('ofId')
 //                ->with($this->salesActivityReportId)
 //                ->willReturn($this->salesActivityReport);
+    }
+    
+    protected MockObject $customerVerificationRepository;
+    protected MockObject $customerVerification;
+    protected string $customerVerificationId = 'customerVerificationId';
+    protected function prepareCustomerVerificationDependency()
+    {
+        $this->customerVerificationRepository = $this->buildMockOfInterface(CustomerVerificationRepository::class);
+        $this->customerVerification = $this->buildMockOfClass(CustomerVerification::class);
+        
+        $this->customerVerificationRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerVerificationId)
+                ->willReturn($this->customerVerification);
+    }
+    
+    protected MockObject $closingRequestRepository;
+    protected MockObject $closingRequest;
+    protected string $closingRequestId = 'closingRequestId';
+    protected function prepareClosingRequestDependency()
+    {
+        $this->closingRequestRepository = $this->buildMockOfInterface(ClosingRequestRepository::class);
+        $this->closingRequest = $this->buildMockOfClass(ClosingRequest::class);
+        
+        $this->closingRequestRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->closingRequestId)
+                ->willReturn($this->closingRequest);
+    }
+    
+    protected MockObject $recycleRequestRepository;
+    protected MockObject $recycleRequest;
+    protected string $recycleRequestId = 'recycleRequestId';
+    protected function prepareRecycleRequestDependency()
+    {
+        $this->recycleRequestRepository = $this->buildMockOfInterface(RecycleRequestRepository::class);
+        $this->recycleRequest = $this->buildMockOfClass(RecycleRequest::class);
+        
+        $this->recycleRequestRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->recycleRequestId)
+                ->willReturn($this->recycleRequest);
     }
 }

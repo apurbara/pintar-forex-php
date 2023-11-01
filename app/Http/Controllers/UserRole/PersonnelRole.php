@@ -27,7 +27,7 @@ class PersonnelRole implements CompanyUserRoleInterface, PersonnelRoleInterface
     //
     public function authorizedAsSales(string $salesId): SalesRole
     {
-        return new SalesRole($this, $this->personnelId, $salesId);
+        return new SalesRole($this->personnelId, $salesId);
     }
 
     //

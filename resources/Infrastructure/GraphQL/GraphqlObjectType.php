@@ -2,8 +2,11 @@
 
 namespace Resources\Infrastructure\GraphQL;
 
+use Doctrine\ORM\EntityManager;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
+use function app;
 
 abstract class GraphqlObjectType extends ObjectType
 {
@@ -21,4 +24,10 @@ abstract class GraphqlObjectType extends ObjectType
     {
         return DoctrineGraphqlFieldsBuilder::buildObjectFields($this->getClassMetadata());
     }
+    
+    protected function buildDoctrineRepository(string $classMetadata): DoctrineEntityRepository
+    {
+        return app(EntityManager::class)->getRepository($classMetadata);
+    }
+    
 }

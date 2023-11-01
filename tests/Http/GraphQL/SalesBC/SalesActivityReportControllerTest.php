@@ -65,7 +65,7 @@ class SalesActivityReportControllerTest extends SalesBCTestCase
     }
     
     //
-    protected function submitSchedule()
+    protected function submitReport()
     {
         $this->prepareSalesDependency();
         $this->salesActivity->insert($this->connection);
@@ -92,7 +92,7 @@ _QUERY;
     }
     public function test_submitSchedule_200()
     {
-        $this->submitSchedule();
+        $this->submitReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([

@@ -3,17 +3,23 @@
 namespace App\Http\GraphQL\SalesBC;
 
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
+use App\Http\Controllers\SalesBC\ClosingRequestController;
+use App\Http\Controllers\SalesBC\RecycleRequestController;
 use App\Http\Controllers\SalesBC\SalesActivityReportController;
 use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
+use App\Http\Controllers\SalesBC\VerificationReportController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\ClosingRequestInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\Customer\VerificationReportInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\RecycleRequestInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
 
 class Query extends ObjectType
@@ -34,6 +40,9 @@ class Query extends ObjectType
                 ...$this->assignedCustomerQuery(),
                 ...$this->salesActivityScheduleQuery(),
                 ...$this->salesActivityReportQuery(),
+                ...$this->verificationReportQuery(),
+                ...$this->closingRequestQuery(),
+                ...$this->recycleRequestQuery(),
             ],
         ]);
         return [
@@ -70,13 +79,13 @@ class Query extends ObjectType
     {
         return [
             'salesActivityScheduleList' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivitySchedule::class)),
+                'type' => new Pagination(TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'salesActivityScheduleDetail' => [
-                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
+                'type' => TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class),
                 'args' => ['salesActivityScheduleId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewDetail($app->user, $args['salesActivityScheduleId'])
@@ -98,6 +107,60 @@ class Query extends ObjectType
                 'args' => ['salesActivityReportId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityReportController())
                         ->viewDetail($app->user, $args['salesActivityReportId'])
+            ],
+        ];
+    }
+
+    protected function verificationReportQuery(): array
+    {
+        return [
+            'verificationReportList' => [
+                'type' => new Pagination(TypeRegistry::objectType(VerificationReportInSalesBCGraph::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new VerificationReportController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'verificationReportDetail' => [
+                'type' => TypeRegistry::objectType(VerificationReportInSalesBCGraph::class),
+                'args' => ['verificationReportId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new VerificationReportController())
+                        ->viewDetail($app->user, $args['verificationReportId'])
+            ],
+        ];
+    }
+
+    protected function closingRequestQuery(): array
+    {
+        return [
+            'closingRequestList' => [
+                'type' => new Pagination(TypeRegistry::objectType(ClosingRequestInSalesBCGraph::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'closingRequestDetail' => [
+                'type' => TypeRegistry::objectType(ClosingRequestInSalesBCGraph::class),
+                'args' => ['closingRequestId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
+                        ->viewDetail($app->user, $args['closingRequestId'])
+            ],
+        ];
+    }
+
+    protected function recycleRequestQuery(): array
+    {
+        return [
+            'recycleRequestList' => [
+                'type' => new Pagination(TypeRegistry::objectType(RecycleRequestInSalesBCGraph::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'recycleRequestDetail' => [
+                'type' => TypeRegistry::objectType(RecycleRequestInSalesBCGraph::class),
+                'args' => ['recycleRequestId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
+                        ->viewDetail($app->user, $args['recycleRequestId'])
             ],
         ];
     }

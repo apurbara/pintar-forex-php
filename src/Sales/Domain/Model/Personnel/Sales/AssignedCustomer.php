@@ -2,19 +2,25 @@
 
 namespace Sales\Domain\Model\Personnel\Sales;
 
-use Company\Domain\Model\Personnel\Manager\Sales as SalesInCompanyBC;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Resources\Attributes\FetchableEntity;
+use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
+use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequest;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequestData;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequest;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequestData;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
@@ -31,7 +37,6 @@ class AssignedCustomer implements ContainEventsInterface
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
-    #[FetchableEntity(targetEntity: Customer::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Customer::class, cascade: ["persist"])]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
@@ -44,6 +49,12 @@ class AssignedCustomer implements ContainEventsInterface
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
+    
+    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "assignedCustomer")]
+    protected Collection $closingRequests;
+    
+    #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "assignedCustomer")]
+    protected Collection $recycleRequests;
 
     public function __construct(Sales $sales, Customer $customer, string $id)
     {
@@ -64,13 +75,53 @@ class AssignedCustomer implements ContainEventsInterface
         }
     }
 
-    //
-    public function submitSalesActivitySchedule(
-            SalesActivity $salesActivity, SalesActivityScheduleData $scheduledSalesActivityData): SalesActivitySchedule
+    protected function assertActive(): void
     {
         if ($this->disabled) {
             throw RegularException::forbidden('inactive customer assignment');
         }
+    }
+
+    //
+    public function submitSalesActivitySchedule(
+            SalesActivity $salesActivity, SalesActivityScheduleData $scheduledSalesActivityData): SalesActivitySchedule
+    {
+        $this->assertActive();
         return new SalesActivitySchedule($this, $salesActivity, $scheduledSalesActivityData);
+    }
+
+    public function submitVerificationReport(
+            CustomerVerification $customerVerification, VerificationReportData $verificationReportData): void
+    {
+        $this->assertActive();
+        $this->customer->submitVerificationReport($customerVerification, $verificationReportData);
+    }
+
+    //
+    protected function assertNoOngoingRequest(): void
+    {
+        $closingRequestFilter = fn(ClosingRequest $closingRequest) => $closingRequest->isOngoing();
+        $containOngoingClosingRequest = !$this->closingRequests->filter($closingRequestFilter)->isEmpty();
+        
+        $recycleRequestFilter = fn(RecycleRequest $recycleRequest) => $recycleRequest->isOngoing();
+        $containOngoingRecycleRequest = !$this->recycleRequests->filter($recycleRequestFilter)->isEmpty();
+
+        if ($containOngoingClosingRequest || $containOngoingRecycleRequest) {
+            throw RegularException::forbidden('there area still ongoing closing/recycle request on this assignment');
+        }
+        
+    }
+    public function submitClosingRequest(ClosingRequestData $closingRequestData): ClosingRequest
+    {
+        $this->assertActive();
+        $this->assertNoOngoingRequest();
+        return new ClosingRequest($this, $closingRequestData);
+    }
+
+    public function submitRecycleRequest(RecycleRequestData $recycleRequestData): RecycleRequest
+    {
+        $this->assertActive();
+        $this->assertNoOngoingRequest();
+        return new RecycleRequest($this, $recycleRequestData);
     }
 }

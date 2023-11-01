@@ -24,8 +24,9 @@ $isDevMode = true; //generate proxy manually if entity not found
 $ormConfig = ORMSetup::createAttributeMetadataConfiguration($path, $isDevMode);
 $ormConfig->setSchemaIgnoreClasses([
         \Sales\Domain\Model\Personnel::class,
-        \Sales\Domain\Model\Personnel\Sales::class,
+        \Sales\Domain\Model\CustomerVerification::class,
         \Sales\Domain\Model\SalesActivity::class,
+        \Sales\Domain\Model\Personnel\Sales::class,
         \Sales\Domain\Model\AreaStructure\Area::class,
     
 ]);
