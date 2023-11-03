@@ -14,6 +14,7 @@ use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\ClosingRequestInSales
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\Customer\VerificationReportInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\RecycleRequestInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
@@ -61,13 +62,13 @@ class Query extends ObjectType
     {
         return [
             'assignedCustomerList' => [
-                'type' => new Pagination(TypeRegistry::objectType(AssignedCustomer::class)),
+                'type' => new Pagination(TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'assignedCustomerDetail' => [
-                'type' => TypeRegistry::objectType(AssignedCustomer::class),
+                'type' => TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class),
                 'args' => ['assignedCustomerId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->viewDetail($app->user, $args['assignedCustomerId'])

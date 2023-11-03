@@ -11,6 +11,7 @@ use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\ClosingRequestInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\Customer\VerificationReportInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\RecycleRequestInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -34,7 +35,7 @@ class AssignedCustomerMutation extends ObjectType
     {
         return [
             'submitSalesActivitySchedule' => [
-                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
+                'type' => TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class),
                 'args' => [
                     'salesActivityId' => Type::nonNull(Type::id()),
                     ...DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivitySchedule::class),

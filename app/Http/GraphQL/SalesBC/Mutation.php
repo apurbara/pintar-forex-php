@@ -9,6 +9,7 @@ use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\ClosingRequestInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\RecycleRequestInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Task\AssignedCustomerMutation;
 use App\Http\GraphQL\SalesBC\Task\SalesActivityScheduleMutation;
 use GraphQL\Type\Definition\ObjectType;
@@ -57,7 +58,7 @@ class Mutation extends ObjectType
     {
         return [
             'registerNewCustomer' => [
-                'type' => TypeRegistry::objectType(AssignedCustomer::class),
+                'type' => TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class),
                 'args' => [
                     'areaId' => Type::nonNull(Type::id()),
                     ...DoctrineGraphqlFieldsBuilder::buildInputFields(Customer::class),

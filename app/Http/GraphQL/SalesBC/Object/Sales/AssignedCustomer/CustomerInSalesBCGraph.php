@@ -23,14 +23,17 @@ class CustomerInSalesBCGraph extends GraphqlObjectType
             ...parent::fieldDefinition(),
             'area' => [
                 'type' => TypeRegistry::objectType(AreaGraph::class),
-                'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
-                        ->viewDetail($app->user, $root['Area_id'])
+                'resolve' => fn ($root, $args, AppContext $app) => (new AreaController())
+                    ->viewDetail($app->user, $root['Area_id'])
             ],
             'verificationReports' => [
                 'type' => new Pagination(TypeRegistry::objectType(VerificationReportInSalesBCGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
-                'resolve' => fn($root, $args, AppContext $app) => (new VerificationReportController())
-                        ->viewList($app->user, new GraphqlInputRequest($args))
+                'resolve' => function ($root, $args, AppContext $app) {
+                    $args['filters'][] = ['column' => 'VerificationReport.Customer_id', 'value' => $root['id']];
+                    return (new VerificationReportController())
+                        ->viewList($app->user, new GraphqlInputRequest($args));
+                }
             ],
         ];
     }
