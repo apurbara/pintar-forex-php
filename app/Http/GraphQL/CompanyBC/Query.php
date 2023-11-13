@@ -4,6 +4,7 @@ namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
+use App\Http\GraphQL\CompanyBC\Object\CustomerJourneyGraph;
 use App\Http\GraphQL\CompanyBC\Object\CustomerVerificationGraph;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\Manager\SalesGraph;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
@@ -44,6 +46,7 @@ class Query extends ObjectType
             ...$this->salesQuery(),
             ...$this->customerVerificationQuery(),
             ...$this->salesActivityQuery(),
+            ...$this->customerJourneyQuery(),
         ];
     }
 
@@ -169,6 +172,24 @@ class Query extends ObjectType
                 'args' => ['salesActivityId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
                         ->viewDetail($app->user, $args['salesActivityId'])
+            ],
+        ];
+    }
+
+    protected function customerJourneyQuery(): array
+    {
+        return [
+            'customerJourneyList' => [
+                'type' => new Pagination(TypeRegistry::objectType(CustomerJourneyGraph::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerJourneyController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'customerJourneyDetail' => [
+                'type' => TypeRegistry::objectType(CustomerJourneyGraph::class),
+                'args' => ['customerJourneyId' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerJourneyController())
+                        ->viewDetail($app->user, $args['customerJourneyId'])
             ],
         ];
     }

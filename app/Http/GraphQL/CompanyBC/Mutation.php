@@ -3,11 +3,13 @@
 namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
+use App\Http\GraphQL\CompanyBC\Object\CustomerJourneyGraph;
 use App\Http\GraphQL\CompanyBC\Object\CustomerVerificationGraph;
 use App\Http\GraphQL\CompanyBC\Object\PersonnelGraph;
 use App\Http\GraphQL\CompanyBC\Object\SalesActivityGraph;
@@ -17,6 +19,7 @@ use App\Http\GraphQL\CompanyBC\Task\ManagerMutation;
 use App\Http\GraphQL\CompanyBC\Task\PersonnelMutation;
 use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
+use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\SalesActivity;
@@ -44,6 +47,7 @@ class Mutation extends ObjectType
             ...$this->managerMutation(),
             ...$this->customerVerificationMutation(),
             ...$this->salesActivityMutation(),
+            ...$this->customerJourneyMutation(),
         ];
     }
 
@@ -149,6 +153,24 @@ class Mutation extends ObjectType
                 'type' => TypeRegistry::objectType(SalesActivityGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivity::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
+                        ->add($app->user, new GraphqlInputRequest($args))
+            ],
+        ];
+    }
+
+    protected function customerJourneyMutation(): array
+    {
+        return [
+            'setInitialCustomerJourney' => [
+                'type' => TypeRegistry::objectType(CustomerJourneyGraph::class),
+                'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(CustomerJourney::class),
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerJourneyController())
+                        ->setInitial($app->user, new GraphqlInputRequest($args))
+            ],
+            'addCustomerJourney' => [
+                'type' => TypeRegistry::objectType(CustomerJourneyGraph::class),
+                'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(CustomerJourney::class),
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerJourneyController())
                         ->add($app->user, new GraphqlInputRequest($args))
             ],
         ];

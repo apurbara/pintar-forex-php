@@ -4,6 +4,7 @@ namespace Tests\src\Company\Domain\Task\InCompany;
 
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
@@ -11,6 +12,7 @@ use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
+use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\Sales\SalesRepository;
@@ -118,5 +120,19 @@ class TaskInCompanyTestBase extends TestBase
 //                ->method('ofId')
 //                ->with($this->salesActivityId)
 //                ->willReturn($this->salesActivity);
+    }
+    
+    protected MockObject $customerJourneyRepository;
+    protected MockObject $customerJourney;
+    protected string $customerJourneyId = 'customerJourneyId';
+    protected function prepareCustomerJourneyDependency(): void
+    {
+        $this->customerJourneyRepository = $this->buildMockOfInterface(CustomerJourneyRepository::class);
+        $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        //
+//        $this->customerJourneyRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->customerJourneyId)
+//                ->willReturn($this->customerJourney);
     }
 }
