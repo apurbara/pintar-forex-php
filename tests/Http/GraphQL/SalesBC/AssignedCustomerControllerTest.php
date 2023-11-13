@@ -5,6 +5,7 @@ namespace Tests\Http\GraphQL\SalesBC;
 use Company\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use Tests\Http\Record\EntityRecord;
 
 class AssignedCustomerControllerTest extends SalesBCTestCase
@@ -58,7 +59,7 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
 mutation ( $salesId: ID!, $areaId: ID!, $name: String, $email: String ) {
     sales ( salesId: $salesId ) {
         registerNewCustomer ( areaId: $areaId, name: $name, email: $email ) {
-            id, disabled, createdTime
+            id, status, createdTime
             customer {
                 name, email
                 area { id, name }
@@ -79,7 +80,7 @@ _QUERY;
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
-            'disabled' => false,
+            'status' => CustomerAssignmentStatus::ACTIVE->value,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'customer' => [
                 'name' => $this->registerNewCustomerRequest['name'],
@@ -93,7 +94,7 @@ _QUERY;
         
         $this->seeInDatabase('AssignedCustomer', [
             'Sales_id' => $this->sales->columns['id'],
-            'disabled' => false,
+            'status' => CustomerAssignmentStatus::ACTIVE->value,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
@@ -120,7 +121,7 @@ query ( $salesId: ID!) {
     sales ( salesId: $salesId ) {
         assignedCustomerList {
             list {
-                id, disabled, createdTime
+                id, status, createdTime
                 customer {
                     id, name, email
                     area { id, name }
@@ -141,7 +142,7 @@ _QUERY;
             'list' => [
                 [
                     'id' => $this->assignedCustomerOne->columns['id'],
-                    'disabled' => $this->assignedCustomerOne->columns['disabled'],
+                    'status' => $this->assignedCustomerOne->columns['status'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->assignedCustomerOne->columns['createdTime']),
                     'customer' => [
                         'id' => $this->customerOne->columns['id'],
@@ -155,7 +156,7 @@ _QUERY;
                 ],
                 [
                     'id' => $this->assignedCustomerTwo->columns['id'],
-                    'disabled' => $this->assignedCustomerTwo->columns['disabled'],
+                    'status' => $this->assignedCustomerTwo->columns['status'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->assignedCustomerTwo->columns['createdTime']),
                     'customer' => [
                         'id' => $this->customerTwo->columns['id'],
@@ -186,7 +187,7 @@ _QUERY;
 query ( $salesId: ID!, $assignedCustomerId: ID!) {
     sales ( salesId: $salesId ) {
         assignedCustomerDetail ( assignedCustomerId: $assignedCustomerId ) {
-            id, disabled, createdTime
+            id, status, createdTime
             customer {
                 id, name, email
                 area { id, name }
@@ -206,7 +207,7 @@ _QUERY;
         $this->viewDetail();
         $this->seeJsonContains([
             'id' => $this->assignedCustomerOne->columns['id'],
-            'disabled' => $this->assignedCustomerOne->columns['disabled'],
+            'status' => $this->assignedCustomerOne->columns['status'],
             'createdTime' => $this->jakartaDateTimeFormat($this->assignedCustomerOne->columns['createdTime']),
             'customer' => [
                 'id' => $this->customerOne->columns['id'],

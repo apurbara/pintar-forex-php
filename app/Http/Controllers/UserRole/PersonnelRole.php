@@ -4,6 +4,7 @@ namespace App\Http\Controllers\UserRole;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\UserBC\ByPersonnel\PersonnelRoleInterface;
+use App\Http\Controllers\UserRole\Personnel\ManagerRole;
 use App\Http\Controllers\UserRole\Personnel\SalesRole;
 use Company\Application\Service\Personnel\ExecuteTaskInCompany;
 use Company\Domain\Model\Personnel;
@@ -28,6 +29,11 @@ class PersonnelRole implements CompanyUserRoleInterface, PersonnelRoleInterface
     public function authorizedAsSales(string $salesId): SalesRole
     {
         return new SalesRole($this->personnelId, $salesId);
+    }
+    
+    public function authorizedAsManager(string $managerId): ManagerRole
+    {
+        return new ManagerRole($this->personnelId, $managerId);
     }
 
     //

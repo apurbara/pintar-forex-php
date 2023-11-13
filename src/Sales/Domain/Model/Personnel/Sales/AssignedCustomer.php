@@ -25,6 +25,7 @@ use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 
 #[Entity(repositoryClass: DoctrineAssignedCustomerRepository::class)]
@@ -44,8 +45,8 @@ class AssignedCustomer implements ContainEventsInterface
     #[Id, Column(type: "guid")]
     protected string $id;
 
-    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
+    #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
+    protected CustomerAssignmentStatus $status;
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
@@ -61,7 +62,7 @@ class AssignedCustomer implements ContainEventsInterface
         $this->sales = $sales;
         $this->customer = $customer;
         $this->id = $id;
-        $this->disabled = false;
+        $this->status = CustomerAssignmentStatus::ACTIVE;
         $this->createdTime = new DateTimeImmutable();
 
         $this->recordEvent(new CustomerAssignedEvent($this->id));
@@ -77,7 +78,7 @@ class AssignedCustomer implements ContainEventsInterface
 
     protected function assertActive(): void
     {
-        if ($this->disabled) {
+        if ($this->status !== CustomerAssignmentStatus::ACTIVE) {
             throw RegularException::forbidden('inactive customer assignment');
         }
     }

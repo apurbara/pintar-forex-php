@@ -191,10 +191,9 @@ _QUERY;
     protected function viewDetail()
     {
         $this->prepareSalesDependency();
-        $this->customerVerification->insert($this->connection);
+        $this->customerVerificationOne->insert($this->connection);
         $this->customer->insert($this->connection);
         $this->assignedCustomer->insert($this->connection);
-        $this->customerVerificationSchedule->insert($this->connection);
         
         $this->verificationReportOne->insert($this->connection);
         
@@ -202,7 +201,7 @@ _QUERY;
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
         verificationReportDetail ( verificationReportId: $id ) {
-            id, content, createdTime, customerVerification
+            id, note, createdTime, customerVerification { id, name }
         }
     }
 }
@@ -218,6 +217,10 @@ _QUERY;
             'id' => $this->verificationReportOne->columns['id'],
             'note' => $this->verificationReportOne->columns['note'],
             'createdTime' => $this->jakartaDateTimeFormat($this->verificationReportOne->columns['createdTime']),
+            'customerVerification' => [
+                'id' => $this->customerVerificationOne->columns['id'],
+                'name' => $this->customerVerificationOne->columns['name'],
+            ],
         ]);
     }
 }

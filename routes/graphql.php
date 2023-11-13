@@ -20,6 +20,9 @@ Route::post('/company', function (Request $request) {
 Route::post('/sales', function (Request $request) {
     return require __DIR__ .  '../../app/Http/GraphQL/SalesBC/graphql.php';
 });
+Route::post('/manager', function (Request $request) {
+    return require __DIR__ .  '../../app/Http/GraphQL/ManagerBC/graphql.php';
+});
 Route::post('/user', function (Request $request) {
     return require __DIR__ .  '../../app/Http/GraphQL/UserBC/graphql.php';
 });

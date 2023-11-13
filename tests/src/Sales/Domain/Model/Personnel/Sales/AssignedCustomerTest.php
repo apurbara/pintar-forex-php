@@ -15,6 +15,7 @@ use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequestData;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
@@ -67,7 +68,7 @@ class AssignedCustomerTest extends TestBase
         $this->assertSame($this->sales, $assignedCustomer->sales);
         $this->assertSame($this->customer, $assignedCustomer->customer);
         $this->assertSame($this->id, $assignedCustomer->id);
-        $this->assertFalse($assignedCustomer->disabled);
+        $this->assertEquals(CustomerAssignmentStatus::ACTIVE, $assignedCustomer->status);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($assignedCustomer->createdTime);
     }
     public function test_construct_storeCustomerAssignedEvent()
@@ -106,7 +107,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitSalesActivitySchedule_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->disabled = true;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
         $this->assertRegularExceptionThrowed(fn() => $this->submitSalesActivitySchedule(), 'Forbidden', 'inactive customer assignment');
     }
     
@@ -124,7 +125,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitVerificationReport_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->disabled = true;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
         $this->assertRegularExceptionThrowed(fn() => $this->submitVerificationReport(), 'Forbidden', 'inactive customer assignment');
     }
     
@@ -139,7 +140,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitClosingRequest_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->disabled = true;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
         $this->assertRegularExceptionThrowed(fn() => $this->submitClosingRequest(), 'Forbidden', 'inactive customer assignment');
     }
     public function test_submitClosingRequest_hasUnconcludedClosingRequest()
@@ -168,7 +169,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitRecycleRequest_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->disabled = true;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
         $this->assertRegularExceptionThrowed(fn() => $this->submitRecycleRequest(), 'Forbidden', 'inactive customer assignment');
     }
     public function test_submitRecycleRequest_hasUnconcludedClosingRequest()
@@ -192,7 +193,7 @@ class TestableAssignedCustomer extends AssignedCustomer
     public Sales $sales;
     public Customer $customer;
     public string $id;
-    public bool $disabled;
+    public CustomerAssignmentStatus $status;
     public DateTimeImmutable $createdTime;
     public Collection $closingRequests;
     public Collection $recycleRequests;
