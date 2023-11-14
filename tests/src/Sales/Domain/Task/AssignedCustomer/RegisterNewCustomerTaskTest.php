@@ -17,11 +17,12 @@ class RegisterNewCustomerTaskTest extends SalesTaskTestBase
         $this->prepareAssignedCustomerDependency();
         $this->prepareAreaDependency();
         $this->prepareCustomerDependency();
+        $this->prepareCustomerJourneyDependency();
 
         $this->task = new RegisterNewCustomerTask($this->assignedCustomerRepository, $this->areaRepository,
-                $this->customerRepository, $this->dispatcher);
+                $this->customerRepository, $this->customerJourneyRepository, $this->dispatcher);
         //
-        $this->payload = new RegisterNewCustomerPayload($this->areaId, new CustomerData('name', 'address@email.org'));
+        $this->payload = new RegisterNewCustomerPayload($this->areaId, new CustomerData('name', 'address@email.org', '0823123123123'));
     }
 
     //
@@ -36,6 +37,9 @@ class RegisterNewCustomerTaskTest extends SalesTaskTestBase
         $this->customerRepository->expects($this->any())
                 ->method('isEmailAvailable')
                 ->willReturn(true);
+        $this->customerJourneyRepository->expects($this->any())
+                ->method('anInitialCustomerJourney')
+                ->willReturn($this->customerJourney);
         $this->sales->expects($this->any())
                 ->method('registerNewCustomer')
                 ->willReturn($this->assignedCustomer);
@@ -47,7 +51,7 @@ class RegisterNewCustomerTaskTest extends SalesTaskTestBase
     {
         $this->sales->expects($this->once())
                 ->method('registerNewCustomer')
-                ->with($this->area, $this->assignedCustomerId, $this->payload->customerData)
+                ->with($this->area, $this->customerJourney, $this->assignedCustomerId, $this->payload->customerData)
                 ->willReturn($this->assignedCustomer);
         $this->assignedCustomerRepository->expects($this->once())
                 ->method('add')

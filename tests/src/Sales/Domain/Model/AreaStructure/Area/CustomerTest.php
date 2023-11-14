@@ -17,7 +17,7 @@ class CustomerTest extends TestBase
     protected $customer;
     protected $verificationReport;
     //
-    protected $id = 'newId', $name = 'new customer name', $email = 'newcustomer@email.org';
+    protected $id = 'newId', $name = 'new customer name', $email = 'newcustomer@email.org', $phone = '+6281324312123';
     //
     protected $customerVerification, $verificationReportData;
 
@@ -27,7 +27,7 @@ class CustomerTest extends TestBase
         parent::setUp();
         $this->area = $this->buildMockOfClass(Area::class);
         
-        $data = (new CustomerData('name', 'customer@email.org'))->setId('id');
+        $data = (new CustomerData('name', 'customer@email.org', '08932324234'))->setId('id');
         $this->customer = new TestableCustomer($this->area, $data);
         
         $this->verificationReport = $this->buildMockOfClass(VerificationReport::class);
@@ -41,7 +41,7 @@ class CustomerTest extends TestBase
     //
     protected function createData()
     {
-        return (new CustomerData($this->name, $this->email))->setId($this->id);
+        return (new CustomerData($this->name, $this->email, $this->phone))->setId($this->id);
     }
     
     //
@@ -57,6 +57,7 @@ class CustomerTest extends TestBase
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($customer->createdTime);
         $this->assertSame($this->name, $customer->name);
         $this->assertSame($this->email, $customer->email);
+        $this->assertSame($this->phone, $customer->phone);
         $this->assertSame($this->area, $customer->area);
     }
     public function test_construct_emptyName_badRequest()
@@ -68,6 +69,11 @@ class CustomerTest extends TestBase
     {
         $this->email = 'bad mail format';
         $this->assertRegularExceptionThrowed(fn() => $this->construct(), 'Bad Request', 'customer email is mandatory and must be in valid email address format');
+    }
+    public function test_construct_invalidPhoneFormat_badRequest()
+    {
+        $this->phone = 'bad phone format';
+        $this->assertRegularExceptionThrowed(fn() => $this->construct(), 'Bad Request', 'customer phone is mandatory and must be in valid phone format');
     }
     
     //
@@ -116,6 +122,7 @@ class TestableCustomer extends Customer
     public DateTimeImmutable $createdTime;
     public string $name;
     public string $email;
+    public string $phone;
     public Area $area;
     public Collection $verificationReports;
 }

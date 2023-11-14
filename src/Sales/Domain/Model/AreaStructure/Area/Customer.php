@@ -42,6 +42,10 @@ class Customer
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $email;
     
+    #[Column(type: "string", length: 255, nullable: true)]
+    protected string $phone;
+
+
     #[OneToMany(targetEntity: VerificationReport::class, mappedBy: "customer", cascade: ["persist"])]
     protected Collection $verificationReports;
 
@@ -61,6 +65,14 @@ class Customer
         $this->email = $email;
     }
 
+    protected function setPhone(string $phone)
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::phone())
+                ->execute($phone, 'customer phone is mandatory and must be in valid phone format');
+        $this->phone = $phone;
+    }
+
     public function __construct(Area $area, CustomerData $data)
     {
         $this->id = $data->id;
@@ -68,6 +80,7 @@ class Customer
         $this->createdTime = new DateTimeImmutable();
         $this->setName($data->name);
         $this->setEmail($data->email);
+        $this->setPhone($data->phone);
         $this->area = $area;
     }
 

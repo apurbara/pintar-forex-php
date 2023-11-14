@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequest;
@@ -24,6 +25,7 @@ class AssignedCustomerTest extends TestBase
 {
     protected $sales;
     protected $customer;
+    protected $customerJourney;
     protected $assignedCustomer;
     //
     protected $id = 'newId', $customerData;
@@ -38,8 +40,10 @@ class AssignedCustomerTest extends TestBase
         parent::setUp();
         $this->sales = $this->buildMockOfClass(Sales::class);
         $this->customer = $this->buildMockOfClass(Customer::class);
+        $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
         
-        $this->assignedCustomer = new TestableAssignedCustomer($this->sales, $this->customer, 'id');
+        $this->assignedCustomer = new TestableAssignedCustomer($this->sales, $this->customer, $this->customerJourney, 'id');
+        $this->assignedCustomer->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
         
         //
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
@@ -60,13 +64,14 @@ class AssignedCustomerTest extends TestBase
     //
     protected function construct()
     {
-        return new TestableAssignedCustomer($this->sales, $this->customer, $this->id);
+        return new TestableAssignedCustomer($this->sales, $this->customer, $this->customerJourney, $this->id);
     }
     public function test_construct_setProperties()
     {
         $assignedCustomer = $this->construct();
         $this->assertSame($this->sales, $assignedCustomer->sales);
         $this->assertSame($this->customer, $assignedCustomer->customer);
+        $this->assertSame($this->customerJourney, $assignedCustomer->customerJourney);
         $this->assertSame($this->id, $assignedCustomer->id);
         $this->assertEquals(CustomerAssignmentStatus::ACTIVE, $assignedCustomer->status);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($assignedCustomer->createdTime);
@@ -76,6 +81,35 @@ class AssignedCustomerTest extends TestBase
         $assignedCustomer = $this->construct();
         $event = new CustomerAssignedEvent($this->id);
         $this->assertEquals($event, $assignedCustomer->recordedEvents[0]);
+    }
+    public function test_construct_assertCustomerJourneyActive()
+    {
+        $this->customerJourney->expects($this->once())
+                ->method('assertActive');
+        $this->construct();
+    }
+    public function test_construct_noCustomerJourney_void()
+    {
+        $this->customerJourney = null;
+        $this->construct();
+        $this->markAsSuccess();
+    }
+    
+    //
+    protected function updateJourney()
+    {
+        $this->assignedCustomer->updateJourney($this->customerJourney);
+    }
+    public function test_updateJourney_updateJourney()
+    {
+        $this->updateJourney();
+        $this->assertSame($this->customerJourney, $this->assignedCustomer->customerJourney);
+    }
+    public function test_updateJourney_assertNewJourneyActive()
+    {
+        $this->customerJourney->expects($this->once())
+                ->method('assertActive');
+        $this->updateJourney();
     }
     
     //
@@ -192,6 +226,7 @@ class TestableAssignedCustomer extends AssignedCustomer
 {
     public Sales $sales;
     public Customer $customer;
+    public ?CustomerJourney $customerJourney;
     public string $id;
     public CustomerAssignmentStatus $status;
     public DateTimeImmutable $createdTime;

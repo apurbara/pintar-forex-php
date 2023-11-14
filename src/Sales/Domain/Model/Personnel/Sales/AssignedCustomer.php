@@ -15,6 +15,7 @@ use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
+use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequest;
@@ -41,6 +42,10 @@ class AssignedCustomer implements ContainEventsInterface
     #[ManyToOne(targetEntity: Customer::class, cascade: ["persist"])]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
+    
+    #[ManyToOne(targetEntity: CustomerJourney::class)]
+    #[JoinColumn(name: "CustomerJourney_id", referencedColumnName: "id")]
+    protected ?CustomerJourney $customerJourney;
 
     #[Id, Column(type: "guid")]
     protected string $id;
@@ -57,15 +62,25 @@ class AssignedCustomer implements ContainEventsInterface
     #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $recycleRequests;
 
-    public function __construct(Sales $sales, Customer $customer, string $id)
+    public function __construct(Sales $sales, Customer $customer, ?CustomerJourney $customerJourney, string $id)
     {
+        $customerJourney?->assertActive();
+        
         $this->sales = $sales;
         $this->customer = $customer;
+        $this->customerJourney = $customerJourney;
         $this->id = $id;
         $this->status = CustomerAssignmentStatus::ACTIVE;
         $this->createdTime = new DateTimeImmutable();
+        
 
         $this->recordEvent(new CustomerAssignedEvent($this->id));
+    }
+    
+    public function updateJourney(CustomerJourney $customerJourney): void
+    {
+        $customerJourney->assertActive();
+        $this->customerJourney = $customerJourney;
     }
 
     //

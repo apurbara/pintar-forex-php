@@ -7,16 +7,16 @@ use Resources\Exception\RegularException;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Task\Area\AreaRepository;
 use Sales\Domain\Task\Customer\CustomerRepository;
+use Sales\Domain\Task\CustomerJourney\CustomerJourneyRepository;
 use Sales\Domain\Task\SalesTask;
 
 class RegisterNewCustomerTask implements SalesTask
 {
 
     public function __construct(
-            protected AssignedCustomerRepository $assignedCustomerRepository,
-            protected AreaRepository $areaRepository,
+            protected AssignedCustomerRepository $assignedCustomerRepository, protected AreaRepository $areaRepository,
             protected CustomerRepository $customerRepository,
-            protected Dispatcher $dispatcher,
+            protected CustomerJourneyRepository $customerJourneyRepository, protected Dispatcher $dispatcher,
     )
     {
         
@@ -32,18 +32,18 @@ class RegisterNewCustomerTask implements SalesTask
     {
         $payload->setId($this->assignedCustomerRepository->nextIdentity());
         $payload->customerData->setId($this->customerRepository->nextIdentity());
-        
+
         if (!$this->customerRepository->isEmailAvailable($payload->customerData->email)) {
             throw RegularException::conflict('email already registered');
         }
-        
+
         $customerArea = $this->areaRepository->ofId($payload->areaId);
         $customerArea->assertAccessible();
-        
-        $assignedCustomer = $sales->registerNewCustomer($customerArea, $payload->id, $payload->customerData);
-        
+        $customerJourney = $this->customerJourneyRepository->anInitialCustomerJourney();
+
+        $assignedCustomer = $sales->registerNewCustomer($customerArea, $customerJourney, $payload->id, $payload->customerData);
+
         $this->assignedCustomerRepository->add($assignedCustomer);
         $this->dispatcher->dispatchEventContainer($assignedCustomer);
-        
     }
 }

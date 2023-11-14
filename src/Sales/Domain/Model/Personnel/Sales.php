@@ -12,6 +12,7 @@ use Resources\Attributes\FetchableEntity;
 use Resources\Exception\RegularException;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\CustomerData;
+use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\Personnel;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Task\SalesTask;
@@ -32,7 +33,7 @@ class Sales
 
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
-    
+
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
 
@@ -56,9 +57,11 @@ class Sales
     }
 
     //
-    public function registerNewCustomer(Area $customerArea, string $assignedCustomerId, CustomerData $customerData): AssignedCustomer
+    public function registerNewCustomer(
+            Area $customerArea, ?CustomerJourney $initialCustomerJourney, string $assignedCustomerId,
+            CustomerData $customerData): AssignedCustomer
     {
         $customer = $customerArea->createCustomer($customerData);
-        return new AssignedCustomer($this, $customer, $assignedCustomerId);
+        return new AssignedCustomer($this, $customer, $initialCustomerJourney, $assignedCustomerId);
     }
 }

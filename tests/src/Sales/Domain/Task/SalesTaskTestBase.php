@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Resources\Event\Dispatcher;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
@@ -18,6 +19,7 @@ use Sales\Domain\Task\Area\AreaRepository;
 use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
 use Sales\Domain\Task\ClosingRequest\ClosingRequestRepository;
 use Sales\Domain\Task\Customer\CustomerRepository;
+use Sales\Domain\Task\CustomerJourney\CustomerJourneyRepository;
 use Sales\Domain\Task\CustomerVerification\CustomerVerificationRepository;
 use Sales\Domain\Task\RecycleRequest\RecycleRequestRepository;
 use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
@@ -161,5 +163,19 @@ class SalesTaskTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->recycleRequestId)
                 ->willReturn($this->recycleRequest);
+    }
+    
+    protected MockObject $customerJourneyRepository;
+    protected MockObject $customerJourney;
+    protected string $customerJourneyId = 'customerJourneyId';
+    protected function prepareCustomerJourneyDependency()
+    {
+        $this->customerJourneyRepository = $this->buildMockOfInterface(CustomerJourneyRepository::class);
+        $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        
+        $this->customerJourneyRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerJourneyId)
+                ->willReturn($this->customerJourney);
     }
 }

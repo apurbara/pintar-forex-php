@@ -33,7 +33,7 @@ class AreaTest extends TestBase
     //
     protected function createCustomer()
     {
-        $customerData = (new Area\CustomerData('customer name', 'customer@email.org'))->setId('customerId');
+        $customerData = (new Area\CustomerData('customer name', 'customer@email.org', '+628123123123'))->setId('customerId');
         return $this->area->createCustomer($customerData);
     }
     public function test_createCustomer_returnCustomer()

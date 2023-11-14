@@ -3,6 +3,7 @@
 namespace Sales\Domain\Model\Personnel;
 
 use Sales\Domain\Model\AreaStructure\Area;
+use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\Personnel;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Task\SalesTask;
@@ -15,6 +16,7 @@ class SalesTest extends TestBase
     protected $task, $payload = 'string represent task payload';
     //
     protected $area;
+    protected $customerJourney;
 
     protected function setUp(): void
     {
@@ -24,6 +26,7 @@ class SalesTest extends TestBase
         $this->task = $this->buildMockOfInterface(SalesTask::class);
         //
         $this->area = $this->buildMockOfClass(Area::class);
+        $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
     }
     
     //
@@ -47,14 +50,20 @@ class SalesTest extends TestBase
     //
     protected function registerNewCustomer()
     {
-        $customerData = (new Area\CustomerData('customer name', 'customer@email.org'))->setId('customerId');
-        return $this->sales->registerNewCustomer($this->area, 'assigmentId', $customerData);
+        $customerData = (new Area\CustomerData('customer name', 'customer@email.org', '08131231232'))->setId('customerId');
+        return $this->sales->registerNewCustomer($this->area, $this->customerJourney, 'assigmentId', $customerData);
     }
-    public function test_managedNewCustomer_returnNewManagedCustomer()
+    public function test_registerNewCustomer_returnNewManagedCustomer()
     {
         $this->area->expects($this->once())
                 ->method('createCustomer');
         $this->assertInstanceOf(AssignedCustomer::class, $this->registerNewCustomer());
+    }
+    public function test_registerNewCustomer_emptyInitialJourney_void()
+    {
+        $this->customerJourney = null;
+        $this->registerNewCustomer();
+        $this->markAsSuccess();
     }
 }
 

@@ -28,6 +28,7 @@ $ormConfig->setSchemaIgnoreClasses([
         \Sales\Domain\Model\SalesActivity::class,
         \Sales\Domain\Model\Personnel\Sales::class,
         \Sales\Domain\Model\AreaStructure\Area::class,
+        \Sales\Domain\Model\CustomerJourney::class,
     
 ]);
 

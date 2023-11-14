@@ -66,6 +66,15 @@ class Mutation extends ObjectType
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->registerNewCustomer($app->user, new GraphqlInputRequest($args))
             ],
+            'updateJourney' => [
+                'type' => TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class),
+                'args' => [
+                    'id' => Type::id(),
+                    'customerJourneyId' => Type::id(),
+                ],
+                'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
+                        ->updateJourney($app->user, new GraphqlInputRequest($args))
+            ],
             'assignedCustomer' => [
                 'type' => TypeRegistry::type(AssignedCustomerMutation::class),
                 'args' => ['assignedCustomerId' => Type::nonNull(Type::id())],
