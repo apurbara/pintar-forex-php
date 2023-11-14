@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SalesBC;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Resources\Event\Dispatcher;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
@@ -16,6 +17,7 @@ use Sales\Domain\Task\AssignedCustomer\RegisterNewCustomerTask;
 use Sales\Domain\Task\AssignedCustomer\UpdateJourney;
 use Sales\Domain\Task\AssignedCustomer\ViewAssignedCustomerDetail;
 use Sales\Domain\Task\AssignedCustomer\ViewAssignedCustomerList;
+use Sales\Domain\Task\AssignedCustomer\ViewTotalCustomerAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 
 class AssignedCustomerController extends Controller
@@ -76,6 +78,18 @@ class AssignedCustomerController extends Controller
         $payload = new ViewDetailPayload($assignedCustomerId);
         $user->executeSalesTask($task, $payload);
 
+        return $payload->result;
+    }
+    
+    public function viewTotalCustomerAssignment(SalesRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewTotalCustomerAssignment($this->repository());
+        $searchSchema =[
+            'filters' => $input->get('filters'),
+        ];
+        $payload = new ViewSummaryPayload($searchSchema);
+        
+        $user->executeSalesTask($task, $payload);
         return $payload->result;
     }
 }

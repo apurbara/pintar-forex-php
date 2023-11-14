@@ -5,9 +5,9 @@ namespace Resources\Domain\TaskPayload;
 readonly class ViewPayload
 {
 
-    public array $result;
+    public mixed $result;
 
-    public function setResult(array $result)
+    public function setResult(mixed $result)
     {
         $this->result = $result;
     }

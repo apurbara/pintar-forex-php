@@ -32,7 +32,7 @@ class AssignedCustomerTest extends TestBase
     public function test_closeAssignment_setStatusClosed()
     {
         $this->closeAssignment();
-        $this->assertEquals(CustomerAssignmentStatus::CLOSED, $this->assignedCustomer->status);
+        $this->assertEquals(CustomerAssignmentStatus::GOOD_FUND, $this->assignedCustomer->status);
     }
     public function test_closeAssignment_alreadyConcluded_forbidden()
     {

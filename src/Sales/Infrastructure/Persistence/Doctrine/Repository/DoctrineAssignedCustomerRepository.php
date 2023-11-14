@@ -36,4 +36,19 @@ class DoctrineAssignedCustomerRepository extends DoctrineEntityRepository implem
     {
         return $this->findOneByIdOrDie($id);
     }
+
+    public function totalCustomerAssignment(string $salesId, array $searchSchema): int
+    {
+        $qb = $this->dbalQueryBuilder();
+        $qb->select('COUNT(AssignedCustomer.id)')
+                ->from('AssignedCustomer')
+                ->andWhere('AssignedCustomer.Sales_id = :salesId')
+                ->setParameter('salesId', $salesId);
+        
+        foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
+            Filter::fromSchema($filterSchema)->applyToQuery($qb);
+        }
+        
+        return $qb->executeQuery()->fetchOne();
+    }
 }

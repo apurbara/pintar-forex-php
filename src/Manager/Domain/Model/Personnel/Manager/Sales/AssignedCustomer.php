@@ -37,7 +37,7 @@ class AssignedCustomer
         if ($this->status !== CustomerAssignmentStatus::ACTIVE) {
             throw RegularException::forbidden('assignment already concluded');
         }
-        $this->status = CustomerAssignmentStatus::CLOSED;
+        $this->status = CustomerAssignmentStatus::GOOD_FUND;
     }
 
     //

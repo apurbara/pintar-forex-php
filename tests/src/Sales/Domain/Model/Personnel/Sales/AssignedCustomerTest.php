@@ -141,7 +141,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitSalesActivitySchedule_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::GOOD_FUND;
         $this->assertRegularExceptionThrowed(fn() => $this->submitSalesActivitySchedule(), 'Forbidden', 'inactive customer assignment');
     }
     
@@ -159,7 +159,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitVerificationReport_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::GOOD_FUND;
         $this->assertRegularExceptionThrowed(fn() => $this->submitVerificationReport(), 'Forbidden', 'inactive customer assignment');
     }
     
@@ -174,7 +174,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitClosingRequest_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::GOOD_FUND;
         $this->assertRegularExceptionThrowed(fn() => $this->submitClosingRequest(), 'Forbidden', 'inactive customer assignment');
     }
     public function test_submitClosingRequest_hasUnconcludedClosingRequest()
@@ -203,7 +203,7 @@ class AssignedCustomerTest extends TestBase
     }
     public function test_submitRecycleRequest_inactiveAssignment_forbidden()
     {
-        $this->assignedCustomer->status = CustomerAssignmentStatus::CLOSED;
+        $this->assignedCustomer->status = CustomerAssignmentStatus::GOOD_FUND;
         $this->assertRegularExceptionThrowed(fn() => $this->submitRecycleRequest(), 'Forbidden', 'inactive customer assignment');
     }
     public function test_submitRecycleRequest_hasUnconcludedClosingRequest()

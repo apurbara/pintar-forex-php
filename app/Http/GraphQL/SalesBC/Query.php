@@ -20,7 +20,7 @@ use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
 
 class Query extends ObjectType
@@ -72,6 +72,12 @@ class Query extends ObjectType
                 'args' => ['assignedCustomerId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->viewDetail($app->user, $args['assignedCustomerId'])
+            ],
+            'totalCustomerAssignment' => [
+                'type' => Type::int(),
+                'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),],
+                'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
+                        ->viewTotalCustomerAssignment($app->user, new GraphqlInputRequest($args))
             ],
         ];
     }
