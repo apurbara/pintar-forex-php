@@ -20,7 +20,7 @@ class ViewTotalCustomerAssignment implements SalesTask
      */
     public function executeBySales(Sales $sales, $payload): void
     {
-        $result = $this->assignedCustomerRepository->totalCustomerAssignment($sales->getId(), $payload->searchSchema);
+        $result = $this->assignedCustomerRepository->totalCustomerAssignmentBelongsToSales($sales->getId(), $payload->searchSchema);
         $payload->setResult($result);
     }
 }

@@ -17,5 +17,5 @@ interface AssignedCustomerRepository
 
     public function assignedCustomerToSalesDetail(string $salesId, string $id): array;
     
-    public function totalCustomerAssignment(string $salesId, array $searchSchema): int;
+    public function totalCustomerAssignmentBelongsToSales(string $salesId, array $searchSchema): int;
 }

@@ -90,6 +90,11 @@ class SalesActivityScheduleTest extends TestBase
     {
         $this->assertInstanceOf(SalesActivityReport::class, $this->submitReport());
     }
+    public function test_submitReport_setStatusCompleted()
+    {
+        $this->submitReport();
+        $this->assertSame(SalesActivityScheduleStatus::COMPLETED, $this->salesActivitySchedule->status);
+    }
     public function test_submitReport_nonScheduledStatus_forbidden()
     {
         $this->salesActivitySchedule->status = SalesActivityScheduleStatus::COMPLETED;

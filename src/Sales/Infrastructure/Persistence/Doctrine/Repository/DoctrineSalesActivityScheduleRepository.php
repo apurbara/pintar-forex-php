@@ -47,4 +47,20 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
                 ->addFilter(new Filter($salesId, 'AssignedCustomer.Sales_id'));
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
+
+    public function totalSalesActivityScheduleBelongsToSales(string $salesId, array $searchSchema): int
+    {
+        $qb = $this->dbalQueryBuilder();
+        $qb->select('COUNT(SalesActivitySchedule.id)')
+                ->from('SalesActivitySchedule')
+                ->innerJoin('SalesActivitySchedule', "AssignedCustomer", "AssignedCustomer", "SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id")
+                ->andWhere('AssignedCustomer.Sales_id = :salesId')
+                ->setParameter('salesId', $salesId);
+        
+        foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
+            Filter::fromSchema($filterSchema)->applyToQuery($qb);
+        }
+        
+        return $qb->executeQuery()->fetchOne();
+    }
 }

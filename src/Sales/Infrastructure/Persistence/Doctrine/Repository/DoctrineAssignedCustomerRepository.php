@@ -37,7 +37,7 @@ class DoctrineAssignedCustomerRepository extends DoctrineEntityRepository implem
         return $this->findOneByIdOrDie($id);
     }
 
-    public function totalCustomerAssignment(string $salesId, array $searchSchema): int
+    public function totalCustomerAssignmentBelongsToSales(string $salesId, array $searchSchema): int
     {
         $qb = $this->dbalQueryBuilder();
         $qb->select('COUNT(AssignedCustomer.id)')

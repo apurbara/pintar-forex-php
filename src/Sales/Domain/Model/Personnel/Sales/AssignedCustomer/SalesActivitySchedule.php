@@ -72,6 +72,7 @@ class SalesActivitySchedule
         if ($this->status !== SalesActivityScheduleStatus::SCHEDULED) {
             throw RegularException::forbidden('schedule concluded');
         }
+        $this->status = SalesActivityScheduleStatus::COMPLETED;
         return new SalesActivityReport($this, $salesActivityReportData);
     }
 }

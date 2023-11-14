@@ -5,12 +5,14 @@ namespace App\Http\Controllers\SalesBC;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\SalesActivity;
 use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
+use Sales\Domain\Task\SalesActivitySchedule\ViewTotalSalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 
@@ -52,6 +54,18 @@ class SalesActivityScheduleController extends Controller
     {
         $task = new ViewSalesActivityScheduleDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);
+        $user->executeSalesTask($task, $payload);
+        
+        return $payload->result;
+    }
+    
+    public function viewTotalSchedule(SalesRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewTotalSalesActivitySchedule($this->repository());
+        $searchSchema = [
+            'filters' => $input->get('filters'),
+        ];
+        $payload = new ViewSummaryPayload($searchSchema);
         $user->executeSalesTask($task, $payload);
         
         return $payload->result;

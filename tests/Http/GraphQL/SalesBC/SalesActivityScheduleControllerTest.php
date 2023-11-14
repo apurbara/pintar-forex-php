@@ -7,6 +7,7 @@ use DateTime;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
+use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use Tests\Http\Record\EntityRecord;
 
 class SalesActivityScheduleControllerTest extends SalesBCTestCase
@@ -39,6 +40,7 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->customer = new EntityRecord(Customer::class, 'main');
         $this->customerOne = new EntityRecord(Customer::class, 1);
         $this->customerTwo = new EntityRecord(Customer::class, 2);
+        $this->customerThree = new EntityRecord(Customer::class, 3);
         
         $this->assignedCustomer = new EntityRecord(AssignedCustomer::class, 'main');
         $this->assignedCustomer->columns['Customer_id'] = $this->customer->columns['id'];
@@ -49,13 +51,25 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->assignedCustomerTwo = new EntityRecord(AssignedCustomer::class, 2);
         $this->assignedCustomerTwo->columns['Customer_id'] = $this->customerTwo->columns['id'];
         $this->assignedCustomerTwo->columns['Sales_id'] = $this->sales->columns['id'];
+        $this->assignedCustomerThree = new EntityRecord(AssignedCustomer::class, 3);
+        $this->assignedCustomerThree->columns['Customer_id'] = $this->customerThree->columns['id'];
+        $this->assignedCustomerThree->columns['Sales_id'] = $this->sales->columns['id'];
         
         $this->salesActivityScheduleOne = new EntityRecord(SalesActivitySchedule::class, 1);
         $this->salesActivityScheduleOne->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
         $this->salesActivityScheduleOne->columns['AssignedCustomer_id'] = $this->assignedCustomerOne->columns['id'];
+        $this->salesActivityScheduleOne->columns['startTime'] = (new \DateTime('+48 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleOne->columns['endTime'] = (new \DateTime('+49 hours'))->format('Y-m-d H') . ":00:00";
         $this->salesActivityScheduleTwo = new EntityRecord(SalesActivitySchedule::class, 2);
         $this->salesActivityScheduleTwo->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
         $this->salesActivityScheduleTwo->columns['AssignedCustomer_id'] = $this->assignedCustomerTwo->columns['id'];
+        $this->salesActivityScheduleTwo->columns['startTime'] = (new \DateTime('-49 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleTwo->columns['endTime'] = (new \DateTime('-48 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleThree = new EntityRecord(SalesActivitySchedule::class, 3);
+        $this->salesActivityScheduleThree->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
+        $this->salesActivityScheduleThree->columns['AssignedCustomer_id'] = $this->assignedCustomerThree->columns['id'];
+        $this->salesActivityScheduleThree->columns['startTime'] = (new \DateTime('+72 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleThree->columns['endTime'] = (new \DateTime('+73 hours'))->format('Y-m-d H') . ":00:00";
         
         $this->submitScheduleRequest = [
             'salesActivityId' => $this->salesActivity->columns['id'],
@@ -240,4 +254,57 @@ _QUERY;
             ],
         ]);
     }
+    
+    //
+    protected function viewTotal()
+    {
+        $this->prepareSalesDependency();
+        
+        $this->salesActivity->insert($this->connection);
+        
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
+        
+        $this->assignedCustomerOne->insert($this->connection);
+        $this->assignedCustomerTwo->insert($this->connection);
+        $this->assignedCustomerThree->insert($this->connection);
+        
+        $this->salesActivityScheduleOne->insert($this->connection);
+        $this->salesActivityScheduleTwo->insert($this->connection);
+        $this->salesActivityScheduleThree->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query ( $salesId: ID!, $totalUpcomingFilters: [FilterInput], $totalPastScheduleWithoutReportFilters: [FilterInput]) {
+    sales ( salesId: $salesId ) {
+        totalUpcomingSchedule: totalSalesActivitySchedule ( filters: $totalUpcomingFilters),
+        totalPastScheduleWithoutReport: totalSalesActivitySchedule ( filters: $totalPastScheduleWithoutReportFilters)
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'salesId' => $this->sales->columns['id'],
+            'totalPastScheduleWithoutReportFilters' => [
+                ['column' => 'SalesActivitySchedule.endTime', 'value' => (new \DateTime())->format('Y-m-d H') . ":00:00", 'comparisonType' => 'LTE'],
+                ['column' => 'SalesActivitySchedule.status', 'value' => SalesActivityScheduleStatus::SCHEDULED->value],
+            ],
+            'totalUpcomingFilters' => [
+                ['column' => 'SalesActivitySchedule.startTime', 'value' => (new \DateTime())->format('Y-m-d H') . ":00:00", 'comparisonType' => 'GTE'],
+                ['column' => 'SalesActivitySchedule.status', 'value' => SalesActivityScheduleStatus::SCHEDULED->value],
+            ],
+            
+        ]; 
+        $this->postGraphqlRequest($this->personnel->token);
+    }
+    public function test_viewTotal_200()
+    {
+        $this->viewTotal();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'totalUpcomingSchedule' => 2,
+            'totalPastScheduleWithoutReport' => 1,
+        ]);
+    }
+    
 }

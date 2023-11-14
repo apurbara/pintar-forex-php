@@ -36,21 +36,21 @@ class Query extends ObjectType
     protected function fieldDefinition(): array
     {
         $type = new ObjectType([
-            'name' => 'salesQuery', 
+            'name' => 'salesQuery',
             'fields' => fn() => [
-                ...$this->assignedCustomerQuery(),
-                ...$this->salesActivityScheduleQuery(),
-                ...$this->salesActivityReportQuery(),
-                ...$this->verificationReportQuery(),
-                ...$this->closingRequestQuery(),
-                ...$this->recycleRequestQuery(),
+        ...$this->assignedCustomerQuery(),
+        ...$this->salesActivityScheduleQuery(),
+        ...$this->salesActivityReportQuery(),
+        ...$this->verificationReportQuery(),
+        ...$this->closingRequestQuery(),
+        ...$this->recycleRequestQuery(),
             ],
         ]);
         return [
             'sales' => [
                 'type' => $type,
                 'args' => ['salesId' => Type::nonNull(Type::id())],
-                'resolve' => function($root, $args, AppContext $app) use($type) {
+                'resolve' => function ($root, $args, AppContext $app) use ($type) {
                     $app->user = $app->user->authorizedAsSales($args['salesId']);
                     return $type;
                 }
@@ -96,6 +96,12 @@ class Query extends ObjectType
                 'args' => ['salesActivityScheduleId' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewDetail($app->user, $args['salesActivityScheduleId'])
+            ],
+            'totalSalesActivitySchedule' => [
+                'type' => Type::int(),
+                'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),],
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
+                        ->viewTotalSchedule($app->user, new GraphqlInputRequest($args))
             ],
         ];
     }
