@@ -7,11 +7,15 @@ use App\Http\Controllers\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Resources\Event\Dispatcher;
+use Sales\Application\Listener\AllocateInitialSalesActivityScheduleListener;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\CustomerJourney;
+use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomerData;
+use Sales\Domain\Model\SalesActivity;
 use Sales\Domain\Task\AssignedCustomer\RegisterNewCustomerPayload;
 use Sales\Domain\Task\AssignedCustomer\RegisterNewCustomerTask;
 use Sales\Domain\Task\AssignedCustomer\UpdateJourney;
@@ -19,6 +23,7 @@ use Sales\Domain\Task\AssignedCustomer\ViewAssignedCustomerDetail;
 use Sales\Domain\Task\AssignedCustomer\ViewAssignedCustomerList;
 use Sales\Domain\Task\AssignedCustomer\ViewTotalCustomerAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
+use SharedContext\Domain\Event\CustomerAssignedEvent;
 
 class AssignedCustomerController extends Controller
 {
@@ -37,7 +42,17 @@ class AssignedCustomerController extends Controller
         $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
         $dispatcher = new Dispatcher();
 
-        $task = new RegisterNewCustomerTask($repository, $areaRepository, $customerRepository, $customerJourneyRepository, $dispatcher);
+        $salesRepository = $this->em->getRepository(Sales::class);
+        $salesActivityScheduleRepository = $this->em->getRepository(SalesActivitySchedule::class);
+        $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
+        $listener = new AllocateInitialSalesActivityScheduleListener
+                ($salesRepository, $salesActivityScheduleRepository, $repository, $salesActivityRepository,
+                $user->getPersonnelId(), $user->getSalesId());
+        
+        $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(), $listener);
+
+        $task = new RegisterNewCustomerTask($repository, $areaRepository, $customerRepository,
+                $customerJourneyRepository, $dispatcher);
 
         $areaId = $input->get('areaId');
         $name = $input->get('name');
@@ -46,7 +61,13 @@ class AssignedCustomerController extends Controller
         $customerData = new Area\CustomerData($name, $email, $phone);
         $payload = new RegisterNewCustomerPayload($areaId, $customerData);
         $user->executeSalesTask($task, $payload);
-
+        
+        try {
+            $dispatcher->publishTransactional();
+        } catch (Exception $ex) {
+            
+        }
+        
         return $repository->fetchOneByIdOrDie($payload->id);
     }
 
@@ -59,7 +80,7 @@ class AssignedCustomerController extends Controller
                 ->setId($input->get('id'))
                 ->setCustomerJourneyId($input->get('customerJourneyId'));
         $user->executeSalesTask($task, $payload);
-        
+
         return $this->repository()->fetchOneById($payload->id);
     }
 
@@ -80,15 +101,15 @@ class AssignedCustomerController extends Controller
 
         return $payload->result;
     }
-    
+
     public function viewTotalCustomerAssignment(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewTotalCustomerAssignment($this->repository());
-        $searchSchema =[
+        $searchSchema = [
             'filters' => $input->get('filters'),
         ];
         $payload = new ViewSummaryPayload($searchSchema);
-        
+
         $user->executeSalesTask($task, $payload);
         return $payload->result;
     }

@@ -33,7 +33,7 @@ class ExecuteSalesTaskTest extends TestBase
                 ->method('aSalesBelongToPersonnel')
                 ->with($this->personnelId, $this->salesId)
                 ->willReturn($this->sales);
-        $this->service->excute($this->personnelId, $this->salesId, $this->task, $this->payload);
+        $this->service->execute($this->personnelId, $this->salesId, $this->task, $this->payload);
     }
 
     public function test_execute_salesExecuteTask()

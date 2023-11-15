@@ -2,31 +2,44 @@
 
 namespace Sales\Domain\Model\Personnel;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\Personnel;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesTask;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use Tests\TestBase;
 
 class SalesTest extends TestBase
 {
     protected $sales;
+    protected $assignedCustomer;
     //
     protected $task, $payload = 'string represent task payload';
     //
     protected $area;
     protected $customerJourney;
+    //
+    protected $schedulerService;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->sales = new TestableSales();
+        
+        $this->assignedCustomer = $this->buildMockOfClass(AssignedCustomer::class);
+        $this->sales->assignedCustomers = new ArrayCollection();
+        $this->sales->assignedCustomers->add($this->assignedCustomer);
         //
         $this->task = $this->buildMockOfInterface(SalesTask::class);
         //
         $this->area = $this->buildMockOfClass(Area::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        //
+        $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
     }
     
     //
@@ -65,6 +78,31 @@ class SalesTest extends TestBase
         $this->registerNewCustomer();
         $this->markAsSuccess();
     }
+    
+    //
+    protected function registerAllUpcomingScheduleToScheduler()
+    {
+        $this->assignedCustomer->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->sales->registerAllUpcomingScheduleToScheduler($this->schedulerService);
+    }
+    public function test_registerAllUpcomingScheduleToScheduler_addAssignedCustomerUpcomingScheduleToScheduler()
+    {
+        $this->assignedCustomer->expects($this->once())
+                ->method('addUpcomingScheduleToSchedulerService')
+                ->with($this->schedulerService);
+        $this->registerAllUpcomingScheduleToScheduler();
+    }
+    public function test_registerAllUpcomingScheduleToScheduler_containInactiveCustomerAssignment_excludeFromScheduler()
+    {
+        $this->assignedCustomer->expects($this->once())
+                ->method('getStatus')
+                ->willReturn(CustomerAssignmentStatus::RECYCLED);
+        $this->assignedCustomer->expects($this->never())
+                ->method('addUpcomingScheduleToSchedulerService');
+        $this->registerAllUpcomingScheduleToScheduler();
+    }
 }
 
 class TestableSales extends Sales
@@ -72,6 +110,7 @@ class TestableSales extends Sales
     public Personnel $personnel;
     public string $id = 'id';
     public bool $disabled = false;
+    public Collection $assignedCustomers;
     
     function __construct()
     {

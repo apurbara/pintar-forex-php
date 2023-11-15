@@ -17,6 +17,16 @@ class HourlyTimeInterval extends AbstractTimeInterval
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected ?DateTimeImmutable $endTime;
 
+    public function getStartTime(): ?DateTimeImmutable
+    {
+        return $this->startTime;
+    }
+
+    public function getEndTime(): ?DateTimeImmutable
+    {
+        return $this->endTime;
+    }
+
     public function __construct(HourlyTimeIntervalData $data)
     {
         $startTime = new \DateTimeImmutable($data->startTime);

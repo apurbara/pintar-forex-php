@@ -17,6 +17,7 @@ use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\SalesActivity;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use SharedContext\Domain\ValueObject\HourlyTimeInterval;
@@ -26,7 +27,7 @@ class SalesActivitySchedule
 {
 
     #[FetchableEntity(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
-    #[ManyToOne(targetEntity: AssignedCustomer::class)]
+    #[ManyToOne(targetEntity: AssignedCustomer::class, inversedBy: "salesActivitySchedules")]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;
 
@@ -47,6 +48,16 @@ class SalesActivitySchedule
     #[Column(type: "string", enumType: SalesActivityScheduleStatus::class)]
     protected SalesActivityScheduleStatus $status;
 
+    public function getStatus(): SalesActivityScheduleStatus
+    {
+        return $this->status;
+    }
+
+    public function getSchedule(): HourlyTimeInterval
+    {
+        return $this->schedule;
+    }
+
     public function __construct(
             AssignedCustomer $assignedCustomer, SalesActivity $salesActivity, SalesActivityScheduleData $data)
     {
@@ -58,6 +69,11 @@ class SalesActivitySchedule
         $this->createdTime = new \DateTimeImmutable();
         $this->schedule = new HourlyTimeInterval($data->hourlyTimeIntervalData);
         $this->status = SalesActivityScheduleStatus::SCHEDULED;
+    }
+
+    public function getActivityDuration(): int
+    {
+        return $this->salesActivity->getDuration();
     }
 
     //
@@ -74,5 +90,13 @@ class SalesActivitySchedule
         }
         $this->status = SalesActivityScheduleStatus::COMPLETED;
         return new SalesActivityReport($this, $salesActivityReportData);
+    }
+
+    //
+    public function includeInSchedulerService(SalesActivitySchedulerService $service): void
+    {
+        if ($this->schedule->getStartTime() > new DateTimeImmutable()) {
+            $service->add($this->schedule->getStartTime(), $this);
+        }
     }
 }

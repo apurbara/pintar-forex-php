@@ -82,7 +82,7 @@ class SalesTaskTestBase extends TestBase
     }
     
     protected MockObject $salesActivityRepository;
-    protected MockObject $salesActivity;
+    protected ?MockObject $salesActivity;
     protected string $salesActivityId = 'salesActivityId';
     protected function prepareSalesActivityDependency()
     {

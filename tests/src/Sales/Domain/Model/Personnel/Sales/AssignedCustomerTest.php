@@ -16,8 +16,11 @@ use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequestData;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
+use SharedContext\Domain\ValueObject\HourlyTimeInterval;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 
@@ -27,6 +30,7 @@ class AssignedCustomerTest extends TestBase
     protected $customer;
     protected $customerJourney;
     protected $assignedCustomer;
+    protected $salesActivitySchedule, $schedule;
     //
     protected $id = 'newId', $customerData;
     //
@@ -34,6 +38,8 @@ class AssignedCustomerTest extends TestBase
     protected $customerVerification, $verificationReportData;
     protected $closingRequest, $closingRequestData;
     protected $recycleRequest, $recycleRequestData;
+    //
+    protected $schedulerService;
 
     protected function setUp(): void
     {
@@ -44,6 +50,12 @@ class AssignedCustomerTest extends TestBase
         
         $this->assignedCustomer = new TestableAssignedCustomer($this->sales, $this->customer, $this->customerJourney, 'id');
         $this->assignedCustomer->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        
+        $this->salesActivitySchedule = $this->buildMockOfClass(SalesActivitySchedule::class);
+        $this->schedule = $this->buildMockOfClass(HourlyTimeInterval::class);
+        
+        $this->assignedCustomer->salesActivitySchedules = new ArrayCollection();
+        $this->assignedCustomer->salesActivitySchedules->add($this->salesActivitySchedule);
         
         //
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
@@ -59,6 +71,8 @@ class AssignedCustomerTest extends TestBase
         $this->assignedCustomer->recycleRequests = new ArrayCollection();
         $this->assignedCustomer->recycleRequests->add($this->recycleRequest);
         $this->recycleRequestData = (new RecycleRequestData('new note'))->setId('recycleRequestId');
+        //
+        $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
     }
     
     //
@@ -220,6 +234,50 @@ class AssignedCustomerTest extends TestBase
                 ->willReturn(true);
         $this->assertRegularExceptionThrowed(fn() => $this->submitRecycleRequest(), 'Forbidden', 'there area still ongoing closing/recycle request on this assignment');
     }
+    
+    //
+    protected function addUpcomingScheduleToSchedulerService()
+    {
+        $this->schedule->expects($this->any())
+                ->method('getStartTime')
+                ->willReturn(new DateTimeImmutable('tomorrow'));
+        //
+        $this->salesActivitySchedule->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(SalesActivityScheduleStatus::SCHEDULED);
+        $this->salesActivitySchedule->expects($this->any())
+                ->method('getSchedule')
+                ->willReturn($this->schedule);
+        $this->assignedCustomer->addUpcomingScheduleToSchedulerService($this->schedulerService);
+    }
+    public function test_addUpcomingScheduleToSchedulerService_includeScheduleInService()
+    {
+        $this->salesActivitySchedule->expects($this->once())
+                ->method('includeInSchedulerService')
+                ->with($this->schedulerService);
+        $this->addUpcomingScheduleToSchedulerService();
+    }
+    public function test_addUpcomingScheduleToSchedulerService_excludeNonScheduledSchedule()
+    {
+        $this->salesActivitySchedule->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(SalesActivityScheduleStatus::COMPLETED);
+        $this->salesActivitySchedule->expects($this->never())
+                ->method('includeInSchedulerService')
+                ->with($this->schedulerService);
+        $this->addUpcomingScheduleToSchedulerService();
+    }
+    //unfortunately embedded criteria untestable
+    public function test_addUpcomingScheduleToSchedulerService_excludeNonUpcomingSchedule()
+    {
+        $this->schedule->expects($this->once())
+                ->method('getStartTime')
+                ->willReturn(new DateTimeImmutable('yesterday'));
+        $this->salesActivitySchedule->expects($this->never())
+                ->method('includeInSchedulerService')
+                ->with($this->schedulerService);
+        $this->addUpcomingScheduleToSchedulerService();
+    }
 }
 
 class TestableAssignedCustomer extends AssignedCustomer
@@ -233,4 +291,5 @@ class TestableAssignedCustomer extends AssignedCustomer
     public Collection $closingRequests;
     public Collection $recycleRequests;
     public $recordedEvents = [];
+    public Collection $salesActivitySchedules;
 }

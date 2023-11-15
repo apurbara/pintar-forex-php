@@ -20,6 +20,16 @@ class SalesRole extends PersonnelRole implements SalesRoleInterface
     {
         $salesRepository = $this->em->getRepository(Sales::class);
         (new ExecuteSalesTask($salesRepository))
-                ->excute($this->personnelId, $this->salesId, $task, $payload);
+                ->execute($this->personnelId, $this->salesId, $task, $payload);
+    }
+
+    public function getPersonnelId(): string
+    {
+        return $this->personnelId;
+    }
+
+    public function getSalesId(): string
+    {
+        return $this->salesId;
     }
 }

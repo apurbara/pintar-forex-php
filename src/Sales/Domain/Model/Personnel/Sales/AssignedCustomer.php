@@ -3,7 +3,9 @@
 namespace Sales\Domain\Model\Personnel\Sales;
 
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
@@ -25,8 +27,10 @@ use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequestData;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
 use Sales\Domain\Model\SalesActivity;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 
 #[Entity(repositoryClass: DoctrineAssignedCustomerRepository::class)]
@@ -35,7 +39,7 @@ class AssignedCustomer implements ContainEventsInterface
 
     use ContainEventsTrait;
 
-    #[ManyToOne(targetEntity: Sales::class)]
+    #[ManyToOne(targetEntity: Sales::class, inversedBy: "assignedCustomers", fetch: "LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
@@ -61,6 +65,14 @@ class AssignedCustomer implements ContainEventsInterface
     
     #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $recycleRequests;
+    
+    #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "assignedCustomer", fetch: 'EXTRA_LAZY')]
+    protected Collection $salesActivitySchedules;
+    
+    public function getStatus(): CustomerAssignmentStatus
+    {
+        return $this->status;
+    }
 
     public function __construct(Sales $sales, Customer $customer, ?CustomerJourney $customerJourney, string $id)
     {
@@ -72,6 +84,8 @@ class AssignedCustomer implements ContainEventsInterface
         $this->id = $id;
         $this->status = CustomerAssignmentStatus::ACTIVE;
         $this->createdTime = new DateTimeImmutable();
+        
+        $this->salesActivitySchedules = new ArrayCollection();
         
 
         $this->recordEvent(new CustomerAssignedEvent($this->id));
@@ -140,4 +154,16 @@ class AssignedCustomer implements ContainEventsInterface
         $this->assertNoOngoingRequest();
         return new RecycleRequest($this, $recycleRequestData);
     }
+    
+    //
+    public function addUpcomingScheduleToSchedulerService(SalesActivitySchedulerService $service): void
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->gte('schedule.startTime',  (new DateTimeImmutable())->format('Y-m-d H') . ":00:00"))
+                ->andWhere(Criteria::expr()->gte('status', SalesActivityScheduleStatus::SCHEDULED));
+        foreach ($this->salesActivitySchedules->matching($criteria)->getIterator() as $schedule) {
+            $schedule->includeInSchedulerService($service);
+        }
+    }
+    
 }

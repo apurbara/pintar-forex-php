@@ -8,4 +8,6 @@ interface SalesActivityRepository
 {
 
     public function ofId(string $id): SalesActivity;
+    
+    public function anInitialSalesActivity(): ?SalesActivity;
 }

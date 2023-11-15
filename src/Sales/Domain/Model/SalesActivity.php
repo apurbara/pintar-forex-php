@@ -24,6 +24,11 @@ class SalesActivity
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $initial;
 
+    public function getDuration(): int
+    {
+        return $this->duration;
+    }
+
     protected function __construct()
     {
         

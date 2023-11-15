@@ -13,4 +13,12 @@ class DoctrineSalesActivityRepository extends DoctrineEntityRepository implement
     {
         return $this->findOneByIdOrDie($id);
     }
+
+    public function anInitialSalesActivity(): ?SalesActivity
+    {
+        return $this->findOneBy([
+            'initial' => true,
+            'disabled' => false,
+        ]);
+    }
 }
