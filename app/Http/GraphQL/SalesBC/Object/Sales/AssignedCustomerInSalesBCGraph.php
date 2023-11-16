@@ -32,7 +32,7 @@ class AssignedCustomerInSalesBCGraph extends GraphqlObjectType
             ],
             'customerJourney' => [
                 'type' => TypeRegistry::objectType(CustomerJourneyGraph::class),
-                'resolve' => fn ($root) => isset($root['CustomerJourney_id']) ?? $this->buildDoctrineRepository(CustomerJourney::class)->fetchOneById($root['CustomerJourney_id'])
+                'resolve' => fn ($root) => isset($root['CustomerJourney_id']) ? $this->buildDoctrineRepository(CustomerJourney::class)->fetchOneById($root['CustomerJourney_id']) : null
             ],
             'schedules' => [
                 'type' => new Pagination(TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class)),
