@@ -2,6 +2,7 @@
 
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
@@ -51,4 +52,11 @@ class DoctrineAssignedCustomerRepository extends DoctrineEntityRepository implem
         
         return $qb->executeQuery()->fetchOne();
     }
+
+    protected function createCoreQueryBuilder(): QueryBuilder
+    {
+        return parent::createCoreQueryBuilder()
+            ->innerJoin('AssignedCustomer', 'Customer', 'Customer', 'AssignedCustomer.Customer_id = Customer.id');
+    }
+
 }
