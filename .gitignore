@@ -6,6 +6,7 @@
 /storage/*.key
 /vendor
 /lib
+cli-config.php
 .env
 .env.backup
 .env.production
@@ -19,4 +20,3 @@ yarn-error.log
 /.idea
 /.vscode
 /nbproject/private/
-cli-config.php
