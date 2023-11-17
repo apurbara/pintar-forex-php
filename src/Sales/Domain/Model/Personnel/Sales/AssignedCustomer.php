@@ -159,7 +159,7 @@ class AssignedCustomer implements ContainEventsInterface
     public function addUpcomingScheduleToSchedulerService(SalesActivitySchedulerService $service): void
     {
         $criteria = Criteria::create()
-                ->andWhere(Criteria::expr()->gte('schedule.startTime',  (new DateTimeImmutable())->format('Y-m-d H') . ":00:00"))
+                ->andWhere(Criteria::expr()->gte('schedule.startTime',  new DateTimeImmutable()))
                 ->andWhere(Criteria::expr()->gte('status', SalesActivityScheduleStatus::SCHEDULED));
         foreach ($this->salesActivitySchedules->matching($criteria)->getIterator() as $schedule) {
             $schedule->includeInSchedulerService($service);
