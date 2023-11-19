@@ -2,7 +2,7 @@
 
 namespace App\Http\GraphQL\ManagerBC\Object\Manager\Sales;
 
-use App\Http\GraphQL\ManagerBC\Object\Manager\SalesInMangerBCGraph;
+use App\Http\GraphQL\ManagerBC\Object\Manager\SalesInManagerBCGraph;
 use Company\Domain\Model\Personnel\Manager\Sales;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -17,7 +17,7 @@ class AssignedCustomerInManagerBCGraph extends GraphqlObjectType
         return [
             ...parent::fieldDefinition(),
             'sales' => [
-                'type' => TypeRegistry::objectType(SalesInMangerBCGraph::class),
+                'type' => TypeRegistry::objectType(SalesInManagerBCGraph::class),
                 'resolve' => fn($root) => $this->buildDoctrineRepository(Sales::class)->fetchOneById($root['Sales_id']),
             ],
             'customer' => [

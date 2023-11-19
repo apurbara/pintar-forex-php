@@ -2,6 +2,7 @@
 
 namespace Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
@@ -23,9 +24,18 @@ class ClosingRequest
 
     #[Id, Column(type: "guid")]
     protected string $id;
+    
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected DateTimeImmutable $createdTime;
 
     #[Column(type: "string", enumType: ManagementApprovalStatus::class)]
     protected ManagementApprovalStatus $status;
+    
+    #[Column(type: "integer", nullable: false)]
+    protected int $transactionValue;
+    
+    #[Column(type: "text", nullable: true)]
+    protected ?string $note;
 
     protected function __construct()
     {

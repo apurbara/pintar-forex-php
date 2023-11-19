@@ -8,13 +8,13 @@ use Company\Domain\Model\Personnel\Manager\Sales;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
-class SalesInMangerBCGraph extends GraphqlObjectType
+class SalesInManagerBCGraph extends GraphqlObjectType
 {
 
     protected function fieldDefinition(): array
     {
         return [
-            parent::fieldDefinition(),
+            ...parent::fieldDefinition(),
             'personnel' => [
                 'type' => TypeRegistry::objectType(PersonnelGraph::class),
                 'resolve' => fn($root) => $this->buildDoctrineRepository(Personnel::class)->fetchOneById($root['Personnel_id'])

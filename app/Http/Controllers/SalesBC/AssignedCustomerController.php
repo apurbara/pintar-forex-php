@@ -62,11 +62,11 @@ class AssignedCustomerController extends Controller
         $payload = new RegisterNewCustomerPayload($areaId, $customerData);
         $user->executeSalesTask($task, $payload);
         
-        try {
+//        try {
             $dispatcher->publishTransactional();
-        } catch (Exception $ex) {
-            
-        }
+//        } catch (Exception $ex) {
+//            
+//        }
         
         return $repository->fetchOneByIdOrDie($payload->id);
     }

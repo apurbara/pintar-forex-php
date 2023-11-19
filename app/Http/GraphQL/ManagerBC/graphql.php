@@ -13,33 +13,37 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
-$managerQuery = new ObjectType([
-    'name' => 'managerQuery',
+$query = new ObjectType([
+    'name' => 'Query',
     'fields' => fn() => [
-        'type' => TypeRegistry::type(Query::class),
-        'args' => ['managerId' => Type::nonNull(Type::id())],
-        'resolve' => function($root, $args, AppContext $appContext){
-            $appContext->user->authorizeAsManager($args['managerId']);
-            return TypeRegistry::type(Query::class);
-        }
+        'manager' => [
+            'type' => TypeRegistry::type(ManagerQuery::class),
+            'args' => ['managerId' => Type::nonNull(Type::id())],
+            'resolve' => function($root, $args, AppContext $appContext){
+                $appContext->user = $appContext->user->authorizeAsManager($args['managerId']);
+                return TypeRegistry::type(ManagerQuery::class);
+            }
+        ],
     ],
 ]);
 
-$managerMutation = new ObjectType([
-    'name' => 'managerMutation',
+$mutation = new ObjectType([
+    'name' => 'Mutation',
     'fields' => fn() => [
-        'type' => TypeRegistry::type(Mutation::class),
-        'args' => ['managerId' => Type::nonNull(Type::id())],
-        'resolve' => function($root, $args, AppContext $appContext){
-            $appContext->user->authorizeAsManager($args['managerId']);
-            return TypeRegistry::type(Mutation::class);
-        }
+        'manager' => [
+            'type' => TypeRegistry::type(ManagerMutation::class),
+            'args' => ['managerId' => Type::nonNull(Type::id())],
+            'resolve' => function($root, $args, AppContext $appContext){
+                $appContext->user = $appContext->user->authorizeAsManager($args['managerId']);
+                return TypeRegistry::type(ManagerMutation::class);
+            }
+        ],
     ],
 ]);
     
 $schema = new Schema([
-    'query' => TypeRegistry::type($managerQuery),
-    'mutation' => TypeRegistry::type($managerMutation),
+    'query' => $query,
+    'mutation' => $mutation,
     'typeLoader' => static fn($name) => TypeRegistry::type($name),
 ]);
 

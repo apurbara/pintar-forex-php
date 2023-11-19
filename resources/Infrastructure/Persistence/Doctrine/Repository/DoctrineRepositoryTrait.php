@@ -64,7 +64,7 @@ trait DoctrineRepositoryTrait
         return $this->fetchOneOrDie([new Filter($id, "{$this->getTableName()}.id")]);
     }
 
-    public function fetchOneById(?string $id): ?array
+    public function fetchOneById(string $id): array
     {
         return $this->fetchOneBy([new Filter($id, "{$this->getTableName()}.id")]);
     }

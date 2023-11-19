@@ -9,10 +9,11 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales;
+use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use Resources\Exception\RegularException;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 
-#[Entity]
+#[Entity(repositoryClass: DoctrineAssignedCustomerRepository::class)]
 class AssignedCustomer
 {
 

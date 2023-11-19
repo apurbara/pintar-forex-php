@@ -83,7 +83,7 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
 //        $this->connection->table('SalesActivitySchedule')->truncate();
     }
 
-    //
+    //  
     protected function registerNewCustomer()
     {
         $this->prepareSalesDependency();

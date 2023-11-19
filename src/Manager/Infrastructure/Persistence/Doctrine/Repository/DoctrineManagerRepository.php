@@ -22,6 +22,7 @@ class DoctrineManagerRepository extends DoctrineEntityRepository implements Mana
                 ->innerJoin('manager.personnel', 'personnel')
                 ->andWhere($qb->expr()->eq('personnel.id', ':personnelId'))
                 ->andWhere($qb->expr()->eq('manager.id', ':managerId'))
+                ->setParameters($params)
                 ->setMaxResults(1);
 
         try {
