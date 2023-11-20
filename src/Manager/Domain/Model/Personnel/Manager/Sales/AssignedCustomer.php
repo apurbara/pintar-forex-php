@@ -33,12 +33,22 @@ class AssignedCustomer
     }
 
     //
-    public function closeAssignment(): void
+    protected function assertActiveAssignment()
     {
         if ($this->status !== CustomerAssignmentStatus::ACTIVE) {
             throw RegularException::forbidden('assignment already concluded');
         }
+    }
+    public function closeAssignment(): void
+    {
+        $this->assertActiveAssignment();
         $this->status = CustomerAssignmentStatus::GOOD_FUND;
+    }
+    
+    public function recycleAssignment(): void
+    {
+        $this->assertActiveAssignment();
+        $this->status = CustomerAssignmentStatus::RECYCLED;
     }
 
     //

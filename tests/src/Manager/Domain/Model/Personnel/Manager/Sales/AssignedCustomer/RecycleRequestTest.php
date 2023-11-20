@@ -43,7 +43,7 @@ class RecycleRequestTest extends TestBase
     public function test_approve_closeCustomerAssignment()
     {
         $this->assignedCustomer->expects($this->once())
-                ->method('closeAssignment');
+                ->method('recycleAssignment');
         $this->approve();
     }
     

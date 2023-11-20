@@ -7,6 +7,7 @@ use Company\Domain\Model\Personnel\Manager\Sales;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\ClosingRequest;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 use Tests\Http\Record\EntityRecord;
 
@@ -110,6 +111,10 @@ _QUERY;
             'id' => $this->closingRequestOne->columns['id'],
             'status' => ManagementApprovalStatus::APPROVED->value,
         ]);
+        $this->seeInDatabase('AssignedCustomer', [
+            'id' => $this->customerAssignmentOne->columns['id'],
+            'status' => CustomerAssignmentStatus::GOOD_FUND->value,
+        ]);
     }
     
     //
@@ -151,6 +156,11 @@ _QUERY;
         $this->seeInDatabase('ClosingRequest', [
             'id' => $this->closingRequestOne->columns['id'],
             'status' => ManagementApprovalStatus::REJECTED->value,
+        ]);
+        
+        $this->seeInDatabase('AssignedCustomer', [
+            'id' => $this->customerAssignmentOne->columns['id'],
+            'status' => CustomerAssignmentStatus::ACTIVE->value,
         ]);
     }
     

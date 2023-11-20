@@ -49,7 +49,7 @@ class RecycleRequest
     {
         $this->assertWaitingForApproval();
         $this->status = ManagementApprovalStatus::APPROVED;
-        $this->assignedCustomer->closeAssignment();
+        $this->assignedCustomer->recycleAssignment();
     }
     
     public function reject(): void

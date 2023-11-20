@@ -41,6 +41,22 @@ class AssignedCustomerTest extends TestBase
     }
     
     //
+    protected function recycleAssignment()
+    {
+        $this->assignedCustomer->recycleAssignment();
+    }
+    public function test_recycleAssignment_setStatusRecycled()
+    {
+        $this->recycleAssignment();
+        $this->assertEquals(CustomerAssignmentStatus::RECYCLED, $this->assignedCustomer->status);
+    }
+    public function test_recycleAssignment_alreadyConcluded_forbidden()
+    {
+        $this->assignedCustomer->status = CustomerAssignmentStatus::RECYCLED;
+        $this->assertRegularExceptionThrowed(fn() => $this->recycleAssignment(), 'Forbidden', 'assignment already concluded');
+    }
+    
+    //
     protected function isManageableByManager()
     {
         return $this->assignedCustomer->isManageableByManager($this->manager);
