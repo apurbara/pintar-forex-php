@@ -3,8 +3,10 @@
 namespace App\Http\GraphQL\ManagerBC;
 
 use App\Http\Controllers\ManagerBC\ClosingRequestController;
+use App\Http\Controllers\ManagerBC\RecycleRequestController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\ManagerBC\Object\Manager\Sales\AssignedCustomer\ClosingRequestInManagerBCGraph;
+use App\Http\GraphQL\ManagerBC\Object\Manager\Sales\AssignedCustomer\RecycleRequestInManagerBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
@@ -23,6 +25,7 @@ class ManagerMutation extends ObjectType
     {
         return [
             ...$this->closingRequestMutation(),
+            ...$this->recycleRequestMutation(),
         ];
     }
 
@@ -40,6 +43,24 @@ class ManagerMutation extends ObjectType
                 'type' => TypeRegistry::type(ClosingRequestInManagerBCGraph::class),
                 'args' => ['id' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
+                        ->reject($app->user, $args['id']),
+            ],
+        ];
+    }
+    //
+    protected function recycleRequestMutation(): array
+    {
+        return [
+            'approveRecycleRequest' => [
+                'type' => TypeRegistry::type(RecycleRequestInManagerBCGraph::class),
+                'args' => ['id' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
+                        ->approve($app->user, $args['id']),
+            ],
+            'rejectRecycleRequest' => [
+                'type' => TypeRegistry::type(RecycleRequestInManagerBCGraph::class),
+                'args' => ['id' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
                         ->reject($app->user, $args['id']),
             ],
         ];

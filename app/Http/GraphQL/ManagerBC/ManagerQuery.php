@@ -3,9 +3,11 @@
 namespace App\Http\GraphQL\ManagerBC;
 
 use App\Http\Controllers\ManagerBC\ClosingRequestController;
+use App\Http\Controllers\ManagerBC\RecycleRequestController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\ManagerBC\Object\Manager\Sales\AssignedCustomer\ClosingRequestInManagerBCGraph;
+use App\Http\GraphQL\ManagerBC\Object\Manager\Sales\AssignedCustomer\RecycleRequestInManagerBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
@@ -26,9 +28,10 @@ class ManagerQuery extends ObjectType
     {
         return [
             ...$this->closingRequestQuery(),
+            ...$this->recycleRequestQuery(),
         ];
     }
-
+    //
     protected function closingRequestQuery(): array
     {
         return [
@@ -42,6 +45,24 @@ class ManagerQuery extends ObjectType
                 'type' => TypeRegistry::objectType(ClosingRequestInManagerBCGraph::class),
                 'args' => ['id' => Type::nonNull(Type::id())],
                 'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
+                        ->viewDetail($app->user, $args['id'])
+            ],
+        ];
+    }
+    //
+    protected function recycleRequestQuery(): array
+    {
+        return [
+            'recycleRequestList' => [
+                'type' => new Pagination(TypeRegistry::objectType(RecycleRequestInManagerBCGraph::class)),
+                'args' => InputListSchema::paginationListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
+                        ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'recycleRequestDetail' => [
+                'type' => TypeRegistry::objectType(RecycleRequestInManagerBCGraph::class),
+                'args' => ['id' => Type::nonNull(Type::id())],
+                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
                         ->viewDetail($app->user, $args['id'])
             ],
         ];

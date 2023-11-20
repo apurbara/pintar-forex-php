@@ -4,7 +4,9 @@ namespace Tests\src\Manager\Domain\Task;
 
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\ClosingRequest;
+use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequest;
 use Manager\Domain\Task\ClosingRequest\ClosingRequestRepository;
+use Manager\Domain\Task\RecycleRequest\RecycleRequestRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
@@ -29,6 +31,20 @@ class ManagerTaskTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->closingRequestId)
                 ->willReturn($this->closingRequest);
+    }
+    
+    //
+    protected MockObject $recycleRequestRepository;
+    protected MockObject $recycleRequest;
+    protected string $recycleRequestId = 'recycleRequestId';
+    protected function prepareRecycleRequestDependency()
+    {
+        $this->recycleRequestRepository = $this->buildMockOfInterface(RecycleRequestRepository::class);
+        $this->recycleRequest = $this->buildMockOfClass(RecycleRequest::class);
+        $this->recycleRequestRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->recycleRequestId)
+                ->willReturn($this->recycleRequest);
     }
     
 }
