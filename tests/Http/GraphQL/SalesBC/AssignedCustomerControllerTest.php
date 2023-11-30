@@ -75,12 +75,12 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
 
     protected function tearDown(): void
     {
-//        parent::tearDown();
-//        $this->connection->table('Customer')->truncate();
-//        $this->connection->table('AssignedCustomer')->truncate();
-//        $this->connection->table('CustomerJourney')->truncate();
-//        $this->connection->table('SalesActivity')->truncate();
-//        $this->connection->table('SalesActivitySchedule')->truncate();
+        parent::tearDown();
+        $this->connection->table('Customer')->truncate();
+        $this->connection->table('AssignedCustomer')->truncate();
+        $this->connection->table('CustomerJourney')->truncate();
+        $this->connection->table('SalesActivity')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
     }
 
     //  

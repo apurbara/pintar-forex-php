@@ -3,13 +3,14 @@
 namespace Sales\Domain\Task\SalesActivitySchedule;
 
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\src\Sales\Domain\Task\SalesTaskTestBase;
 
 class SubmitScheduleTaskTest extends SalesTaskTestBase
 {
 
-    protected $task;
+    protected $task, $schedulerService;
     protected $payload;
 
     protected function setUp(): void
@@ -18,9 +19,11 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
         $this->prepareSalesActivityScheduleDependency();
         $this->prepareAssignedCustomerDependency();
         $this->prepareSalesActivityDependency();
+        
+        $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
 
         $this->task = new SubmitScheduleTask($this->salesActivityScheduleRepository,
-                $this->assignedCustomerRepository, $this->salesActivityRepository);
+                $this->assignedCustomerRepository, $this->salesActivityRepository, $this->schedulerService);
 
         //
         $timeIntervalData = new HourlyTimeIntervalData('next week');
@@ -60,5 +63,23 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
     {
         $this->execute();
         $this->assertSame($this->salesActivityScheduleId, $this->payload->id);
+    }
+    public function test_execute_registerAllUpcomingScheduleToScheduler()
+    {
+        $this->sales->expects($this->once())
+                ->method('registerAllUpcomingScheduleToScheduler')
+                ->with($this->schedulerService);
+        $this->execute();
+    }
+    public function test_execute_attemptToRelocateConflictedInitialScheduleIfDurationNotEnough()
+    {
+        $this->assignedCustomer->expects($this->once())
+                ->method('submitSalesActivitySchedule')
+                ->with($this->salesActivity, $this->payload)
+                ->willReturn($this->salesActivitySchedule);
+        $this->salesActivitySchedule->expects($this->once())
+                ->method('relocateConflictedInitialScheduleIfDurationNotEnough')
+                ->with($this->schedulerService);
+        $this->execute();
     }
 }

@@ -13,6 +13,8 @@ use Tests\Http\Record\EntityRecord;
 class SalesActivityScheduleControllerTest extends SalesBCTestCase
 {
     protected $salesActivity;
+    protected $initialSalesActivity;
+    protected $salesActivityOne;
     
     protected $customer;
     protected $customerOne;
@@ -24,6 +26,7 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
     
     protected $salesActivityScheduleOne;
     protected $salesActivityScheduleTwo;
+    protected $salesActivityScheduleThree;
     
     protected $submitScheduleRequest;
 
@@ -36,6 +39,12 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->connection->table('SalesActivitySchedule')->truncate();
         
         $this->salesActivity = new EntityRecord(SalesActivity::class, 'main');
+        $this->salesActivity->columns['duration'] = 20;
+        $this->salesActivityOne = new EntityRecord(SalesActivity::class, '1');
+        $this->salesActivityOne->columns['duration'] = 30;
+        $this->initialSalesActivity = new EntityRecord(SalesActivity::class, 'initial');
+        $this->initialSalesActivity->columns['duration'] = 15;
+        $this->initialSalesActivity->columns['initial'] = true;
         
         $this->customer = new EntityRecord(Customer::class, 'main');
         $this->customerOne = new EntityRecord(Customer::class, 1);
@@ -56,33 +65,34 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->assignedCustomerThree->columns['Sales_id'] = $this->sales->columns['id'];
         
         $this->salesActivityScheduleOne = new EntityRecord(SalesActivitySchedule::class, 1);
-        $this->salesActivityScheduleOne->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
+        $this->salesActivityScheduleOne->columns['SalesActivity_id'] = $this->salesActivityOne->columns['id'];
         $this->salesActivityScheduleOne->columns['AssignedCustomer_id'] = $this->assignedCustomerOne->columns['id'];
-        $this->salesActivityScheduleOne->columns['startTime'] = (new \DateTime('+48 hours'))->format('Y-m-d H') . ":00:00";
-        $this->salesActivityScheduleOne->columns['endTime'] = (new \DateTime('+49 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleOne->columns['startTime'] = (new \DateTime('next monday'))->setTime(10, 0)->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleOne->columns['endTime'] = (new \DateTime('next monday'))->setTime(11, 0)->format('Y-m-d H') . ":00:00";
+//        $this->salesActivityScheduleOne->columns['endTime'] = (new \DateTime('+49 hours'))->format('Y-m-d H') . ":00:00";
         $this->salesActivityScheduleTwo = new EntityRecord(SalesActivitySchedule::class, 2);
-        $this->salesActivityScheduleTwo->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
+        $this->salesActivityScheduleTwo->columns['SalesActivity_id'] = $this->initialSalesActivity->columns['id'];
         $this->salesActivityScheduleTwo->columns['AssignedCustomer_id'] = $this->assignedCustomerTwo->columns['id'];
-        $this->salesActivityScheduleTwo->columns['startTime'] = (new \DateTime('-49 hours'))->format('Y-m-d H') . ":00:00";
-        $this->salesActivityScheduleTwo->columns['endTime'] = (new \DateTime('-48 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleTwo->columns['startTime'] = (new \DateTime('next monday'))->setTime(10, 0)->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleTwo->columns['endTime'] = (new \DateTime('next monday'))->setTime(11, 0)->format('Y-m-d H') . ":00:00";
         $this->salesActivityScheduleThree = new EntityRecord(SalesActivitySchedule::class, 3);
         $this->salesActivityScheduleThree->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
         $this->salesActivityScheduleThree->columns['AssignedCustomer_id'] = $this->assignedCustomerThree->columns['id'];
-        $this->salesActivityScheduleThree->columns['startTime'] = (new \DateTime('+72 hours'))->format('Y-m-d H') . ":00:00";
-        $this->salesActivityScheduleThree->columns['endTime'] = (new \DateTime('+73 hours'))->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleThree->columns['startTime'] = (new \DateTime('next monday'))->setTime(11, 0)->format('Y-m-d H') . ":00:00";
+        $this->salesActivityScheduleThree->columns['endTime'] = (new \DateTime('next monday'))->setTime(12, 0)->format('Y-m-d H') . ":00:00";
         
         $this->submitScheduleRequest = [
             'salesActivityId' => $this->salesActivity->columns['id'],
-            'startTime' => 'next week',
+            'startTime' => (new \DateTimeImmutable('next monday'))->setTime(10, 0)->format('Y-m-d H:i:s'),
         ];
     }
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('SalesActivity')->truncate();
-        $this->connection->table('Customer')->truncate();
-        $this->connection->table('AssignedCustomer')->truncate();
-        $this->connection->table('SalesActivitySchedule')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('SalesActivity')->truncate();
+//        $this->connection->table('Customer')->truncate();
+//        $this->connection->table('AssignedCustomer')->truncate();
+//        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
@@ -130,6 +140,31 @@ _QUERY;
             'SalesActivity_id' => $this->salesActivity->columns['id'],
             'AssignedCustomer_id' => $this->assignedCustomer->columns['id'],
             'status' => 'SCHEDULED',
+        ]);
+    }
+    public function test_submitSchedule_relocateConflictedInitialScheduler()
+    {
+        $this->initialSalesActivity->insert($this->connection);
+        $this->salesActivityOne->insert($this->connection);
+        
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
+        
+        $this->assignedCustomerOne->insert($this->connection);
+        $this->assignedCustomerTwo->insert($this->connection);
+        $this->assignedCustomerThree->insert($this->connection);
+        
+        $this->salesActivityScheduleOne->insert($this->connection);
+        $this->salesActivityScheduleTwo->insert($this->connection);
+        $this->salesActivityScheduleThree->insert($this->connection);
+        
+        $this->submitSchedule();
+        $this->seeStatusCode(200);
+        
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'id' => $this->salesActivityScheduleTwo->columns['id'],
+            'startTime' => (new \DateTimeImmutable('next monday'))->setTime(11, 0)->format('Y-m-d H:i:s'),
         ]);
     }
     
@@ -261,6 +296,8 @@ _QUERY;
         $this->prepareSalesDependency();
         
         $this->salesActivity->insert($this->connection);
+        $this->salesActivityOne->insert($this->connection);
+        $this->initialSalesActivity->insert($this->connection);
         
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
@@ -270,6 +307,8 @@ _QUERY;
         $this->assignedCustomerTwo->insert($this->connection);
         $this->assignedCustomerThree->insert($this->connection);
         
+        $this->salesActivityScheduleOne->columns['startTime'] = (new \DateTimeImmutable('-2 days'))->setTime(10, 0)->format('Y-m-d H:i:s');
+        $this->salesActivityScheduleOne->columns['endTime'] = (new \DateTimeImmutable('-2 days'))->setTime(11, 0)->format('Y-m-d H:i:s');
         $this->salesActivityScheduleOne->insert($this->connection);
         $this->salesActivityScheduleTwo->insert($this->connection);
         $this->salesActivityScheduleThree->insert($this->connection);

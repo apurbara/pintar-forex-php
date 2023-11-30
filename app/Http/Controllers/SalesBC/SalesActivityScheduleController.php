@@ -9,6 +9,7 @@ use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\SalesActivity;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
@@ -30,7 +31,9 @@ class SalesActivityScheduleController extends Controller
         $repository = $this->repository();
         $assignedCustomerRepository = $this->em->getRepository(AssignedCustomer::class);
         $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
-        $task = new SubmitScheduleTask($repository, $assignedCustomerRepository, $salesActivityRepository);
+        $schedulerService = new SalesActivitySchedulerService();
+//        $task = new SubmitScheduleTask($repository, $assignedCustomerRepository, $salesActivityRepository);
+        $task = new SubmitScheduleTask($repository, $assignedCustomerRepository, $salesActivityRepository, $schedulerService);
 
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($input->get('startTime'));
         $payload = (new AssignedCustomer\SalesActivityScheduleData($hourlyTimeIntervalData))

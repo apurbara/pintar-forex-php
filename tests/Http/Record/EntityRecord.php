@@ -83,7 +83,7 @@ class EntityRecord implements IRecord
             return match ($columnAttributeReflection->getArguments()['type']) {
                 'guid' => strtolower($this->tableName) . "-{$index}-id",
                 'boolean' => false,
-                'integer', 'smallint', 'bigint' => 999,
+                'integer', 'smallint', 'bigint' => 10,
                 'float', 'decimal' => 999.99,
                 'string', 'text', 'binary', 'blob' => "{$this->tableName} $index $colName",
                 'json' => json_encode([]),

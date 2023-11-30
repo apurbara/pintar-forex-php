@@ -21,13 +21,14 @@ use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use SharedContext\Domain\ValueObject\HourlyTimeInterval;
+use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 
 #[Entity(repositoryClass: DoctrineSalesActivityScheduleRepository::class)]
 class SalesActivitySchedule
 {
 
     #[FetchableEntity(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
-    #[ManyToOne(targetEntity: AssignedCustomer::class, inversedBy: "salesActivitySchedules")]
+    #[ManyToOne(targetEntity: AssignedCustomer::class, inversedBy: "salesActivitySchedules", fetch: "LAZY")]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;
 
@@ -58,6 +59,16 @@ class SalesActivitySchedule
         return $this->schedule;
     }
 
+    public function getActivityDuration(): int
+    {
+        return $this->salesActivity->getDuration();
+    }
+
+    public function isRelocateable(): bool
+    {
+        return $this->salesActivity->isInitial();
+    }
+
     public function __construct(
             AssignedCustomer $assignedCustomer, SalesActivity $salesActivity, SalesActivityScheduleData $data)
     {
@@ -71,9 +82,9 @@ class SalesActivitySchedule
         $this->status = SalesActivityScheduleStatus::SCHEDULED;
     }
 
-    public function getActivityDuration(): int
+    public function relocateTo(\DateTimeImmutable $startTime): void
     {
-        return $this->salesActivity->getDuration();
+        $this->schedule = new HourlyTimeInterval(new HourlyTimeIntervalData($startTime->format('Y-m-d H:i:s')));
     }
 
     //
@@ -98,5 +109,11 @@ class SalesActivitySchedule
         if ($this->schedule->getStartTime() > new DateTimeImmutable()) {
             $service->add($this->schedule->getStartTime(), $this);
         }
+    }
+
+    public function relocateConflictedInitialScheduleIfDurationNotEnough(SalesActivitySchedulerService $schedulerService): void
+    {
+        $schedulerService->releaseRequiredDurationInTimeSlotOrDie($this->schedule->getStartTime(),
+                $this->getActivityDuration());
     }
 }

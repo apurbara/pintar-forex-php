@@ -90,6 +90,29 @@ class SalesActivityScheduleTest extends TestBase
     }
     
     //
+    protected function isRelocateable()
+    {
+        return $this->salesActivitySchedule->isRelocateable();
+    }
+    public function test_isRelocateable_returnSalesActivityInitialStatus()
+    {
+        $this->salesActivity->expects($this->once())
+                ->method('isInitial');
+        $this->isRelocateable();
+    }
+    
+    //
+    protected function relocateTo()
+    {
+        $this->salesActivitySchedule->relocateTo($this->startTime);
+    }
+    public function test_relocateTo_updateSchedule()
+    {
+        $this->relocateTo();
+        $this->assertEquals(new HourlyTimeInterval(new HourlyTimeIntervalData($this->startTime->format('Y-m-d H:i:s'))), $this->salesActivitySchedule->schedule);
+    }
+    
+    //
     protected function assertBelongsToSales()
     {
         $this->salesActivitySchedule->assertBelongsToSales($this->sales);
@@ -145,6 +168,27 @@ class SalesActivityScheduleTest extends TestBase
                 ->method('add')
                 ->with($this->startTime, $this->salesActivitySchedule);
         $this->includeInSchedulerService();
+    }
+    
+    //
+    protected function relocateConflictedInitialScheduleIfDurationNotEnough()
+    {
+        $this->salesActivitySchedule->relocateConflictedInitialScheduleIfDurationNotEnough($this->schedulerService);
+    }
+    public function test_relocateConflictedInitialScheduleIfDurationNotEnough_attemptToReleaseRequiredDurationFromSchedulerService()
+    {
+        $startTime = new DateTimeImmutable();
+        $duration = 25;
+        $this->schedule->expects($this->once())
+                ->method('getStartTime')
+                ->willReturn($startTime);
+        $this->salesActivity->expects($this->once())
+                ->method('getDuration')
+                ->willReturn($duration);
+        $this->schedulerService->expects($this->once())
+                ->method('releaseRequiredDurationInTimeSlotOrDie')
+                ->with($startTime, $duration);
+        $this->relocateConflictedInitialScheduleIfDurationNotEnough();
     }
 }
 

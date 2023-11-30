@@ -43,9 +43,9 @@ class AllocateInitialSalesActivityScheduleTest extends SalesTaskTestBase
     }
     public function test_execute_addInitialSchedulerFromAssignedCustomerToRepository()
     {
-        $this->schedulerService->expects($this->once())
-                ->method('nextAvailableStartTimeForInitialSalesActivity')
-                ->with($this->salesActivity)
+        $this->salesActivity->expects($this->once())
+                ->method('findAvailableTimeSlotForInitialActivity')
+                ->with($this->schedulerService)
                 ->willReturn($this->availableInitialScheduleStartTime);
         
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($this->availableInitialScheduleStartTime->format('Y-m-d H:i:s'));

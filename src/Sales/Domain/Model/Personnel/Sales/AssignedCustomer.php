@@ -160,7 +160,7 @@ class AssignedCustomer implements ContainEventsInterface
     {
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->gte('schedule.startTime',  new DateTimeImmutable()))
-                ->andWhere(Criteria::expr()->gte('status', SalesActivityScheduleStatus::SCHEDULED));
+                ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED->value));
         foreach ($this->salesActivitySchedules->matching($criteria)->getIterator() as $schedule) {
             $schedule->includeInSchedulerService($service);
         }

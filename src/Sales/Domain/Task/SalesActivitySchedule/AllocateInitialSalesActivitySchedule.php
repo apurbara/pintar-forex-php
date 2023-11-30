@@ -35,17 +35,17 @@ class AllocateInitialSalesActivitySchedule implements SalesTask
 
         $assignedCustomer = $this->assignedCustomerRepository->ofId($payload);
         $salesActivity = $this->salesActivityRepository->anInitialSalesActivity();
-        if ($salesActivity) {
-            $nextAvailableScheduleStartTime = $this->schedulerService
-                    ->nextAvailableStartTimeForInitialSalesActivity($salesActivity);
-
-            $hourlyTimeIntervalData = new HourlyTimeIntervalData($nextAvailableScheduleStartTime->format('Y-m-d H:i:s'));
+        
+        $availableTimeSlot = $salesActivity?->findAvailableTimeSlotForInitialActivity($this->schedulerService);
+        if ($availableTimeSlot) {
+            $hourlyTimeIntervalData = new HourlyTimeIntervalData($availableTimeSlot->format('Y-m-d H:i:s'));
             $scheduledSalesActivityData = (new Sales\AssignedCustomer\SalesActivityScheduleData($hourlyTimeIntervalData))
                     ->setId($this->scheduleRepository->nextIdentity());
 
             $scheduledSalesActivity = $assignedCustomer->submitSalesActivitySchedule($salesActivity,
                     $scheduledSalesActivityData);
             $this->scheduleRepository->add($scheduledSalesActivity);
+            
         }
     }
 }

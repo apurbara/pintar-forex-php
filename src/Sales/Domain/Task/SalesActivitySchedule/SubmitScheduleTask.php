@@ -4,6 +4,7 @@ namespace Sales\Domain\Task\SalesActivitySchedule;
 
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivityScheduleData;
+use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
 use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
 use Sales\Domain\Task\SalesTask;
@@ -14,7 +15,8 @@ class SubmitScheduleTask implements SalesTask
     public function __construct(
             protected SalesActivityScheduleRepository $scheduledSalesActivityRepository,
             protected AssignedCustomerRepository $assignedCustomerRepository,
-            protected SalesActivityRepository $salesActivityRepository
+            protected SalesActivityRepository $salesActivityRepository,
+            protected SalesActivitySchedulerService $schedulerService
     )
     {
         
@@ -28,6 +30,8 @@ class SubmitScheduleTask implements SalesTask
      */
     public function executeBySales(Sales $sales, $payload): void
     {
+        $sales->registerAllUpcomingScheduleToScheduler($this->schedulerService);
+        
         $payload->setId($this->scheduledSalesActivityRepository->nextIdentity());
         
         $salesActivity = $this->salesActivityRepository->ofId($payload->salesActivityId);
@@ -35,6 +39,8 @@ class SubmitScheduleTask implements SalesTask
         $assignedCustomer->assertBelongsToSales($sales);
         
         $scheduledSalesActivity = $assignedCustomer->submitSalesActivitySchedule($salesActivity, $payload);
+        $scheduledSalesActivity->relocateConflictedInitialScheduleIfDurationNotEnough($this->schedulerService);
+        
         $this->scheduledSalesActivityRepository->add($scheduledSalesActivity);
     }
 }
