@@ -23,4 +23,20 @@ class ManagerRole extends PersonnelRole implements ManagerRoleInterface
         (new ExecuteManagerTask($managerRepository))
                 ->excute($this->personnelId, $this->managerId, $task, $payload);
     }
+
+    public function buildExecuteManagerTaskService(): ExecuteManagerTask
+    {
+        $managerRepository = $this->em->getRepository(Manager::class);
+        return new ExecuteManagerTask($managerRepository);
+    }
+
+    public function getManagerId(): string
+    {
+        return $this->managerId;
+    }
+
+    public function getPersonnelId(): string
+    {
+        return $this->personnelId;
+    }
 }

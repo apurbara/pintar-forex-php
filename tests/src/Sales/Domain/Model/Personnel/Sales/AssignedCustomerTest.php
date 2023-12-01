@@ -278,6 +278,27 @@ class AssignedCustomerTest extends TestBase
                 ->with($this->schedulerService);
         $this->addUpcomingScheduleToSchedulerService();
     }
+    
+    //
+    protected function initiateSalesActivitySchedule()
+    {
+        $this->assignedCustomer->initiateSalesActivitySchedule($this->salesActivity, $this->schedulerService);
+    }
+    public function test_initiateSalesActivitySchedule_addScheduleToCollection()
+    {
+        $this->schedulerService->expects($this->once())
+                ->method('nextAvailableTimeSlotForScheduleWithDuration');
+        $this->initiateSalesActivitySchedule();
+        $this->assertEquals(2, $this->assignedCustomer->salesActivitySchedules->count());
+        $this->assertInstanceOf(SalesActivitySchedule::class, $this->assignedCustomer->salesActivitySchedules->last());
+    }
+    public function test_initiateSalesActivitySchedule_salesResiteringAllUpcomingSchedule()
+    {
+        $this->sales->expects($this->once())
+                ->method('registerAllUpcomingScheduleToScheduler')
+                ->with($this->schedulerService);
+        $this->initiateSalesActivitySchedule();
+    }
 }
 
 class TestableAssignedCustomer extends AssignedCustomer

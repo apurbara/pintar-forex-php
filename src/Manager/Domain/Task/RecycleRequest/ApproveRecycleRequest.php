@@ -4,13 +4,17 @@ namespace Manager\Domain\Task\RecycleRequest;
 
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Task\ManagerTask;
+use Resources\Event\Dispatcher;
 
 class ApproveRecycleRequest implements ManagerTask
 {
-    public function __construct(protected RecycleRequestRepository $recycleRequestRepository)
+
+    public function __construct(protected RecycleRequestRepository $recycleRequestRepository,
+            protected Dispatcher $dispatcher)
     {
+        
     }
-    
+
     /**
      * 
      * @param Manager $manager
@@ -21,7 +25,9 @@ class ApproveRecycleRequest implements ManagerTask
     {
         $recycleRequest = $this->recycleRequestRepository->ofId($payload);
         $recycleRequest->assertManageableByManager($manager);
-        
+
         $recycleRequest->approve();
+        
+        $this->dispatcher->dispatchEventContainer($recycleRequest);
     }
 }

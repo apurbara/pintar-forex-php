@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
+use Resources\Uuid;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
 use Sales\Domain\Model\CustomerJourney;
@@ -32,6 +33,7 @@ use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustome
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
+use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 
 #[Entity(repositoryClass: DoctrineAssignedCustomerRepository::class)]
 class AssignedCustomer implements ContainEventsInterface
@@ -66,7 +68,7 @@ class AssignedCustomer implements ContainEventsInterface
     #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $recycleRequests;
     
-    #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "assignedCustomer", fetch: 'EXTRA_LAZY')]
+    #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "assignedCustomer", cascade: ["persist"], fetch: 'EXTRA_LAZY')]
     protected Collection $salesActivitySchedules;
     
     public function getStatus(): CustomerAssignmentStatus
@@ -160,10 +162,22 @@ class AssignedCustomer implements ContainEventsInterface
     {
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->gte('schedule.startTime',  new DateTimeImmutable()))
-                ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED->value));
+                ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED));
         foreach ($this->salesActivitySchedules->matching($criteria)->getIterator() as $schedule) {
             $schedule->includeInSchedulerService($service);
         }
+    }
+    
+    public function initiateSalesActivitySchedule(SalesActivity $initialSalesActivity, SalesActivitySchedulerService $schedulerService): void
+    {
+        $this->sales->registerAllUpcomingScheduleToScheduler($schedulerService);
+        
+        $startTime = $schedulerService->nextAvailableTimeSlotForScheduleWithDuration($initialSalesActivity->getDuration())->format('Y-m-d H:i:s');
+        $hourlyTimeIntervalData = new HourlyTimeIntervalData($startTime);
+        $scheduledSalesActivityData = (new SalesActivityScheduleData($hourlyTimeIntervalData))->setId(Uuid::generateUuid4());
+        
+        $salesActivitySchedule = $this->submitSalesActivitySchedule($initialSalesActivity, $scheduledSalesActivityData);
+        $this->salesActivitySchedules->add($salesActivitySchedule);
     }
     
 }

@@ -2,13 +2,17 @@
 
 namespace Tests\Http\GraphQL\ManagerBC;
 
+use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager\Sales;
+use Company\Domain\Model\SalesActivity;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequest;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use SharedContext\Domain\Enum\SalesType;
 use Tests\Http\Record\EntityRecord;
 
 class RecycleRequestControllerTest extends ManagerBCTestCase
@@ -16,6 +20,10 @@ class RecycleRequestControllerTest extends ManagerBCTestCase
     protected $personnelOne;
     protected $personnelTwo;
     
+    protected $area;
+    protected $initialCustomerJourney;
+    protected $initialSalesActivity;
+
     protected $salesOne;
     protected $salesTwo;
     
@@ -31,10 +39,24 @@ class RecycleRequestControllerTest extends ManagerBCTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->connection->table('Area')->truncate();
+        $this->connection->table('CustomerJourney')->truncate();
+        $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('Sales')->truncate();
         $this->connection->table('Customer')->truncate();
+        $this->connection->table('CustomerJourney')->truncate();
         $this->connection->table('AssignedCustomer')->truncate();
         $this->connection->table('RecycleRequest')->truncate();
+        $this->connection->table('SalesActivity')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
+        
+        $this->area = new EntityRecord(Area::class, 'main');
+        
+        $this->initialCustomerJourney = new EntityRecord(CustomerJourney::class, 'main');
+        $this->initialCustomerJourney->columns['initial'] = true;
+        
+        $this->initialSalesActivity = new EntityRecord(SalesActivity::class, 'main');
+        $this->initialSalesActivity->columns['initial'] = true;
         
         $this->personnelOne = new EntityRecord(Personnel::class, 1);
         $this->personnelTwo = new EntityRecord(Personnel::class, 2);
@@ -42,12 +64,18 @@ class RecycleRequestControllerTest extends ManagerBCTestCase
         $this->salesOne = new EntityRecord(Sales::class, 1);
         $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesOne->columns['Manager_id'] = $this->manager->columns['id'];
+        $this->salesOne->columns['type'] = SalesType::IN_HOUSE->value;
+        $this->salesOne->columns['Area_id'] = $this->area->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
         $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         $this->salesTwo->columns['Manager_id'] = $this->manager->columns['id'];
+        $this->salesTwo->columns['type'] = SalesType::FREELANCE->value;
+        $this->salesTwo->columns['Area_id'] = $this->area->columns['id'];
         
         $this->customerOne = new EntityRecord(Customer::class, 1);
+        $this->customerOne->columns['Area_id'] = $this->area->columns['id'];
         $this->customerTwo = new EntityRecord(Customer::class, 2);
+        $this->customerTwo->columns['Area_id'] = $this->area->columns['id'];
         
         $this->customerAssignmentOne = new EntityRecord(AssignedCustomer::class, 1);
         $this->customerAssignmentOne->columns['Customer_id'] = $this->customerOne->columns['id'];
@@ -64,17 +92,27 @@ class RecycleRequestControllerTest extends ManagerBCTestCase
     }
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('Sales')->truncate();
-        $this->connection->table('Customer')->truncate();
-        $this->connection->table('AssignedCustomer')->truncate();
-        $this->connection->table('RecycleRequest')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('Area')->truncate();
+//        $this->connection->table('CustomerJourney')->truncate();
+//        $this->connection->table('SalesActivity')->truncate();
+//        $this->connection->table('Sales')->truncate();
+//        $this->connection->table('Customer')->truncate();
+//        $this->connection->table('CustomerJourney')->truncate();
+//        $this->connection->table('AssignedCustomer')->truncate();
+//        $this->connection->table('RecycleRequest')->truncate();
+//        $this->connection->table('SalesActivity')->truncate();
+//        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
     protected function accept()
     {
         $this->prepareManagerDependency();
+        
+        $this->area->insert($this->connection);
+        $this->initialCustomerJourney->insert($this->connection);
+        $this->initialSalesActivity->insert($this->connection);
         $this->personnelOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
@@ -113,6 +151,30 @@ _QUERY;
         $this->seeInDatabase('AssignedCustomer', [
             'id' => $this->customerAssignmentOne->columns['id'],
             'status' => CustomerAssignmentStatus::RECYCLED->value,
+        ]);
+    }
+    public function test_accept_distributeCustomerToFreelancer()
+    {
+        $this->salesTwo->insert($this->connection);
+        $this->accept();
+        
+        $this->seeInDatabase('AssignedCustomer', [
+            'Sales_id' => $this->salesTwo->columns['id'],
+            'Customer_id' => $this->customerOne->columns['id'],
+            'status' => CustomerAssignmentStatus::ACTIVE,
+        ]);
+    }
+    public function test_accept_setInitialScheduleForNewAssignment()
+    {
+        $this->salesTwo->insert($this->connection);
+        $this->accept();
+        
+        $startTime = match ((new \DateTimeImmutable())->format('w')){
+            '4', '5' => (new \DateTimeImmutable('next monday'))->setTime(10, 0)->format('Y-m-d H:i:s'),
+            default => (new \DateTimeImmutable('+1 days'))->setTime(10, 0)->format('Y-m-d H:i:s'),
+        };
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'startTime' => $startTime,
         ]);
     }
     

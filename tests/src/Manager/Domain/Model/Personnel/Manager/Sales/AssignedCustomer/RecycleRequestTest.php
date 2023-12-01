@@ -46,6 +46,11 @@ class RecycleRequestTest extends TestBase
                 ->method('recycleAssignment');
         $this->approve();
     }
+    public function test_approve_appendCustomerAssignmentAsChildEvent()
+    {
+        $this->approve();
+        $this->assertEquals($this->assignedCustomer, $this->recycleRequest->childrenContainEvents[0]);
+    }
     
     //
     protected function reject()
@@ -88,6 +93,7 @@ class TestableRecycleRequest extends RecycleRequest
     public AssignedCustomer $assignedCustomer;
     public string $id;
     public ManagementApprovalStatus $status;
+    public $childrenContainEvents = [];
     
     function __construct()
     {
