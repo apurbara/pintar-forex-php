@@ -14,6 +14,7 @@ use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\ClosingRequestInSales
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\Customer\VerificationReportInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\RecycleRequestInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleInSalesBCGraph;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleSummaryInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -90,6 +91,12 @@ class Query extends ObjectType
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'salesActivityScheduleSummaryList' => [
+                'type' => Type::listOf(TypeRegistry::objectType(SalesActivityScheduleSummaryInSalesBCGraph::class)),
+                'args' => InputListSchema::allListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
+                        ->viewSummaryList($app->user, new GraphqlInputRequest($args))
             ],
             'salesActivityScheduleDetail' => [
                 'type' => TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class),

@@ -3,6 +3,7 @@
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
 use Doctrine\DBAL\Query\QueryBuilder;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
@@ -53,14 +54,35 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
         $qb = $this->dbalQueryBuilder();
         $qb->select('COUNT(SalesActivitySchedule.id)')
                 ->from('SalesActivitySchedule')
-                ->innerJoin('SalesActivitySchedule', "AssignedCustomer", "AssignedCustomer", "SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id")
+                ->innerJoin('SalesActivitySchedule', "AssignedCustomer", "AssignedCustomer",
+                        "SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id")
                 ->andWhere('AssignedCustomer.Sales_id = :salesId')
                 ->setParameter('salesId', $salesId);
-        
+
         foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
             Filter::fromSchema($filterSchema)->applyToQuery($qb);
         }
-        
+
         return $qb->executeQuery()->fetchOne();
+    }
+
+    public function salesActivityScheduleSummaryBelongsToSales(string $salesId, array $searchSchema): array
+    {
+        $qb = $this->dbalQueryBuilder();
+        $qb->addSelect('COUNT(SalesActivitySchedule.startTime) total')
+                ->addSelect('SalesActivitySchedule.startTime startTime')
+                ->addSelect('SalesActivitySchedule.endTime endTime')
+                ->addSelect('SalesActivitySchedule.status status')
+                ->from('SalesActivitySchedule')
+                ->innerJoin('SalesActivitySchedule', "AssignedCustomer", "AssignedCustomer",
+                        "SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id")
+                ->andWhere('AssignedCustomer.Sales_id = :salesId')
+                ->addGroupBy('SalesActivitySchedule.startTime')
+                ->addGroupBy('SalesActivitySchedule.endTime')
+                ->addGroupBy('SalesActivitySchedule.status')
+                ->setParameter('salesId', $salesId);
+
+        return DoctrineAllListCategory::fromSchema($searchSchema)
+                        ->fetchResult($qb);
     }
 }

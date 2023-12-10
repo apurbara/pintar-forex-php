@@ -18,7 +18,7 @@ class CursorLimit implements PageLimitInterface
         ?string $cursor = null,
         array $orders = [['column' => 'id', 'direction' => 'ASC']]
     ) {
-        $this->pageSize = $pageSize;
+        $this->pageSize = ($pageSize > 100) ? 100 : $pageSize;
         $this->cursor = isset($cursor) ? json_decode(base64_decode($cursor), true) : null;
         $orderedById = false;
         foreach ($orders as $order) {

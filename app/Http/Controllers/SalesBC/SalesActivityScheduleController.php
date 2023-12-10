@@ -13,6 +13,7 @@ use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
+use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleSummary;
 use Sales\Domain\Task\SalesActivitySchedule\ViewTotalSalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
@@ -48,6 +49,15 @@ class SalesActivityScheduleController extends Controller
     {
         $task = new ViewSalesActivityScheduleListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+        $user->executeSalesTask($task, $payload);
+        
+        return $payload->result;
+    }
+    
+    public function viewSummaryList(SalesRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewSalesActivityScheduleSummary($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
         $user->executeSalesTask($task, $payload);
         
         return $payload->result;

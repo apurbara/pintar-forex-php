@@ -16,7 +16,7 @@ class OffsetLimit implements PageLimitInterface
             array $orders = [['column' => 'id', 'direction' => 'ASC']])
     {
         $this->page = $page;
-        $this->pageSize = $pageSize;
+        $this->pageSize = ($pageSize > 100) ? 100 : $pageSize;
         $this->orders = $orders;
     }
 

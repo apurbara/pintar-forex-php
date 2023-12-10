@@ -18,4 +18,6 @@ interface SalesActivityScheduleRepository
     public function scheduledSalesActivityBelongsToSalesDetail(string $salesId, string $id): array;
     
     public function totalSalesActivityScheduleBelongsToSales(string $salesId, array $searchSchema): int;
+    
+    public function salesActivityScheduleSummaryBelongsToSales(string $salesId, array $searchSchema): array;
 }

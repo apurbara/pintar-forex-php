@@ -88,11 +88,11 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
     }
     protected function tearDown(): void
     {
-//        parent::tearDown();
-//        $this->connection->table('SalesActivity')->truncate();
-//        $this->connection->table('Customer')->truncate();
-//        $this->connection->table('AssignedCustomer')->truncate();
-//        $this->connection->table('SalesActivitySchedule')->truncate();
+        parent::tearDown();
+        $this->connection->table('SalesActivity')->truncate();
+        $this->connection->table('Customer')->truncate();
+        $this->connection->table('AssignedCustomer')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
@@ -240,6 +240,53 @@ _QUERY;
                 'cursorToNextPage' => null,
             ],
         ]);
+    }
+    
+    //
+    protected function viewSummaryList()
+    {
+        $this->prepareSalesDependency();
+        
+        $this->salesActivity->insert($this->connection);
+        
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        
+        $this->assignedCustomerOne->insert($this->connection);
+        $this->assignedCustomerTwo->insert($this->connection);
+        
+        $this->salesActivityScheduleOne->insert($this->connection);
+        $this->salesActivityScheduleTwo->columns['status'] = SalesActivityScheduleStatus::COMPLETED->value;
+        $this->salesActivityScheduleTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query ( $salesId: ID!) {
+    sales ( salesId: $salesId ) {
+        salesActivityScheduleSummaryList {
+            total, startTime, endTime, status
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
+        $this->postGraphqlRequest($this->personnel->token);
+    }
+    public function test_viewSummaryList_200()
+    {
+        $this->viewSummaryList();
+        $this->seeJsonContains([
+                'total' => 1,
+                'startTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleOne->columns['startTime']),
+                'endTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleOne->columns['endTime']),
+                'status' => $this->salesActivityScheduleOne->columns['status'],
+        ]);
+        $this->seeJsonContains([
+                'total' => 1,
+                'startTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleTwo->columns['startTime']),
+                'endTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleTwo->columns['endTime']),
+                'status' => $this->salesActivityScheduleTwo->columns['status'],
+        ]);
+        $this->printApiSpesification();
     }
     
     //

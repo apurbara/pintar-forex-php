@@ -17,7 +17,7 @@ class DateTimeZ extends ScalarType
     public function parseValue($value): mixed
     {
         return (new \DateTime($value, new \DateTimeZone('Asia/Jakarta')))
-                ->format('Y-m-d H:i:sP');
+                ->format('Y-m-d\TH:i:sP');
     }
 
     public function serialize($value): mixed

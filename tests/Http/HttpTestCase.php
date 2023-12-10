@@ -69,6 +69,6 @@ abstract class HttpTestCase extends \Tests\TestCase
 
     protected function jakartaDateTimeFormat(string $datetime): string
     {
-        return (new DateTimeImmutable($datetime, new \DateTimeZone('Asia/Jakarta')))->format('Y-m-d H:i:sP');
+        return (new DateTimeImmutable($datetime, new \DateTimeZone('Asia/Jakarta')))->format('Y-m-d\TH:i:sP');
     }
 }
