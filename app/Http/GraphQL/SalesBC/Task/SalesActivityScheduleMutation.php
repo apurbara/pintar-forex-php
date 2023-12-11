@@ -5,6 +5,7 @@ namespace App\Http\GraphQL\SalesBC\Task;
 use App\Http\Controllers\SalesBC\SalesActivityReportController;
 use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\GraphqlInputRequest;
+use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReportInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
@@ -24,7 +25,7 @@ class SalesActivityScheduleMutation extends ObjectType
     {
         return [
             'submitReport' => [
-                'type' => TypeRegistry::objectType(SalesActivityReport::class),
+                'type' => TypeRegistry::objectType(SalesActivityReportInSalesBCGraph::class),
                 'args' => DoctrineGraphqlFieldsBuilder::buildInputFields(SalesActivityReport::class),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityReportController())
                         ->submitReport($app->user, $app->getAggregateRootId('salesActivityScheduleId'),
