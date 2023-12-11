@@ -29,7 +29,7 @@ class HourlyTimeInterval extends AbstractTimeInterval
 
     public function __construct(HourlyTimeIntervalData $data)
     {
-        $startTime = new \DateTimeImmutable($data->startTime);
+        $startTime = new DateTimeImmutable($data->startTime);
         $this->startTime = $startTime->setTime($startTime->format('H'), 0);
         $this->endTime = $this->startTime->add(new DateInterval('PT1H'));
     }

@@ -7,6 +7,5 @@ readonly class HourlyTimeIntervalData
 
     public function __construct(public string $startTime)
     {
-        
     }
 }
