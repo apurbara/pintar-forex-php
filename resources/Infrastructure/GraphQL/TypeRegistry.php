@@ -24,6 +24,7 @@ class TypeRegistry
         'CursorLimitInput' => CursorLimitInput::class,
         'OffsetLimitInput' => OffsetLimitInput::class,
         'DateTimeZ' => DateTimeZ::class,
+        'Pagination' => Pagination::class,
     ];
 
     private static $types = [];
