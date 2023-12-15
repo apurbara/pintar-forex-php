@@ -54,7 +54,7 @@ class Query extends ObjectType
     {
         return [
             'personnelList' => [
-                'type' => new Pagination(TypeRegistry::objectType(PersonnelGraph::class)),
+                'type' => TypeRegistry::paginationType(PersonnelGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new PersonnelController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -72,7 +72,7 @@ class Query extends ObjectType
     {
         return [
             'areaStructureList' => [
-                'type' => new Pagination(TypeRegistry::objectType(AreaStructureGraph::class)),
+                'type' => TypeRegistry::paginationType(AreaStructureGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaStructureController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -90,7 +90,7 @@ class Query extends ObjectType
     {
         return [
             'areaList' => [
-                'type' => new Pagination(TypeRegistry::objectType(AreaGraph::class)),
+                'type' => TypeRegistry::paginationType(AreaGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -108,7 +108,7 @@ class Query extends ObjectType
     {
         return [
             'managerList' => [
-                'type' => new Pagination(TypeRegistry::objectType(ManagerGraph::class)),
+                'type' => TypeRegistry::paginationType(ManagerGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new ManagerController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -126,7 +126,7 @@ class Query extends ObjectType
     {
         return [
             'salesList' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesGraph::class)),
+                'type' => TypeRegistry::paginationType(SalesGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -144,7 +144,7 @@ class Query extends ObjectType
     {
         return [
             'customerVerificationList' => [
-                'type' => new Pagination(TypeRegistry::objectType(CustomerVerificationGraph::class)),
+                'type' => TypeRegistry::paginationType(CustomerVerificationGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerVerificationController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -162,7 +162,7 @@ class Query extends ObjectType
     {
         return [
             'salesActivityList' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivityGraph::class)),
+                'type' => TypeRegistry::paginationType(SalesActivityGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -180,7 +180,7 @@ class Query extends ObjectType
     {
         return [
             'customerJourneyList' => [
-                'type' => new Pagination(TypeRegistry::objectType(CustomerJourneyGraph::class)),
+                'type' => TypeRegistry::paginationType(CustomerJourneyGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerJourneyController())
                         ->viewList($app->user, new GraphqlInputRequest($args))

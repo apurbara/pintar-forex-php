@@ -22,7 +22,8 @@ class PersonnelGraph extends GraphqlObjectType
         return [
             ...parent::fieldDefinition(),
             'managerAssignments' => [
-                'type' => new Pagination(TypeRegistry::objectType(ManagerGraph::class)),
+                'type' => TypeRegistry::paginationType(ManagerGraph::class),
+//                'type' => new Pagination(TypeRegistry::objectType(ManagerGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'Manager.Personnel_id', 'value' => $root['id']];
@@ -30,7 +31,8 @@ class PersonnelGraph extends GraphqlObjectType
                 }
             ],
             'salesAssignments' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesGraph::class)),
+                'type' => TypeRegistry::paginationType(SalesGraph::class),
+//                'type' => new Pagination(TypeRegistry::objectType(SalesGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'Sales.Personnel_id', 'value' => $root['id']];

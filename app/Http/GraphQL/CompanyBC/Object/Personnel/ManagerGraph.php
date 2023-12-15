@@ -26,7 +26,8 @@ class ManagerGraph extends GraphqlObjectType
                 'resolve' => fn ($root) => $this->buildDoctrineRepository(Personnel::class)->fetchOneById($root['Personnel_id']),
             ],
             'managedSales' => [
-                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
+                'type' => TypeRegistry::paginationType(Sales::class),
+//                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'Sales.Manager_id', 'value' => $root['id']];

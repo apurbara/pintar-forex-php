@@ -13,7 +13,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use function app;
 
@@ -37,7 +36,8 @@ class AreaGraph extends GraphqlObjectType
                 }
             ],
             'children' => [
-                'type' => new Pagination(TypeRegistry::objectType(AreaGraph::class)),
+                'type' => TypeRegistry::paginationType(AreaGraph::class),
+//                'type' => new Pagination(TypeRegistry::objectType(AreaGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'Area.Area_idOfParent', 'value' => $root['id']];

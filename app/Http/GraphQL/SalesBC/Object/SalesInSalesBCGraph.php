@@ -22,13 +22,13 @@ class SalesInSalesBCGraph extends GraphqlObjectType
         return [
             ...parent::fieldDefinition(),
             'assignedCustomers' => [
-                'type' => new Pagination(TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(AssignedCustomerInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) =>
                 (new AssignedCustomerController())->viewList($app->user, new GraphqlInputRequest($args))
             ],
             'salesActivitySchedules' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(SalesActivityScheduleInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) =>
                 (new SalesActivityScheduleController())->viewList($app->user, new GraphqlInputRequest($args))

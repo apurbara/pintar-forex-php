@@ -27,7 +27,7 @@ class CustomerInSalesBCGraph extends GraphqlObjectType
                     ->viewDetail($app->user, $root['Area_id'])
             ],
             'verificationReports' => [
-                'type' => new Pagination(TypeRegistry::objectType(VerificationReportInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(VerificationReportInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'VerificationReport.Customer_id', 'value' => $root['id']];

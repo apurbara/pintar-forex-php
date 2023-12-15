@@ -36,7 +36,7 @@ class ManagerQuery extends ObjectType
     {
         return [
             'closingRequestList' => [
-                'type' => new Pagination(TypeRegistry::objectType(ClosingRequestInManagerBCGraph::class)),
+                'type' => TypeRegistry::paginationType(ClosingRequestInManagerBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -54,7 +54,7 @@ class ManagerQuery extends ObjectType
     {
         return [
             'recycleRequestList' => [
-                'type' => new Pagination(TypeRegistry::objectType(RecycleRequestInManagerBCGraph::class)),
+                'type' => TypeRegistry::paginationType(RecycleRequestInManagerBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
                         ->viewList($app->user, new GraphqlInputRequest($args))

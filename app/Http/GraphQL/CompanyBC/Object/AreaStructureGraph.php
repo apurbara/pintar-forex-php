@@ -27,7 +27,8 @@ class AreaStructureGraph extends GraphqlObjectType
                 },
             ],
             'children' => [
-                'type' => new Pagination(TypeRegistry::objectType(AreaStructureGraph::class)),
+                'type' => TypeRegistry::paginationType(AreaStructureGraph::class),
+//                'type' => new Pagination(TypeRegistry::objectType(AreaStructureGraph::class)),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'AreaStructure.AreaStructure_idOfParent', 'value' => $root['id']];

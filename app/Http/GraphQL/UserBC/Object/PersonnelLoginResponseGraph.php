@@ -28,14 +28,14 @@ class PersonnelLoginResponseGraph extends GraphqlObjectType
                 'resolve' => fn($root) => UserRoleBuilder::generateJwtToken(UserRoleBuilder::PERSONNEL, $root['id']),
             ],
             'salesAssignments' => [
-                'type' => new Pagination(TypeRegistry::objectType(Sales::class)),
+                'type' => TypeRegistry::paginationType(Sales::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     return (new SalesAssignmentController())->viewList($app->user, new GraphqlInputRequest($args));
                 }
             ],
             'managerAssignments' => [
-                'type' => new Pagination(TypeRegistry::objectType(Manager::class)),
+                'type' => TypeRegistry::paginationType(Manager::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     return (new ManagerAssignmentController())->viewList($app->user, new GraphqlInputRequest($args));

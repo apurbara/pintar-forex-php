@@ -35,7 +35,7 @@ class AssignedCustomerInSalesBCGraph extends GraphqlObjectType
                 'resolve' => fn ($root) => isset($root['CustomerJourney_id']) ? $this->buildDoctrineRepository(CustomerJourney::class)->fetchOneById($root['CustomerJourney_id']) : null
             ],
             'schedules' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(SalesActivityScheduleInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'SalesActivitySchedule.AssignedCustomer_id', 'value' => $root['id']];
@@ -43,7 +43,7 @@ class AssignedCustomerInSalesBCGraph extends GraphqlObjectType
                 }
             ],
             'closingRequests' => [
-                'type' => new Pagination(TypeRegistry::objectType(ClosingRequestInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(ClosingRequestInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'ClosingRequest.AssignedCustomer_id', 'value' => $root['id']];
@@ -51,7 +51,7 @@ class AssignedCustomerInSalesBCGraph extends GraphqlObjectType
                 }
             ],
             'recycleRequests' => [
-                'type' => new Pagination(TypeRegistry::objectType(RecycleRequestInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(RecycleRequestInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => function ($root, $args, AppContext $app) {
                     $args['filters'][] = ['column' => 'RecycleRequest.AssignedCustomer_id', 'value' => $root['id']];

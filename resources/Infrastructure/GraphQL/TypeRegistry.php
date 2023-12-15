@@ -27,6 +27,7 @@ class TypeRegistry
     ];
 
     private static $types = [];
+    private static $paginationTypes = [];
 
     public function __construct()
     {
@@ -87,6 +88,20 @@ class TypeRegistry
 //        }
 //        return static::$types[$listCacheName];
 //    }
+    
+    public static function paginationType(string $classMetadata): Type
+    {
+        $reflectionClass = new ReflectionClass($classMetadata);
+        if ($reflectionClass->isSubclassOf(ObjectType::class)) {
+            $cacheName = $reflectionClass->getShortName() . 'Pagination';
+        } else {
+            $cacheName = $reflectionClass->getShortName() . 'GraphPagination';
+        }
+        if (!isset(static::$paginationTypes[$cacheName])) {
+            static::$paginationTypes[$cacheName] = new Pagination(static::objectType($classMetadata));
+        }
+        return static::$paginationTypes[$cacheName];
+    }
 
     public static function objectType(string $classMetadata): Type
     {

@@ -63,7 +63,7 @@ class Query extends ObjectType
     {
         return [
             'assignedCustomerList' => [
-                'type' => new Pagination(TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(AssignedCustomerInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -87,7 +87,7 @@ class Query extends ObjectType
     {
         return [
             'salesActivityScheduleList' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivityScheduleInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(SalesActivityScheduleInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -117,7 +117,7 @@ class Query extends ObjectType
     {
         return [
             'salesActivityReportList' => [
-                'type' => new Pagination(TypeRegistry::objectType(SalesActivityReport::class)),
+                'type' => TypeRegistry::paginationType(SalesActivityReport::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityReportController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -135,7 +135,7 @@ class Query extends ObjectType
     {
         return [
             'verificationReportList' => [
-                'type' => new Pagination(TypeRegistry::objectType(VerificationReportInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(VerificationReportInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new VerificationReportController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -153,7 +153,7 @@ class Query extends ObjectType
     {
         return [
             'closingRequestList' => [
-                'type' => new Pagination(TypeRegistry::objectType(ClosingRequestInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(ClosingRequestInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
@@ -171,7 +171,7 @@ class Query extends ObjectType
     {
         return [
             'recycleRequestList' => [
-                'type' => new Pagination(TypeRegistry::objectType(RecycleRequestInSalesBCGraph::class)),
+                'type' => TypeRegistry::paginationType(RecycleRequestInSalesBCGraph::class),
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
