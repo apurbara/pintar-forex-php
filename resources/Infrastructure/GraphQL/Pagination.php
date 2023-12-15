@@ -15,8 +15,8 @@ class Pagination extends ObjectType
         parent::__construct([
             'fields' => fn() => [
                 'list' => Type::listOf($type),
-                'cursorLimit' => TypeRegistry::get(CursorLimit::class),
-                'offsetLimit' => TypeRegistry::get(OffsetLimit::class),
+                'cursorLimit' => TypeRegistry::type(CursorLimit::class),
+                'offsetLimit' => TypeRegistry::type(OffsetLimit::class),
             ],
         ]);
     }

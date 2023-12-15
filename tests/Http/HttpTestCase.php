@@ -64,7 +64,7 @@ abstract class HttpTestCase extends \Tests\TestCase
     
     protected function stringOfJakartaCurrentTime(): string
     {
-        return (new DateTimeImmutable('now', new \DateTimeZone('Asia/Jakarta')))->format('Y-m-d H:i:sP');
+        return (new DateTimeImmutable('now', new \DateTimeZone('Asia/Jakarta')))->format('Y-m-d\TH:i:sP');
     }
 
     protected function jakartaDateTimeFormat(string $datetime): string

@@ -61,7 +61,7 @@ class DoctrineGraphqlFieldsBuilder
             if ($joinAttributeReflection) {
                 $colName = $columnPrefix . $joinAttributeReflection->getArguments()['name'];
                 $fields[$colName] = Type::id();
-                continue;
+//                continue;
             }
 
             $embeddedAttributeReflection = static::getAttribute($propertyReflection, Embedded::class);

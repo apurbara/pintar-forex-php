@@ -40,53 +40,53 @@ class TypeRegistry
 
     //    private static $called = 0;
 
-    public static function get(string $classname): Type
-    {
-        //static::$called += 1;
-        //if (static::$called > 100) {
-        //    throw RegularException::tooManyRequests('too many request');
-        //}
+//    public static function get(string $classname): Type
+//    {
+//        //static::$called += 1;
+//        //if (static::$called > 100) {
+//        //    throw RegularException::tooManyRequests('too many request');
+//        //}
+//
+//        $path = explode('\\', $classname);
+//        $cacheName = lcfirst(array_pop($path));
+//
+//        //        $instance = static::$types[$cacheName] ?? null;
+//        //        $diffInstance = class_exists($classname) && !($instance instanceof  $classname);
+//        //        if (!isset(static::$types[$cacheName]) || $diffInstance ) {
+//
+//        if (!isset(static::$types[$cacheName])) {
+//            $predefinedClassMap = array_merge(self::PREDEFINED_CLASS_MAP, static::getPredefinedClassMap());
+//            if (class_exists($classname)) {
+//                static::$types[$cacheName] = new $classname();
+//            } elseif (isset($predefinedClassMap[$classname]) && class_exists($predefinedClassMap[$classname])) {
+//                $class = $predefinedClassMap[$classname];
+//                static::$types[$cacheName] = new $class();
+//            } else {
+//                throw RegularException::notFound("not found: $cacheName graphql type not found");
+//            }
+//        }
+//        return static::$types[$cacheName];
+//    }
 
-        $path = explode('\\', $classname);
-        $cacheName = lcfirst(array_pop($path));
-
-        //        $instance = static::$types[$cacheName] ?? null;
-        //        $diffInstance = class_exists($classname) && !($instance instanceof  $classname);
-        //        if (!isset(static::$types[$cacheName]) || $diffInstance ) {
-
-        if (!isset(static::$types[$cacheName])) {
-            $predefinedClassMap = array_merge(self::PREDEFINED_CLASS_MAP, static::getPredefinedClassMap());
-            if (class_exists($classname)) {
-                static::$types[$cacheName] = new $classname();
-            } elseif (isset($predefinedClassMap[$classname]) && class_exists($predefinedClassMap[$classname])) {
-                $class = $predefinedClassMap[$classname];
-                static::$types[$cacheName] = new $class();
-            } else {
-                throw RegularException::notFound("not found: $cacheName graphql type not found");
-            }
-        }
-        return static::$types[$cacheName];
-    }
-
-    public static function getPagination(string $classname): Type
-    {
-        $path = explode('\\', $classname);
-        $cacheName = lcfirst(array_pop($path));
-        $listCacheName = $cacheName . 'List';
-
-        if (!isset(static::$types[$cacheName])) {
-            if (class_exists($classname)) {
-                static::$types[$cacheName] = new $classname();
-            } else {
-                throw RegularException::notFound("not found: $cacheName graphql type not found");
-            }
-        }
-
-        if (!isset(static::$types[$listCacheName])) {
-            static::$types[$listCacheName] = new Pagination(static::$types[$cacheName], $listCacheName);
-        }
-        return static::$types[$listCacheName];
-    }
+//    public static function getPagination(string $classname): Type
+//    {
+//        $path = explode('\\', $classname);
+//        $cacheName = lcfirst(array_pop($path));
+//        $listCacheName = $cacheName . 'List';
+//
+//        if (!isset(static::$types[$cacheName])) {
+//            if (class_exists($classname)) {
+//                static::$types[$cacheName] = new $classname();
+//            } else {
+//                throw RegularException::notFound("not found: $cacheName graphql type not found");
+//            }
+//        }
+//
+//        if (!isset(static::$types[$listCacheName])) {
+//            static::$types[$listCacheName] = new Pagination(static::$types[$cacheName], $listCacheName);
+//        }
+//        return static::$types[$listCacheName];
+//    }
 
     public static function objectType(string $classMetadata): Type
     {

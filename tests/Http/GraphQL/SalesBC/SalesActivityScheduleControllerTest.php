@@ -286,7 +286,7 @@ _QUERY;
                 'endTime' => $this->jakartaDateTimeFormat($this->salesActivityScheduleTwo->columns['endTime']),
                 'status' => $this->salesActivityScheduleTwo->columns['status'],
         ]);
-        $this->printApiSpesification();
+//        $this->printApiSpesification();
     }
     
     //

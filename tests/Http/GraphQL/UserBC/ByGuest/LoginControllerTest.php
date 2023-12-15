@@ -111,7 +111,7 @@ mutation ( $email: String!, $password: String!, $salesAssignmentFilters: [Filter
     byGuest {
         personnelLogin ( email: $email, password: $password ) {
             id, name, token,
-            salesAssignments ( filters: $salesAssignmentFilters) { list { id, disabled, area { id, name } } }
+            salesAssignments ( filters: $salesAssignmentFilters) { list { id, disabled , area { id, name } } }
             managerAssignments ( filters: $managerAssignmentFilters) { list { id, disabled } }
         }
     }
