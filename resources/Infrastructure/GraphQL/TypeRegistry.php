@@ -163,6 +163,9 @@ class TypeRegistry
 
     public static function type(string $classMetadata): Type
     {
+        if (isset(static::$types[$classMetadata])) {
+            return static::$types[$classMetadata];
+        }
         $predefinedInputMetadata = [...self::PREDEFINED_CLASS_MAP, ...static::getPredefinedClassMap()];
         $graphqlClassMetadata = $predefinedInputMetadata[$classMetadata] ?? $classMetadata;
 
