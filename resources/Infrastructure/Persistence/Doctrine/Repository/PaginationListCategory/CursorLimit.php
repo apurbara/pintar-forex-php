@@ -16,20 +16,21 @@ class CursorLimit implements PageLimitInterface
     public function __construct(
         int $pageSize = 20,
         ?string $cursor = null,
-        array $orders = [['column' => 'id', 'direction' => 'ASC']]
+        ?array $orders = null
     ) {
         $this->pageSize = ($pageSize > 100) ? 100 : $pageSize;
         $this->cursor = isset($cursor) ? json_decode(base64_decode($cursor), true) : null;
-        $orderedById = false;
-        foreach ($orders as $order) {
-            if (!empty($order['column'])) {
-                $this->orders[] = ['column' => $order['column'], 'direction' => $order['direction'] ?? 'ASC'];
-                $orderedById = $orderedById || ($order['column'] === 'id');
-            }
-        }
-        if (!$orderedById) {
-            $this->orders[] = ['column' => 'id', 'direction' => 'ASC'];
-        }
+        $this->orders = $orders;
+        // $orderedById = false;
+        // foreach ($orders as $order) {
+        //     if (!empty($order['column'])) {
+        //         $this->orders[] = ['column' => $order['column'], 'direction' => $order['direction'] ?? 'ASC'];
+        //         $orderedById = $orderedById || ($order['column'] === 'id');
+        //     }
+        // }
+        // if (!$orderedById) {
+        //     $this->orders[] = ['column' => 'id', 'direction' => 'ASC'];
+        // }
     }
 
     public static function fromSchema(array $schema = []): static
@@ -41,8 +42,9 @@ class CursorLimit implements PageLimitInterface
         );
     }
 
-    public function paginateResult(QueryBuilder $qb): array
+    public function paginateResult(QueryBuilder $qb, string $tableName): array
     {
+        $this->orders = [...$this->orders ?? [], ['column' => "{$tableName}.id", "direction" => "ASC"]];
         $total = $this->getTotalResult(clone $qb);
         $resultList = $this->getResultList($qb);
 
@@ -120,7 +122,8 @@ class CursorLimit implements PageLimitInterface
             } else {
                 $qb->andWhere($qb->expr()->lt("($inspectedColumns)", "($comparisonValues)"));
             }
-            $qb->setParameters($parameters);
+            // $qb->setParameters($parameters);
+            $qb->setParameters([...$qb->getParameters(), ...$parameters]);
         }
 
         $qb->setMaxResults($this->pageSize + 1);
@@ -128,7 +131,8 @@ class CursorLimit implements PageLimitInterface
             $orderDirection = $order['direction'] == 'ASC' ? 'ASC' : 'DESC';
             $qb->addOrderBy($order['column'] ?? 'id', $orderDirection);
         }
-
+// var_dump($qb->getSQL());
+// var_dump($qb->getParameters());
         return $qb->executeQuery()->fetchAllAssociative();
     }
 

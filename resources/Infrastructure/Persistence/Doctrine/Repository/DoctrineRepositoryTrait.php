@@ -18,7 +18,7 @@ trait DoctrineRepositoryTrait
     protected function fetchPaginationList(DoctrinePaginationListCategory $doctrinePaginationListCategory): array
     {
         $qb = $this->createCoreQueryBuilder();
-        return $doctrinePaginationListCategory->paginateResult($qb);
+        return $doctrinePaginationListCategory->paginateResult($qb, $this->getTableName());
     }
 
     protected function fetchAllList(DoctrineAllListCategory $doctrineAllListCategory): array

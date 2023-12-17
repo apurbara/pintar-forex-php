@@ -7,5 +7,5 @@ use Doctrine\DBAL\Query\QueryBuilder;
 interface PageLimitInterface
 {
 
-    public function paginateResult(QueryBuilder $qb): array;
+    public function paginateResult(QueryBuilder $qb, string $tableName): array;
 }

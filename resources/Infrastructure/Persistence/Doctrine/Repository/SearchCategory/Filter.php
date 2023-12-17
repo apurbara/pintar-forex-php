@@ -30,7 +30,6 @@ class Filter
         }
 
         $booleanParams = "";
-        $booleanParams = "";
         if (is_array($this->value)) {
             foreach ($this->value as $value) {
                 if (is_bool($value)) {

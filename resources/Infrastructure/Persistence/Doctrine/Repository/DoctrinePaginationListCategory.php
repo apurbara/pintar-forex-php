@@ -42,13 +42,13 @@ class DoctrinePaginationListCategory
         return new static(KeywordSearch::fromSchema($schema['keywordSearch'] ?? []), $filters, $pageLimit);
     }
 
-    public function paginateResult(QueryBuilder $qb): array
+    public function paginateResult(QueryBuilder $qb, string $tableName): array
     {
         $this->keywordSearch->applyToQuery($qb);
         foreach ($this->filters as $filter) {
             $filter->applyToQuery($qb);
         }
-        return $this->pageLimit->paginateResult($qb);
+        return $this->pageLimit->paginateResult($qb, $tableName);
     }
 
     //
