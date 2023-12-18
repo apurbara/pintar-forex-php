@@ -10,7 +10,6 @@ use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use User\Domain\Model\Personnel;
 use User\Domain\Model\Personnel\Manager;

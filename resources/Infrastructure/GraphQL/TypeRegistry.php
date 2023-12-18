@@ -11,7 +11,9 @@ use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\CustomTypes\DateTimeZ;
 use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
 use Resources\Infrastructure\GraphQL\ViewList\KeywordSearchInput;
+use Resources\Infrastructure\GraphQL\ViewPaginationList\CursorLimit;
 use Resources\Infrastructure\GraphQL\ViewPaginationList\CursorLimitInput;
+use Resources\Infrastructure\GraphQL\ViewPaginationList\OffsetLimit;
 use Resources\Infrastructure\GraphQL\ViewPaginationList\OffsetLimitInput;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
 
@@ -40,7 +42,6 @@ class TypeRegistry
     }
 
     //    private static $called = 0;
-
 //    public static function get(string $classname): Type
 //    {
 //        //static::$called += 1;
@@ -68,7 +69,6 @@ class TypeRegistry
 //        }
 //        return static::$types[$cacheName];
 //    }
-
 //    public static function getPagination(string $classname): Type
 //    {
 //        $path = explode('\\', $classname);
@@ -88,7 +88,7 @@ class TypeRegistry
 //        }
 //        return static::$types[$listCacheName];
 //    }
-    
+
     public static function paginationType(string $classMetadata): Type
     {
         $reflectionClass = new ReflectionClass($classMetadata);
@@ -98,13 +98,24 @@ class TypeRegistry
             $cacheName = $reflectionClass->getShortName() . 'GraphPagination';
         }
         if (!isset(static::$paginationTypes[$cacheName])) {
-            static::$paginationTypes[$cacheName] = new Pagination(static::objectType($classMetadata));
+//            static::$paginationTypes[$cacheName] = new Pagination(static::objectType($classMetadata));
+            static::$paginationTypes[$cacheName] = new ObjectType([
+                'name' => 'paginationObjectType',
+                'fields' => fn() => [
+                    'list' => Type::listOf(TypeRegistry::objectType($classMetadata)),
+                    'cursorLimit' => TypeRegistry::objectType(CursorLimit::class),
+                    'offsetLimit' => TypeRegistry::objectType(OffsetLimit::class),
+                ],
+            ]);
         }
         return static::$paginationTypes[$cacheName];
     }
 
     public static function objectType(string $classMetadata): Type
     {
+        if (isset(static::$types[$classMetadata])) {
+            return static::$types[$classMetadata];
+        }
         $reflectionClass = new ReflectionClass($classMetadata);
         if ($reflectionClass->isSubclassOf(ObjectType::class)) {
             $cacheName = $reflectionClass->getShortName();
@@ -116,7 +127,7 @@ class TypeRegistry
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = new ObjectType([
                     'name' => $cacheName,
-                    'fields' => fn () => DoctrineGraphqlFieldsBuilder::buildObjectFields($classMetadata),
+                    'fields' => fn() => DoctrineGraphqlFieldsBuilder::buildObjectFields($classMetadata),
                 ]);
             }
         }
@@ -136,7 +147,7 @@ class TypeRegistry
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = new InputObjectType([
                     'name' => $cacheName,
-                    'fields' => fn () => DoctrineGraphqlFieldsBuilder::buildInputFields($classMetadata),
+                    'fields' => fn() => DoctrineGraphqlFieldsBuilder::buildInputFields($classMetadata),
                 ]);
             }
         }
@@ -169,7 +180,7 @@ class TypeRegistry
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = new EnumType([
                     'name' => $cacheName,
-                    'values' => fn () => DoctrineGraphqlFieldsBuilder::getEnumValues($classMetadata),
+                    'values' => fn() => DoctrineGraphqlFieldsBuilder::getEnumValues($classMetadata),
                 ]);
             }
         }
