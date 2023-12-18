@@ -7,7 +7,7 @@ use Doctrine\DBAL\Query\QueryBuilder;
 class Filter
 {
 
-    protected string|Array $value;
+    protected string|array $value;
     protected string $column;
     protected ?string $comparisonType;
 
@@ -29,20 +29,22 @@ class Filter
             return;
         }
 
-        $booleanParams = "";
+        $params = "";
         if (is_array($this->value)) {
             foreach ($this->value as $value) {
                 if (is_bool($value)) {
                     $val = intval($value);
-                    $booleanParams .= empty($booleanParams) ? $val : ", {$val}";
+                    $params .= empty($params) ? $val : ", {$val}";
+                } else {
+                    $params .= empty($params) ? "'{$value}'" : ", '{$value}'";
                 }
             }
-        } 
-        if ($this->comparisonType == 'IN' && $booleanParams) {
-            $qb->andWhere($qb->expr()->in($this->column, $booleanParams));
+        }
+        if ($this->comparisonType == 'IN' && $params) {
+            $qb->andWhere($qb->expr()->in($this->column, $params));
             return;
         }
-        
+
         $cleanColumn = str_replace(array('.'), '', $this->column);
         $comparison = match ($this->comparisonType) {
             'LT' => $qb->expr()->lt($this->column, ":{$cleanColumn}"),
@@ -54,6 +56,6 @@ class Filter
             default => $qb->expr()->eq($this->column, ":{$cleanColumn}"),
         };
         $qb->andWhere($comparison)
-                ->setParameter($cleanColumn, implode(', ', (array)$this->value));
+            ->setParameter($cleanColumn, implode(', ', (array)$this->value));
     }
 }
