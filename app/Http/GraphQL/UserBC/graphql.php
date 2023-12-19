@@ -13,7 +13,7 @@ use Resources\Infrastructure\GraphQL\TypeRegistry;
 $schema = new Schema([
     'query' => TypeRegistry::type(Query::class),
     'mutation' => TypeRegistry::type(Mutation::class),
-    'typeLoader' => static fn($name) => TypeRegistry::type($name),
+    'typeLoader' => static fn($name) => TypeRegistry::load($name),
 ]);
 
 return require __DIR__ . '/../executeGraphqlQuery.php';

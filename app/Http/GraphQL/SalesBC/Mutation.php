@@ -33,25 +33,31 @@ class Mutation extends ObjectType
 
     protected function fieldDefinition(): array
     {
-        $type = new ObjectType([
-            'name' => 'salesMutation',
-            'fields' => fn() => [
-                ...$this->assignedCustomerMutation(),
-                ...$this->salesActivityScheduleMutation(),
-                ...$this->closingRequestMutation(),
-                ...$this->recycleRequestMutation(),
-            ],
-        ]);
         return [
-            'sales' => [
-                'type' => $type,
-                'args' => ['salesId' => Type::nonNull(Type::id())],
-                'resolve' => function ($root, $args, AppContext $app) use ($type) {
-                    $app->user = $app->user->authorizedAsSales($args['salesId']);
-                    return $type;
-                }
-            ]
+            ...$this->assignedCustomerMutation(),
+            ...$this->salesActivityScheduleMutation(),
+            ...$this->closingRequestMutation(),
+            ...$this->recycleRequestMutation(),
         ];
+//        $type = new ObjectType([
+//            'name' => 'salesMutation',
+//            'fields' => fn() => [
+//                ...$this->assignedCustomerMutation(),
+//                ...$this->salesActivityScheduleMutation(),
+//                ...$this->closingRequestMutation(),
+//                ...$this->recycleRequestMutation(),
+//            ],
+//        ]);
+//        return [
+//            'sales' => [
+//                'type' => $type,
+//                'args' => ['salesId' => Type::nonNull(Type::id())],
+//                'resolve' => function ($root, $args, AppContext $app) use ($type) {
+//                    $app->user = $app->user->authorizedAsSales($args['salesId']);
+//                    return $type;
+//                }
+//            ]
+//        ];
     }
 
     protected function assignedCustomerMutation(): array

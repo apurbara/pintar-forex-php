@@ -36,27 +36,35 @@ class Query extends ObjectType
 
     protected function fieldDefinition(): array
     {
-        $type = new ObjectType([
-            'name' => 'salesQuery',
-            'fields' => fn() => [
-        ...$this->assignedCustomerQuery(),
-        ...$this->salesActivityScheduleQuery(),
-        ...$this->salesActivityReportQuery(),
-        ...$this->verificationReportQuery(),
-        ...$this->closingRequestQuery(),
-        ...$this->recycleRequestQuery(),
-            ],
-        ]);
         return [
-            'sales' => [
-                'type' => $type,
-                'args' => ['salesId' => Type::nonNull(Type::id())],
-                'resolve' => function ($root, $args, AppContext $app) use ($type) {
-                    $app->user = $app->user->authorizedAsSales($args['salesId']);
-                    return $type;
-                }
-            ]
+            ...$this->assignedCustomerQuery(),
+            ...$this->salesActivityScheduleQuery(),
+            ...$this->salesActivityReportQuery(),
+            ...$this->verificationReportQuery(),
+            ...$this->closingRequestQuery(),
+            ...$this->recycleRequestQuery(),
         ];
+//        $type = new ObjectType([
+//            'name' => 'salesQuery',
+//            'fields' => fn() => [
+//                ...$this->assignedCustomerQuery(),
+//                ...$this->salesActivityScheduleQuery(),
+//                ...$this->salesActivityReportQuery(),
+//                ...$this->verificationReportQuery(),
+//                ...$this->closingRequestQuery(),
+//                ...$this->recycleRequestQuery(),
+//            ],
+//        ]);
+//        return [
+//            'sales' => [
+//                'type' => $type,
+//                'args' => ['salesId' => Type::nonNull(Type::id())],
+//                'resolve' => function ($root, $args, AppContext $app) use ($type) {
+//                    $app->user = $app->user->authorizedAsSales($args['salesId']);
+//                    return $type;
+//                }
+//            ]
+//        ];
     }
 
     protected function assignedCustomerQuery(): array

@@ -44,7 +44,7 @@ $mutation = new ObjectType([
 $schema = new Schema([
     'query' => $query,
     'mutation' => $mutation,
-    'typeLoader' => static fn($name) => TypeRegistry::type($name),
+    'typeLoader' => static fn($name) => TypeRegistry::load($name),
 ]);
 
 return require __DIR__ . '/../executeGraphqlQuery.php';
