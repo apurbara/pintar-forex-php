@@ -8,7 +8,10 @@ use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\ValueObject\AccountInfo;
+use User\Domain\Model\Personnel\Manager;
+use User\Domain\Model\Personnel\Sales;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 use User\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
 
@@ -27,6 +30,13 @@ class Personnel
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
+
+    //
+    #[FetchableObjectList(targetEntity: Sales::class, joinColumnName: "Personnel_id", paginationRequired: false)]
+    protected $salesAssignments;
+
+    #[FetchableObjectList(targetEntity: Manager::class, joinColumnName: "Personnel_id", paginationRequired: false)]
+    protected $managerAssignments;
 
     public function getId(): string
     {

@@ -11,7 +11,11 @@ use Manager\Domain\Task\ClosingRequest\ViewClosingRequestList;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 
+#[GraphqlMapableController(entity: ClosingRequest::class)]
 class ClosingRequestController extends Controller
 {
 
@@ -21,27 +25,30 @@ class ClosingRequestController extends Controller
     }
 
     //
-    public function accept(ManagerRoleInterface $user, string $closingRequestId)
+    #[Mutation]
+    public function acceptClosingRequest(ManagerRoleInterface $user, string $id)
     {
         $repository = $this->repository();
 
         $task = new AcceptClosingRequestTask($repository);
-        $user->executeManagerTask($task, $closingRequestId);
+        $user->executeManagerTask($task, $id);
 
-        return $repository->fetchOneById($closingRequestId);
+        return $repository->queryOneById($id);
     }
 
-    public function reject(ManagerRoleInterface $user, string $closingRequestId)
+    #[Mutation]
+    public function rejectClosingRequest(ManagerRoleInterface $user, string $id)
     {
         $repository = $this->repository();
 
         $task = new RejectClosingRequestTask($repository);
-        $user->executeManagerTask($task, $closingRequestId);
+        $user->executeManagerTask($task, $id);
 
-        return $repository->fetchOneById($closingRequestId);
+        return $repository->queryOneById($id);
     }
 
-    public function viewList(ManagerRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function closingRequestList(ManagerRoleInterface $user, InputRequest $input)
     {
         $task = new ViewClosingRequestList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -51,7 +58,8 @@ class ClosingRequestController extends Controller
         return $payload->result;
     }
 
-    public function viewDetail(ManagerRoleInterface $user, string $id)
+    #[Query]
+    public function closingRequestDetail(ManagerRoleInterface $user, string $id)
     {
         $task = new ViewClosingRequestDetail($this->repository());
         $payload = new ViewDetailPayload($id);

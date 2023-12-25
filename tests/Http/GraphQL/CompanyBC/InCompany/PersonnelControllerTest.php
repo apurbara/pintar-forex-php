@@ -94,7 +94,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query PersonnelList{
-    viewPersonnelList{
+    personnelList{
         list { id, disabled, createdTime, name, email },
         cursorLimit { total, cursorToNextPage }
     }
@@ -142,7 +142,7 @@ _QUERY;
         
         $this->graphqlQuery = <<<'_QUERY'
 query PersonnelDetail ( $id: ID! ) {
-    viewPersonnelDetail ( id: $id ) {
+    personnelDetail ( id: $id ) {
         id, disabled, createdTime, name, email,
         managerAssignments { list { id, disabled } }
         salesAssignments { 

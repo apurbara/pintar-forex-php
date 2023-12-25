@@ -10,7 +10,13 @@ use Attribute;
 final class Mutation
 {
 
-//    public readonly ?string $responseType;
+    public readonly ?string $responseType;
+
+    public function __construct(?string $responseType = null)
+    {
+        $this->responseType = $responseType;
+    }
+
 //    public readonly ?string $inputType;
 //    public readonly ?string $inputName;
 //
@@ -20,6 +26,4 @@ final class Mutation
 //        $this->inputType = $inputType;
 //        $this->inputName = $inputName;
 //    }
-
-
 }

@@ -39,7 +39,7 @@ class CustomerVerificationController extends Controller
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewCustomerVerificationList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function customerVerificationList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewCustomerVerificationListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -49,7 +49,7 @@ class CustomerVerificationController extends Controller
     }
 
     #[Query]
-    public function viewCustomerVerificationDetail(CompanyUserRoleInterface $user, string $id)
+    public function customerVerificationDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewCustomerVerificationDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);

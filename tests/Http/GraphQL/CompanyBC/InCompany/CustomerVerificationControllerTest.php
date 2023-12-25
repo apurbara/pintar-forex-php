@@ -73,7 +73,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query {
-    viewCustomerVerificationList{
+    customerVerificationList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }
     }
@@ -117,7 +117,7 @@ _QUERY;
         
         $this->graphqlQuery = <<<'_QUERY'
 query CustomerVerificationDetail ( $id: ID! ) {
-    viewCustomerVerificationDetail ( id: $id ) {
+    customerVerificationDetail ( id: $id ) {
         id, disabled, createdTime, name, description
     }
 }

@@ -7,11 +7,14 @@ namespace App\Http\GraphQL\ManagerBC;
 //require_once __DIR__ . '/../../vendor/autoload.php';
 
 
+use App\Http\Controllers\ManagerBC\ManagerRoleInterface;
+use App\Http\Controllers\UserBC\ByPersonnel\PersonnelRoleInterface;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
+use function app;
 use function base_path;
 
 $query = new ObjectType([
@@ -21,7 +24,7 @@ $query = new ObjectType([
             'type' => TypeRegistry::type(ManagerQuery::class),
             'args' => ['managerId' => Type::nonNull(Type::id())],
             'resolve' => function($root, $args, AppContext $appContext){
-                $appContext->user = $appContext->user->authorizeAsManager($args['managerId']);
+                app()->singleton(ManagerRoleInterface::class, fn() => app(PersonnelRoleInterface::class)->authorizeAsManager($args['managerId']));
                 return TypeRegistry::type(ManagerQuery::class);
             }
         ],
@@ -35,7 +38,7 @@ $mutation = new ObjectType([
             'type' => TypeRegistry::type(ManagerMutation::class),
             'args' => ['managerId' => Type::nonNull(Type::id())],
             'resolve' => function($root, $args, AppContext $appContext){
-                $appContext->user = $appContext->user->authorizeAsManager($args['managerId']);
+                app()->singleton(ManagerRoleInterface::class, fn() => app(PersonnelRoleInterface::class)->authorizeAsManager($args['managerId']));
                 return TypeRegistry::type(ManagerMutation::class);
             }
         ],

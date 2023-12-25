@@ -42,7 +42,7 @@ class ManagerController extends Controller
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewManagerList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function managerList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewManagerListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -52,7 +52,7 @@ class ManagerController extends Controller
     }
     
     #[Query]
-    public function viewManagerDetail(CompanyUserRoleInterface $user, string $id)
+    public function managerDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewManagerDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);

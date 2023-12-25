@@ -18,6 +18,9 @@ use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleReques
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineTransactionalSession;
 use Sales\Application\Listener\InitiateSalesActivityScheduleListener;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer as AssignedCustomer2;
@@ -25,6 +28,7 @@ use Sales\Domain\Model\SalesActivity;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 use SharedContext\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;
 
+#[GraphqlMapableController(entity: RecycleRequest::class)]
 class RecycleRequestController extends Controller
 {
 
@@ -41,7 +45,8 @@ class RecycleRequestController extends Controller
     }
 
     //
-    public function approve(ManagerRoleInterface $user, string $recycleRequestId)
+    #[Mutation]
+    public function approveRecycleRequest(ManagerRoleInterface $user, string $id)
     {
         $repository = $this->repository();
         $dispatcher = new Dispatcher();
@@ -61,9 +66,9 @@ class RecycleRequestController extends Controller
         $dispatcher->addTransactionalListener(InHouseSalesCustomerAssignmentRecycledEvent::eventName(), $assignedCustomerListener);
         $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(), $this->buildInitiateSalesActivityScheduleListener());
         
-        $acceptRecycleRequestFunction = function() use($user, $repository, $recycleRequestId, $dispatcher) {
+        $acceptRecycleRequestFunction = function() use($user, $repository, $id, $dispatcher) {
             $task = new ApproveRecycleRequest($repository, $dispatcher);
-            $user->executeManagerTask($task, $recycleRequestId);
+            $user->executeManagerTask($task, $id);
             $dispatcher->publishTransactional();
             $dispatcher->publishTransactional();
         };
@@ -71,20 +76,22 @@ class RecycleRequestController extends Controller
         $transactionalSession = new DoctrineTransactionalSession($this->em);
         $transactionalSession->executeAtomically($acceptRecycleRequestFunction);
         
-        return $repository->fetchOneById($recycleRequestId);
+        return $repository->queryOneById($id);
     }
 
-    public function reject(ManagerRoleInterface $user, string $recycleRequestId)
+    #[Mutation]
+    public function rejectRecycleRequest(ManagerRoleInterface $user, string $id)
     {
         $repository = $this->repository();
 
         $task = new RejectRecycleRequest($repository);
-        $user->executeManagerTask($task, $recycleRequestId);
+        $user->executeManagerTask($task, $id);
 
-        return $repository->fetchOneById($recycleRequestId);
+        return $repository->queryOneById($id);
     }
 
-    public function viewList(ManagerRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function recycleRequestList(ManagerRoleInterface $user, InputRequest $input)
     {
         $task = new ViewRecycleRequestList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -94,7 +101,8 @@ class RecycleRequestController extends Controller
         return $payload->result;
     }
 
-    public function viewDetail(ManagerRoleInterface $user, string $id)
+    #[Query]
+    public function recycleRequestDetail(ManagerRoleInterface $user, string $id)
     {
         $task = new ViewRecycleRequestDetail($this->repository());
         $payload = new ViewDetailPayload($id);

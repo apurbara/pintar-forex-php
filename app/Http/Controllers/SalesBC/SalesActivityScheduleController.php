@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\SalesActivity;
@@ -18,6 +21,7 @@ use Sales\Domain\Task\SalesActivitySchedule\ViewTotalSalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 
+#[GraphqlMapableController(entity: SalesActivitySchedule::class)]
 class SalesActivityScheduleController extends Controller
 {
 
@@ -27,7 +31,8 @@ class SalesActivityScheduleController extends Controller
     }
 
     //
-    public function submitSchedule(SalesRoleInterface $user, string $assignedCustomerId, InputRequest $input)
+    #[Mutation]
+    public function submitSalesActivitySchedule(SalesRoleInterface $user, string $AssignedCustomer_id, InputRequest $input)
     {
         $repository = $this->repository();
         $assignedCustomerRepository = $this->em->getRepository(AssignedCustomer::class);
@@ -38,14 +43,15 @@ class SalesActivityScheduleController extends Controller
 
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($input->get('startTime'));
         $payload = (new AssignedCustomer\SalesActivityScheduleData($hourlyTimeIntervalData))
-                ->setAssignedCustomerId($assignedCustomerId)
-                ->setSalesActivityId($input->get('salesActivityId'));
+                ->setAssignedCustomerId($AssignedCustomer_id)
+                ->setSalesActivityId($input->get('SalesActivity_id'));
         
         $user->executeSalesTask($task, $payload);
-        return $repository->fetchOneByIdOrDie($payload->id);
+        return $repository->queryOneById($payload->id);
     }
     
-    public function viewList(SalesRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function salesActivityScheduleList(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewSalesActivityScheduleListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -54,7 +60,7 @@ class SalesActivityScheduleController extends Controller
         return $payload->result;
     }
     
-    public function viewSummaryList(SalesRoleInterface $user, InputRequest $input)
+    public function salesActivityScheduleSummaryList(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewSalesActivityScheduleSummary($this->repository());
         $payload = $this->buildViewAllListPayload($input);
@@ -63,7 +69,8 @@ class SalesActivityScheduleController extends Controller
         return $payload->result;
     }
     
-    public function viewDetail(SalesRoleInterface $user, string $id)
+    #[Query]
+    public function salesActivityScheduleDetail(SalesRoleInterface $user, string $id)
     {
         $task = new ViewSalesActivityScheduleDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);
@@ -72,7 +79,7 @@ class SalesActivityScheduleController extends Controller
         return $payload->result;
     }
     
-    public function viewTotalSchedule(SalesRoleInterface $user, InputRequest $input)
+    public function totalSalesActivitySchedule(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewTotalSalesActivitySchedule($this->repository());
         $searchSchema = [

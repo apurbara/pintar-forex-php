@@ -1,12 +1,13 @@
 <?php
 
-namespace Tests\Http\GraphQL\SalesBC;
+namespace App\Http\Controllers\SalesBC;
 
 use Company\Domain\Model\SalesActivity;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
+use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class SalesActivityReportControllerTest extends SalesBCTestCase
@@ -73,19 +74,17 @@ class SalesActivityReportControllerTest extends SalesBCTestCase
         $this->salesActivitySchedule->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $salesActivityScheduleId: ID!, $content: String ) {
+mutation ( $salesId: ID!, $SalesActivitySchedule_id: ID!, $content: String ) {
     sales ( salesId: $salesId ) {
-        salesActivitySchedule ( salesActivityScheduleId: $salesActivityScheduleId ) {
-            submitReport ( content: $content ) {
-                id, content, submitTime
-            }
+        submitSalesActivityReport (SalesActivitySchedule_id: $SalesActivitySchedule_id, content: $content ) {
+            id, content, submitTime
         }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'salesActivityScheduleId' => $this->salesActivitySchedule->columns['id'],
+            'SalesActivitySchedule_id' => $this->salesActivitySchedule->columns['id'],
             ...$this->submitReportRequest
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -170,7 +169,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        salesActivityReportDetail ( salesActivityReportId: $id ) {
+        salesActivityReportDetail ( id: $id ) {
             id, content, submitTime
         }
     }

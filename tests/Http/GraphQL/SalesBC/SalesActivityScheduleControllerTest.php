@@ -1,13 +1,15 @@
 <?php
 
-namespace Tests\Http\GraphQL\SalesBC;
+namespace App\Http\Controllers\SalesBC;
 
 use Company\Domain\Model\SalesActivity;
 use DateTime;
+use DateTimeImmutable;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
+use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class SalesActivityScheduleControllerTest extends SalesBCTestCase
@@ -82,8 +84,8 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->salesActivityScheduleThree->columns['endTime'] = (new \DateTime('next monday'))->setTime(12, 0)->format('Y-m-d H') . ":00:00";
         
         $this->submitScheduleRequest = [
-            'salesActivityId' => $this->salesActivity->columns['id'],
-            'startTime' => (new \DateTimeImmutable('next monday'))->setTime(10, 0)->format('Y-m-d H:i:s'),
+            'SalesActivity_id' => $this->salesActivity->columns['id'],
+            'startTime' => (new DateTimeImmutable('next monday'))->setTime(10, 0)->format('Y-m-d H:i:s'),
         ];
     }
     protected function tearDown(): void
@@ -103,20 +105,18 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->assignedCustomer->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $assignedCustomerId: ID!, $salesActivityId: ID!, $startTime: DateTimeZ ) {
+mutation ( $salesId: ID!, $AssignedCustomer_id: ID!, $SalesActivity_id: ID!, $startTime: DateTimeZ ) {
     sales ( salesId: $salesId ) {
-        assignedCustomer ( assignedCustomerId: $assignedCustomerId) {
-            submitSalesActivitySchedule ( salesActivityId: $salesActivityId, startTime: $startTime ) {
-                id, status, startTime
-                salesActivity { id, name, duration }
-            }
+        submitSalesActivitySchedule ( AssignedCustomer_id: $AssignedCustomer_id, SalesActivity_id: $SalesActivity_id, startTime: $startTime ) {
+            id, status, startTime
+            salesActivity { id, name, duration }
         }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'assignedCustomerId' => $this->assignedCustomer->columns['id'],
+            'AssignedCustomer_id' => $this->assignedCustomer->columns['id'],
             ...$this->submitScheduleRequest
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -130,7 +130,7 @@ _QUERY;
             'status' => 'SCHEDULED',
             'startTime' => $this->jakartaDateTimeFormat((new DateTime($this->submitScheduleRequest['startTime']))->format('Y-m-d H') . ":00:00"),
             'salesActivity' => [
-                'id' => $this->submitScheduleRequest['salesActivityId'],
+                'id' => $this->submitScheduleRequest['SalesActivity_id'],
                 'name' => $this->salesActivity->columns['name'],
                 'duration' => $this->salesActivity->columns['duration'],
             ],
@@ -164,7 +164,7 @@ _QUERY;
         
         $this->seeInDatabase('SalesActivitySchedule', [
             'id' => $this->salesActivityScheduleTwo->columns['id'],
-            'startTime' => (new \DateTimeImmutable('next monday'))->setTime(11, 0)->format('Y-m-d H:i:s'),
+            'startTime' => (new DateTimeImmutable('next monday'))->setTime(11, 0)->format('Y-m-d H:i:s'),
         ]);
     }
     
@@ -305,7 +305,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        salesActivityScheduleDetail ( salesActivityScheduleId: $id ) {
+        salesActivityScheduleDetail ( id: $id ) {
             id, status, startTime, endTime
             assignedCustomer {
                 id, 
@@ -354,8 +354,8 @@ _QUERY;
         $this->assignedCustomerTwo->insert($this->connection);
         $this->assignedCustomerThree->insert($this->connection);
         
-        $this->salesActivityScheduleOne->columns['startTime'] = (new \DateTimeImmutable('-2 days'))->setTime(10, 0)->format('Y-m-d H:i:s');
-        $this->salesActivityScheduleOne->columns['endTime'] = (new \DateTimeImmutable('-2 days'))->setTime(11, 0)->format('Y-m-d H:i:s');
+        $this->salesActivityScheduleOne->columns['startTime'] = (new DateTimeImmutable('-2 days'))->setTime(10, 0)->format('Y-m-d H:i:s');
+        $this->salesActivityScheduleOne->columns['endTime'] = (new DateTimeImmutable('-2 days'))->setTime(11, 0)->format('Y-m-d H:i:s');
         $this->salesActivityScheduleOne->insert($this->connection);
         $this->salesActivityScheduleTwo->insert($this->connection);
         $this->salesActivityScheduleThree->insert($this->connection);

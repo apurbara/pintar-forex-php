@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Http\GraphQL\SalesBC;
+namespace App\Http\Controllers\SalesBC;
 
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequest;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class RecycleRequestControllerTest extends SalesBCTestCase
@@ -56,19 +57,17 @@ class RecycleRequestControllerTest extends SalesBCTestCase
         $this->assignedCustomer->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $assignedCustomerId: ID!, $note: String ) {
+mutation ( $salesId: ID!, $AssignedCustomer_id: ID!, $note: String ) {
     sales ( salesId: $salesId ) {
-        assignedCustomer ( assignedCustomerId: $assignedCustomerId) {
-            submitRecycleRequest ( note: $note ) {
-                id, status, createdTime, note
-            }
+        submitRecycleRequest ( AssignedCustomer_id: $AssignedCustomer_id, note: $note ) {
+            id, status, createdTime, note
         }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'assignedCustomerId' => $this->assignedCustomer->columns['id'],
+            'AssignedCustomer_id' => $this->assignedCustomer->columns['id'],
             ...$this->recycleRequestPayload
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -100,9 +99,9 @@ _QUERY;
         $this->recycleRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $recycleRequestId: ID!, $note: String ) {
+mutation ( $salesId: ID!, $id: ID!, $note: String ) {
     sales ( salesId: $salesId ) {
-        updateRecycleRequest ( recycleRequestId: $recycleRequestId,  note: $note ) {
+        updateRecycleRequest ( id: $id,  note: $note ) {
             id, status, createdTime, note
         }
     }
@@ -110,7 +109,7 @@ mutation ( $salesId: ID!, $recycleRequestId: ID!, $note: String ) {
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'recycleRequestId' => $this->recycleRequestOne->columns['id'],
+            'id' => $this->recycleRequestOne->columns['id'],
             ...$this->recycleRequestPayload,
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -211,7 +210,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        recycleRequestDetail ( recycleRequestId: $id ) {
+        recycleRequestDetail ( id: $id ) {
             id, status, createdTime, note
         }
     }

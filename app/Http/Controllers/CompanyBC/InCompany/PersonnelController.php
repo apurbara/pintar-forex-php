@@ -41,7 +41,7 @@ class PersonnelController extends Controller
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewPersonnelList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function personnelList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewPersonnelListTask($this->personnelRepository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -51,7 +51,7 @@ class PersonnelController extends Controller
     }
     
     #[Query]
-    public function viewPersonnelDetail(CompanyUserRoleInterface $user, string $id)
+    public function personnelDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewPersonnelDetailTask($this->personnelRepository());
         $payload = new ViewDetailPayload($id);

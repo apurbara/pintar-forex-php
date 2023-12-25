@@ -3,6 +3,7 @@
 namespace Manager\Domain\Model\Personnel\Manager;
 
 use Company\Domain\Model\AreaStructure\Area as AreaInCompanyBC;
+use Company\Domain\Model\Personnel as PersonnelInCompanyBC;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
@@ -16,13 +17,14 @@ use Manager\Domain\Model\AreaStructure\Area\Customer;
 use Manager\Domain\Model\CustomerJourney;
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
+use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\SalesType;
 
-#[Entity]
+#[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales
 {
 
@@ -48,6 +50,12 @@ class Sales
     #[FetchableObjectList(targetEntity: AssignedCustomer::class, joinColumnName: "Sales_id", paginationRequired: true)]
     #[OneToMany(targetEntity: AssignedCustomer::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
     protected Collection $assignedCustomers;
+    
+    //
+    #[FetchableObject(targetEntity: PersonnelInCompanyBC::class, joinColumnName: "Personnel_id")]
+    #[JoinColumn(name: "Personnel_id", referencedColumnName: "id")]
+    protected $personnel;
+    
 
     public function getType(): SalesType
     {

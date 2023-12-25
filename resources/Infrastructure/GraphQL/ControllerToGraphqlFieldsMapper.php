@@ -41,7 +41,8 @@ class ControllerToGraphqlFieldsMapper
 
 //            $mutationFields[static::generateMethodName($methodReflection, $controllerReflection)] = [
             $mutationFields[$methodReflection->getName()] = [
-                'type' => TypeRegistry::objectType($responseTypeMetadata),
+                'type' => TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata),
+//                'type' => TypeRegistry::objectType($responseTypeMetadata),
 //                'args' => DoctrineEntityToGraphqlFieldMapper::mapInputFields($entityMetadata),
                 'args' => $args,
                 'resolve' => function ($root, $args, AppContext $app) use ($controllerMetadata, $methodReflection) {
@@ -65,16 +66,16 @@ class ControllerToGraphqlFieldsMapper
         foreach (ReflectionHelper::getPublicMethodsWithAttribute($controllerReflection, Query::class) as $methodReflection) {
             $args = [];
 
-            $inputTypeMetadata = ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'inputType');
-            if ($inputTypeMetadata) {
-                $inputTypeObject = new \ReflectionClass($inputTypeMetadata);
-                if ($inputTypeObject->isSubclassOf(GraphqlInputType::class)) {
-                    $args = [
-                        ...$args,
-                        ...$inputTypeObject->newInstance()->fieldDefinition(),
-                    ];
-                }
-            }
+//            $inputTypeMetadata = ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'inputType');
+//            if ($inputTypeMetadata) {
+//                $inputTypeObject = new \ReflectionClass($inputTypeMetadata);
+//                if ($inputTypeObject->isSubclassOf(GraphqlInputType::class)) {
+//                    $args = [
+//                        ...$args,
+//                        ...$inputTypeObject->newInstance()->fieldDefinition(),
+//                    ];
+//                }
+//            }
 
             if (ReflectionHelper::methodHasParameter($methodReflection, 'id')) {
                 $args = [
@@ -84,20 +85,21 @@ class ControllerToGraphqlFieldsMapper
             }
 
             if (ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseWrapper') === Query::PAGINATION_RESPONSE_WRAPPER) {
-                $responseType = TypeRegistry::paginationType($responseTypeMetadata);
+                $responseType = TypeRegistry::paginationType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata);
+//                $responseType = TypeRegistry::paginationType($responseTypeMetadata);
 //                $responseType = new Pagination(TypeRegistry::objectType($responseTypeMetadata));
                 $args = [
                     ...$args,
                     ...InputListSchema::paginationListSchema(),
                 ];
             } elseif (ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseWrapper') === Query::LIST_RESPONSE_WRAPPER) {
-                $responseType = Type::listOf(TypeRegistry::objectType($responseTypeMetadata));
+                $responseType = Type::listOf(TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata));
                 $args = [
                     ...$args,
                     ...InputListSchema::allListSchema(),
                 ];
             } else {
-                $responseType = TypeRegistry::objectType($responseTypeMetadata);
+                $responseType = TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata);
             }
 
 //            $queryFields[static::generateMethodName($methodReflection, $controllerReflection)] = [

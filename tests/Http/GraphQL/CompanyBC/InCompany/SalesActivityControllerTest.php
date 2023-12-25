@@ -117,7 +117,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query SalesActivityList{
-    viewSalesActivityList{
+    salesActivityList{
         list { id, disabled, createdTime, name, description, duration },
         cursorLimit { total, cursorToNextPage }
     }
@@ -163,7 +163,7 @@ _QUERY;
         
         $this->graphqlQuery = <<<'_QUERY'
 query SalesActivityDetail ( $id: ID! ) {
-    viewSalesActivityDetail ( id: $id ) {
+    salesActivityDetail ( id: $id ) {
         id, disabled, createdTime, name, description, duration
     }
 }

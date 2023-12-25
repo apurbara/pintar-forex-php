@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Http\GraphQL\SalesBC;
+namespace App\Http\Controllers\SalesBC;
 
 use Company\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class VerificationReportControllerTest extends SalesBCTestCase
@@ -68,20 +69,18 @@ class VerificationReportControllerTest extends SalesBCTestCase
         $this->assignedCustomer->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $assignedCustomerId: ID!, $customerVerificationId: ID!, $note: String ) {
+mutation ( $salesId: ID!, $AssignedCustomer_id: ID!, $CustomerVerification_id: ID!, $note: String ) {
     sales ( salesId: $salesId ) {
-        assignedCustomer ( assignedCustomerId: $assignedCustomerId ) {
-            submitCustomerVerificationReport ( customerVerificationId: $customerVerificationId, note: $note) {
-                createdTime, note, CustomerVerification_id
-            }
+        submitCustomerVerificationReport ( AssignedCustomer_id: $AssignedCustomer_id, CustomerVerification_id: $CustomerVerification_id, note: $note) {
+            createdTime, note, CustomerVerification_id
         }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'assignedCustomerId' => $this->assignedCustomer->columns['id'],
-            'customerVerificationId' => $this->customerVerification->columns['id'],
+            'AssignedCustomer_id' => $this->assignedCustomer->columns['id'],
+            'CustomerVerification_id' => $this->customerVerification->columns['id'],
             ...$this->submitReportRequest
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -200,7 +199,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        verificationReportDetail ( verificationReportId: $id ) {
+        verificationReportDetail ( id: $id ) {
             id, note, createdTime, customerVerification { id, name }
         }
     }

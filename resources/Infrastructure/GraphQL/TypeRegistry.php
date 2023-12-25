@@ -15,7 +15,6 @@ use Resources\Infrastructure\GraphQL\ViewPaginationList\CursorLimit;
 use Resources\Infrastructure\GraphQL\ViewPaginationList\CursorLimitInput;
 use Resources\Infrastructure\GraphQL\ViewPaginationList\OffsetLimit;
 use Resources\Infrastructure\GraphQL\ViewPaginationList\OffsetLimitInput;
-use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
 
 class TypeRegistry
 {
@@ -178,7 +177,7 @@ class TypeRegistry
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = new EnumType([
                     'name' => $cacheName,
-                    'values' => fn() => DoctrineGraphqlFieldsBuilder::getEnumValues($classMetadata),
+                    'values' => fn() => DoctrineEntityToGraphqlFieldMapper::mapEnumValues($classMetadata),
                 ]);
             }
         }

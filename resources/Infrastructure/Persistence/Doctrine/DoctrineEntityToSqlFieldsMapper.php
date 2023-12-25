@@ -96,7 +96,8 @@ class DoctrineEntityToSqlFieldsMapper
             
             $joinColumnAttributeReflection = ReflectionHelper::findAttribute($propertyReflection, JoinColumn::class);
             if ($joinColumnAttributeReflection) {
-                $fields["selectFields"][] = $joinColumnAttributeReflection->getArguments()['name'];
+                $joinColumnName = $joinColumnAttributeReflection->getArguments()['name'];
+                $fields["selectFields"][] = "{$tableName}.{$joinColumnName} {$joinColumnName}";
             }
         }
         return $fields;

@@ -16,7 +16,6 @@ class Query extends ObjectType
 
     protected function fieldDefinition(): array
     {
-        return [
-        ];
+        return [];
     }
 }

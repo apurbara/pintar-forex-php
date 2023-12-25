@@ -7,6 +7,9 @@ use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Resources\Event\Dispatcher;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Sales\Application\Listener\AllocateInitialSalesActivityScheduleListener;
 use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
@@ -25,6 +28,7 @@ use Sales\Domain\Task\AssignedCustomer\ViewTotalCustomerAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 
+#[GraphqlMapableController(entity: AssignedCustomer::class)]
 class AssignedCustomerController extends Controller
 {
 
@@ -33,58 +37,22 @@ class AssignedCustomerController extends Controller
         return $this->em->getRepository(AssignedCustomer::class);
     }
 
-    //
-    public function registerNewCustomer(SalesRoleInterface $user, InputRequest $input)
-    {
-        $repository = $this->repository();
-        $areaRepository = $this->em->getRepository(Area::class);
-        $customerRepository = $this->em->getRepository(Customer::class);
-        $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
-        $dispatcher = new Dispatcher();
-
-        $salesRepository = $this->em->getRepository(Sales::class);
-        $salesActivityScheduleRepository = $this->em->getRepository(SalesActivitySchedule::class);
-        $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
-        $listener = new AllocateInitialSalesActivityScheduleListener
-                ($salesRepository, $salesActivityScheduleRepository, $repository, $salesActivityRepository,
-                $user->getPersonnelId(), $user->getSalesId());
-        
-        $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(), $listener);
-
-        $task = new RegisterNewCustomerTask($repository, $areaRepository, $customerRepository,
-                $customerJourneyRepository, $dispatcher);
-
-        $areaId = $input->get('areaId');
-        $name = $input->get('name');
-        $email = $input->get('email');
-        $phone = $input->get('phone');
-        $customerData = new Area\CustomerData($name, $email, $phone);
-        $payload = new RegisterNewCustomerPayload($areaId, $customerData);
-        $user->executeSalesTask($task, $payload);
-        
-//        try {
-            $dispatcher->publishTransactional();
-//        } catch (Exception $ex) {
-//            
-//        }
-        
-        return $repository->fetchOneByIdOrDie($payload->id);
-    }
-
-    public function updateJourney(SalesRoleInterface $user, InputRequest $input)
+    #[Mutation]
+    public function updateAssignedCustomerJourney(SalesRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
         $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
         $task = new UpdateJourney($repository, $customerJourneyRepository);
         $payload = (new AssignedCustomerData())
                 ->setId($input->get('id'))
-                ->setCustomerJourneyId($input->get('customerJourneyId'));
+                ->setCustomerJourneyId($input->get('CustomerJourney_id'));
         $user->executeSalesTask($task, $payload);
 
-        return $this->repository()->fetchOneById($payload->id);
+        return $repository->queryOneById($payload->id);
     }
 
-    public function viewList(SalesRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function assignedCustomerList(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewAssignedCustomerList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -93,16 +61,18 @@ class AssignedCustomerController extends Controller
         return $payload->result;
     }
 
-    public function viewDetail(SalesRoleInterface $user, string $assignedCustomerId)
+    #[Query]
+    public function assignedCustomerDetail(SalesRoleInterface $user, string $id)
     {
         $task = new ViewAssignedCustomerDetail($this->repository());
-        $payload = new ViewDetailPayload($assignedCustomerId);
+        $payload = new ViewDetailPayload($id);
         $user->executeSalesTask($task, $payload);
 
         return $payload->result;
     }
-
-    public function viewTotalCustomerAssignment(SalesRoleInterface $user, InputRequest $input)
+    
+    
+    public function totalCustomerAssignment(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewTotalCustomerAssignment($this->repository());
         $searchSchema = [

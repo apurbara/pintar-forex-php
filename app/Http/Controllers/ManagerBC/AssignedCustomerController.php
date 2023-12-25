@@ -9,7 +9,10 @@ use Manager\Domain\Task\AssignedCustomer\ViewAssignedCustomerList;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 
+#[GraphqlMapableController(entity: AssignedCustomer::class)]
 class AssignedCustomerController extends Controller
 {
 
@@ -19,7 +22,8 @@ class AssignedCustomerController extends Controller
     }
 
     //
-    protected function viewDetail(ManagerRoleInterface $user, string $id)
+    #[Query]
+    protected function assignedCustomerDetail(ManagerRoleInterface $user, string $id)
     {
         $task = new ViewAssignedCustomerDetail($this->repository());
         $payload = new ViewDetailPayload($id);
@@ -28,7 +32,8 @@ class AssignedCustomerController extends Controller
         return $payload->result;
     }
     //
-    protected function viewList(ManagerRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    protected function assignedCustomerList(ManagerRoleInterface $user, InputRequest $input)
     {
         $task = new ViewAssignedCustomerList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);

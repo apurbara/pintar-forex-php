@@ -56,7 +56,7 @@ class SalesActivityController extends Controller
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewSalesActivityList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function salesActivityList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewSalesActivityList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -66,7 +66,7 @@ class SalesActivityController extends Controller
     }
     
     #[Query]
-    public function viewSalesActivityDetail(CompanyUserRoleInterface $user, string $id)
+    public function salesActivityDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewSalesActivityDetail($this->repository());
         $payload = new ViewDetailPayload($id);

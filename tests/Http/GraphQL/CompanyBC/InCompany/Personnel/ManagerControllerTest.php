@@ -87,7 +87,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query ManagerList {
-    viewManagerList{
+    managerList{
         list {
             id, disabled, createdTime,
             personnel { id, name }
@@ -139,7 +139,7 @@ _QUERY;
         
         $this->graphqlQuery = <<<'_QUERY'
 query ManagerDetail ( $id: ID! ) {
-    viewManagerDetail ( id: $id ) {
+    managerDetail ( id: $id ) {
         id, disabled, createdTime,
         personnel { id, name }
     }

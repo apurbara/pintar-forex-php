@@ -4,21 +4,20 @@ namespace App\Http\GraphQL\SalesBC;
 
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
 use App\Http\Controllers\SalesBC\ClosingRequestController;
+use App\Http\Controllers\SalesBC\CustomerController;
 use App\Http\Controllers\SalesBC\RecycleRequestController;
-use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\ClosingRequestInSalesBCGraph;
-use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\RecycleRequestInSalesBCGraph;
-use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
-use App\Http\GraphQL\SalesBC\Task\AssignedCustomerMutation;
-use App\Http\GraphQL\SalesBC\Task\SalesActivityScheduleMutation;
+use App\Http\Controllers\SalesBC\SalesActivityReportController;
+use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
+use App\Http\Controllers\SalesBC\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\VerificationReportController;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
+use Resources\Infrastructure\GraphQL\DoctrineEntityToGraphqlFieldMapper;
 use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
-use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
-use Sales\Domain\Model\AreaStructure\Area\Customer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequest;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequest;
+use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
+use function app;
 
 class Mutation extends ObjectType
 {
@@ -33,105 +32,23 @@ class Mutation extends ObjectType
     protected function fieldDefinition(): array
     {
         return [
-            ...$this->assignedCustomerMutation(),
-            ...$this->salesActivityScheduleMutation(),
-            ...$this->closingRequestMutation(),
-            ...$this->recycleRequestMutation(),
-        ];
-//        $type = new ObjectType([
-//            'name' => 'salesMutation',
-//            'fields' => fn() => [
-//                ...$this->assignedCustomerMutation(),
-//                ...$this->salesActivityScheduleMutation(),
-//                ...$this->closingRequestMutation(),
-//                ...$this->recycleRequestMutation(),
-//            ],
-//        ]);
-//        return [
-//            'sales' => [
-//                'type' => $type,
-//                'args' => ['salesId' => Type::nonNull(Type::id())],
-//                'resolve' => function ($root, $args, AppContext $app) use ($type) {
-//                    $app->user = $app->user->authorizedAsSales($args['salesId']);
-//                    return $type;
-//                }
-//            ]
-//        ];
-    }
-
-    protected function assignedCustomerMutation(): array
-    {
-        return [
-            'registerNewCustomer' => [
-                'type' => TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(AssignedCustomerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(RecycleRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityReportController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityScheduleController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(VerificationReportController::class),
+            'submitCustomerVerificationReport' => [
+                'type' => TypeRegistry::objectType(VerificationReport::class),
                 'args' => [
-                    'areaId' => Type::nonNull(Type::id()),
-                    ...DoctrineGraphqlFieldsBuilder::buildInputFields(Customer::class),
+                    ...DoctrineEntityToGraphqlFieldMapper::mapInputFields(VerificationReport::class),
+                    'AssignedCustomer_id' => Type::id(),
                 ],
-                'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
-                        ->registerNewCustomer($app->user, new GraphqlInputRequest($args))
+                'resolve' => fn($root, $args) => app(VerificationReportController::class)
+                        ->submitCustomerVerificationReport(app(SalesRoleInterface::class), $args['AssignedCustomer_id'],
+                                new GraphqlInputRequest($args))
             ],
-            'updateJourney' => [
-                'type' => TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class),
-                'args' => [
-                    'id' => Type::id(),
-                    'customerJourneyId' => Type::id(),
-                ],
-                'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
-                        ->updateJourney($app->user, new GraphqlInputRequest($args))
-            ],
-            'assignedCustomer' => [
-                'type' => TypeRegistry::type(AssignedCustomerMutation::class),
-                'args' => ['assignedCustomerId' => Type::nonNull(Type::id())],
-                'resolve' => function ($root, $args, AppContext $app) {
-                    $app->setAggregateRootId('assignedCustomerId', $args['assignedCustomerId']);
-                    return TypeRegistry::type(AssignedCustomerMutation::class);
-                }
-            ],
-        ];
-    }
-
-    protected function salesActivityScheduleMutation(): array
-    {
-        return [
-            'salesActivitySchedule' => [
-                'type' => TypeRegistry::type(SalesActivityScheduleMutation::class),
-                'args' => ['salesActivityScheduleId' => Type::nonNull(Type::id())],
-                'resolve' => function ($root, $args, AppContext $app) {
-                    $app->setAggregateRootId('salesActivityScheduleId', $args['salesActivityScheduleId']);
-                    return TypeRegistry::type(SalesActivityScheduleMutation::class);
-                }
-            ],
-        ];
-    }
-
-    protected function closingRequestMutation(): array
-    {
-        return [
-            'updateClosingRequest' => [
-                'type' => TypeRegistry::objectType(ClosingRequestInSalesBCGraph::class),
-                'args' => [
-                    'closingRequestId' => Type::nonNull(Type::id()),
-                    ...DoctrineGraphqlFieldsBuilder::buildInputFields(ClosingRequest::class),
-                ],
-                'resolve' => fn($root, $args, AppContext $app) => (new ClosingRequestController())
-                        ->update($app->user, $args['closingRequestId'], new GraphqlInputRequest($args))
-            ]
-        ];
-    }
-
-    protected function recycleRequestMutation(): array
-    {
-        return [
-            'updateRecycleRequest' => [
-                'type' => TypeRegistry::objectType(RecycleRequestInSalesBCGraph::class),
-                'args' => [
-                    'recycleRequestId' => Type::nonNull(Type::id()),
-                    ...DoctrineGraphqlFieldsBuilder::buildInputFields(RecycleRequest::class),
-                ],
-                'resolve' => fn($root, $args, AppContext $app) => (new RecycleRequestController())
-                        ->update($app->user, $args['recycleRequestId'], new GraphqlInputRequest($args))
-            ]
         ];
     }
 }

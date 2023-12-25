@@ -50,7 +50,7 @@ class SalesController extends Controller
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewSalesList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function salesList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewSalesListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -60,7 +60,7 @@ class SalesController extends Controller
     }
     
     #[Query]
-    public function viewSalesDetail(CompanyUserRoleInterface $user, string $id)
+    public function salesDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewSalesDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);

@@ -14,7 +14,7 @@ use function base_path;
 $schema = new Schema([
     'query' => TypeRegistry::type(Query::class),
     'mutation' => TypeRegistry::type(Mutation::class),
-    'typeLoader' => static fn($name) => TypeRegistry::load($name),
+    'typeLoader' => static fn($name) => TypeRegistry::type($name),
 ]);
 
 return require base_path() . '/resources/Infrastructure/GraphQL/executeGraphqlQuery.php';

@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Http\GraphQL\SalesBC;
+namespace App\Http\Controllers\SalesBC;
 
-use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\SalesActivity;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class AssignedCustomerControllerTest extends SalesBCTestCase
@@ -21,7 +21,6 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
     protected $initialSalesActivity;
     protected $initialCustomerJourney;
     protected $customerJourneyOne;
-    protected $registerNewCustomerRequest;
 
     protected function setUp(): void
     {
@@ -31,8 +30,6 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
         $this->connection->table('CustomerJourney')->truncate();
         $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('SalesActivitySchedule')->truncate();
-
-        $this->area = new EntityRecord(Area::class, 'main');
 
         $this->initialCustomerJourney = new EntityRecord(CustomerJourney::class, 'initial');
         $this->initialCustomerJourney->columns['initial'] = true;
@@ -64,13 +61,6 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
         $this->assignedCustomerThree->columns['Customer_id'] = $this->customerThree->columns['id'];
         $this->assignedCustomerThree->columns['CustomerJourney_id'] = $this->initialCustomerJourney->columns['id'];
         $this->assignedCustomerThree->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
-
-        $this->registerNewCustomerRequest = [
-            'areaId' => $this->area->columns['id'],
-            'name' => 'new customer name',
-            'email' => 'newCustomer@email.org',
-            'phone' => '0813213123123',
-        ];
     }
 
     protected function tearDown(): void
@@ -81,99 +71,6 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
         $this->connection->table('CustomerJourney')->truncate();
         $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('SalesActivitySchedule')->truncate();
-    }
-
-    //  
-    protected function registerNewCustomer()
-    {
-        $this->prepareSalesDependency();
-        $this->initialCustomerJourney->insert($this->connection);
-
-        $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $areaId: ID!, $name: String, $email: String, $phone: String ) {
-    sales ( salesId: $salesId ) {
-        registerNewCustomer ( areaId: $areaId, name: $name, email: $email, phone: $phone ) {
-            id, status, createdTime
-            customer {
-                name, email, phone
-                area { id, name }
-            }
-            customerJourney { id, name, initial }
-        }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
-            ...$this->registerNewCustomerRequest
-        ];
-        $this->postGraphqlRequest($this->personnel->token);
-    }
-
-    public function test_registerNewCustomer_200()
-    {
-        $this->registerNewCustomer();
-        $this->seeStatusCode(200);
-
-        $this->seeJsonContains([
-            'status' => CustomerAssignmentStatus::ACTIVE->value,
-            'createdTime' => $this->stringOfJakartaCurrentTime(),
-            'customer' => [
-                'name' => $this->registerNewCustomerRequest['name'],
-                'email' => $this->registerNewCustomerRequest['email'],
-                'phone' => $this->registerNewCustomerRequest['phone'],
-                'area' => [
-                    'id' => $this->registerNewCustomerRequest['areaId'],
-                    'name' => $this->area->columns['name'],
-                ],
-            ],
-            'customerJourney' => [
-                'id' => $this->initialCustomerJourney->columns['id'],
-                'name' => $this->initialCustomerJourney->columns['name'],
-                'initial' => true,
-            ],
-        ]);
-
-        $this->seeInDatabase('AssignedCustomer',
-                [
-            'Sales_id' => $this->sales->columns['id'],
-            'CustomerJourney_id' => $this->initialCustomerJourney->columns['id'],
-            'status' => CustomerAssignmentStatus::ACTIVE->value,
-            'createdTime' => $this->stringOfJakartaCurrentTime(),
-        ]);
-
-        $this->seeInDatabase('Customer',
-                [
-            'Area_id' => $this->area->columns['id'],
-            'disabled' => false,
-            'createdTime' => $this->stringOfJakartaCurrentTime(),
-            'name' => $this->registerNewCustomerRequest['name'],
-            'email' => $this->registerNewCustomerRequest['email'],
-            'phone' => $this->registerNewCustomerRequest['phone'],
-        ]);
-    }
-
-    public function test_registerNewCustomer_200_allocateNewInitialSchedule()
-    {
-        $this->initialSalesActivity->insert($this->connection);
-        $this->registerNewCustomer();
-        
-        if ((new \DateTimeImmutable())->format('w') == 5) {
-            $this->seeInDatabase('SalesActivitySchedule', [
-                'startTime' => (new \DateTimeImmutable('+3 Days'))->format('Y-m-d') . " 10:00:00",
-                'SalesActivity_id' => $this->initialSalesActivity->columns['id'],
-            ]);
-        } elseif ((new \DateTimeImmutable())->format('w') == 6) {
-            $this->seeInDatabase('SalesActivitySchedule', [
-                'startTime' => (new \DateTimeImmutable('+2 Days'))->format('Y-m-d') . " 10:00:00",
-                'SalesActivity_id' => $this->initialSalesActivity->columns['id'],
-            ]);
-        } else {
-            $this->seeInDatabase('SalesActivitySchedule', [
-                'startTime' => (new \DateTimeImmutable('+1 Days'))->format('Y-m-d') . " 10:00:00",
-                'SalesActivity_id' => $this->initialSalesActivity->columns['id'],
-            ]);
-        }
     }
 
     //
@@ -188,9 +85,9 @@ _QUERY;
         $this->assignedCustomerOne->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $id: ID, $customerJourneyId: ID ) {
+mutation ( $salesId: ID!, $id: ID, $CustomerJourney_id: ID ) {
     sales ( salesId: $salesId ) {
-        updateJourney ( id: $id, customerJourneyId: $customerJourneyId ) {
+        updateAssignedCustomerJourney ( id: $id, CustomerJourney_id: $CustomerJourney_id ) {
             id, customerJourney { id, name, initial }
         }
     }
@@ -199,7 +96,7 @@ _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
             'id' => $this->assignedCustomerOne->columns['id'],
-            'customerJourneyId' => $this->customerJourneyOne->columns['id'],
+            'CustomerJourney_id' => $this->customerJourneyOne->columns['id'],
         ];
         $this->postGraphqlRequest($this->personnel->token);
     }
@@ -234,9 +131,9 @@ _QUERY;
         $this->assignedCustomerOne->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $assignedCustomerId: ID!) {
+query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        assignedCustomerDetail ( assignedCustomerId: $assignedCustomerId ) {
+        assignedCustomerDetail ( id: $id ) {
             id, status, createdTime
             customer {
                 id, name, email
@@ -248,7 +145,7 @@ query ( $salesId: ID!, $assignedCustomerId: ID!) {
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'assignedCustomerId' => $this->assignedCustomerOne->columns['id'],
+            'id' => $this->assignedCustomerOne->columns['id'],
         ];
         $this->postGraphqlRequest($this->personnel->token);
     }

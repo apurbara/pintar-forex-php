@@ -152,7 +152,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query AreaList{
-    viewAreaList{
+    areaList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }
     }
@@ -201,7 +201,7 @@ _QUERY;
         
         $this->graphqlQuery = <<<'_QUERY'
 query AreaDetail ( $id: ID! ) {
-    viewAreaDetail ( id: $id ) {
+    areaDetail ( id: $id ) {
         id, disabled, createdTime, name, description,
         areaStructure { id, name }
         parent { id, name }

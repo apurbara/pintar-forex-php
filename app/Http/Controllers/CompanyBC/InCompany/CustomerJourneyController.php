@@ -52,7 +52,7 @@ class CustomerJourneyController extends Controller
     }
 
     #[Query]
-    public function viewCustomerJourneyDetail(CompanyUserRoleInterface $user, string $id)
+    public function customerJourneyDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewCustomerJourneyDetail($this->repository());
         $payload = new ViewDetailPayload($id);
@@ -62,7 +62,7 @@ class CustomerJourneyController extends Controller
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewCustomerJourneyList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function customerJourneyList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewCustomerJourneyList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);

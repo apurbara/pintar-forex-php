@@ -5,6 +5,9 @@ namespace App\Http\Controllers\SalesBC;
 use App\Http\Controllers\Controller;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
 use Sales\Domain\Model\CustomerVerification;
@@ -14,6 +17,7 @@ use Sales\Domain\Task\VerificationReport\ViewVerificationReportDetailTask;
 use Sales\Domain\Task\VerificationReport\ViewVerificationReportListTask;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineVerificationReportRepository;
 
+#[GraphqlMapableController(entity: VerificationReport::class)]
 class VerificationReportController extends Controller
 {
 
@@ -23,7 +27,7 @@ class VerificationReportController extends Controller
     }
 
     //
-    public function submit(SalesRoleInterface $user, string $assignedCustomerId, InputRequest $input)
+    public function submitCustomerVerificationReport(SalesRoleInterface $user, string $AssignedCustomer_id, InputRequest $input)
     {
         $assignedCustomerRepository = $this->em->getRepository(AssignedCustomer::class);
         $customerVerificationRepository = $this->em->getRepository(CustomerVerification::class);
@@ -31,18 +35,19 @@ class VerificationReportController extends Controller
         $task = new SubmitVerificationReportTask($assignedCustomerRepository, $customerVerificationRepository);
 
         $note = $input->get('note');
-        $customerVerificationId = $input->get('customerVerificationId');
+        $customerVerificationId = $input->get('CustomerVerification_id');
         $payload = (new VerificationReportData($note))
-                ->setAssignedCustomerId($assignedCustomerId)
+                ->setAssignedCustomerId($AssignedCustomer_id)
                 ->setCustomerVerificationId($customerVerificationId);
 
         $user->executeSalesTask($task, $payload);
 
         return $this->repository()->aVerificationReportOnAssignedCustomerAssociateWithCustomerVerificationId(
-                        $assignedCustomerId, $customerVerificationId);
+                        $AssignedCustomer_id, $customerVerificationId);
     }
 
-    public function viewList(SalesRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function verificationReportList(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewVerificationReportListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -51,7 +56,8 @@ class VerificationReportController extends Controller
         return $payload->result;
     }
 
-    public function viewDetail(SalesRoleInterface $user, string $id)
+    #[Query]
+    public function verificationReportDetail(SalesRoleInterface $user, string $id)
     {
         $task = new ViewVerificationReportDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);

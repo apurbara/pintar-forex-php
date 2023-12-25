@@ -51,7 +51,7 @@ class AreaStructureController extends Controller
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function viewAreaStructureList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function areaStructureList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewAreaStructureListTask($this->areaStructureRepository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -61,7 +61,7 @@ class AreaStructureController extends Controller
     }
     
     #[Query]
-    public function viewAreaStructureDetail(CompanyUserRoleInterface $user, string $id)
+    public function areaStructureDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewAreaStructureDetailTask($this->areaStructureRepository());
         $payload = new ViewDetailPayload($id);

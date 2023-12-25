@@ -84,6 +84,26 @@ abstract class DoctrineEntityRepository extends EntityRepository implements Grap
         }
         return $qb;
     }
+    
+    //
+    protected function retrieveOne(QueryBuilder $qb, array $filters): ?array
+    {
+        $qb->setMaxResults(1);
+        foreach ($filters as $filter) {
+            $filter->applyToQuery($qb);
+        }
+        return $qb->executeQuery()->fetchAssociative() ?: null;
+    }
+    protected function retrieveOneOrDie(QueryBuilder $qb, array $filters): ?array
+    {
+        $result = $this->retrieveOne($qb, $filters);
+        if (empty($result)) {
+            $shortEntityName = (new ReflectionClass($this->getEntityName()))->getShortName();
+            $errorDetail = "not found: '{$shortEntityName}' not found";
+            throw RegularException::notFound($errorDetail);
+        }
+        return $result;
+    }
 
     //
     protected function fetchPaginationList(DoctrinePaginationListCategory $doctrinePaginationListCategory): array

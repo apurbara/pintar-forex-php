@@ -55,12 +55,12 @@ class LoginControllerTest extends GraphqlTestCase
 
     protected function tearDown(): void
     {
-//        parent::tearDown();
-//        $this->connection->table('Admin')->truncate();
-//        $this->connection->table('Personnel')->truncate();
-//        $this->connection->table('Area')->truncate();
-//        $this->connection->table('Sales')->truncate();
-//        $this->connection->table('Manager')->truncate();
+        parent::tearDown();
+        $this->connection->table('Admin')->truncate();
+        $this->connection->table('Personnel')->truncate();
+        $this->connection->table('Area')->truncate();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('Manager')->truncate();
     }
     
     //

@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Http\GraphQL\SalesBC;
+namespace App\Http\Controllers\SalesBC;
 
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\ClosingRequest;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class ClosingRequestControllerTest extends SalesBCTestCase
@@ -57,19 +58,17 @@ class ClosingRequestControllerTest extends SalesBCTestCase
         $this->assignedCustomer->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $assignedCustomerId: ID!, $transactionValue: Int, $note: String ) {
+mutation ( $salesId: ID!, $AssignedCustomer_id: ID!, $transactionValue: Int, $note: String ) {
     sales ( salesId: $salesId ) {
-        assignedCustomer ( assignedCustomerId: $assignedCustomerId) {
-            submitClosingRequest ( transactionValue: $transactionValue, note: $note ) {
-                id, status, createdTime, transactionValue, note
-            }
+        submitClosingRequest ( AssignedCustomer_id: $AssignedCustomer_id, transactionValue: $transactionValue, note: $note ) {
+            id, status, createdTime, transactionValue, note
         }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'assignedCustomerId' => $this->assignedCustomer->columns['id'],
+            'AssignedCustomer_id' => $this->assignedCustomer->columns['id'],
             ...$this->closingRequestPayload
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -103,9 +102,9 @@ _QUERY;
         $this->closingRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $closingRequestId: ID!, $transactionValue: Int, $note: String ) {
+mutation ( $salesId: ID!, $id: ID!, $transactionValue: Int, $note: String ) {
     sales ( salesId: $salesId ) {
-        updateClosingRequest ( closingRequestId: $closingRequestId,  transactionValue: $transactionValue, note: $note ) {
+        updateClosingRequest ( id: $id,  transactionValue: $transactionValue, note: $note ) {
             id, status, createdTime, transactionValue, note
         }
     }
@@ -113,7 +112,7 @@ mutation ( $salesId: ID!, $closingRequestId: ID!, $transactionValue: Int, $note:
 _QUERY;
         $this->graphqlVariables = [
             'salesId' => $this->sales->columns['id'],
-            'closingRequestId' => $this->closingRequestOne->columns['id'],
+            'id' => $this->closingRequestOne->columns['id'],
             ...$this->closingRequestPayload,
         ];
         $this->postGraphqlRequest($this->personnel->token);
@@ -218,7 +217,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query ( $salesId: ID!, $id: ID!) {
     sales ( salesId: $salesId ) {
-        closingRequestDetail ( closingRequestId: $id ) {
+        closingRequestDetail ( id: $id ) {
             id, status, createdTime, transactionValue, note
         }
     }

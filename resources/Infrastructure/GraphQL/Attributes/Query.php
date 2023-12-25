@@ -12,7 +12,7 @@ final class Query
     public const PAGINATION_RESPONSE_WRAPPER = "PAGINATION";
     public const LIST_RESPONSE_WRAPPER = "LIST";
 
-    public readonly ?string $inputType;
+//    public readonly ?string $inputType;
     
     /**
      * 
@@ -25,7 +25,7 @@ final class Query
     public readonly ?string $responseWrapper;
 
 //    public readonly ?string $inputName;
-//    public readonly ?string $responseType;
+    public readonly ?string $responseType;
 //
 //    public function __construct(?string $inputType = null, ?string $inputName = null, ?string $responseType = null)
 //    {
@@ -34,10 +34,11 @@ final class Query
 //        $this->responseType = $responseType;
 //    }
 
-    public function __construct(?string $inputType = null, ?string $responseWrapper = null)
+    public function __construct(?string $responseWrapper = null, ?string $responseType)
     {
-        $this->inputType = $inputType;
+//        $this->inputType = $inputType;
         $this->responseWrapper = $responseWrapper;
+        $this->responseType = $responseType;
     }
 
 }

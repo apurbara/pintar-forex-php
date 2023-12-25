@@ -28,6 +28,7 @@ class Sales
     protected Personnel $personnel;
     
     #[FetchableObject(targetEntity: AreaInCompanyBC::class, joinColumnName: "Area_id")]
+    #[JoinColumn(name: "Area_id", referencedColumnName: "id")]
     protected $area;
     
     #[Id, Column(type: "guid")]
