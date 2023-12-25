@@ -75,17 +75,15 @@ $this->disableExceptionHandling();
         $this->areaStructureOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $areaStructureId: ID!, $name: String, $description: String ){
-    areaStructure ( areaStructureId: $areaStructureId ){
-        addChild (name: $name, description: $description ){
-            id, disabled, createdTime, name, description,
-            parent { id, name }
-        }
+mutation ( $AreaStructure_idOfParent: ID!, $name: String, $description: String ){
+    addChildAreaStructure ( AreaStructure_idOfParent: $AreaStructure_idOfParent,  name: $name, description: $description ){
+        id, disabled, createdTime, name, description,
+        parent { id, name }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-           'areaStructureId' => $this->areaStructureOne->columns['id'], 
+           'AreaStructure_idOfParent' => $this->areaStructureOne->columns['id'], 
             ...$this->addAreaStructureRequest
         ];
         $this->postGraphqlRequest($this->admin->token);
@@ -123,8 +121,8 @@ $this->disableExceptionHandling();
         $this->areaStructureTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query AreaStructureList{
-    areaStructureList{
+query {
+    viewAreaStructureList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }
     }
@@ -169,15 +167,15 @@ _QUERY;
         $this->areaStructureThree->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query AreaStructureDetail ( $areaStructureId: ID! ) {
-    areaStructureDetail ( areaStructureId: $areaStructureId ) {
+query ( $id: ID! ) {
+    viewAreaStructureDetail ( id: $id ) {
         id, disabled, createdTime, name, description, 
         parent { id, name },
         children { list { id, name } }
     }
 }
 _QUERY;
-        $this->graphqlVariables['areaStructureId'] = $this->areaStructureTwo->columns['id'];
+        $this->graphqlVariables['id'] = $this->areaStructureTwo->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

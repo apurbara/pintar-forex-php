@@ -10,8 +10,8 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Resources\Attributes\FetchableEntity;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
@@ -27,12 +27,12 @@ use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
 class SalesActivitySchedule
 {
 
-    #[FetchableEntity(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
+    #[FetchableObject(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
     #[ManyToOne(targetEntity: AssignedCustomer::class, inversedBy: "salesActivitySchedules", fetch: "LAZY")]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;
 
-    #[FetchableEntity(targetEntity: SalesActivityInCompanyBC::class, joinColumnName: "SalesActivity_id")]
+    #[FetchableObject(targetEntity: SalesActivityInCompanyBC::class, joinColumnName: "SalesActivity_id")]
     #[ManyToOne(targetEntity: SalesActivity::class)]
     #[JoinColumn(name: "SalesActivity_id", referencedColumnName: "id")]
     protected SalesActivity $salesActivity;
@@ -48,6 +48,10 @@ class SalesActivitySchedule
 
     #[Column(type: "string", enumType: SalesActivityScheduleStatus::class)]
     protected SalesActivityScheduleStatus $status;
+    
+    //
+    #[FetchableObject(targetEntity: SalesActivityReport::class, joinColumnName: "id", referenceColumnName: "SalesActivitySchedule_id")]
+    protected SalesActivityReport $salesActivityReport;
 
     public function getStatus(): SalesActivityScheduleStatus
     {

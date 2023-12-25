@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\ManagerBC;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\ClosingRequest;
 use Manager\Domain\Task\ClosingRequest\AcceptClosingRequestTask;
 use Manager\Domain\Task\ClosingRequest\RejectClosingRequestTask;
 use Manager\Domain\Task\ClosingRequest\ViewClosingRequestDetail;
 use Manager\Domain\Task\ClosingRequest\ViewClosingRequestList;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
 class ClosingRequestController extends Controller

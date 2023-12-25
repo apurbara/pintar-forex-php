@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
-use Resources\Attributes\ExcludeFromInput;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\ExcludeFromInput;
 use SharedContext\Domain\ValueObject\Label;
 
 #[Entity(repositoryClass: DoctrineSalesActivityRepository::class)]

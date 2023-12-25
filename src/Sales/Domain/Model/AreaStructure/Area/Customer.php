@@ -2,6 +2,7 @@
 
 namespace Sales\Domain\Model\AreaStructure\Area;
 
+use Company\Domain\Model\AreaStructure\Area as AreaInCompanyBC;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
@@ -10,6 +11,8 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\Uuid;
 use Resources\ValidationRule;
 use Resources\ValidationService;
@@ -22,7 +25,7 @@ use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerReposit
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
 {
-
+    #[FetchableObject(targetEntity: AreaInCompanyBC::class, joinColumnName: "Area_id")]
     #[ManyToOne(targetEntity: Area::class)]
     #[JoinColumn(name: "Area_id", referencedColumnName: "id")]
     protected Area $area;
@@ -39,13 +42,13 @@ class Customer
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $name;
 
-    #[Column(type: "string", length: 255, nullable: false)]
+    #[Column(type: "string", length: 255, nullable: true)]
     protected string $email;
     
     #[Column(type: "string", length: 255, nullable: true)]
     protected string $phone;
 
-
+    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: VerificationReport::class, mappedBy: "customer", cascade: ["persist"])]
     protected Collection $verificationReports;
 

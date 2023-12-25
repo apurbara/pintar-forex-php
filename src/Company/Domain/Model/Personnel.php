@@ -3,6 +3,7 @@
 namespace Company\Domain\Model;
 
 use Company\Domain\Model\Personnel\Manager;
+use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Model\Personnel\ManagerData;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
 use DateTimeImmutable;
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrinePersonnelRepository::class)]
@@ -30,6 +32,13 @@ class Personnel
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
+    
+    //
+    
+    #[FetchableObjectList(targetEntity: Sales::class, joinColumnName: "Personnel_id", paginationRequired: false)]
+    protected $salesAssignments;
+    #[FetchableObjectList(targetEntity: Manager::class, joinColumnName: "Personnel_id", paginationRequired: false)]
+    protected $managerAssignments;
 
     public function __construct(PersonnelData $data)
     {

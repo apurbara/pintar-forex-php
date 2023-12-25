@@ -3,10 +3,10 @@
 namespace App\Http\GraphQL\SalesBC\Task;
 
 use App\Http\Controllers\SalesBC\SalesActivityReportController;
-use App\Http\GraphQL\AppContext;
-use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReportInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;

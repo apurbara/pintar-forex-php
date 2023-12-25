@@ -4,13 +4,12 @@ namespace App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\SalesBC\VerificationReportController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
-use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\Customer\VerificationReportInSalesBCGraph;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 

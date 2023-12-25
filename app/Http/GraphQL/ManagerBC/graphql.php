@@ -7,14 +7,15 @@ namespace App\Http\GraphQL\ManagerBC;
 //require_once __DIR__ . '/../../vendor/autoload.php';
 
 
-use App\Http\GraphQL\AppContext;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
+use function base_path;
 
 $query = new ObjectType([
-    'name' => 'Query',
+    'name' => 'ManagerQuery',
     'fields' => fn() => [
         'manager' => [
             'type' => TypeRegistry::type(ManagerQuery::class),
@@ -28,7 +29,7 @@ $query = new ObjectType([
 ]);
 
 $mutation = new ObjectType([
-    'name' => 'Mutation',
+    'name' => 'ManagerMutation',
     'fields' => fn() => [
         'manager' => [
             'type' => TypeRegistry::type(ManagerMutation::class),
@@ -44,7 +45,7 @@ $mutation = new ObjectType([
 $schema = new Schema([
     'query' => $query,
     'mutation' => $mutation,
-    'typeLoader' => static fn($name) => TypeRegistry::load($name),
+    'typeLoader' => static fn($name) => TypeRegistry::type($name),
 ]);
 
-return require __DIR__ . '/../executeGraphqlQuery.php';
+return require base_path() . '/resources/Infrastructure/GraphQL/executeGraphqlQuery.php';

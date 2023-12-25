@@ -51,17 +51,15 @@ class AreaControllerTest extends CompanyBCTestCase
         $this->rootAreaStructure->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $areaStructureId: ID!, $name: String, $description: String ){
-    areaStructure ( areaStructureId: $areaStructureId ) {
-        addRootArea(name: $name, description: $description ){
-            id, disabled, createdTime, name, description,
-            areaStructure { id, name }
-        }
+mutation ( $AreaStructure_id: ID!, $name: String, $description: String ){
+    addRootArea (AreaStructure_id: $AreaStructure_id, name: $name, description: $description ){
+        id, disabled, createdTime, name, description,
+        areaStructure { id, name }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'areaStructureId' => $this->rootAreaStructure->columns['id'],
+            'AreaStructure_id' => $this->rootAreaStructure->columns['id'],
             ...$this->addAreaRequest
         ];
         $this->postGraphqlRequest($this->admin->token);
@@ -100,19 +98,17 @@ $this->disableExceptionHandling();
         $this->areaOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $areaId: ID!, $name: String, $description: String, $areaStructureId: ID! ){
-    area ( areaId: $areaId ){
-        addChild (name: $name, description: $description, areaStructureId: $areaStructureId ){
-            id, disabled, createdTime, name, description,
-            parent { id, name }
-            areaStructure { id, name }
-        }
+mutation ( $Area_idOfParent: ID!, $name: String, $description: String, $AreaStructure_id: ID! ){
+    addChildArea ( Area_idOfParent: $Area_idOfParent, name: $name, description: $description, AreaStructure_id: $AreaStructure_id ){
+        id, disabled, createdTime, name, description,
+        parent { id, name }
+        areaStructure { id, name }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-           'areaId' => $this->areaOne->columns['id'], 
-           'areaStructureId' => $this->childAreaStructure->columns['id'], 
+           'Area_idOfParent' => $this->areaOne->columns['id'], 
+           'AreaStructure_id' => $this->childAreaStructure->columns['id'], 
             ...$this->addAreaRequest
         ];
         $this->postGraphqlRequest($this->admin->token);
@@ -156,7 +152,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query AreaList{
-    areaList{
+    viewAreaList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }
     }
@@ -204,8 +200,8 @@ _QUERY;
         $this->childAreaStructure->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query AreaDetail ( $areaId: ID! ) {
-    areaDetail ( areaId: $areaId ) {
+query AreaDetail ( $id: ID! ) {
+    viewAreaDetail ( id: $id ) {
         id, disabled, createdTime, name, description,
         areaStructure { id, name }
         parent { id, name }
@@ -213,7 +209,7 @@ query AreaDetail ( $areaId: ID! ) {
     }
 }
 _QUERY;
-        $this->graphqlVariables['areaId'] = $this->areaTwo->columns['id'];
+        $this->graphqlVariables['id'] = $this->areaTwo->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

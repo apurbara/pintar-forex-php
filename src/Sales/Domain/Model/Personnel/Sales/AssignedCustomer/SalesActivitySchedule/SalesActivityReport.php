@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Resources\Attributes\FetchableEntity;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityReportRepository;
 
@@ -16,7 +16,7 @@ use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityRe
 class SalesActivityReport
 {
 
-    #[FetchableEntity(targetEntity: SalesActivitySchedule::class, joinColumnName: "SalesActivitySchedule_id")]
+    #[FetchableObject(targetEntity: SalesActivitySchedule::class, joinColumnName: "SalesActivitySchedule_id")]
     #[ManyToOne(targetEntity: SalesActivitySchedule::class)]
     #[JoinColumn(name: "SalesActivitySchedule_id", referencedColumnName: "id")]
     protected SalesActivitySchedule $salesActivitySchedule;

@@ -12,12 +12,14 @@ use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 
 #[Entity(repositoryClass: DoctrineClosingRequestRepository::class)]
 class ClosingRequest
 {
 
+    #[FetchableObject(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
     #[ManyToOne(targetEntity: AssignedCustomer::class)]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;

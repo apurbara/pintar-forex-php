@@ -43,17 +43,15 @@ class ManagerControllerTest extends CompanyBCTestCase
         $this->personnelOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $personnelId: ID!){
-    personnel ( personnelId: $personnelId ) {
-        assignManager {
-            id, disabled, createdTime,
-            personnel { id, name }
-        }
+mutation ( $Personnel_id: ID!){
+    assignManager (Personnel_id: $Personnel_id) {
+        id, disabled, createdTime,
+        personnel { id, name }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'personnelId' => $this->personnelOne->columns['id'],
+            'Personnel_id' => $this->personnelOne->columns['id'],
         ];
         $this->postGraphqlRequest($this->admin->token);
     }
@@ -89,7 +87,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query ManagerList {
-    managerList{
+    viewManagerList{
         list {
             id, disabled, createdTime,
             personnel { id, name }
@@ -140,14 +138,14 @@ _QUERY;
         $this->managerOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ManagerDetail ( $managerId: ID! ) {
-    managerDetail ( managerId: $managerId ) {
+query ManagerDetail ( $id: ID! ) {
+    viewManagerDetail ( id: $id ) {
         id, disabled, createdTime,
         personnel { id, name }
     }
 }
 _QUERY;
-        $this->graphqlVariables['managerId'] = $this->managerOne->columns['id'];
+        $this->graphqlVariables['id'] = $this->managerOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

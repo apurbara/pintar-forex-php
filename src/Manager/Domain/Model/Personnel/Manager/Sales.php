@@ -2,6 +2,7 @@
 
 namespace Manager\Domain\Model\Personnel\Manager;
 
+use Company\Domain\Model\AreaStructure\Area as AreaInCompanyBC;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
@@ -16,6 +17,8 @@ use Manager\Domain\Model\CustomerJourney;
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\SalesType;
 
@@ -23,10 +26,12 @@ use SharedContext\Domain\Enum\SalesType;
 class Sales
 {
 
-    #[ManyToOne(targetEntity: Manager::class, inversedBy: "salesCollection", fetch: "LAZY")]
+    #[FetchableObject(targetEntity: Manager::class, joinColumnName: "Manager_id")]
+    #[ManyToOne(targetEntity: Manager::class, inversedBy: "salesList", fetch: "LAZY")]
     #[JoinColumn(name: "Manager_id", referencedColumnName: "id")]
     protected Manager $manager;
 
+    #[FetchableObject(targetEntity: AreaInCompanyBC::class, joinColumnName: "Area_id")]
     #[ManyToOne(targetEntity: Area::class)]
     #[JoinColumn(name: "Area_id", referencedColumnName: "id")]
     protected Area $area;
@@ -40,6 +45,7 @@ class Sales
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
     
+    #[FetchableObjectList(targetEntity: AssignedCustomer::class, joinColumnName: "Sales_id", paginationRequired: true)]
     #[OneToMany(targetEntity: AssignedCustomer::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
     protected Collection $assignedCustomers;
 

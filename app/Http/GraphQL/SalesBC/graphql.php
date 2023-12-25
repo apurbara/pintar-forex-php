@@ -9,11 +9,12 @@ namespace App\Http\GraphQL\SalesBC;
 
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
+use function base_path;
 
 $schema = new Schema([
     'query' => TypeRegistry::type(SalesQuery::class),
     'mutation' => TypeRegistry::type(SalesMutation::class),
-    'typeLoader' => static fn($name) => TypeRegistry::load($name),
+    'typeLoader' => static fn($name) => TypeRegistry::type($name),
 ]);
 
-return require __DIR__ . '/../executeGraphqlQuery.php';
+return require base_path() . '/resources/Infrastructure/GraphQL/executeGraphqlQuery.php';

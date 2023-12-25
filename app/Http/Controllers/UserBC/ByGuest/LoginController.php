@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\UserBC\ByGuest;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
+use Resources\Application\InputRequest;
 use User\Application\Service\Guest\AdminLoginService;
 use User\Application\Service\Guest\PersonnelLoginService;
 use User\Domain\Model\Admin;

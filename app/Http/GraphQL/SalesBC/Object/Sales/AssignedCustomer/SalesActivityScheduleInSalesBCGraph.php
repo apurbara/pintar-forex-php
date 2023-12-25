@@ -4,10 +4,10 @@ namespace App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer;
 
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\SalesActivityGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReportInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;

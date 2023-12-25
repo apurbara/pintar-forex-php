@@ -2,6 +2,8 @@
 
 namespace Manager\Domain\Model\Personnel\Manager\Sales;
 
+use Company\Domain\Model\CustomerJourney as CustomerJourneyInCompanyBC;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
@@ -11,10 +13,16 @@ use Manager\Domain\Model\AreaStructure\Area\Customer;
 use Manager\Domain\Model\CustomerJourney;
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales;
+use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\ClosingRequest;
+use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequest;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
+use Sales\Domain\Model\AreaStructure\Area\Customer as CustomerInSalesBC;
+use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule as SalesActivityScheduleInSalesBC;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\SalesType;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
@@ -26,14 +34,17 @@ class AssignedCustomer implements ContainEventsInterface
 
     use ContainEventsTrait;
 
+    #[FetchableObject(targetEntity: Sales::class, joinColumnName: "Sales_id")]
     #[ManyToOne(targetEntity: Sales::class, inversedBy: "assignedCustomers", fetch: "LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
+    #[FetchableObject(targetEntity: CustomerInSalesBC::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Customer::class)]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
 
+    #[FetchableObject(targetEntity: CustomerJourneyInCompanyBC::class, joinColumnName: "CustomerJourney_id")]
     #[ManyToOne(targetEntity: CustomerJourney::class)]
     #[JoinColumn(name: "CustomerJourney_id", referencedColumnName: "id")]
     protected CustomerJourney $customerJourney;
@@ -43,6 +54,16 @@ class AssignedCustomer implements ContainEventsInterface
 
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
+    
+    //
+    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
+    protected Collection $closingRequests;
+    
+    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
+    protected Collection $recycleRequests;
+    
+    #[FetchableObjectList(targetEntity: SalesActivityScheduleInSalesBC::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
+    protected Collection $salesActivitySchedules;
 
     public function getStatus(): CustomerAssignmentStatus
     {

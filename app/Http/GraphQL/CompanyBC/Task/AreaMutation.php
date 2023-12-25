@@ -3,12 +3,12 @@
 namespace App\Http\GraphQL\CompanyBC\Task;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
-use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure\Area;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
 

@@ -1,26 +1,25 @@
 <?php
 
 namespace Resources\Infrastructure\Persistence\Doctrine\Repository;
+//use Resources\Infrastructure\Persistence\Doctrine\Attribute\QueryEntity;
+
 
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Embedded;
-use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\Table;
-use ReflectionAttribute;
 use ReflectionClass;
-use ReflectionProperty;
-use Reflector;
-use Resources\Attributes\Composed;
-use Resources\Attributes\ExcludeFromFetch;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\GraphqlQueryableRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Attribute\QueryEntity;
+use Resources\Infrastructure\Persistence\Doctrine\DoctrineEntityToSqlFieldsMapper;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
+use Resources\ReflectionHelper;
 use Resources\Uuid;
 
-abstract class DoctrineEntityRepository extends EntityRepository
+abstract class DoctrineEntityRepository extends EntityRepository implements GraphqlQueryableRepository
 {
 
-    use DoctrineRepositoryTrait;
+//    use DoctrineRepositoryTrait;
 
     public function nextIdentity(): string
     {
@@ -52,129 +51,21 @@ abstract class DoctrineEntityRepository extends EntityRepository
         return $entity;
     }
 
-    protected function initializeEntityResources(): void
+//
+//    protected readonly ?string $queryEntityMetadata;
+
+    protected function getQueryEntityMetadata(): string
     {
-        $this->columns = [];
-        $this->compositionEntities = [];
-        $entityReflection = new ReflectionClass($this->getEntityName());
-        $this->tableName = $this->getAttribute($entityReflection, Table::class)?->getArguments()['name'] ?? $entityReflection->getShortName();
-        $this->setColumnsAndCompositionRelation($entityReflection, $this->tableName);
+        $entityName = $this->getEntityName();
+        return ReflectionHelper::getAttributeArgument(new \ReflectionClass($entityName), QueryEntity::class, 'targetEntity') ?? $entityName;
     }
-
-    private function setColumnsAndCompositionRelation(
-            \ReflectionClass $classReflection, string $table, ?string $columnPrefix = null, bool $excludeId = false): void
-    {
-        foreach ($this->iterateReflectionPropertiesOfClass($classReflection) as $propertyReflection) {
-            if ($excludeId && $propertyReflection->getName() === 'id') {
-                continue;
-            }
-            
-            $isExcluded = $this->getAttribute($propertyReflection, ExcludeFromFetch::class);
-            if ($isExcluded) {
-                continue;
-            }
-
-            $columnAttributeReflection = $this->getAttribute($propertyReflection, Column::class);
-            if ($columnAttributeReflection) {
-                $colName = $columnPrefix . $propertyReflection->getName();
-                $this->columns["{$table}.{$colName}"] = $colName;
-                continue;
-            }
-
-            $embeddedAttributeReflection = $this->getAttribute($propertyReflection, Embedded::class);
-            if ($embeddedAttributeReflection) {
-                $this->setColumnsAndCompositionRelation(
-                        new \ReflectionClass(
-                                $embeddedAttributeReflection->getArguments()['class']), 
-                                $table,
-                                $embeddedAttributeReflection->getArguments()['columnPrefix'] ?? null
-                        );
-                continue;
-            }
-
-            $composedAttributeReflection = $this->getAttribute($propertyReflection, Composed::class);
-            if ($composedAttributeReflection) {
-                $composedClassReflection = new \ReflectionClass($composedAttributeReflection->getArguments()['class']);
-                $composedTableName = $this->getAttribute($composedClassReflection, Table::class)?->getArguments()['name'] ?? $composedClassReflection->getShortName();
-//                $this->compositionEntities[$table] = $composedTableName;
-                $joinColName = $this->getAttribute($propertyReflection, JoinColumn::class)->getArguments()['name'];
-                $this->compositionEntities[] = [
-                    'from' => $table,
-                    'join' => $composedTableName,
-                    'condition' => "{$table}.{$joinColName} = {$composedTableName}.id",
-                ];
-                $this->setColumnsAndCompositionRelation($composedClassReflection, $composedTableName, null, true);
-                continue;
-            }
-
-            $joinColumnAttributeReflection = $this->getAttribute($propertyReflection, JoinColumn::class);
-            if ($joinColumnAttributeReflection) {
-                $refColumnName = $joinColumnAttributeReflection->getArguments()['name'];
-                $this->columns["{$table}.{$refColumnName}"] = $refColumnName;
-                continue;
-            }
-        }
-    }
-
-    /**
-     * 
-     * @param string $classMetadata
-     * @return ReflectionProperty[]
-     */
-    private static function iterateReflectionPropertiesOfClass(\ReflectionClass $classReflection)
-    {
-        return $classReflection->getProperties();
-    }
-
-    private static function getAttribute(Reflector $reflection, string $attributeMetadata): ?ReflectionAttribute
-    {
-        $attributesReflection = $reflection->getAttributes($attributeMetadata, ReflectionAttribute::IS_INSTANCEOF);
-        return $attributesReflection[0] ?? null;
-    }
-
-    /**
-     * 
-     * @var [
-     *  'fromTabel' => 'joinTable',
-     * ]
-     */
-    protected ?array $compositionEntities = null;
-
-    protected function getCompositionEntities(): array
-    {
-        if (is_null($this->compositionEntities)) {
-            $this->initializeEntityResources();
-        }
-        return $this->compositionEntities;
-    }
-
-    /**
-     * 
-     * @var [
-     *  'Table.colName' => 'alias',
-     * ]
-     */
-    protected ?array $columns = null;
-
-    protected function getSelectColumns(): array
-    {
-        if (is_null($this->columns)) {
-            $this->initializeEntityResources();
-        }
-        return $this->columns;
-    }
-
-    protected ?string $tableName = null;
 
     protected function getTableName(): string
     {
-        if (is_null($this->tableName)) {
-            $this->initializeEntityResources();
-        }
-        return $this->tableName;
+        $entityReflection = new ReflectionClass($this->getEntityName());
+        return ReflectionHelper::getAttributeArgument($entityReflection, Table::class, 'name') ?? $entityReflection->getShortName();
     }
 
-//
     protected function dbalQueryBuilder(): QueryBuilder
     {
         return $this->getEntityManager()->getConnection()->createQueryBuilder();
@@ -183,17 +74,93 @@ abstract class DoctrineEntityRepository extends EntityRepository
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         $qb = $this->getEntityManager()->getConnection()->createQueryBuilder();
-        foreach ($this->getSelectColumns() as $tableColumnName => $alias) {
-            $qb->addSelect("$tableColumnName AS $alias");
-        }
+        $sqlMap = DoctrineEntityToSqlFieldsMapper::mapFields($this->getQueryEntityMetadata());
         $qb->from($this->getTableName());
-        foreach ($this->getCompositionEntities() as $composition) {
-            $qb->innerJoin($composition['from'], $composition['join'], $composition['join'], $composition['condition']);
+        foreach ($sqlMap['selectFields'] as $selectField) {
+            $qb->addSelect($selectField);
         }
-//        foreach ($this->getCompositionEntities() as $fromAlias => $join) {
-//            $condition = "{$fromAlias}.{$join}_id = {$join}.id";
-//            $qb->innerJoin($fromAlias, $join, $join, $condition);
-//        }
+        foreach ($sqlMap['joins'] as $join) {
+            $qb->innerJoin($join['from'], $join['to'], $join['to'], $join['condition']);
+        }
         return $qb;
+    }
+
+    //
+    protected function fetchPaginationList(DoctrinePaginationListCategory $doctrinePaginationListCategory): array
+    {
+        $qb = $this->createCoreQueryBuilder();
+        return $doctrinePaginationListCategory->paginateResult($qb, $this->getTableName());
+    }
+
+    protected function fetchAllList(DoctrineAllListCategory $doctrineAllListCategory): array
+    {
+        $qb = $this->createCoreQueryBuilder();
+        return $doctrineAllListCategory->fetchResult($qb);
+    }
+
+    /**
+     * 
+     * @param Filter[] $filter
+     * @return array
+     */
+    protected function fetchOneBy($filters): ?array
+    {
+        $qb = $this->createCoreQueryBuilder();
+        $qb->setMaxResults(1);
+        foreach ($filters as $filter) {
+            $filter->applyToQuery($qb);
+        }
+        return $qb->executeQuery()->fetchAssociative() ?: null;
+    }
+
+    /**
+     * 
+     * @param Filter[] $filter
+     * @return array
+     * @throws RegularException
+     */
+    protected function fetchOneOrDie($filters): array
+    {
+        $result = $this->fetchOneBy($filters);
+        if (empty($result)) {
+            $shortEntityName = (new ReflectionClass($this->getEntityName()))->getShortName();
+            $errorDetail = "not found: '{$shortEntityName}' not found";
+            throw RegularException::notFound($errorDetail);
+        }
+        return $result;
+    }
+
+    public function fetchOneByIdOrDie(string $id): array
+    {
+        return $this->fetchOneOrDie([new Filter($id, "{$this->getTableName()}.id")]);
+    }
+//
+//    public function fetchOneById(string $id): ?array
+//    {
+//        return $this->fetchOneBy([new Filter($id, "{$this->getTableName()}.id")]);
+//    }
+
+    //
+    public function queryOneById(string $id): ?array
+    {
+        return $this->fetchOneBy([new Filter($id, "{$this->getTableName()}.id")]);
+//        return $this->fetchOneById($id);
+    }
+    
+    public function queryOneBy(array $filters): ?array
+    {
+        return $this->fetchOneBy($filters);
+    }
+
+    public function queryAllList(array $searchSchema): array
+    {
+        $doctrineAllListCategory = DoctrineAllListCategory::fromSchema($searchSchema);
+        return $this->fetchAllList($doctrineAllListCategory);
+    }
+
+    public function queryPaginationList(array $paginationSchema): array
+    {
+        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
+        return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
 }

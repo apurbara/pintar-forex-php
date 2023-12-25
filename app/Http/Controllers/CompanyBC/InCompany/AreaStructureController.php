@@ -4,7 +4,6 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructureData;
 use Company\Domain\Task\InCompany\AreaStructure\AddChildAreaStructureTask;
@@ -12,8 +11,13 @@ use Company\Domain\Task\InCompany\AreaStructure\AddRootAreaStructureTask;
 use Company\Domain\Task\InCompany\AreaStructure\ViewAreaStructureDetailTask;
 use Company\Domain\Task\InCompany\AreaStructure\ViewAreaStructureListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineAreaStructureRepository;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 
+#[GraphqlMapableController(entity: AreaStructure::class)]
 class AreaStructureController extends Controller
 {
 
@@ -23,28 +27,31 @@ class AreaStructureController extends Controller
     }
 
     //
-    public function addRoot(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Mutation]
+    public function addRootAreaStructure(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->areaStructureRepository();
         $task = new AddRootAreaStructureTask($repository);
         $payload = new AreaStructureData($this->createLabelData($input));
         $user->executeTaskInCompany($task, $payload);
 
-        return $repository->fetchOneByIdOrDie($payload->id);
+        return $repository->queryOneById($payload->id);
     }
 
-    public function addChild(CompanyUserRoleInterface $user, string $parentAreaStructureId, InputRequest $input)
+    #[Mutation]
+    public function addChildAreaStructure(CompanyUserRoleInterface $user, ?string $parentAreaStructureId, InputRequest $input)
     {
         $repository = $this->areaStructureRepository();
         $task = new AddChildAreaStructureTask($repository);
         $payload = (new AreaStructureData($this->createLabelData($input)))
-                ->setParentId($parentAreaStructureId);
+                ->setParentId($parentAreaStructureId ?? $input->get('AreaStructure_idOfParent'));
         $user->executeTaskInCompany($task, $payload);
 
-        return $repository->fetchOneByIdOrDie($payload->id);
+        return $repository->queryOneById($payload->id);
     }
     
-    public function viewList(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function viewAreaStructureList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewAreaStructureListTask($this->areaStructureRepository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -53,7 +60,8 @@ class AreaStructureController extends Controller
         return $payload->result;
     }
     
-    public function viewDetail(CompanyUserRoleInterface $user, string $id)
+    #[Query]
+    public function viewAreaStructureDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewAreaStructureDetailTask($this->areaStructureRepository());
         $payload = new ViewDetailPayload($id);

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\ManagerBC;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
 use Manager\Application\Listener\DistributeRecycledCustomerFromInHouseSalesListener;
 use Manager\Domain\Model\AreaStructure\Area\Customer;
 use Manager\Domain\Model\CustomerJourney;
@@ -16,6 +15,7 @@ use Manager\Domain\Task\RecycleRequest\RejectRecycleRequest;
 use Manager\Domain\Task\RecycleRequest\ViewRecycleRequestDetail;
 use Manager\Domain\Task\RecycleRequest\ViewRecycleRequestList;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleRequestRepository;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineTransactionalSession;

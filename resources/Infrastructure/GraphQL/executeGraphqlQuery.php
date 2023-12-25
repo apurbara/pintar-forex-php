@@ -28,6 +28,7 @@ if ($request->query('debug')) {
 //enable complexiti rule, particularly to prevent circular reference query
 $rule = new \GraphQL\Validator\Rules\QueryComplexity(400);
 \GraphQL\Validator\DocumentValidator::addRule($rule);
+$appContext = new AppContext();
 
 try {
     $data = $request->input();

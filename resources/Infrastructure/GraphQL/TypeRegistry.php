@@ -28,6 +28,13 @@ class TypeRegistry
         'DateTimeZ' => DateTimeZ::class,
     ];
 
+    private static $predefinedClassmaps = [
+        'KeywordSearchInput' => KeywordSearchInput::class,
+        'FilterInput' => FilterInput::class,
+        'CursorLimitInput' => CursorLimitInput::class,
+        'OffsetLimitInput' => OffsetLimitInput::class,
+        'DateTimeZ' => DateTimeZ::class,
+    ];
     private static $types = [];
 //    private static $paginationTypes = [];
 
@@ -35,11 +42,16 @@ class TypeRegistry
     {
         $this->types = [];
     }
-
-    protected static function getPredefinedClassMap(): array
+    
+    public static function registerPredefinedClassMaps(array $predefinedClassMaps)
     {
-        return static::PREDEFINED_CLASS_MAP;
+        static::$predefinedClassmaps = [...static::$predefinedClassmaps, ...$predefinedClassMaps];
     }
+
+//    protected static function getPredefinedClassMap(): array
+//    {
+//        return static::PREDEFINED_CLASS_MAP;
+//    }
 
     //    private static $called = 0;
 //    public static function get(string $classname): Type
@@ -89,52 +101,14 @@ class TypeRegistry
 //        return static::$types[$listCacheName];
 //    }
 
-    public static function load(string $classMetadata): Type
-    {
-        if (isset(static::$types[$classMetadata])) {
-            return static::$types[$classMetadata];
-        }
-        return static::type($classMetadata);
-//
-//        $path = explode('\\', $classname);
-//        $cacheName = lcfirst(array_pop($path));
-//        
-//        if (!isset(static::$types[$cacheName])) {
-//            $predefinedClassMap = array_merge(self::PREDEFINED_CLASS_MAP, static::getPredefinedClassMap());
-//            if (class_exists($classname)) {
-//                static::$types[$cacheName] = new $classname();
-//            } elseif (isset($predefinedClassMap[$classname]) && class_exists($predefinedClassMap[$classname])) {
-//                $class = $predefinedClassMap[$classname];
-//                static::$types[$cacheName] = new $class();
-//            } else {
-//                throw RegularException::notFound("not found: $cacheName graphql type not found");
-//            }
+//    public static function load(string $classMetadata): Type
+//    {
+//        if (isset(static::$types[$classMetadata])) {
+//            return static::$types[$classMetadata];
 //        }
-//        return static::$types[$cacheName];
-    }
+//        return static::type($classMetadata);
+//    }
     
-    public static function paginationType(string $classMetadata): Type
-    {
-        $reflectionClass = new ReflectionClass($classMetadata);
-        if ($reflectionClass->isSubclassOf(ObjectType::class)) {
-            $cacheName = $reflectionClass->getShortName() . 'Pagination';
-        } else {
-            $cacheName = $reflectionClass->getShortName() . 'GraphPagination';
-        }
-        if (!isset(static::$types[$cacheName])) {
-//            static::$paginationTypes[$cacheName] = new Pagination(static::objectType($classMetadata));
-            static::$types[$cacheName] = new ObjectType([
-                'name' => $cacheName,
-                'fields' => fn() => [
-                    'list' => Type::listOf(TypeRegistry::objectType($classMetadata)),
-                    'cursorLimit' => TypeRegistry::objectType(CursorLimit::class),
-                    'offsetLimit' => TypeRegistry::objectType(OffsetLimit::class),
-                ],
-            ]);
-        }
-        return static::$types[$cacheName];
-    }
-
     public static function objectType(string $classMetadata): Type
     {
         if (isset(static::$types[$classMetadata])) {
@@ -151,7 +125,7 @@ class TypeRegistry
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = new ObjectType([
                     'name' => $cacheName,
-                    'fields' => fn() => DoctrineGraphqlFieldsBuilder::buildObjectFields($classMetadata),
+                    'fields' => fn() => DoctrineEntityToGraphqlFieldMapper::mapObjectFields($classMetadata),
                 ]);
             }
         }
@@ -171,7 +145,7 @@ class TypeRegistry
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = new InputObjectType([
                     'name' => $cacheName,
-                    'fields' => fn() => DoctrineGraphqlFieldsBuilder::buildInputFields($classMetadata),
+                    'fields' => fn() => DoctrineEntityToGraphqlFieldMapper::mapInputFields($classMetadata),
                 ]);
             }
         }
@@ -216,8 +190,9 @@ class TypeRegistry
         if (isset(static::$types[$classMetadata])) {
             return static::$types[$classMetadata];
         }
-        $predefinedInputMetadata = [...self::PREDEFINED_CLASS_MAP, ...static::getPredefinedClassMap()];
-        $graphqlClassMetadata = $predefinedInputMetadata[$classMetadata] ?? $classMetadata;
+//        $predefinedInputMetadata = [...self::PREDEFINED_CLASS_MAP, ...static::getPredefinedClassMap()];
+        $graphqlClassMetadata = static::$predefinedClassmaps[$classMetadata] ?? $classMetadata;
+//        $graphqlClassMetadata = $predefinedInputMetadata[$classMetadata] ?? $classMetadata;
 
         $reflectionClass = new ReflectionClass($graphqlClassMetadata);
         if ($reflectionClass->isSubclassOf(Type::class)) {
@@ -229,5 +204,27 @@ class TypeRegistry
         } else {
             return static::inputType($graphqlClassMetadata);
         }
+    }
+    
+    public static function paginationType(string $classMetadata): Type
+    {
+        $reflectionClass = new ReflectionClass($classMetadata);
+        if ($reflectionClass->isSubclassOf(ObjectType::class)) {
+            $cacheName = $reflectionClass->getShortName() . 'Pagination';
+        } else {
+            $cacheName = $reflectionClass->getShortName() . 'GraphPagination';
+        }
+        if (!isset(static::$types[$cacheName])) {
+//            static::$paginationTypes[$cacheName] = new Pagination(static::objectType($classMetadata));
+            static::$types[$cacheName] = new ObjectType([
+                'name' => $cacheName,
+                'fields' => fn() => [
+                    'list' => Type::listOf(TypeRegistry::objectType($classMetadata)),
+                    'cursorLimit' => TypeRegistry::objectType(CursorLimit::class),
+                    'offsetLimit' => TypeRegistry::objectType(OffsetLimit::class),
+                ],
+            ]);
+        }
+        return static::$types[$cacheName];
     }
 }

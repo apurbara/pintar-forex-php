@@ -3,10 +3,10 @@
 namespace App\Http\GraphQL\CompanyBC\Task;
 
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
 use Company\Domain\Model\Personnel\Manager;
 use GraphQL\Type\Definition\ObjectType;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
 

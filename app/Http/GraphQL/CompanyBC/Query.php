@@ -10,7 +10,6 @@ use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
 use App\Http\GraphQL\CompanyBC\Object\CustomerJourneyGraph;
@@ -19,11 +18,12 @@ use App\Http\GraphQL\CompanyBC\Object\Personnel\Manager\SalesGraph;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
 use App\Http\GraphQL\CompanyBC\Object\PersonnelGraph;
 use App\Http\GraphQL\CompanyBC\Object\SalesActivityGraph;
-use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class Query extends ObjectType
@@ -39,14 +39,22 @@ class Query extends ObjectType
     protected function fieldDefinition(): array
     {
         return [
-            ...$this->personnelQuery(),
-            ...$this->areaStructureQuery(),
-            ...$this->areaQuery(),
-            ...$this->managerQuery(),
-            ...$this->salesQuery(),
-            ...$this->customerVerificationQuery(),
-            ...$this->salesActivityQuery(),
-            ...$this->customerJourneyQuery(),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(AreaStructureController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerJourneyController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerVerificationController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(PersonnelController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(AreaController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(ManagerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
+//            ...$this->personnelQuery(),
+//            ...$this->areaStructureQuery(),
+//            ...$this->areaQuery(),
+//            ...$this->managerQuery(),
+//            ...$this->salesQuery(),
+//            ...$this->customerVerificationQuery(),
+//            ...$this->salesActivityQuery(),
+//            ...$this->customerJourneyQuery(),
         ];
     }
 

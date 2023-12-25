@@ -4,11 +4,11 @@ namespace App\Http\GraphQL\ManagerBC;
 
 use App\Http\Controllers\ManagerBC\ClosingRequestController;
 use App\Http\Controllers\ManagerBC\RecycleRequestController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\ManagerBC\Object\Manager\Sales\AssignedCustomer\ClosingRequestInManagerBCGraph;
 use App\Http\GraphQL\ManagerBC\Object\Manager\Sales\AssignedCustomer\RecycleRequestInManagerBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class ManagerMutation extends ObjectType

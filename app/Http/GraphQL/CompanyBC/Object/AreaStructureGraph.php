@@ -3,12 +3,11 @@
 namespace App\Http\GraphQL\CompanyBC\Object;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
-use App\Http\GraphQL\AppContext;
-use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class AreaStructureGraph extends GraphqlObjectType

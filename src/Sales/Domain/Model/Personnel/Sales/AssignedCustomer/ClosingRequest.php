@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\ValidationRule;
 use Resources\ValidationService;
 use Sales\Domain\Model\Personnel\Sales;
@@ -20,6 +21,7 @@ use SharedContext\Domain\Enum\ManagementApprovalStatus;
 class ClosingRequest
 {
 
+    #[FetchableObject(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
     #[ManyToOne(targetEntity: AssignedCustomer::class, inversedBy: "closingRequest", fetch: "LAZY")]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;

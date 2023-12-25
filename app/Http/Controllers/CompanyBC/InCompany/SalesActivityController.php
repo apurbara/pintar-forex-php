@@ -4,7 +4,6 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Model\SalesActivityData;
 use Company\Domain\Task\InCompany\SalesActivity\AddSalesActivityTask;
@@ -12,8 +11,13 @@ use Company\Domain\Task\InCompany\SalesActivity\SetInitialSalesActivityTask;
 use Company\Domain\Task\InCompany\SalesActivity\ViewSalesActivityDetail;
 use Company\Domain\Task\InCompany\SalesActivity\ViewSalesActivityList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityRepository;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 
+#[GraphqlMapableController(entity: SalesActivity::class)]
 class SalesActivityController extends Controller
 {
 
@@ -23,7 +27,8 @@ class SalesActivityController extends Controller
     }
 
     //
-    public function setInitial(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Mutation]
+    public function setInitialSalesActivity(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
         
@@ -36,7 +41,8 @@ class SalesActivityController extends Controller
         return $repository->fetchInitialSalesActivityDetail();
     }
     
-    public function add(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Mutation]
+    public function addSalesActivity(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
         
@@ -49,7 +55,8 @@ class SalesActivityController extends Controller
         return $repository->fetchOneByIdOrDie($payload->id);
     }
     
-    public function viewList(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function viewSalesActivityList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewSalesActivityList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -58,7 +65,8 @@ class SalesActivityController extends Controller
         return $payload->result;
     }
     
-    public function viewDetail(CompanyUserRoleInterface $user, string $id)
+    #[Query]
+    public function viewSalesActivityDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewSalesActivityDetail($this->repository());
         $payload = new ViewDetailPayload($id);

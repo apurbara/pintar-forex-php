@@ -14,6 +14,7 @@ use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleReques
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 
 #[Entity(repositoryClass: DoctrineRecycleRequestRepository::class)]
@@ -22,6 +23,7 @@ class RecycleRequest implements ContainEventsInterface
 
     use ContainEventsTrait;
 
+    #[FetchableObject(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
     #[ManyToOne(targetEntity: AssignedCustomer::class)]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;

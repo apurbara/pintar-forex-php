@@ -112,7 +112,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query CustomerJourneyList{
-    customerJourneyList{
+    viewCustomerJourneyList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }
     }
@@ -155,13 +155,13 @@ _QUERY;
         $this->customerJourneyOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query CustomerJourneyDetail ( $customerJourneyId: ID! ) {
-    customerJourneyDetail ( customerJourneyId: $customerJourneyId ) {
+query CustomerJourneyDetail ( $id: ID! ) {
+    viewCustomerJourneyDetail ( id: $id ) {
         id, disabled, createdTime, name, description
     }
 }
 _QUERY;
-        $this->graphqlVariables['customerJourneyId'] = $this->customerJourneyOne->columns['id'];
+        $this->graphqlVariables['id'] = $this->customerJourneyOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

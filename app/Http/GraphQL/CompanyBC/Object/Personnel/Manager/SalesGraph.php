@@ -5,11 +5,11 @@ namespace App\Http\GraphQL\CompanyBC\Object\Personnel\Manager;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructure\AreaGraph;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
 use App\Http\GraphQL\CompanyBC\Object\PersonnelGraph;
 use Company\Domain\Model\Personnel\Manager\Sales;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 

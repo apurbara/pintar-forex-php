@@ -4,14 +4,13 @@ namespace App\Http\GraphQL\CompanyBC\Object;
 
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\Manager\SalesGraph;
 use App\Http\GraphQL\CompanyBC\Object\Personnel\ManagerGraph;
-use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\Personnel;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class PersonnelGraph extends GraphqlObjectType

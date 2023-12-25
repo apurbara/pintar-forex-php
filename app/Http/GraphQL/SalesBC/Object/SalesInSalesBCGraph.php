@@ -4,13 +4,12 @@ namespace App\Http\GraphQL\SalesBC\Object;
 
 use App\Http\Controllers\SalesBC\AssignedCustomerController;
 use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
-use App\Http\GraphQL\AppContext;
-use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleInSalesBCGraph;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\Personnel\Sales;
 

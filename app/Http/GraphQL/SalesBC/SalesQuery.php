@@ -2,9 +2,9 @@
 
 namespace App\Http\GraphQL\SalesBC;
 
-use App\Http\GraphQL\AppContext;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class SalesQuery extends ObjectType

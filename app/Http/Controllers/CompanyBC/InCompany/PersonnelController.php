@@ -4,15 +4,20 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\PersonnelData;
 use Company\Domain\Task\InCompany\Personnel\AddPersonnelTask;
 use Company\Domain\Task\InCompany\Personnel\ViewPersonnelDetailTask;
 use Company\Domain\Task\InCompany\Personnel\ViewPersonnelListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
+use Resources\Application\InputRequest;
+use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 use SharedContext\Domain\ValueObject\AccountInfoData;
 
+#[GraphqlMapableController(entity: Personnel::class)]
 class PersonnelController extends Controller
 {
     protected function personnelRepository(): DoctrinePersonnelRepository
@@ -21,7 +26,8 @@ class PersonnelController extends Controller
     }
     
     //
-    public function add(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Mutation]
+    public function addPersonnel(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new AddPersonnelTask($this->personnelRepository());
         $name = $input->get('name');
@@ -34,7 +40,8 @@ class PersonnelController extends Controller
         return $this->personnelRepository()->fetchOneByIdOrDie($payload->id);
     }
     
-    public function viewList(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function viewPersonnelList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewPersonnelListTask($this->personnelRepository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -43,10 +50,11 @@ class PersonnelController extends Controller
         return $payload->result;
     }
     
-    public function viewDetail(CompanyUserRoleInterface $user, string $personnelId)
+    #[Query]
+    public function viewPersonnelDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewPersonnelDetailTask($this->personnelRepository());
-        $payload = new \Resources\Domain\TaskPayload\ViewDetailPayload($personnelId);
+        $payload = new ViewDetailPayload($id);
         $user->executeTaskInCompany($task, $payload);
         
         return $payload->result;

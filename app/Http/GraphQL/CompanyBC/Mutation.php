@@ -2,12 +2,14 @@
 
 namespace App\Http\GraphQL\CompanyBC;
 
+use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
+use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
+use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
 use App\Http\GraphQL\CompanyBC\Object\CustomerJourneyGraph;
 use App\Http\GraphQL\CompanyBC\Object\CustomerVerificationGraph;
@@ -17,7 +19,6 @@ use App\Http\GraphQL\CompanyBC\Task\AreaMutation;
 use App\Http\GraphQL\CompanyBC\Task\AreaStructureMutation;
 use App\Http\GraphQL\CompanyBC\Task\ManagerMutation;
 use App\Http\GraphQL\CompanyBC\Task\PersonnelMutation;
-use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
@@ -25,6 +26,9 @@ use Company\Domain\Model\Personnel;
 use Company\Domain\Model\SalesActivity;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineGraphqlFieldsBuilder;
 
@@ -41,13 +45,21 @@ class Mutation extends ObjectType
     protected function fieldDefinition(): array
     {
         return [
-            ...$this->personnelMutation(),
-            ...$this->areaStructureMutation(),
-            ...$this->areaMutation(),
-            ...$this->managerMutation(),
-            ...$this->customerVerificationMutation(),
-            ...$this->salesActivityMutation(),
-            ...$this->customerJourneyMutation(),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(AreaStructureController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerJourneyController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerVerificationController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(PersonnelController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(AreaController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(ManagerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesController::class),
+//            ...$this->personnelMutation(),
+//            ...$this->areaStructureMutation(),
+//            ...$this->areaMutation(),
+//            ...$this->managerMutation(),
+//            ...$this->customerVerificationMutation(),
+//            ...$this->salesActivityMutation(),
+//            ...$this->customerJourneyMutation(),
         ];
     }
 

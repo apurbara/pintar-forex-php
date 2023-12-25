@@ -9,6 +9,7 @@ namespace App\Http\GraphQL\UserBC;
 
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
+use function base_path;
 
 $schema = new Schema([
     'query' => TypeRegistry::type(Query::class),
@@ -16,4 +17,4 @@ $schema = new Schema([
     'typeLoader' => static fn($name) => TypeRegistry::load($name),
 ]);
 
-return require __DIR__ . '/../executeGraphqlQuery.php';
+return require base_path() . '/resources/Infrastructure/GraphQL/executeGraphqlQuery.php';

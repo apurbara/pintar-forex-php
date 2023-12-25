@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Resources\Attributes\FetchableEntity;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\CustomerVerification;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineVerificationReportRepository;
@@ -18,10 +18,12 @@ use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineVerificationRep
 class VerificationReport
 {
 
+    #[FetchableObject(targetEntity: Customer::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Customer::class, inversedBy: "verificationReports", fetch: "LAZY")]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
 
+    #[FetchableObject(targetEntity: CustomerVerificationInCompanyBC::class, joinColumnName: "CustomerVerification_id")]
     #[ManyToOne(targetEntity: CustomerVerification::class)]
     #[JoinColumn(name: "CustomerVerification_id", referencedColumnName: "id")]
     protected CustomerVerification $customerVerification;

@@ -4,15 +4,19 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\CustomerVerificationData;
 use Company\Domain\Task\InCompany\CustomerVerification\AddCustomerVerificationTask;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationDetailTask;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerVerificationRepository;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
+use Resources\Infrastructure\GraphQL\Attributes\Mutation;
+use Resources\Infrastructure\GraphQL\Attributes\Query;
 
+#[GraphqlMapableController(entity: CustomerVerification::class)]
 class CustomerVerificationController extends Controller
 {
 
@@ -22,7 +26,8 @@ class CustomerVerificationController extends Controller
     }
 
     //
-    public function add(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Mutation]
+    public function addCustomerVerification(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
 
@@ -33,7 +38,8 @@ class CustomerVerificationController extends Controller
         return $repository->fetchOneByIdOrDie($payload->id);
     }
 
-    public function viewList(CompanyUserRoleInterface $user, InputRequest $input)
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
+    public function viewCustomerVerificationList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewCustomerVerificationListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -42,10 +48,11 @@ class CustomerVerificationController extends Controller
         return $payload->result;
     }
 
-    public function viewDetail(CompanyUserRoleInterface $user, string $customerVerificationId)
+    #[Query]
+    public function viewCustomerVerificationDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewCustomerVerificationDetailTask($this->repository());
-        $payload = new ViewDetailPayload($customerVerificationId);
+        $payload = new ViewDetailPayload($id);
         $user->executeTaskInCompany($task, $payload);
 
         return $payload->result;

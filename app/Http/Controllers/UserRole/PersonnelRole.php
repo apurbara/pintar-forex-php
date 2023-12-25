@@ -11,7 +11,7 @@ use Company\Domain\Model\Personnel;
 use Company\Domain\Task\InCompany\TaskInCompany;
 use Doctrine\ORM\EntityManager;
 use User\Application\Service\Personnel\ExecutePersonnelTask;
-use User\Domain\Model\Personnel as Personnel2;
+use User\Domain\Model\Personnel as PersonnelInCompanyBC;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 use function app;
 
@@ -45,7 +45,7 @@ class PersonnelRole implements CompanyUserRoleInterface, PersonnelRoleInterface
 
     public function executePersonnelTask(PersonnelTask $task, $payload): void
     {
-        $personnelRepository = $this->em->getRepository(Personnel2::class);
+        $personnelRepository = $this->em->getRepository(PersonnelInCompanyBC::class);
         (new ExecutePersonnelTask($personnelRepository))
                 ->execute($this->personnelId, $task, $payload);
     }

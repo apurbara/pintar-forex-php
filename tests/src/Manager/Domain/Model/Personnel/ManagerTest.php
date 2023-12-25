@@ -24,12 +24,12 @@ class ManagerTest extends TestBase
     {
         parent::setUp();
         $this->manager = new TestableManager();
-        $this->manager->salesCollection = new ArrayCollection();
+        $this->manager->salesList = new ArrayCollection();
         
         $this->salesOne = $this->buildMockOfClass(Sales::class);
         $this->salesTwo = $this->buildMockOfClass(Sales::class);
-        $this->manager->salesCollection->add($this->salesOne);
-        $this->manager->salesCollection->add($this->salesTwo);
+        $this->manager->salesList->add($this->salesOne);
+        $this->manager->salesList->add($this->salesTwo);
         //
         $this->task = $this->buildMockOfInterface(ManagerTask::class);
         $this->assignmentPriorityCalculator = $this->buildMockOfClass(CustomerAssignmentPriorityCalculatorService::class);
@@ -97,7 +97,7 @@ class TestableManager extends Manager
     public Personnel $personnel;
     public string $id = 'id';
     public bool $disabled = false;
-    public Collection $salesCollection;
+    public Collection $salesList;
     
     public function __construct()
     {

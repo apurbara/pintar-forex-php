@@ -2,6 +2,7 @@
 
 namespace Sales\Domain\Model\Personnel\Sales;
 
+use Company\Domain\Model\CustomerJourney as CustomerJourneyInCompanyBC;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -15,6 +16,8 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\Uuid;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
@@ -41,14 +44,17 @@ class AssignedCustomer implements ContainEventsInterface
 
     use ContainEventsTrait;
 
+    #[FetchableObject(targetEntity: Sales::class, joinColumnName: "Sales_id")]
     #[ManyToOne(targetEntity: Sales::class, inversedBy: "assignedCustomers", fetch: "LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
+    #[FetchableObject(targetEntity: Customer::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Customer::class, cascade: ["persist"])]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
     
+    #[FetchableObject(targetEntity: CustomerJourneyInCompanyBC::class, joinColumnName: "CustomerJourney_id")]
     #[ManyToOne(targetEntity: CustomerJourney::class)]
     #[JoinColumn(name: "CustomerJourney_id", referencedColumnName: "id")]
     protected ?CustomerJourney $customerJourney;
@@ -61,13 +67,16 @@ class AssignedCustomer implements ContainEventsInterface
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
-    
+
+    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $closingRequests;
     
+    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $recycleRequests;
     
+    #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "assignedCustomer", cascade: ["persist"], fetch: 'EXTRA_LAZY')]
     protected Collection $salesActivitySchedules;
     

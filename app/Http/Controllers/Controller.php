@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Doctrine\ORM\EntityManager;
 use Illuminate\Routing\Controller as BaseController;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 use SharedContext\Domain\ValueObject\LabelData;

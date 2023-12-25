@@ -117,7 +117,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query SalesActivityList{
-    salesActivityList{
+    viewSalesActivityList{
         list { id, disabled, createdTime, name, description, duration },
         cursorLimit { total, cursorToNextPage }
     }
@@ -162,13 +162,13 @@ _QUERY;
         $this->salesActivityOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query SalesActivityDetail ( $salesActivityId: ID! ) {
-    salesActivityDetail ( salesActivityId: $salesActivityId ) {
+query SalesActivityDetail ( $id: ID! ) {
+    viewSalesActivityDetail ( id: $id ) {
         id, disabled, createdTime, name, description, duration
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesActivityId'] = $this->salesActivityOne->columns['id'];
+        $this->graphqlVariables['id'] = $this->salesActivityOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

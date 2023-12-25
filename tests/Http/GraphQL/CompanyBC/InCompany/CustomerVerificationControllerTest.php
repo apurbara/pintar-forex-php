@@ -73,7 +73,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query {
-    customerVerificationList{
+    viewCustomerVerificationList{
         list { id, disabled, createdTime, name, description },
         cursorLimit { total, cursorToNextPage }
     }
@@ -116,13 +116,13 @@ _QUERY;
         $this->customerVerificationOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query CustomerVerificationDetail ( $customerVerificationId: ID! ) {
-    customerVerificationDetail ( customerVerificationId: $customerVerificationId ) {
+query CustomerVerificationDetail ( $id: ID! ) {
+    viewCustomerVerificationDetail ( id: $id ) {
         id, disabled, createdTime, name, description
     }
 }
 _QUERY;
-        $this->graphqlVariables['customerVerificationId'] = $this->customerVerificationOne->columns['id'];
+        $this->graphqlVariables['id'] = $this->customerVerificationOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

@@ -3,14 +3,14 @@
 namespace App\Http\GraphQL\CompanyBC\Object\AreaStructure;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
-use App\Http\GraphQL\AppContext;
 use App\Http\GraphQL\CompanyBC\Object\AreaStructureGraph;
-use App\Http\GraphQL\GraphqlInputRequest;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineAreaStructureRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;

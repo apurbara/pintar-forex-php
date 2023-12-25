@@ -12,8 +12,9 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Resources\Attributes\FetchableEntity;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\ValueObject\Label;
 
 #[Entity(repositoryClass: DoctrineAreaStructureRepository::class)]
@@ -32,10 +33,14 @@ class AreaStructure
     #[Embedded(class: Label::class, columnPrefix: false)]
     protected Label $label;
 
-    #[FetchableEntity(targetEntity: AreaStructure::class, joinColumnName: 'AreaStructure_idOfParent')]
+    #[FetchableObject(targetEntity: AreaStructure::class, joinColumnName: "AreaStructure_idOfParent")]
     #[ManyToOne(targetEntity: AreaStructure::class)]
     #[JoinColumn(name: "AreaStructure_idOfParent", referencedColumnName: "id")]
     protected ?AreaStructure $parent;
+    
+    //
+    #[FetchableObjectList(targetEntity: AreaStructure::class, joinColumnName: "AreaStructure_idOfParent", paginationRequired: false)]
+    protected $children;
 
     public function __construct(AreaStructureData $data)
     {

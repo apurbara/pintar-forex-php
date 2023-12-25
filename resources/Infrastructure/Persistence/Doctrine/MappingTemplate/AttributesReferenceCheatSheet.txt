@@ -1,6 +1,7 @@
 
 #[Entity]
 #[Entity(repositoryClass: DoctrineEntityRepository::class)]
+#[QueryEntity(targetEntity: target::class)]
 #[Entity(repositoryClass: DoctrineEntityRepository::class, readOnly: false)]
 #[Table(name: "user")]
 #[Table(name: "user", schema: "schema_name")]
@@ -49,32 +50,32 @@
     #[Column(type: "object", nullable: true)]
 
 class AggregateClass
+    #[Composed(class: Composition::class)]
     #[OneToOne(targetEntity: Composition::class, cascade: ["persist"])]
     #[JoinColumn(name: "Composition_id", referencedColumnName: "id")]
     protected Composition $composition;
 
 class Source
-    #[Composed(class: Target::class)]
+    #[FetchableObject(targetEntity: Source::class, joinColumnName: "Source_id")]
     #[OneToOne(targetEntity: Target::class, cascade: ["persist"])]
     #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
     #[OneToOne(targetEntity: Target::class, inversedBy: "source", cascade: ["persist"])]
     #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
     protected Target $target;
 
-    #[OneToMany(targetEntity: Target::class, mappedBy: "source", cascade: ["persist"])]
+    #[FetchableObjectList(targetEntity: Source::class, joinColumnName: "Source_id", paginationRequired: false)]
+    #[OneToMany(targetEntity: Target::class, mappedBy: "source", cascade: ["persist"], fetch: "EXTRA_LAZY")]
     #[OrderBy(["name" => "ASC"])]
     protected Target $targets;
 
-    #[ManyToMany(targetEntity: Target::class, mappedBy: "sources", cascade: ["persist"])]
+    #[FetchableObjectList(targetEntity: Source::class, joinColumnName: "Source_id", paginationRequired: false)]
+    #[ManyToMany(targetEntity: Target::class, mappedBy: "sources", cascade: ["persist"]), fetch: "EXTRA_LAZY"]
     #[OrderBy(["name" => "ASC"])]
     protected Target $targets;
 
 class Target
-    #[OneToOne(targetEntity: Source::class, inversedBy: "target")]
-    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
-    protected Source $source;
-
-    #[ManyToOne(targetEntity: Source::class)]
+    #[FetchableObject(targetEntity: Source::class, joinColumnName: "Source_id")]
+    #[ManyToOne(targetEntity: Source::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
     #[ManyToOne(targetEntity: Source::class, inversedBy: "targets", fetch: "LAZY")]
     #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
@@ -82,7 +83,16 @@ class Target
     #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
     protected Source $source;
 
-    #[ManyToMany(targetEntity: Source::class, inversedBy: "targets", fetch: "LAZY")]
+    #[FetchableObject(targetEntity: Source::class, joinColumnName: "Source_id")]
+    #[OneToOne(targetEntity: Source::class, inversedBy: "target")]
+    #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
+    protected Source $source;
+
+    #[FetchableObjectList(targetEntity: Source::class, joinColumnName: "Source_id", paginationRequired: false)]
+    #[ManyToMany(targetEntity: Source::class, inversedBy: "targets", fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Source_id", referencedColumnName: "id")]
     protected Target $sources;
 
+#[GraphqlMapableController(entity: Entity::class, responseType: EntityInBoundedContextGraphqlObjectType::class)]
+    #[Mutation]
+    #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]

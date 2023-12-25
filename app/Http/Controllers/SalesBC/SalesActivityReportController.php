@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\SalesBC;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
+use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;

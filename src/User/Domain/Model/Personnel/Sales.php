@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Resources\Attributes\FetchableEntity;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use SharedContext\Domain\Enum\SalesType;
 use User\Domain\Model\Personnel;
 use User\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
@@ -17,18 +17,17 @@ use User\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales
 {
-    #[FetchableEntity(targetEntity: Manager::class, joinColumnName: "Manager_id")]
+    #[FetchableObject(targetEntity: Manager::class, joinColumnName: "Manager_id")]
     #[ManyToOne(targetEntity: Manager::class)]
     #[JoinColumn(name: "Manager_id", referencedColumnName: "id")]
     protected Manager $manager;
     
-    #[FetchableEntity(targetEntity: Personnel::class, joinColumnName: "Personnel_id")]
+    #[FetchableObject(targetEntity: Personnel::class, joinColumnName: "Personnel_id")]
     #[ManyToOne(targetEntity: Personnel::class)]
     #[JoinColumn(name: "Personnel_id", referencedColumnName: "id")]
     protected Personnel $personnel;
     
-    #[FetchableEntity(targetEntity: AreaInCompanyBC::class, joinColumnName: "Area_id")]
-    #[JoinColumn(name: "Area_id", referencedColumnName: "id")]
+    #[FetchableObject(targetEntity: AreaInCompanyBC::class, joinColumnName: "Area_id")]
     protected $area;
     
     #[Id, Column(type: "guid")]

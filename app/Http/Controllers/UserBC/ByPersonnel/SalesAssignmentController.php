@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\UserBC\ByPersonnel;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\InputRequest;
+use Resources\Application\InputRequest;
 use User\Domain\Model\Personnel\Sales;
 use User\Domain\Task\ByPersonnel\Sales\ViewSalesAssignmentList;
 use User\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;

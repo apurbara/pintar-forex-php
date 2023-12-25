@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Resources\Attributes;
+namespace Resources\Infrastructure\GraphQL\Attributes;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_PROPERTY)]
+#[Attribute]
 final class ExcludeFromFetch
 {
     

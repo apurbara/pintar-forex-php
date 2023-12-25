@@ -78,21 +78,19 @@ class SalesControllerTest extends CompanyBCTestCase
         $this->area->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $managerId: ID!, $personnelId: ID!, $areaId: ID!, $type: String){
-    manager ( managerId: $managerId ) {
-        assignSales ( personnelId: $personnelId, areaId: $areaId, type: $type ) {
-            id, disabled, createdTime, type,
-            personnel { id, name }
-            area { id, name }
-            manager { id, personnel { id, name } }
-        }
+mutation ( $Manager_id: ID!, $Personnel_id: ID!, $Area_id: ID!, $type: String){
+    assignSales (Manager_id: $Manager_id, Personnel_id: $Personnel_id, Area_id: $Area_id, type: $type ) {
+        id, disabled, createdTime, type,
+        personnel { id, name }
+        area { id, name }
+        manager { id, personnel { id, name } }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'managerId' => $this->manager->columns['id'],
-            'personnelId' => $this->personnelOne->columns['id'],
-            'areaId' => $this->area->columns['id'],
+            'Manager_id' => $this->manager->columns['id'],
+            'Personnel_id' => $this->personnelOne->columns['id'],
+            'Area_id' => $this->area->columns['id'],
             ...$this->salesAssignData,
             
         ];
@@ -152,7 +150,7 @@ $this->disableExceptionHandling();
         
         $this->graphqlQuery = <<<'_QUERY'
 query SalesList {
-    salesList{
+    viewSalesList{
         list {
             id, disabled, createdTime,
             personnel { id, name }
@@ -232,8 +230,8 @@ _QUERY;
         $this->salesOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query SalesDetail ( $salesId: ID! ) {
-    salesDetail ( salesId: $salesId ) {
+query SalesDetail ( $id: ID! ) {
+    viewSalesDetail ( id: $id ) {
         id, disabled, createdTime,
         personnel { id, name }
         area { id, name }
@@ -241,7 +239,7 @@ query SalesDetail ( $salesId: ID! ) {
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->salesOne->columns['id'];
+        $this->graphqlVariables['id'] = $this->salesOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewDetail_200()

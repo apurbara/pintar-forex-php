@@ -4,12 +4,12 @@ namespace App\Http\GraphQL\UserBC\Task;
 
 use App\Http\Controllers\UserBC\ByGuest\LoginController;
 use App\Http\Controllers\UserRole\PersonnelRole;
-use App\Http\GraphQL\AppContext;
-use App\Http\GraphQL\GraphqlInputRequest;
 use App\Http\GraphQL\UserBC\Object\AdminLoginResponseGraph;
 use App\Http\GraphQL\UserBC\Object\PersonnelLoginResponseGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class GuestMutation extends ObjectType

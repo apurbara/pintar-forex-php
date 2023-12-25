@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleRequestRepository;
@@ -18,6 +19,7 @@ use SharedContext\Domain\Enum\ManagementApprovalStatus;
 class RecycleRequest
 {
 
+    #[FetchableObject(targetEntity: AssignedCustomer::class, joinColumnName: "AssignedCustomer_id")]
     #[ManyToOne(targetEntity: AssignedCustomer::class, inversedBy: "recycleReports", fetch: "LAZY")]
     #[JoinColumn(name: "AssignedCustomer_id", referencedColumnName: "id")]
     protected AssignedCustomer $assignedCustomer;

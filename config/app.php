@@ -169,6 +169,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\DoctrineEntityManagerProvider::class,
+        App\Providers\UserRoleProvider::class,
     ])->toArray(),
 
     /*

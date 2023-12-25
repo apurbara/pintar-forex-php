@@ -2,6 +2,7 @@
 
 namespace Manager\Domain\Model\Personnel;
 
+use Company\Domain\Model\Personnel as PersonnelInCompanyBC;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
@@ -16,12 +17,15 @@ use Manager\Domain\Service\CustomerAssignmentPriorityCalculatorService;
 use Manager\Domain\Task\ManagerTask;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineManagerRepository;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\Enum\SalesType;
 
 #[Entity(repositoryClass: DoctrineManagerRepository::class)]
 class Manager
 {
 
+    #[FetchableObject(targetEntity: PersonnelInCompanyBC::class, joinColumnName: "Personnel_id")]
     #[ManyToOne(targetEntity: Personnel::class)]
     #[JoinColumn(name: "Personnel_id", referencedColumnName: "id")]
     protected Personnel $personnel;
@@ -32,8 +36,9 @@ class Manager
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
     
+    #[FetchableObjectList(targetEntity: Sales::class, joinColumnName: "Manager_id", paginationRequired: true)]
     #[OneToMany(targetEntity: Sales::class, mappedBy: "manager", fetch: 'EXTRA_LAZY')]
-    protected Collection $salesCollection;
+    protected Collection $salesList;
 
     public function getId(): string
     {
@@ -60,7 +65,7 @@ class Manager
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('disabled', false))
                 ->andWhere(Criteria::expr()->eq('type', SalesType::FREELANCE));
-        foreach ($this->salesCollection->matching($criteria)->getIterator() as $sales) {
+        foreach ($this->salesList->matching($criteria)->getIterator() as $sales) {
             $assignmentPriorityCalculator->registerSales($sales);
         }
     }
