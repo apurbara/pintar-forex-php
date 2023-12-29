@@ -12,6 +12,7 @@ use Manager\Domain\Service\CustomerAssignmentPriorityCalculatorService;
 use Manager\Domain\Task\AssignedCustomer\AssignCustomerToTopPriorityFreelanceSales;
 use Manager\Domain\Task\RecycleRequest\ApproveRecycleRequest;
 use Manager\Domain\Task\RecycleRequest\RejectRecycleRequest;
+use Manager\Domain\Task\RecycleRequest\ViewMonthlyRecycledCount;
 use Manager\Domain\Task\RecycleRequest\ViewRecycleRequestDetail;
 use Manager\Domain\Task\RecycleRequest\ViewRecycleRequestList;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleRequestRepository;
@@ -36,7 +37,7 @@ class RecycleRequestController extends Controller
     {
         return $this->em->getRepository(RecycleRequest::class);
     }
-    
+
     protected function buildInitiateSalesActivityScheduleListener(): InitiateSalesActivityScheduleListener
     {
         $assignedCustomerRepository = $this->em->getRepository(AssignedCustomer2::class);
@@ -55,27 +56,29 @@ class RecycleRequestController extends Controller
         $customerRepository = $this->em->getRepository(Customer::class);
         $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
         $assignmentPriorityCalculator = new CustomerAssignmentPriorityCalculatorService();
-        
+
         $assignCustomerToTopPriorityFreelanceSalesTask = new AssignCustomerToTopPriorityFreelanceSales(
                 $assignedCustomerRepository, $customerRepository, $customerJourneyRepository,
                 $assignmentPriorityCalculator, $dispatcher);
         $assignedCustomerListener = new DistributeRecycledCustomerFromInHouseSalesListener(
                 $user->buildExecuteManagerTaskService(), $assignCustomerToTopPriorityFreelanceSalesTask,
                 $user->getPersonnelId(), $user->getManagerId());
-        
-        $dispatcher->addTransactionalListener(InHouseSalesCustomerAssignmentRecycledEvent::eventName(), $assignedCustomerListener);
-        $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(), $this->buildInitiateSalesActivityScheduleListener());
-        
-        $acceptRecycleRequestFunction = function() use($user, $repository, $id, $dispatcher) {
+
+        $dispatcher->addTransactionalListener(InHouseSalesCustomerAssignmentRecycledEvent::eventName(),
+                $assignedCustomerListener);
+        $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(),
+                $this->buildInitiateSalesActivityScheduleListener());
+
+        $acceptRecycleRequestFunction = function () use ($user, $repository, $id, $dispatcher) {
             $task = new ApproveRecycleRequest($repository, $dispatcher);
             $user->executeManagerTask($task, $id);
             $dispatcher->publishTransactional();
             $dispatcher->publishTransactional();
         };
-        
+
         $transactionalSession = new DoctrineTransactionalSession($this->em);
         $transactionalSession->executeAtomically($acceptRecycleRequestFunction);
-        
+
         return $repository->queryOneById($id);
     }
 
@@ -106,6 +109,17 @@ class RecycleRequestController extends Controller
     {
         $task = new ViewRecycleRequestDetail($this->repository());
         $payload = new ViewDetailPayload($id);
+
+        $user->executeManagerTask($task, $payload);
+
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function monthlyRecycledCount(ManagerRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewMonthlyRecycledCount($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
 
         $user->executeManagerTask($task, $payload);
 

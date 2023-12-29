@@ -45,7 +45,7 @@ class DoctrineRecycleRequestRepository extends DoctrineEntityRepository implemen
         return $this->findOneByIdOrDie($id);
     }
 
-    public function montylyRecycledCount(string $managerId, array $searchSchema): array
+    public function monthlyRecycledCount(string $managerId, array $searchSchema): array
     {
         $qb = $this->dbalQueryBuilder();
         $qb->select('COUNT(*) recycledCount')

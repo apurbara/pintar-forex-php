@@ -22,7 +22,7 @@ class ViewMonthlyRecycledCount implements ManagerTask
      */
     public function executeByManager(Manager $manager, $payload): void
     {
-        $result = $this->recycleRequestRepository->montylyRecycledCount($manager->getId(), $payload->listSchema);
+        $result = $this->recycleRequestRepository->monthlyRecycledCount($manager->getId(), $payload->listSchema);
         $payload->setResult($result);
     }
 }

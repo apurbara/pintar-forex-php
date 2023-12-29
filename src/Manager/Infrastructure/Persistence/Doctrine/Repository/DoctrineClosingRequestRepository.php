@@ -45,7 +45,7 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
                 ->paginateResult($this->generateManagerAggergateQueryBuilder(), $this->getTableName());
     }
 
-    public function monthlyClosingCount(string $managerId, array $searchSchema): array
+    public function monthlyTotalClosing(string $managerId, array $searchSchema): array
     {
         $qb = $this->dbalQueryBuilder();
         $qb->select('SUM(ClosingRequest.transactionValue) totalTransaction')
@@ -54,7 +54,7 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
                 ->innerJoin('ClosingRequest', 'AssignedCustomer', 'AssignedCustomer',
                         'ClosingRequest.AssignedCustomer_id = AssignedCustomer.id')
                 ->innerJoin('AssignedCustomer', 'Sales', 'Sales', 'AssignedCustomer.Sales_id = Sales.id')
-                ->andWhere($qb->expr()->eq('ClosingRequest.status', ManagementApprovalStatus::APPROVED->value))
+                ->andWhere($qb->expr()->eq('ClosingRequest.status', "'" .  ManagementApprovalStatus::APPROVED->value . "'"))
                 ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
                 ->setParameter('managerId', $managerId)
                 ->groupBy('yearMonth');
@@ -75,17 +75,17 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
             }
         }
         
-        if (!$startModifiedTimeDefined) {
-            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime', (new DateTime('-12 months'))->format('Ym')));
+        if (!$startMonthDefined) {
+            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime('-12 months'))->format('Ym')));
         }
-        if (!$endModifiedTimeDefined) {
-            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime', (new DateTime())->format('Ym')));
+        if (!$endMonthDefined) {
+            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime())->format('Ym')));
         }
         return DoctrineAllListCategory::fromSchema()
                 ->fetchResult($qb);
     }
 
-    public function monthlyTotalClosing(string $managerId, array $searchSchema): array
+    public function monthlyClosingCount(string $managerId, array $searchSchema): array
     {
         $qb = $this->dbalQueryBuilder();
         $qb->select('COUNT(*) closingCount')
@@ -94,7 +94,7 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
                 ->innerJoin('ClosingRequest', 'AssignedCustomer', 'AssignedCustomer',
                         'ClosingRequest.AssignedCustomer_id = AssignedCustomer.id')
                 ->innerJoin('AssignedCustomer', 'Sales', 'Sales', 'AssignedCustomer.Sales_id = Sales.id')
-                ->andWhere($qb->expr()->eq('ClosingRequest.status', ManagementApprovalStatus::APPROVED->value))
+                ->andWhere($qb->expr()->eq('ClosingRequest.status', "'" .  ManagementApprovalStatus::APPROVED->value . "'"))
                 ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
                 ->setParameter('managerId', $managerId)
                 ->groupBy('yearMonth');
@@ -115,11 +115,11 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
             }
         }
         
-        if (!$startModifiedTimeDefined) {
-            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime', (new DateTime('-12 months'))->format('Ym')));
+        if (!$startMonthDefined) {
+            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime('-12 months'))->format('Ym')));
         }
-        if (!$endModifiedTimeDefined) {
-            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime', (new DateTime())->format('Ym')));
+        if (!$endMonthDefined) {
+            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime())->format('Ym')));
         }
         return DoctrineAllListCategory::fromSchema()
                 ->fetchResult($qb);

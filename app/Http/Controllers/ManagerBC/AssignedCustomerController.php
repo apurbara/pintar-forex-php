@@ -23,7 +23,7 @@ class AssignedCustomerController extends Controller
 
     //
     #[Query]
-    protected function assignedCustomerDetail(ManagerRoleInterface $user, string $id)
+    public function assignedCustomerDetail(ManagerRoleInterface $user, string $id)
     {
         $task = new ViewAssignedCustomerDetail($this->repository());
         $payload = new ViewDetailPayload($id);
@@ -33,7 +33,7 @@ class AssignedCustomerController extends Controller
     }
     //
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    protected function assignedCustomerList(ManagerRoleInterface $user, InputRequest $input)
+    public function assignedCustomerList(ManagerRoleInterface $user, InputRequest $input)
     {
         $task = new ViewAssignedCustomerList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);

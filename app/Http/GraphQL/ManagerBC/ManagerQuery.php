@@ -5,6 +5,7 @@ namespace App\Http\GraphQL\ManagerBC;
 use App\Http\Controllers\ManagerBC\AssignedCustomerController;
 use App\Http\Controllers\ManagerBC\ClosingRequestController;
 use App\Http\Controllers\ManagerBC\RecycleRequestController;
+use App\Http\Controllers\ManagerBC\SalesController;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
 
@@ -24,6 +25,7 @@ class ManagerQuery extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(AssignedCustomerController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
         ];
     }
 }

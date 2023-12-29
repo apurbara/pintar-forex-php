@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\ManagerBC;
 
 use App\Http\Controllers\Controller;
+use App\Http\GraphQL\ManagerBC\Object\ClosingRequestMonthlyCountSummaryGraphqlObjectType;
+use App\Http\GraphQL\ManagerBC\Object\ClosingRequestMonthlyTotalTransactionSummaryGraphqlObjectType;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\ClosingRequest;
 use Manager\Domain\Task\ClosingRequest\AcceptClosingRequestTask;
 use Manager\Domain\Task\ClosingRequest\RejectClosingRequestTask;
 use Manager\Domain\Task\ClosingRequest\ViewClosingRequestDetail;
 use Manager\Domain\Task\ClosingRequest\ViewClosingRequestList;
+use Manager\Domain\Task\ClosingRequest\ViewMonthlyClosingCount;
+use Manager\Domain\Task\ClosingRequest\ViewMonthlyTotalClosing;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
@@ -66,6 +70,26 @@ class ClosingRequestController extends Controller
 
         $user->executeManagerTask($task, $payload);
 
+        return $payload->result;
+    }
+    
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER, responseType: ClosingRequestMonthlyTotalTransactionSummaryGraphqlObjectType::class)]
+    public function monthlyTotalTransaction(ManagerRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewMonthlyTotalClosing($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
+        $user->executeManagerTask($task, $payload);
+        
+        return $payload->result;
+    }
+    
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER, responseType: ClosingRequestMonthlyCountSummaryGraphqlObjectType::class)]
+    public function monthlyTransactionCount(ManagerRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewMonthlyClosingCount($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
+        $user->executeManagerTask($task, $payload);
+        
         return $payload->result;
     }
 }

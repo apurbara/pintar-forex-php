@@ -13,5 +13,5 @@ interface RecycleRequestRepository
 
     public function aRecycleRequestBelongToManager(string $managerId, string $id): ?array;
 
-    public function montylyRecycledCount(string $managerId, array $searchSchema): array;
+    public function monthlyRecycledCount(string $managerId, array $searchSchema): array;
 }

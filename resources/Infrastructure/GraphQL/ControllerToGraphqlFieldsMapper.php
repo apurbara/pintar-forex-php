@@ -85,7 +85,7 @@ class ControllerToGraphqlFieldsMapper
             }
 
             if (ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseWrapper') === Query::PAGINATION_RESPONSE_WRAPPER) {
-                $responseType = TypeRegistry::paginationType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata);
+                $responseType = TypeRegistry::paginationType(ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseType') ?? $responseTypeMetadata);
 //                $responseType = TypeRegistry::paginationType($responseTypeMetadata);
 //                $responseType = new Pagination(TypeRegistry::objectType($responseTypeMetadata));
                 $args = [
@@ -93,13 +93,13 @@ class ControllerToGraphqlFieldsMapper
                     ...InputListSchema::paginationListSchema(),
                 ];
             } elseif (ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseWrapper') === Query::LIST_RESPONSE_WRAPPER) {
-                $responseType = Type::listOf(TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata));
+                $responseType = Type::listOf(TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseType') ?? $responseTypeMetadata));
                 $args = [
                     ...$args,
                     ...InputListSchema::allListSchema(),
                 ];
             } else {
-                $responseType = TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Mutation::class, 'responseType') ?? $responseTypeMetadata);
+                $responseType = TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseType') ?? $responseTypeMetadata);
             }
 
 //            $queryFields[static::generateMethodName($methodReflection, $controllerReflection)] = [
