@@ -23,7 +23,6 @@ use App\Http\GraphQL\GraphqlInputRequest;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\InputListSchema;
-use Resources\Infrastructure\GraphQL\Pagination;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class Query extends ObjectType
@@ -94,6 +93,12 @@ class Query extends ObjectType
                 'args' => InputListSchema::paginationListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
                         ->viewList($app->user, new GraphqlInputRequest($args))
+            ],
+            'allAreaList' => [
+                'type' => Type::listOf(TypeRegistry::objectType(AreaGraph::class)),
+                'args' => InputListSchema::allListSchema(),
+                'resolve' => fn($root, $args, AppContext $app) => (new AreaController())
+                        ->viewAll($app->user, new GraphqlInputRequest($args))
             ],
             'areaDetail' => [
                 'type' => TypeRegistry::objectType(AreaGraph::class),

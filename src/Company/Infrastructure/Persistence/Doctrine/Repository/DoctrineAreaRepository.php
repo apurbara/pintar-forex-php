@@ -48,4 +48,10 @@ class DoctrineAreaRepository extends DoctrineEntityRepository implements AreaRep
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
+
+    public function viewAllAreaList(array $searchSchema): array
+    {
+        $doctrineAllListCategory = \Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory::fromSchema($searchSchema);
+        return $this->fetchAllList($doctrineAllListCategory);
+    }
 }

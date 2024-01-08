@@ -244,4 +244,38 @@ _QUERY;
             ],
         ]);
     }
+    
+    //
+    protected function viewAll()
+    {
+        $this->prepareAdminDependency();
+        $this->areaOne->insert($this->connection);
+        $this->areaTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query AreaList{
+    allAreaList{ id, disabled, createdTime, name, description  }
+}
+_QUERY;
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_viewAll_200()
+    {
+        $this->viewAll();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->areaOne->columns['id'],
+            'disabled' => $this->areaOne->columns['disabled'],
+            'createdTime' => $this->jakartaDateTimeFormat($this->areaOne->columns['createdTime']),
+            'name' => $this->areaOne->columns['name'],
+            'description' => $this->areaOne->columns['description'],
+        ]);
+        $this->seeJsonContains( [
+                    'id' => $this->areaTwo->columns['id'],
+                    'disabled' => $this->areaTwo->columns['disabled'],
+                    'createdTime' => $this->jakartaDateTimeFormat($this->areaTwo->columns['createdTime']),
+                    'name' => $this->areaTwo->columns['name'],
+                    'description' => $this->areaTwo->columns['description'],
+        ]);
+    }
 }
