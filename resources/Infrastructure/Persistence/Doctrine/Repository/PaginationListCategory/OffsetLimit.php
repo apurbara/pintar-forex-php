@@ -36,7 +36,7 @@ class OffsetLimit implements PageLimitInterface
         $qb->setFirstResult($this->pageSize * ($this->page - 1));
         $qb->setMaxResults($this->pageSize);
 
-        $this->orders = [...$this->orders, ["column" => "{$tableName}.id", "direction" => "ASC"]];
+        $this->orders = [...$this->orders ?? [], ["column" => "{$tableName}.id", "direction" => "ASC"]];
         foreach ($this->orders as $order) {
             $qb->addOrderBy($order['column'], $order['direction'] ?? 'ASC');
         }
