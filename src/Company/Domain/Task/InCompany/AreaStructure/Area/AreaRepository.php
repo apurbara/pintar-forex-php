@@ -16,8 +16,10 @@ interface AreaRepository
     public function isAreaRootNameAvailable(string $name): bool;
 
     public function isChildAreaNameAvailable(string $parentAreaId, string $name): bool;
-    
+
     public function viewAreaList(array $paginationSchema): array;
-    
+
+    public function viewAllAreaList(array $searchSchema): array;
+
     public function viewAreaDetail(string $id): array;
 }

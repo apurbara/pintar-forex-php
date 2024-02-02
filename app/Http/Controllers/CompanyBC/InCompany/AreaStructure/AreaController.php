@@ -8,6 +8,7 @@ use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AddChildAreaTask;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AddRootAreaTask;
+use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAllAreaList;
 use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAreaDetail;
 use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAreaListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineAreaRepository;
@@ -62,6 +63,16 @@ class AreaController extends Controller
     {
         $task = new ViewAreaListTask($this->areaRepository());
         $payload = $this->buildViewPaginationListPayload($input);
+        $user->executeTaskInCompany($task, $payload);
+
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function allAreaList(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewAllAreaList($this->areaRepository());
+        $payload = $this->buildViewAllListPayload($input);
         $user->executeTaskInCompany($task, $payload);
 
         return $payload->result;

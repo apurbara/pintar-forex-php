@@ -4,6 +4,7 @@ namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
@@ -47,5 +48,11 @@ class DoctrineAreaRepository extends DoctrineEntityRepository implements AreaRep
     {
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
         return $this->fetchPaginationList($doctrinePaginationListCategory);
+    }
+
+    public function viewAllAreaList(array $searchSchema): array
+    {
+        $doctrineAllListCategory = DoctrineAllListCategory::fromSchema($searchSchema);
+        return $this->fetchAllList($doctrineAllListCategory);
     }
 }
