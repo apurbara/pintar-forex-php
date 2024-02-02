@@ -52,4 +52,8 @@ class PersonnelRole implements CompanyUserRoleInterface, PersonnelRoleInterface
                 ->execute($this->personnelId, $task, $payload);
     }
 
+    public function getUserId(): string
+    {
+        return $this->personnelId;
+    }
 }

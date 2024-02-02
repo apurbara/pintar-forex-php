@@ -60,6 +60,12 @@ class AssignedCustomerTest extends TestBase
         $assignment = $this->construct();
         $this->assertEquals(new CustomerAssignedEvent($this->id), $assignment->pullRecordedEvents()[0]);
     }
+    public function test_construct_assertCustomerHasNoActiveAssignment()
+    {
+        $this->customer->expects($this->once())
+                ->method('assertHasNoActiveAssignment');
+        $this->construct();
+    }
     
     //
     protected function closeAssignment()

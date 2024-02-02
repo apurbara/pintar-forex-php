@@ -32,7 +32,9 @@ class CustomerVerificationController extends Controller
         $repository = $this->repository();
 
         $task = new AddCustomerVerificationTask($repository);
-        $payload = new CustomerVerificationData($this->createLabelData($input));
+        $payload = (new CustomerVerificationData($this->createLabelData($input)))
+                ->setWeight($input->get('weight'))
+                ->setPosition($input->get('position'));
         $user->executeTaskInCompany($task, $payload);
         //
         return $repository->fetchOneByIdOrDie($payload->id);

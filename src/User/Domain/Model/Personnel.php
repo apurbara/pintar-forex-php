@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Id;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\ValueObject\AccountInfo;
+use SharedContext\Domain\ValueObject\ChangeUserPasswordData;
 use User\Domain\Model\Personnel\Manager;
 use User\Domain\Model\Personnel\Sales;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
@@ -46,6 +47,15 @@ class Personnel
     protected function __construct()
     {
         
+    }
+
+    public function changeName(string $name): void
+    {
+        $this->accountInfo = $this->accountInfo->changeName($name);
+    }
+    public function changePassword(ChangeUserPasswordData $changeUserPasswordData): void
+    {
+        $this->accountInfo = $this->accountInfo->changePassword($changeUserPasswordData);
     }
 
     //

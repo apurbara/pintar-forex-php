@@ -17,15 +17,15 @@ class SalesMutation extends ObjectType
     {
         parent::__construct([
             'fields' => fn() => [
-        'sales' => [
-            'type' => TypeRegistry::type(Mutation::class),
-            'args' => ['salesId' => Type::nonNull(Type::id())],
-            'resolve' => function ($root, $args, AppContext $app) {
-                app()->singleton(SalesRoleInterface::class,
-                        fn() => app(PersonnelRoleInterface::class)->authorizedAsSales($args['salesId']));
-                return TypeRegistry::type(Mutation::class);
-            }
-        ],
+                'sales' => [
+                    'type' => TypeRegistry::type(Mutation::class),
+                    'args' => ['salesId' => Type::nonNull(Type::id())],
+                    'resolve' => function ($root, $args, AppContext $app) {
+                        app()->singleton(SalesRoleInterface::class,
+                                fn() => app(PersonnelRoleInterface::class)->authorizedAsSales($args['salesId']));
+                        return TypeRegistry::type(Mutation::class);
+                    }
+                ],
             ],
         ]);
     }

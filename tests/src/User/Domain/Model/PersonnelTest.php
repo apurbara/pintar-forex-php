@@ -4,6 +4,7 @@ namespace User\Domain\Model;
 
 use DateTimeImmutable;
 use SharedContext\Domain\ValueObject\AccountInfo;
+use SharedContext\Domain\ValueObject\ChangeUserPasswordData;
 use Tests\TestBase;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 
@@ -13,6 +14,8 @@ class PersonnelTest extends TestBase
     //
     protected $password = 'password123';
     protected $task, $payload = 'string represent task payload';
+    protected $newName = 'new name', $changeUserPasswordData;
+    protected $updatedAccountInfo;
 
     protected function setUp(): void
     {
@@ -20,8 +23,12 @@ class PersonnelTest extends TestBase
         $this->personnel = new TestablePersonnel();
         $this->accountInfo = $this->buildMockOfClass(AccountInfo::class);
         $this->personnel->accountInfo = $this->accountInfo;
+        
+        $this->updatedAccountInfo = $this->buildMockOfClass(AccountInfo::class);
+        $this->changeUserPasswordData = new ChangeUserPasswordData('password123', 'newPassword123');
         //
         $this->task = $this->buildMockOfInterface(PersonnelTask::class);
+        //
     }
     
     //
@@ -48,6 +55,36 @@ class PersonnelTest extends TestBase
     {
         $this->personnel->disabled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->login(), 'Unauthorized', 'inactive account or invalid email and password');
+    }
+    
+    //
+    protected function changeName()
+    {
+        $this->personnel->changeName($this->newName);
+    }
+    public function test_changeName_changeAccountInfoName()
+    {
+        $this->accountInfo->expects($this->once())
+                ->method('changeName')
+                ->with($this->newName)
+                ->willReturn($this->updatedAccountInfo);
+        $this->changeName();
+        $this->assertSame($this->updatedAccountInfo, $this->personnel->accountInfo);
+    }
+    
+    //
+    protected function changePassword()
+    {
+        $this->personnel->changePassword($this->changeUserPasswordData);
+    }
+    public function test_changePassword_changeAccountInfoPassword()
+    {
+        $this->accountInfo->expects($this->once())
+                ->method('changePassword')
+                ->with($this->changeUserPasswordData)
+                ->willReturn($this->updatedAccountInfo);
+        $this->changePassword();
+        $this->assertSame($this->updatedAccountInfo, $this->personnel->accountInfo);
     }
     
     //

@@ -5,6 +5,7 @@ namespace Tests\src\Manager\Domain\Task;
 use Manager\Domain\Model\AreaStructure\Area\Customer;
 use Manager\Domain\Model\CustomerJourney;
 use Manager\Domain\Model\Personnel\Manager;
+use Manager\Domain\Model\Personnel\Manager\Sales;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\ClosingRequest;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequest;
@@ -13,6 +14,7 @@ use Manager\Domain\Task\ClosingRequest\ClosingRequestRepository;
 use Manager\Domain\Task\Customer\CustomerRepository;
 use Manager\Domain\Task\CustomerJourney\CustomerJourneyRepository;
 use Manager\Domain\Task\RecycleRequest\RecycleRequestRepository;
+use Manager\Domain\Task\Sales\SalesRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
@@ -89,6 +91,20 @@ class ManagerTaskTestBase extends TestBase
     {
         $this->customerJourneyRepository = $this->buildMockOfInterface(CustomerJourneyRepository::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+    }
+    
+    //
+    protected MockObject $salesRepository;
+    protected MockObject $sales;
+    protected string $salesId = 'salesId';
+    protected function prepareSalesDependency()
+    {
+        $this->salesRepository = $this->buildMockOfInterface(SalesRepository::class);
+        $this->sales = $this->buildMockOfClass(Sales::class);
+        $this->salesRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->salesId)
+                ->willReturn($this->sales);
     }
     
 }

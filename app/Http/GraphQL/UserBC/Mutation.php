@@ -3,6 +3,7 @@
 namespace App\Http\GraphQL\UserBC;
 
 use App\Http\GraphQL\UserBC\Task\GuestMutation;
+use App\Http\GraphQL\UserBC\Task\PersonnelMutation;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
@@ -22,7 +23,11 @@ class Mutation extends ObjectType
             'byGuest' => [
                 'type' => TypeRegistry::type(GuestMutation::class),
                 'resolve' => fn() => TypeRegistry::type(GuestMutation::class),
-            ]
+            ],
+            'byPersonnel' => [
+                'type' => TypeRegistry::type(PersonnelMutation::class),
+                'resolve' => fn() => TypeRegistry::type(PersonnelMutation::class),
+            ],
         ];
     }
 }

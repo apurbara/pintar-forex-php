@@ -14,4 +14,6 @@ interface PersonnelRoleInterface
     public function authorizedAsSales(string $salesId): SalesRoleInterface;
 
     public function authorizeAsManager(string $managerId): ManagerRoleInterface;
+    
+    public function getUserId(): string;
 }

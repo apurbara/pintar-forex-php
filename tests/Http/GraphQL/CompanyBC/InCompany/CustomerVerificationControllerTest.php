@@ -14,6 +14,8 @@ class CustomerVerificationControllerTest extends CompanyBCTestCase
     protected $addCustomerVerificationRequest = [
         'name' => "new customer verification name",
         'description' => 'new customer verification description',
+        'weight' => 10,
+        'position' => 3,
     ];
     protected function setUp(): void
     {
@@ -35,9 +37,9 @@ class CustomerVerificationControllerTest extends CompanyBCTestCase
         $this->prepareAdminDependency();
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $name: String, $description: String){
-    addCustomerVerification(name: $name, description: $description ){
-        id, disabled, createdTime, name, description
+mutation ( $name: String, $description: String, $weight: Int, $position: Int){
+    addCustomerVerification(name: $name, description: $description, weight: $weight, position: $position ){
+        id, disabled, createdTime, name, description, weight, position
     }
 }
 _QUERY;
@@ -52,6 +54,8 @@ $this->disableExceptionHandling();
         $this->seeJsonContains([
             'name' => $this->addCustomerVerificationRequest['name'],
             'description' => $this->addCustomerVerificationRequest['description'],
+            'weight' => $this->addCustomerVerificationRequest['weight'],
+            'position' => $this->addCustomerVerificationRequest['position'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
@@ -59,6 +63,8 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('CustomerVerification', [
             'name' => $this->addCustomerVerificationRequest['name'],
             'description' => $this->addCustomerVerificationRequest['description'],
+            'weight' => $this->addCustomerVerificationRequest['weight'],
+            'position' => $this->addCustomerVerificationRequest['position'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);

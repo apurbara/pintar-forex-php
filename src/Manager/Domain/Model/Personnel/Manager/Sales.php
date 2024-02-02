@@ -18,15 +18,21 @@ use Manager\Domain\Model\CustomerJourney;
 use Manager\Domain\Model\Personnel\Manager;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
+use Resources\Event\ContainEventsInterface;
+use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Enum\SalesType;
+use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use SharedContext\Domain\Event\SalesReceivedCustomerAssignments;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
-class Sales
+class Sales implements ContainEventsInterface
 {
+
+    use ContainEventsTrait;
 
     #[FetchableObject(targetEntity: Manager::class, joinColumnName: "Manager_id")]
     #[ManyToOne(targetEntity: Manager::class, inversedBy: "salesList", fetch: "LAZY")]
@@ -46,16 +52,17 @@ class Sales
 
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
-    
+
     #[FetchableObjectList(targetEntity: AssignedCustomer::class, joinColumnName: "Sales_id", paginationRequired: true)]
     #[OneToMany(targetEntity: AssignedCustomer::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
     protected Collection $assignedCustomers;
-    
+
     //
     #[FetchableObject(targetEntity: PersonnelInCompanyBC::class, joinColumnName: "Personnel_id")]
     #[JoinColumn(name: "Personnel_id", referencedColumnName: "id")]
     protected $personnel;
-    
+    //
+    protected ?SalesReceivedCustomerAssignments $salesReceivedCustomerAssignments;
 
     public function getType(): SalesType
     {
@@ -78,14 +85,35 @@ class Sales
         return $this->manager === $manager;
     }
 
+    public function assertManageableByManager(Manager $manager): void
+    {
+        if (!$this->isManageableByManager($manager)) {
+            throw RegularException::forbidden('unmanaged sales');
+        }
+    }
+
     //
+    protected ?MultipleCustomerAssignmentReceivedBySales $multipleCustomerAssignmentReceivedBySalesEvent;
+
     public function receiveCustomerAssignment(
-            string $assignedCustomerId, Customer $customer, CustomerJourney $customerJourney): AssignedCustomer
+            string $assignedCustomerId, Customer $customer, CustomerJourney $customerJourney): ?AssignedCustomer
     {
         if ($this->disabled) {
             throw RegularException::forbidden('inactive sales');
         }
-        return new AssignedCustomer($this, $customer, $customerJourney, $assignedCustomerId);
+
+        try {
+            $assignedCustomer = new AssignedCustomer($this, $customer, $customerJourney, $assignedCustomerId);
+            if (empty($this->multipleCustomerAssignmentReceivedBySalesEvent)) {
+                $this->multipleCustomerAssignmentReceivedBySalesEvent = new MultipleCustomerAssignmentReceivedBySales($this->id);
+                $this->recordEvent($this->multipleCustomerAssignmentReceivedBySalesEvent);
+            }
+            $this->multipleCustomerAssignmentReceivedBySalesEvent->addAssignedCustomerIdList($assignedCustomerId);
+            $this->activeAssignmentValue++;
+            return $assignedCustomer;
+        } catch (RegularException $ex) {
+            return null;
+        }
     }
 
     public function countAssignmentPriorityWithCustomer(Customer $customer): float|int
@@ -96,5 +124,15 @@ class Sales
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
         return $this->assignedCustomers->matching($criteria)->count();
+    }
+
+    protected ?float $activeAssignmentValue;
+
+    public function countActiveAssignmentValue(): float
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
+        $this->activeAssignmentValue ??= $this->assignedCustomers->matching($criteria)->count();
+        return $this->activeAssignmentValue;
     }
 }

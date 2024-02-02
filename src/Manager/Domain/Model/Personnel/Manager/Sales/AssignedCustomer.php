@@ -33,12 +33,12 @@ class AssignedCustomer implements ContainEventsInterface
     use ContainEventsTrait;
 
     #[FetchableObject(targetEntity: Sales::class, joinColumnName: "Sales_id")]
-    #[ManyToOne(targetEntity: Sales::class, inversedBy: "assignedCustomers", fetch: "LAZY")]
+    #[ManyToOne(targetEntity: Sales::class, inversedBy: "assignedCustomers", fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
     #[FetchableObject(targetEntity: Customer::class, joinColumnName: "Customer_id")]
-    #[ManyToOne(targetEntity: Customer::class)]
+    #[ManyToOne(targetEntity: Customer::class, inversedBy: "assignedCustomers", fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
 
@@ -74,6 +74,7 @@ class AssignedCustomer implements ContainEventsInterface
     public function __construct(Sales $sales, Customer $customer, CustomerJourney $customerJourney, string $id)
     {
         $customerJourney->assertActive();
+        $customer->assertHasNoActiveAssignment();
 
         $this->sales = $sales;
         $this->customer = $customer;

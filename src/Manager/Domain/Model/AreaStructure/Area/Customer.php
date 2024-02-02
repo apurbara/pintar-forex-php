@@ -4,20 +4,27 @@ namespace Manager\Domain\Model\AreaStructure\Area;
 
 use Company\Domain\Model\AreaStructure\Area as AreaInCompanyBC;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Manager\Domain\Model\AreaStructure\Area;
 use Manager\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
+use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
+use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
 {
+
     #[FetchableObject(targetEntity: AreaInCompanyBC::class, joinColumnName: "Area_id")]
     #[ManyToOne(targetEntity: Area::class)]
     #[JoinColumn(name: "Area_id", referencedColumnName: "id")]
@@ -38,11 +45,18 @@ class Customer
 
     #[Column(type: "string", length: 255, nullable: true)]
     protected string $email;
-    
+
     #[Column(type: "string", length: 255, nullable: true)]
     protected string $phone;
 
-    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    #[FetchableObjectList(targetEntity: AssignedCustomer::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: AssignedCustomer::class, mappedBy: "customer", cascade: ["persist"], fetch: "EXTRA_LAZY")]
+    protected Collection $assignedCustomers;
+
+    //
+    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
     protected $verificationReports;
 
     public function getId(): string
@@ -54,9 +68,19 @@ class Customer
     {
         
     }
-    
+
+    //
     public function areaEquals(Area $area): bool
     {
         return $this->area === $area;
+    }
+
+    public function assertHasNoActiveAssignment(): void
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
+        if (!$this->assignedCustomers->matching($criteria)->isEmpty()) {
+            throw RegularException::forbidden('customer has active assignment');
+        }
     }
 }

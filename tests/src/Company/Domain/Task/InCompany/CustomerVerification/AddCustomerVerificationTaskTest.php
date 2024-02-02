@@ -16,7 +16,9 @@ class AddCustomerVerificationTaskTest extends TaskInCompanyTestBase
         $this->prepareCustomerVerificationDependency();
         $this->task = new AddCustomerVerificationTask($this->customerVerificationRepository);
         //
-        $this->payload = new CustomerVerificationData($this->createLabelData());
+        $this->payload = (new CustomerVerificationData($this->createLabelData()))
+                ->setWeight(99)
+                ->setPosition(3);
     }
     
     //

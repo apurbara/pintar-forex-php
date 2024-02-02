@@ -2,7 +2,9 @@
 
 namespace App\Http\GraphQL\UserBC;
 
+use App\Http\GraphQL\UserBC\Task\PersonnelQuery;
 use GraphQL\Type\Definition\ObjectType;
+use Resources\Infrastructure\GraphQL\TypeRegistry;
 
 class Query extends ObjectType
 {
@@ -16,6 +18,11 @@ class Query extends ObjectType
 
     protected function fieldDefinition(): array
     {
-        return [];
+        return [
+            'byPersonnel' => [
+                'type' => TypeRegistry::type(PersonnelQuery::class),
+                'resolve' => fn() => TypeRegistry::type(PersonnelQuery::class),
+            ],
+        ];
     }
 }

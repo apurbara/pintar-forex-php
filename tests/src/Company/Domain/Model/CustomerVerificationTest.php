@@ -9,7 +9,7 @@ use Tests\TestBase;
 class CustomerVerificationTest extends TestBase
 {
 
-    protected $id = 'newId';
+    protected $id = 'newId', $position = 2, $weight = 10;
 
     protected function setUp(): void
     {
@@ -20,14 +20,17 @@ class CustomerVerificationTest extends TestBase
     protected function createData()
     {
         return (new CustomerVerificationData($this->createLabelData()))
-                        ->setId($this->id);
+                        ->setId($this->id)
+                        ->setPosition($this->position)
+                        ->setWeight($this->weight);
     }
-    
+
     //
     protected function construct()
     {
         return new TestableCustomerVerification($this->createData());
     }
+
     public function test_construct_setProperties()
     {
         $customerVerification = $this->construct();
@@ -35,6 +38,8 @@ class CustomerVerificationTest extends TestBase
         $this->assertfalse($customerVerification->disabled);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($customerVerification->createdTime);
         $this->assertInstanceOf(Label::class, $customerVerification->label);
+        $this->assertSame($this->weight, $customerVerification->weight);
+        $this->assertSame($this->position, $customerVerification->position);
     }
 }
 
@@ -45,4 +50,6 @@ class TestableCustomerVerification extends CustomerVerification
     public bool $disabled;
     public DateTimeImmutable $createdTime;
     public Label $label;
+    public int $weight;
+    public int $position;
 }
