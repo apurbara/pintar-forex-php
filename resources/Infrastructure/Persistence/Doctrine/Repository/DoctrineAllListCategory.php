@@ -28,7 +28,7 @@ class DoctrineAllListCategory
     {
         $filters = [];
         foreach ($schema['filters'] ?? [] as $filter) {
-            $filters = Filter::fromSchema($filter);
+            $filters[] = Filter::fromSchema($filter);
         };
         return new static(KeywordSearch::fromSchema($schema['keywordSearch'] ?? []), $filters);
     }
