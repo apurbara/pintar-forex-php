@@ -3,6 +3,7 @@
 namespace Manager\Domain\Model\Personnel\Manager\Sales;
 
 use Company\Domain\Model\CustomerJourney as CustomerJourneyInCompanyBC;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
@@ -49,6 +50,9 @@ class AssignedCustomer implements ContainEventsInterface
 
     #[Id, Column(type: "guid")]
     protected string $id;
+    
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected DateTimeImmutable $createdTime;
 
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
@@ -80,6 +84,7 @@ class AssignedCustomer implements ContainEventsInterface
         $this->customer = $customer;
         $this->customerJourney = $customerJourney;
         $this->id = $id;
+        $this->createdTime = new DateTimeImmutable();
         $this->status = CustomerAssignmentStatus::ACTIVE;
 
         $event = new CustomerAssignedEvent($this->id);

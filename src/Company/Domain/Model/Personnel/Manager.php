@@ -34,6 +34,11 @@ class Manager
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
 
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
     public function __construct(Personnel $personnel, ManagerData $data)
     {
         $this->personnel = $personnel;

@@ -5,6 +5,8 @@ namespace Company\Domain\Model;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\ManagerData;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use SharedContext\Domain\ValueObject\AccountInfo;
 use SharedContext\Domain\ValueObject\AccountInfoData;
 use Tests\TestBase;
@@ -12,6 +14,7 @@ use Tests\TestBase;
 class PersonnelTest extends TestBase
 {
     protected $personnel;
+    protected $manager;
     //
     protected $accountInfoData;
     protected $id = 'newPersonnelId';
@@ -25,6 +28,10 @@ class PersonnelTest extends TestBase
         //
         $data = (new PersonnelData($this->accountInfoData))->setId('id');
         $this->personnel = new TestablePersonnel($data);
+        
+        $this->manager = $this->buildMockOfClass(Manager::class);
+        $this->personnel->managerAssignments = new ArrayCollection();
+        $this->personnel->managerAssignments->add($this->manager);
         //
         $this->task = $this->buildMockOfInterface(PersonnelTaskInCompany::class);
     }
@@ -84,6 +91,20 @@ class PersonnelTest extends TestBase
         $this->personnel->disabled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->executeTaskInCompany(), 'Forbidden', 'only active personnel can  make this request');
     }
+    public function test_executeTaskInCompany_taskForManagerOnly_hasNoActiveManager()
+    {
+        $this->task = $this->buildMockOfInterface(PersonnelHavingManagerAssignmentTaskInCompany::class);
+        $this->personnel->managerAssignments->clear();
+        $this->assertRegularExceptionThrowed(fn() => $this->executeTaskInCompany(), 'Forbidden', 'only active personnel having manager assignment can  make this request');
+    }
+    public function test_executeTaskInCompany_taskForManagerOnly_hasInativeManagerAssignment()
+    {
+        $this->task = $this->buildMockOfInterface(PersonnelHavingManagerAssignmentTaskInCompany::class);
+        $this->manager->expects($this->any())
+                ->method('isDisabled')
+                ->willReturn(true);
+        $this->assertRegularExceptionThrowed(fn() => $this->executeTaskInCompany(), 'Forbidden', 'only active personnel having manager assignment can  make this request');
+    }
     
     //
     protected function assignAsManager()
@@ -109,4 +130,5 @@ class TestablePersonnel extends Personnel
     public bool $disabled;
     public DateTimeImmutable $createdTime;
     public AccountInfo $accountInfo;
+    public Collection $managerAssignments;
 }

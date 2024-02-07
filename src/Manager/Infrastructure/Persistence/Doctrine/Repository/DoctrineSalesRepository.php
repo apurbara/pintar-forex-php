@@ -2,6 +2,7 @@
 
 namespace Manager\Infrastructure\Persistence\Doctrine\Repository;
 
+use Manager\Domain\Model\Personnel\Manager\Sales;
 use Manager\Domain\Task\Sales\SalesRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
@@ -23,5 +24,10 @@ class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesR
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
                 ->addFilter(new Filter($managerId, 'Sales.Manager_id'));
         return $this->fetchPaginationList($doctrinePaginationListCategory);
+    }
+
+    public function ofId(string $id): Sales
+    {
+        return $this->findOneByIdOrDie($id);
     }
 }

@@ -47,6 +47,7 @@ class AssignedCustomerTest extends TestBase
         $this->assertSame($this->customer, $assignment->customer);
         $this->assertSame($this->customerJourney, $assignment->customerJourney);
         $this->assertSame($this->id, $assignment->id);
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($assignment->createdTime);
         $this->assertSame(CustomerAssignmentStatus::ACTIVE, $assignment->status);
     }
     public function test_construct_assertCustomerJourneyActive()
@@ -134,6 +135,7 @@ class TestableAssignedCustomer extends AssignedCustomer
     public Customer $customer;
     public CustomerJourney $customerJourney;
     public string $id;
+    public \DateTimeImmutable $createdTime;
     public CustomerAssignmentStatus $status;
     public $recordedEvents;
 }

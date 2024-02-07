@@ -28,4 +28,9 @@ class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesR
             throw RegularException::notFound('sales not found');
         }
     }
+
+    public function ofId(string $id): Sales
+    {
+        return $this->findOneByIdOrDie($id);
+    }
 }

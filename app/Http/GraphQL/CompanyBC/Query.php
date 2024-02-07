@@ -4,6 +4,7 @@ namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
@@ -34,6 +35,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(AreaController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ManagerController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerController::class),
         ];
     }
 }

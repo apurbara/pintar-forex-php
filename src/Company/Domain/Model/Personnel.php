@@ -7,10 +7,12 @@ use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Model\Personnel\ManagerData;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
@@ -38,7 +40,8 @@ class Personnel
     #[FetchableObjectList(targetEntity: Sales::class, joinColumnName: "Personnel_id", paginationRequired: false)]
     protected $salesAssignments;
     #[FetchableObjectList(targetEntity: Manager::class, joinColumnName: "Personnel_id", paginationRequired: false)]
-    protected $managerAssignments;
+    #[OneToMany(targetEntity: Manager::class, mappedBy: "personnel", fetch: "EXTRA_LAZY")]
+    protected Collection $managerAssignments;
 
     public function __construct(PersonnelData $data)
     {
@@ -55,12 +58,22 @@ class Personnel
             throw RegularException::forbidden('inactive personnel');
         }
     }
+    protected function assertHavingActiveManagerAssignment(): void
+    {
+        $p = fn(Manager $manager) => !$manager->isDisabled();
+        if ($this->managerAssignments->filter($p)->count() < 1) {
+            throw RegularException::forbidden('only active personnel having manager assignment can  make this request');
+        }
+    }
 
     //
     public function executeTaskInCompany(PersonnelTaskInCompany $task, $payload): void
     {
         if ($this->disabled) {
             throw RegularException::forbidden('only active personnel can  make this request');
+        }
+        if ($task instanceof PersonnelHavingManagerAssignmentTaskInCompany) {
+            $this->assertHavingActiveManagerAssignment();
         }
         $task->executeInCompany($payload);
     }
