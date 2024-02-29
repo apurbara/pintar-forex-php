@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Doctrine\ORM\EntityManager;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
@@ -31,7 +32,7 @@ class Controller extends BaseController
         ]);
     }
 
-    protected function buildViewAllListPayload(InputRequest $input): ViewAllListPayload
+    protected function buildViewAllListPayload(InputRequest|Request $input): ViewAllListPayload
     {
         return new ViewAllListPayload([
             'keywordSearch' => $input->get('keywordSearch') ?? [],

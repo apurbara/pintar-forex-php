@@ -4,6 +4,7 @@ namespace Tests\src\Company\Domain\Task\InCompany;
 
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\AreaStructure\Area\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
@@ -12,6 +13,7 @@ use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
+use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
@@ -134,5 +136,19 @@ class TaskInCompanyTestBase extends TestBase
 //                ->method('ofId')
 //                ->with($this->customerJourneyId)
 //                ->willReturn($this->customerJourney);
+    }
+    
+    protected MockObject $customerRepository;
+    protected MockObject $customer;
+    protected string $customerId = 'customerId';
+    protected function prepareCustomerDependency(): void
+    {
+        $this->customerRepository = $this->buildMockOfInterface(CustomerRepository::class);
+        $this->customer = $this->buildMockOfClass(Customer::class);
+        //
+//        $this->customerRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->customerId)
+//                ->willReturn($this->customer);
     }
 }

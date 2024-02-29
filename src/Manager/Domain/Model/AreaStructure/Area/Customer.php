@@ -46,8 +46,11 @@ class Customer
     #[Column(type: "string", length: 255, nullable: true)]
     protected string $email;
 
-    #[Column(type: "string", length: 255, nullable: true)]
+    #[Column(type: "string", length: 255, nullable: false)]
     protected string $phone;
+
+    #[Column(type: "string", length: 255, nullable: true)]
+    protected string $source;
 
     #[FetchableObjectList(targetEntity: AssignedCustomer::class, joinColumnName: "Customer_id",
                 paginationRequired: false)]
