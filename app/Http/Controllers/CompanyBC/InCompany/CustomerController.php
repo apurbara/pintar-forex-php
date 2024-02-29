@@ -36,6 +36,7 @@ class CustomerController extends Controller
         ]);
         $file = $request->file('customerList');
         $reader = Reader::createFromFileObject($file->openFile());
+        $reader->setDelimiter(';');
         $reader->setHeaderOffset(0);
 
         $areaRepository = $this->em->getRepository(Area::class);
@@ -81,6 +82,7 @@ class CustomerController extends Controller
             $stream = fopen('php://output', 'w');
             
             $writer = Writer::createFromStream($stream);
+            $writer->setDelimiter(';');
             $writer->insertOne(['name', 'phone', 'email', 'source', 'customerScore']);
             $writer->insertAll($payload->result);
             
