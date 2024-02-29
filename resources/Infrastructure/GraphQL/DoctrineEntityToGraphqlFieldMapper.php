@@ -17,6 +17,7 @@ use Resources\Infrastructure\GraphQL\Attributes\ExcludeFromFetch;
 use Resources\Infrastructure\GraphQL\Attributes\ExcludeFromInput;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
+use Resources\Infrastructure\GraphQL\Attributes\IncludeAsInput;
 use Resources\Infrastructure\GraphQL\Attributes\IncludeAsInputList;
 use Resources\Infrastructure\GraphQL\CustomTypes\DateTimeZ;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
@@ -320,6 +321,17 @@ class DoctrineEntityToGraphqlFieldMapper
         return false;
     }
 
+    private static function mapIncludeAsInput(array &$fields, ReflectionProperty $propertyReflection): bool
+    {
+        $includeAsInputAttributeReflection = ReflectionHelper::findAttribute($propertyReflection,
+                        IncludeAsInput::class);
+        if ($includeAsInputAttributeReflection) {
+            $fields[$propertyReflection->getName()] = TypeRegistry::inputType($includeAsInputAttributeReflection->getArguments()['targetEntity']);
+            return true;
+        }
+        return false;
+    }
+
     public static function mapInputFields(string $classMetadata, array $excludedProperties = [],
             ?string $columnPrefix = null): array
     {
@@ -349,6 +361,9 @@ class DoctrineEntityToGraphqlFieldMapper
             }
             static::mapDoctrineJoinColumn($fields, $propertyReflection);
             if (static::mapInputAsInputList($fields, $propertyReflection)) {
+                continue;
+            }
+            if (static::mapIncludeAsInput($fields, $propertyReflection)) {
                 continue;
             }
 

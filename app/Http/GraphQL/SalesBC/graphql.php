@@ -9,8 +9,12 @@ namespace App\Http\GraphQL\SalesBC;
 
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
+use Sales\Domain\Model\AreaStructure\Area\Customer;
 use function base_path;
 
+TypeRegistry::registerPredefinedClassMaps([
+    'CustomerInput' => Customer::class,
+]);
 $schema = new Schema([
     'query' => TypeRegistry::type(SalesQuery::class),
     'mutation' => TypeRegistry::type(SalesMutation::class),

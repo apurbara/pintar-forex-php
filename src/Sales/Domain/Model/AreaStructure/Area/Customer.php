@@ -43,10 +43,13 @@ class Customer
     protected string $name;
 
     #[Column(type: "string", length: 255, nullable: true)]
-    protected string $email;
+    protected ?string $email;
+    
+    #[Column(type: "string", length: 255, nullable: false)]
+    protected string $phone;
     
     #[Column(type: "string", length: 255, nullable: true)]
-    protected string $phone;
+    protected ?string $source;
 
     #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: VerificationReport::class, mappedBy: "customer", cascade: ["persist"])]
@@ -60,11 +63,11 @@ class Customer
         $this->name = $name;
     }
 
-    protected function setEmail(string $email)
+    protected function setEmail(?string $email)
     {
         ValidationService::build()
-                ->addRule(ValidationRule::email())
-                ->execute($email, 'customer email is mandatory and must be in valid email address format');
+                ->addRule(ValidationRule::optional(ValidationRule::email()))
+                ->execute($email, 'customer email must be in valid email address format');
         $this->email = $email;
     }
 
@@ -84,9 +87,18 @@ class Customer
         $this->setName($data->name);
         $this->setEmail($data->email);
         $this->setPhone($data->phone);
+        $this->source = $data->source;
         $this->area = $area;
     }
-
+    
+    public function update(Area $area, CustomerData $data): void
+    {
+        $this->area = $area;
+        $this->setEmail($data->email);
+        $this->setName($data->name);
+        $this->source = $data->source;
+    }
+    
     //
     public function submitVerificationReport(
             CustomerVerification $customerVerification, VerificationReportData $verificationReportData): void

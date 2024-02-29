@@ -48,7 +48,8 @@ class CustomerController extends Controller
         $name = $input->get('name');
         $email = $input->get('email');
         $phone = $input->get('phone');
-        $customerData = new CustomerData($name, $email, $phone);
+        $customerData = (new CustomerData($name, $email, $phone))
+                ->setSource($input->get('source'));
         $payload = new RegisterNewCustomerPayload($areaId, $customerData);
         $user->executeSalesTask($task, $payload);
         

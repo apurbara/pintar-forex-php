@@ -33,8 +33,8 @@ class RegisterNewCustomerTask implements SalesTask
         $payload->setId($this->assignedCustomerRepository->nextIdentity());
         $payload->customerData->setId($this->customerRepository->nextIdentity());
 
-        if (!$this->customerRepository->isEmailAvailable($payload->customerData->email)) {
-            throw RegularException::conflict('email already registered');
+        if (!$this->customerRepository->isPhoneAvailable($payload->customerData->phone)) {
+            throw RegularException::conflict('phone already registered');
         }
 
         $customerArea = $this->areaRepository->ofId($payload->areaId);

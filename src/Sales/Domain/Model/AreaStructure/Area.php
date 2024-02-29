@@ -32,6 +32,13 @@ class Area
             throw RegularException::forbidden('inaccessible area');
         }
     }
+    
+    public function assertActive(): void
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('inactive area');
+        }
+    }
 
     //
     public function createCustomer(CustomerData $customerData): Customer

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SalesBC;
 
+use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\SalesActivity;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
@@ -13,6 +14,7 @@ use Tests\Http\Record\EntityRecord;
 class AssignedCustomerControllerTest extends SalesBCTestCase
 {
 
+    protected $areaOne;
     protected $customerOne;
     protected $customerTwo;
     protected $assignedCustomerOne;
@@ -21,6 +23,8 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
     protected $initialSalesActivity;
     protected $initialCustomerJourney;
     protected $customerJourneyOne;
+    
+    protected $customerPayload;
 
     protected function setUp(): void
     {
@@ -35,6 +39,8 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
         $this->initialCustomerJourney->columns['initial'] = true;
         $this->customerJourneyOne = new EntityRecord(CustomerJourney::class, 1);
 
+        $this->areaOne = new EntityRecord(Area::class, 1);
+        
         $this->customerOne = new EntityRecord(Customer::class, 1);
         $this->customerOne->columns['Area_id'] = $this->area->columns['id'];
         $this->customerTwo = new EntityRecord(Customer::class, 2);
@@ -61,6 +67,13 @@ class AssignedCustomerControllerTest extends SalesBCTestCase
         $this->assignedCustomerThree->columns['Customer_id'] = $this->customerThree->columns['id'];
         $this->assignedCustomerThree->columns['CustomerJourney_id'] = $this->initialCustomerJourney->columns['id'];
         $this->assignedCustomerThree->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
+        
+        $this->customerPayload = [
+            'Area_id' => $this->areaOne->columns['id'],
+            'name' => 'new customer name',
+            'email' => 'newAddress@email.org',
+            'source' => 'new source',
+        ];
     }
 
     protected function tearDown(): void
@@ -100,7 +113,6 @@ _QUERY;
         ];
         $this->postGraphqlRequest($this->personnel->token);
     }
-
     public function test_udpateJourney_200()
     {
         $this->updateJourney();
@@ -119,6 +131,60 @@ _QUERY;
                 [
             'id' => $this->assignedCustomerOne->columns['id'],
             'CustomerJourney_id' => $this->customerJourneyOne->columns['id'],
+        ]);
+    }
+
+    //
+    protected function updateCustomerBio()
+    {
+        $this->prepareSalesDependency();
+        $this->initialCustomerJourney->insert($this->connection);
+        $this->customerJourneyOne->insert($this->connection);
+
+        $this->areaOne->insert($this->connection);
+        $this->customerOne->insert($this->connection);
+
+        $this->assignedCustomerOne->insert($this->connection);
+
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $salesId: ID!, $id: ID, $customer: CustomerInput ) {
+    sales ( salesId: $salesId ) {
+        updateCustomerBio ( id: $id, customer: $customer ) {
+            id, customer { name, email, source, area { id } }
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'salesId' => $this->sales->columns['id'],
+            'id' => $this->assignedCustomerOne->columns['id'],
+            'customer' => $this->customerPayload,
+        ];
+        $this->postGraphqlRequest($this->personnel->token);
+    }
+    public function test_udpateCustomerBio_200()
+    {
+        $this->updateCustomerBio();
+        $this->seeStatusCode(200);
+
+        $this->seeJsonContains([
+            'id' => $this->assignedCustomerOne->columns['id'],
+            'customer' => [
+                'name' => $this->customerPayload['name'],
+                'email' => $this->customerPayload['email'],
+                'source' => $this->customerPayload['source'],
+                'area' => [
+                    'id' => $this->customerPayload['Area_id'],
+                ],
+            ],
+        ]);
+
+        $this->seeInDatabase('Customer', [
+            'id' => $this->assignedCustomerOne->columns['Customer_id'],
+            'name' => $this->customerPayload['name'],
+            'email' => $this->customerPayload['email'],
+            'source' => $this->customerPayload['source'],
+            'Area_id' => $this->customerPayload['Area_id'],
         ]);
     }
 

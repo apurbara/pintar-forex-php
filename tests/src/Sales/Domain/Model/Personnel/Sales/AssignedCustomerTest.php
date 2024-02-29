@@ -5,7 +5,9 @@ namespace Sales\Domain\Model\Personnel\Sales;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\Model\AreaStructure\Area\CustomerData;
 use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
@@ -32,7 +34,8 @@ class AssignedCustomerTest extends TestBase
     protected $assignedCustomer;
     protected $salesActivitySchedule, $schedule;
     //
-    protected $id = 'newId', $customerData;
+    protected $id = 'newId';
+    protected $area, $customerData;
     //
     protected $salesActivity;
     protected $customerVerification, $verificationReportData;
@@ -56,6 +59,9 @@ class AssignedCustomerTest extends TestBase
         
         $this->assignedCustomer->salesActivitySchedules = new ArrayCollection();
         $this->assignedCustomer->salesActivitySchedules->add($this->salesActivitySchedule);
+        //
+        $this->area = $this->buildMockOfClass(Area::class);
+        $this->customerData = $this->buildMockOfReadonlyClass(CustomerData::class);
         
         //
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
@@ -107,6 +113,24 @@ class AssignedCustomerTest extends TestBase
         $this->customerJourney = null;
         $this->construct();
         $this->markAsSuccess();
+    }
+    
+    //
+    protected function updateCustomer()
+    {
+        $this->assignedCustomer->updateCustomer($this->area, $this->customerData);
+    }
+    public function test_updateCustomer_updateCustomer()
+    {
+        $this->customer->expects($this->once())
+                ->method('update')
+                ->with($this->area, $this->customerData);
+        $this->updateCustomer();
+    }
+    public function test_updateCustomer_inactiveAssignment_forbidden()
+    {
+        $this->assignedCustomer->status = CustomerAssignmentStatus::RECYCLED;
+        $this->assertRegularExceptionThrowed(fn() => $this->updateCustomer(), 'Forbidden', 'inactive customer assignment');
     }
     
     //

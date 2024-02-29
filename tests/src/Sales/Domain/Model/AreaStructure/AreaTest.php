@@ -31,9 +31,25 @@ class AreaTest extends TestBase
     }
     
     //
+    protected function assertActive()
+    {
+        $this->area->assertActive();
+    }
+    public function test_assertActive_disabledArea_forbidden()
+    {
+        $this->area->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive area');
+    }
+    public function test_assertActive_activeArea_void()
+    {
+        $this->assertActive();
+        $this->markAsSuccess();
+    }
+    
+    //
     protected function createCustomer()
     {
-        $customerData = (new Area\CustomerData('customer name', 'customer@email.org', '+628123123123'))->setId('customerId');
+        $customerData = (new Area\CustomerData('customer name', 'customer@email.org', '+628123123123'))->setId('customerId')->setSource('group');
         return $this->area->createCustomer($customerData);
     }
     public function test_createCustomer_returnCustomer()

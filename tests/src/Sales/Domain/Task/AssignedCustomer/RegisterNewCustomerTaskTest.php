@@ -35,7 +35,7 @@ class RegisterNewCustomerTaskTest extends SalesTaskTestBase
                 ->method('nextIdentity')
                 ->willReturn($this->customerId);
         $this->customerRepository->expects($this->any())
-                ->method('isEmailAvailable')
+                ->method('isPhoneAvailable')
                 ->willReturn(true);
         $this->customerJourneyRepository->expects($this->any())
                 ->method('anInitialCustomerJourney')
@@ -71,13 +71,13 @@ class RegisterNewCustomerTaskTest extends SalesTaskTestBase
         $this->assertSame($this->customerId, $this->payload->customerData->id);
     }
 
-    public function test_execute_customerEmailUnavailable_conflict()
+    public function test_execute_customerPhoneUnavailable_conflict()
     {
         $this->customerRepository->expects($this->once())
-                ->method('isEmailAvailable')
-                ->with($this->payload->customerData->email)
+                ->method('isPhoneAvailable')
+                ->with($this->payload->customerData->phone)
                 ->willReturn(false);
-        $this->assertRegularExceptionThrowed(fn() => $this->execute(), 'Conflict', 'email already registered');
+        $this->assertRegularExceptionThrowed(fn() => $this->execute(), 'Conflict', 'phone already registered');
     }
 
     public function test_execute_dispatchAssignedCustomer()

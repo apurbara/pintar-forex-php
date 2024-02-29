@@ -17,7 +17,7 @@ class CustomerTest extends TestBase
     protected $customer;
     protected $verificationReport;
     //
-    protected $id = 'newId', $name = 'new customer name', $email = 'newcustomer@email.org', $phone = '+6281324312123';
+    protected $id = 'newId', $name = 'new customer name', $email = 'newcustomer@email.org', $phone = '+6281324312123', $group = 'wa-forex-bdg';
     //
     protected $customerVerification, $verificationReportData;
 
@@ -27,7 +27,7 @@ class CustomerTest extends TestBase
         parent::setUp();
         $this->area = $this->buildMockOfClass(Area::class);
         
-        $data = (new CustomerData('name', 'customer@email.org', '08932324234'))->setId('id');
+        $data = (new CustomerData('name', 'customer@email.org', '08932324234'))->setId('id')->setSource('group');
         $this->customer = new TestableCustomer($this->area, $data);
         
         $this->verificationReport = $this->buildMockOfClass(VerificationReport::class);
@@ -41,7 +41,9 @@ class CustomerTest extends TestBase
     //
     protected function createData()
     {
-        return (new CustomerData($this->name, $this->email, $this->phone))->setId($this->id);
+        return (new CustomerData($this->name, $this->email, $this->phone))
+                ->setId($this->id)
+                ->setSource($this->group);
     }
     
     //
@@ -59,6 +61,7 @@ class CustomerTest extends TestBase
         $this->assertSame($this->email, $customer->email);
         $this->assertSame($this->phone, $customer->phone);
         $this->assertSame($this->area, $customer->area);
+        $this->assertSame($this->group, $customer->source);
     }
     public function test_construct_emptyName_badRequest()
     {
@@ -68,12 +71,42 @@ class CustomerTest extends TestBase
     public function test_construct_invalidMailFormat_badRequest()
     {
         $this->email = 'bad mail format';
-        $this->assertRegularExceptionThrowed(fn() => $this->construct(), 'Bad Request', 'customer email is mandatory and must be in valid email address format');
+        $this->assertRegularExceptionThrowed(fn() => $this->construct(), 'Bad Request', 'customer email must be in valid email address format');
+    }
+    public function test_construct_emptyMail_200()
+    {
+        $this->email = '';
+        $this->construct();
+        $this->markAsSuccess();
     }
     public function test_construct_invalidPhoneFormat_badRequest()
     {
         $this->phone = 'bad phone format';
         $this->assertRegularExceptionThrowed(fn() => $this->construct(), 'Bad Request', 'customer phone is mandatory and must be in valid phone format');
+    }
+    
+    //
+    protected function update()
+    {
+        $this->customer->update($this->area, $this->createData());
+    }
+    public function test_update_updateAreaAndProperties()
+    {
+        $this->customer->area = $this->buildMockOfClass(Area::class);
+        $this->update();
+        $this->assertSame($this->area, $this->customer->area);
+    }
+    public function test_update_updateProperties()
+    {
+        $this->update();
+        $this->assertSame($this->name, $this->customer->name);
+        $this->assertSame($this->email, $this->customer->email);
+        $this->assertSame($this->group, $this->customer->source);
+    }
+    public function test_update_preventUpdatePhone()
+    {
+        $this->update();
+        $this->assertNotSame($this->phone, $this->customer->phone);
     }
     
     //
@@ -121,8 +154,9 @@ class TestableCustomer extends Customer
     public bool $disabled;
     public DateTimeImmutable $createdTime;
     public string $name;
-    public string $email;
+    public ?string $email;
     public string $phone;
+    public ?string $source;
     public Area $area;
     public Collection $verificationReports;
 }

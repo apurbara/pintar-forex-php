@@ -18,9 +18,12 @@ use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
+use Resources\Infrastructure\GraphQL\Attributes\IncludeAsInput;
 use Resources\Uuid;
+use Sales\Domain\Model\AreaStructure\Area;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
 use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReportData;
+use Sales\Domain\Model\AreaStructure\Area\CustomerData;
 use Sales\Domain\Model\CustomerJourney;
 use Sales\Domain\Model\CustomerVerification;
 use Sales\Domain\Model\Personnel\Sales;
@@ -50,10 +53,11 @@ class AssignedCustomer implements ContainEventsInterface
     protected Sales $sales;
 
     #[FetchableObject(targetEntity: Customer::class, joinColumnName: "Customer_id")]
+    #[IncludeAsInput(targetEntity: Customer::class)]
     #[ManyToOne(targetEntity: Customer::class, cascade: ["persist"])]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
-    
+
     #[FetchableObject(targetEntity: CustomerJourneyInCompanyBC::class, joinColumnName: "CustomerJourney_id")]
     #[ManyToOne(targetEntity: CustomerJourney::class)]
     #[JoinColumn(name: "CustomerJourney_id", referencedColumnName: "id")]
@@ -68,18 +72,22 @@ class AssignedCustomer implements ContainEventsInterface
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
 
-    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
+    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "AssignedCustomer_id",
+                paginationRequired: false)]
     #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $closingRequests;
-    
-    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
+
+    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "AssignedCustomer_id",
+                paginationRequired: false)]
     #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "assignedCustomer")]
     protected Collection $recycleRequests;
-    
-    #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "AssignedCustomer_id", paginationRequired: false)]
-    #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "assignedCustomer", cascade: ["persist"], fetch: 'EXTRA_LAZY')]
+
+    #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "AssignedCustomer_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "assignedCustomer", cascade: ["persist"],
+                fetch: 'EXTRA_LAZY')]
     protected Collection $salesActivitySchedules;
-    
+
     public function getStatus(): CustomerAssignmentStatus
     {
         return $this->status;
@@ -88,24 +96,29 @@ class AssignedCustomer implements ContainEventsInterface
     public function __construct(Sales $sales, Customer $customer, ?CustomerJourney $customerJourney, string $id)
     {
         $customerJourney?->assertActive();
-        
+
         $this->sales = $sales;
         $this->customer = $customer;
         $this->customerJourney = $customerJourney;
         $this->id = $id;
         $this->status = CustomerAssignmentStatus::ACTIVE;
         $this->createdTime = new DateTimeImmutable();
-        
+
         $this->salesActivitySchedules = new ArrayCollection();
-        
 
         $this->recordEvent(new CustomerAssignedEvent($this->id));
     }
-    
+
     public function updateJourney(CustomerJourney $customerJourney): void
     {
         $customerJourney->assertActive();
         $this->customerJourney = $customerJourney;
+    }
+
+    public function updateCustomer(Area $area, CustomerData $customerData): void
+    {
+        $this->assertActive();
+        $this->customer->update($area, $customerData);
     }
 
     //
@@ -143,15 +156,15 @@ class AssignedCustomer implements ContainEventsInterface
     {
         $closingRequestFilter = fn(ClosingRequest $closingRequest) => $closingRequest->isOngoing();
         $containOngoingClosingRequest = !$this->closingRequests->filter($closingRequestFilter)->isEmpty();
-        
+
         $recycleRequestFilter = fn(RecycleRequest $recycleRequest) => $recycleRequest->isOngoing();
         $containOngoingRecycleRequest = !$this->recycleRequests->filter($recycleRequestFilter)->isEmpty();
 
         if ($containOngoingClosingRequest || $containOngoingRecycleRequest) {
             throw RegularException::forbidden('there area still ongoing closing/recycle request on this assignment');
         }
-        
     }
+
     public function submitClosingRequest(ClosingRequestData $closingRequestData): ClosingRequest
     {
         $this->assertActive();
@@ -165,28 +178,28 @@ class AssignedCustomer implements ContainEventsInterface
         $this->assertNoOngoingRequest();
         return new RecycleRequest($this, $recycleRequestData);
     }
-    
+
     //
     public function addUpcomingScheduleToSchedulerService(SalesActivitySchedulerService $service): void
     {
         $criteria = Criteria::create()
-                ->andWhere(Criteria::expr()->gte('schedule.startTime',  new DateTimeImmutable()))
+                ->andWhere(Criteria::expr()->gte('schedule.startTime', new DateTimeImmutable()))
                 ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED));
         foreach ($this->salesActivitySchedules->matching($criteria)->getIterator() as $schedule) {
             $schedule->includeInSchedulerService($service);
         }
     }
-    
-    public function initiateSalesActivitySchedule(SalesActivity $initialSalesActivity, SalesActivitySchedulerService $schedulerService): void
+
+    public function initiateSalesActivitySchedule(SalesActivity $initialSalesActivity,
+            SalesActivitySchedulerService $schedulerService): void
     {
         $this->sales->registerAllUpcomingScheduleToScheduler($schedulerService);
-        
+
         $startTime = $schedulerService->nextAvailableTimeSlotForScheduleWithDuration($initialSalesActivity->getDuration())->format('Y-m-d H:i:s');
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($startTime);
         $scheduledSalesActivityData = (new SalesActivityScheduleData($hourlyTimeIntervalData))->setId(Uuid::generateUuid4());
-        
+
         $salesActivitySchedule = $this->submitSalesActivitySchedule($initialSalesActivity, $scheduledSalesActivityData);
         $this->salesActivitySchedules->add($salesActivitySchedule);
     }
-    
 }

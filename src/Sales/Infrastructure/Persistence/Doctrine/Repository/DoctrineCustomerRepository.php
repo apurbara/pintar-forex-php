@@ -14,4 +14,10 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
         $filters = [new Filter($email, 'Customer.email')];
         return empty($this->fetchOneBy($filters));
     }
+
+    public function isPhoneAvailable(string $phone): bool
+    {
+        $filters = [new Filter($phone, 'Customer.phone')];
+        return empty($this->fetchOneBy($filters));
+    }
 }

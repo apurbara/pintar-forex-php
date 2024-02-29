@@ -6,27 +6,21 @@ use App\Http\Controllers\Controller;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
-use Resources\Event\Dispatcher;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
-use Sales\Application\Listener\AllocateInitialSalesActivityScheduleListener;
 use Sales\Domain\Model\AreaStructure\Area;
-use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\Model\AreaStructure\Area\CustomerData;
 use Sales\Domain\Model\CustomerJourney;
-use Sales\Domain\Model\Personnel\Sales;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomerData;
-use Sales\Domain\Model\SalesActivity;
-use Sales\Domain\Task\AssignedCustomer\RegisterNewCustomerPayload;
-use Sales\Domain\Task\AssignedCustomer\RegisterNewCustomerTask;
+use Sales\Domain\Task\AssignedCustomer\UpdateCustomer;
+use Sales\Domain\Task\AssignedCustomer\UpdateCustomerPayload;
 use Sales\Domain\Task\AssignedCustomer\UpdateJourney;
 use Sales\Domain\Task\AssignedCustomer\ViewAssignedCustomerDetail;
 use Sales\Domain\Task\AssignedCustomer\ViewAssignedCustomerList;
 use Sales\Domain\Task\AssignedCustomer\ViewTotalCustomerAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineAssignedCustomerRepository;
-use SharedContext\Domain\Event\CustomerAssignedEvent;
 
 #[GraphqlMapableController(entity: AssignedCustomer::class)]
 class AssignedCustomerController extends Controller
@@ -51,6 +45,26 @@ class AssignedCustomerController extends Controller
         return $repository->queryOneById($payload->id);
     }
 
+    #[Mutation]
+    public function updateCustomerBio(SalesRoleInterface $user, InputRequest $input)
+    {
+        $repository = $this->repository();
+        $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
+        $areaRepository = $this->em->getRepository(Area::class);
+        $task = new UpdateCustomer($repository, $areaRepository);
+
+        $customerInput = $input->get('customer');
+        $customerData = (new CustomerData($customerInput['name'] ?? null, $customerInput['email'] ?? null, $customerInput['phone'] ?? null))
+                ->setAreaId($customerInput['Area_id'] ?? null)
+                ->setSource($customerInput['source'] ?? null);
+        $payload = (new UpdateCustomerPayload())
+                ->setId($input->get('id'))
+                ->setCustomerData($customerData);
+        $user->executeSalesTask($task, $payload);
+
+        return $repository->queryOneById($payload->id);
+    }
+
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
     public function assignedCustomerList(SalesRoleInterface $user, InputRequest $input)
     {
@@ -70,8 +84,7 @@ class AssignedCustomerController extends Controller
 
         return $payload->result;
     }
-    
-    
+
     public function totalCustomerAssignment(SalesRoleInterface $user, InputRequest $input)
     {
         $task = new ViewTotalCustomerAssignment($this->repository());

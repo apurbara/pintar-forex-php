@@ -37,6 +37,7 @@ class CustomerControllerTest extends SalesBCTestCase
             'name' => 'new customer name',
             'email' => 'newCustomer@email.org',
             'phone' => '0813213123123',
+            'source' => 'wa-forex-bdg',
         ];
     }
 
@@ -58,12 +59,12 @@ $this->disableExceptionHandling();
         $this->initialCustomerJourney->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $Area_id: ID!, $name: String, $email: String, $phone: String ) {
+mutation ( $salesId: ID!, $Area_id: ID!, $name: String, $email: String, $phone: String, $source: String ) {
     sales ( salesId: $salesId ) {
-        registerNewCustomer ( Area_id: $Area_id, name: $name, email: $email, phone: $phone ) {
+        registerNewCustomer ( Area_id: $Area_id, name: $name, email: $email, phone: $phone, source: $source ) {
             id, status, createdTime
             customer {
-                name, email, phone
+                name, email, phone, source
                 area { id, name }
             }
             customerJourney { id, name, initial }
@@ -90,6 +91,7 @@ _QUERY;
                 'name' => $this->registerNewCustomerRequest['name'],
                 'email' => $this->registerNewCustomerRequest['email'],
                 'phone' => $this->registerNewCustomerRequest['phone'],
+                'source' => $this->registerNewCustomerRequest['source'],
                 'area' => [
                     'id' => $this->registerNewCustomerRequest['Area_id'],
                     'name' => $this->area->columns['name'],
@@ -102,22 +104,21 @@ _QUERY;
             ],
         ]);
 
-        $this->seeInDatabase('AssignedCustomer',
-                [
+        $this->seeInDatabase('AssignedCustomer', [
             'Sales_id' => $this->sales->columns['id'],
             'CustomerJourney_id' => $this->initialCustomerJourney->columns['id'],
             'status' => CustomerAssignmentStatus::ACTIVE->value,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
 
-        $this->seeInDatabase('Customer',
-                [
+        $this->seeInDatabase('Customer', [
             'Area_id' => $this->area->columns['id'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'name' => $this->registerNewCustomerRequest['name'],
             'email' => $this->registerNewCustomerRequest['email'],
             'phone' => $this->registerNewCustomerRequest['phone'],
+            'source' => $this->registerNewCustomerRequest['source'],
         ]);
     }
 

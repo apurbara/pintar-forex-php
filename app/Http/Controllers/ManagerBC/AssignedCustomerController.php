@@ -17,7 +17,6 @@ use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
-use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Sales\Application\Listener\AllocateInitialSalesActivityScheduleForMultipleAssignmentListener;
 use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;

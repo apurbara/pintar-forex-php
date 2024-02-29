@@ -119,7 +119,7 @@ class AssignedCustomerControllerTest extends ManagerBCTestCase
         $this->salesActivityInitial->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $managerId: ID!, $salesList: [ID], $customerList: [ID]) {
+mutation ( $managerId: ID!, $salesList: [ID], $customerList: [ID] ) {
     manager ( managerId: $managerId ) {
         assignedMultipleCustomerToMultipleSales (salesList: $salesList, customerList: $customerList)
     }
