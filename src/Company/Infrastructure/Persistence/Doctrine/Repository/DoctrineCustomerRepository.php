@@ -29,17 +29,8 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
     }
 
     //
-    private function createCustomerQueryBuilder(array &$searchSchema): QueryBuilder
+    private function applyFilter(QueryBuilder $qb, &$searchSchema): void
     {
-        $verificationScoreSubQuery = $this->getEntityManager()->getConnection()->createQueryBuilder();
-        $verificationScoreSubQuery->addSelect('VerificationReport.Customer_id')
-                ->addSelect('SUM(CustomerVerification.weight) verificationScore')
-                ->from('VerificationReport')
-                ->innerJoin('VerificationReport', 'CustomerVerification', 'CustomerVerification', 'VerificationReport.CustomerVerification_id = CustomerVerification.id AND CustomerVerification.disabled = false')
-                ->groupBy('VerificationReport.Customer_id');
-        $qb = $this->createCoreQueryBuilder()
-                ->leftJoin('Customer', sprintf('(%s)', $verificationScoreSubQuery->getSQL()), 'verificationScoreSubQuery', 'verificationScoreSubQuery.Customer_id = Customer.id');
-        
         foreach ($searchSchema['filters'] as $key => $filter) {
             if (($filter['column'] ?? null) === 'AssignedCustomer.status') {
                 $customerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
@@ -67,58 +58,49 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
                 unset($searchSchema['filters'][$key]);
             }
         }
-        
-        return $qb;
     }
     
     public function customerList(array $paginationSchema): array
     {
-//        $verificationScoreSubQuery = $this->getEntityManager()->getConnection()->createQueryBuilder();
-//        $verificationScoreSubQuery->addSelect('VerificationReport.Customer_id')
-//                ->addSelect('SUM(CustomerVerification.weight) verificationScore')
-//                ->from('VerificationReport')
-//                ->innerJoin('VerificationReport', 'CustomerVerification', 'CustomerVerification', 'VerificationReport.CustomerVerification_id = CustomerVerification.id AND CustomerVerification.disabled = false')
-//                ->groupBy('VerificationReport.Customer_id');
-//        $qb = $this->createCoreQueryBuilder()
-//                ->leftJoin('Customer', sprintf('(%s)', $verificationScoreSubQuery->getSQL()), 'verificationScoreSubQuery', 'verificationScoreSubQuery.Customer_id = Customer.id');
+        $verificationScoreSubQuery = $this->getEntityManager()->getConnection()->createQueryBuilder();
+        $verificationScoreSubQuery->addSelect('VerificationReport.Customer_id')
+                ->addSelect('SUM(CustomerVerification.weight) verificationScore')
+                ->from('VerificationReport')
+                ->innerJoin('VerificationReport', 'CustomerVerification', 'CustomerVerification', 'VerificationReport.CustomerVerification_id = CustomerVerification.id')
+                ->groupBy('VerificationReport.Customer_id');
+        $qb = $this->createCoreQueryBuilder()
+                ->addSelect('verificationScoreSubQuery.verificationScore')
+                ->leftJoin('Customer', sprintf('(%s)', $verificationScoreSubQuery->getSQL()), 'verificationScoreSubQuery', 'verificationScoreSubQuery.Customer_id = Customer.id');
         
-//        $this->applyFilter($qb, $paginationSchema);
-//        foreach ($paginationSchema['filters'] as $key => $filter) {
-//            if (($filter['column'] ?? null) === 'AssignedCustomer.status') {
-//                $customerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
-//                $customerAssignmentQB->select('1')
-//                        ->from('AssignedCustomer')
-//                        ->andWhere($customerAssignmentQB->expr()->eq('AssignedCustomer.Customer_id', 'Customer.id'))
-//                        ->andWhere($customerAssignmentQB->expr()->in('AssignedCustomer.status', ':status'));
-//
-//                $qb->andWhere("EXISTS ({$customerAssignmentQB->getSQL()})")
-//                        ->setParameter('status', $filter['value'], ArrayParameterType::STRING);
-//                unset($paginationSchema['filters'][$key]);
-//            }
-//            if (($filter['column'] ?? null) === 'hasActiveAssignment') {
-//                $activeCustomerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
-//                $activeCustomerAssignmentQB->select('1')
-//                        ->from('AssignedCustomer')
-//                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('AssignedCustomer.Customer_id', 'Customer.id'))
-//                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('AssignedCustomer.status',
-//                                        "'" . CustomerAssignmentStatus::ACTIVE->value . "'"));
-//                if ($filter['value'] == true) {
-//                    $qb->andWhere("EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
-//                } else {
-//                    $qb->andWhere("NOT EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
-//                }
-//                unset($paginationSchema['filters'][$key]);
-//            }
-//        }
+        $this->applyFilter($qb, $paginationSchema);
+        
         return DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                        ->paginateResult($this->createCustomerQueryBuilder($paginationSchema), $this->getTableName());
+                        ->paginateResult($qb, $this->getTableName());
     }
 
     public function allCustomer(array $searchSchema): array
     {
-//        $qb = $this->createCoreQueryBuilder();
-//        $this->applyFilter($qb, $searchSchema);
+        
+        $verificationScoreSubQuery = $this->getEntityManager()->getConnection()->createQueryBuilder();
+        $verificationScoreSubQuery->addSelect('VerificationReport.Customer_id')
+                ->addSelect('SUM(CustomerVerification.weight) verificationScore')
+                ->from('VerificationReport')
+                ->innerJoin('VerificationReport', 'CustomerVerification', 'CustomerVerification', 'VerificationReport.CustomerVerification_id = CustomerVerification.id')
+                ->groupBy('VerificationReport.Customer_id');
+        $qb = $this->dbalQueryBuilder();
+        $qb->addSelect('Customer.name')
+                ->addSelect('Customer.phone')
+                ->addSelect('Customer.email')
+                ->addSelect('Customer.source')
+                ->addSelect('verificationScoreSubQuery.verificationScore')
+                ->from('Customer')
+                ->leftJoin('Customer', sprintf('(%s)', $verificationScoreSubQuery->getSQL()), 'verificationScoreSubQuery', 'verificationScoreSubQuery.Customer_id = Customer.id');
         return DoctrineAllListCategory::fromSchema($searchSchema)
-                        ->fetchResult($this->createCustomerQueryBuilder($searchSchema));
+                        ->fetchResult($qb);
+    }
+
+    public function aCustomer(string $id): array
+    {
+        return $this->queryOneById($id);
     }
 }

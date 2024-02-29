@@ -4,23 +4,26 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
+use App\Http\GraphQL\CompanyBC\Object\CustomerObjectInCompanyBC;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\Area\Customer;
 use Company\Domain\Model\AreaStructure\Area\CustomerData;
 use Company\Domain\Task\InCompany\Customer\AddCustomer;
 use Company\Domain\Task\InCompany\Customer\ViewAllCustomer;
+use Company\Domain\Task\InCompany\Customer\ViewCustomerDetail;
 use Company\Domain\Task\InCompany\Customer\ViewCustomerList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use Illuminate\Http\Request;
 use League\Csv\Reader;
 use League\Csv\Writer;
 use Resources\Application\InputRequest;
+use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
 use function response;
 
-#[GraphqlMapableController(entity: Customer::class)]
+#[GraphqlMapableController(entity: CustomerObjectInCompanyBC::class)]
 class CustomerController extends Controller
 {
 
@@ -32,9 +35,9 @@ class CustomerController extends Controller
     public function importCustomerFromCsv(CompanyUserRoleInterface $user, Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv|max:2048',
+            'file' => 'required|max:2048',
         ]);
-        $file = $request->file('customerList');
+        $file = $request->file('file');
         $reader = Reader::createFromFileObject($file->openFile());
         $reader->setDelimiter(';');
         $reader->setHeaderOffset(0);
@@ -70,7 +73,6 @@ class CustomerController extends Controller
         $payload = $this->buildViewAllListPayload($request);
         $user->executeTaskInCompany($task, $payload);
 
-
         $headers = [
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Content-type' => 'text/csv',
@@ -78,16 +80,17 @@ class CustomerController extends Controller
             'Expires' => '0',
             'Pragma' => 'public'
         ];
-        return response()->stream(function() use($payload) {
-            $stream = fopen('php://output', 'w');
-            
-            $writer = Writer::createFromStream($stream);
-            $writer->setDelimiter(';');
-            $writer->insertOne(['name', 'phone', 'email', 'source', 'customerScore']);
-            $writer->insertAll($payload->result);
-            
-            fclose($stream);
-        }, 200, $headers);
+        return response()->stream(function () use ($payload) {
+                    $stream = fopen('php://output', 'w');
+
+                    $writer = Writer::createFromStream($stream);
+                    $writer->encloseAll();
+                    $writer->setDelimiter(';');
+                    $writer->insertOne(['name', 'phone', 'email', 'source', 'verificationScore']);
+                    $writer->insertAll($payload->result);
+
+                    fclose($stream);
+                }, 200, $headers);
     }
 
     //
@@ -96,6 +99,16 @@ class CustomerController extends Controller
     {
         $task = new ViewCustomerList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+
+    #[Query]
+    public function customerDetail(CompanyUserRoleInterface $user, string $id)
+    {
+        $task = new ViewCustomerDetail($this->repository());
+        $payload = new ViewDetailPayload($id);
 
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;

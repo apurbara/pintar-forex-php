@@ -16,5 +16,7 @@ interface CustomerRepository
     public function customerList(array $paginationSchema): array;
     
     public function allCustomer(array $searchSchema): array;
+    
+    public function aCustomer(string $id): array;
 
 }
