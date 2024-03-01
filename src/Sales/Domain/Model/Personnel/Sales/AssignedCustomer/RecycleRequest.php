@@ -30,11 +30,17 @@ class RecycleRequest
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
     
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected DateTimeImmutable $concludedTime;
+    
     #[Column(type: "string", enumType: ManagementApprovalStatus::class)]
     protected ManagementApprovalStatus $status;
     
     #[Column(type: "text", nullable: true)]
     protected ?string $note;
+    
+    #[Column(type: "text", nullable: true)]
+    protected ?string $remark;
 
     public function __construct(AssignedCustomer $assignedCustomer, RecycleRequestData $data)
     {
