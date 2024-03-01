@@ -92,17 +92,17 @@ class RecycleRequestControllerTest extends ManagerBCTestCase
     }
     protected function tearDown(): void
     {
-//        parent::tearDown();
-//        $this->connection->table('Area')->truncate();
-//        $this->connection->table('CustomerJourney')->truncate();
-//        $this->connection->table('SalesActivity')->truncate();
-//        $this->connection->table('Sales')->truncate();
-//        $this->connection->table('Customer')->truncate();
-//        $this->connection->table('CustomerJourney')->truncate();
-//        $this->connection->table('AssignedCustomer')->truncate();
-//        $this->connection->table('RecycleRequest')->truncate();
-//        $this->connection->table('SalesActivity')->truncate();
-//        $this->connection->table('SalesActivitySchedule')->truncate();
+        parent::tearDown();
+        $this->connection->table('Area')->truncate();
+        $this->connection->table('CustomerJourney')->truncate();
+        $this->connection->table('SalesActivity')->truncate();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('Customer')->truncate();
+        $this->connection->table('CustomerJourney')->truncate();
+        $this->connection->table('AssignedCustomer')->truncate();
+        $this->connection->table('RecycleRequest')->truncate();
+        $this->connection->table('SalesActivity')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
@@ -120,10 +120,10 @@ class RecycleRequestControllerTest extends ManagerBCTestCase
         $this->recycleRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $managerId: ID!, $id: ID! ) {
+mutation ( $managerId: ID!, $id: ID!, $remark: String ) {
     manager ( managerId: $managerId ) {
-        approveRecycleRequest ( id: $id ) {
-            id, status, note
+        approveRecycleRequest ( id: $id, remark: $remark ) {
+            id, status, note, remark, concludedTime
         }
     }
 }
@@ -131,6 +131,7 @@ _QUERY;
         $this->graphqlVariables = [
             'managerId' => $this->manager->columns['id'],
             'id' => $this->recycleRequestOne->columns['id'],
+            'remark' => 'new manager remark',
         ];
         $this->postGraphqlRequest($this->personnel->token);
     }
@@ -142,11 +143,15 @@ _QUERY;
             'id' => $this->recycleRequestOne->columns['id'],
             'status' => ManagementApprovalStatus::APPROVED->value,
             'note' => $this->recycleRequestOne->columns['note'],
+            'remark' => $this->graphqlVariables['remark'],
+            'concludedTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('RecycleRequest', [
             'id' => $this->recycleRequestOne->columns['id'],
             'status' => ManagementApprovalStatus::APPROVED->value,
+            'remark' => $this->graphqlVariables['remark'],
+            'concludedTime' => $this->stringOfCurrentTime(),
         ]);
         $this->seeInDatabase('AssignedCustomer', [
             'id' => $this->customerAssignmentOne->columns['id'],
@@ -155,6 +160,7 @@ _QUERY;
     }
     public function test_accept_distributeCustomerToFreelancer()
     {
+$this->disableExceptionHandling();
         $this->salesTwo->insert($this->connection);
         $this->accept();
         
@@ -189,10 +195,10 @@ _QUERY;
         $this->recycleRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $managerId: ID!, $id: ID! ) {
+mutation ( $managerId: ID!, $id: ID!, $remark: String ) {
     manager ( managerId: $managerId ) {
-        rejectRecycleRequest ( id: $id ) {
-            id, status, note
+        rejectRecycleRequest ( id: $id, remark: $remark ) {
+            id, status, note, remark, concludedTime
         }
     }
 }
@@ -200,6 +206,7 @@ _QUERY;
         $this->graphqlVariables = [
             'managerId' => $this->manager->columns['id'],
             'id' => $this->recycleRequestOne->columns['id'],
+            'remark' => 'new manager remark',
         ];
         $this->postGraphqlRequest($this->personnel->token);
     }
@@ -211,11 +218,15 @@ _QUERY;
             'id' => $this->recycleRequestOne->columns['id'],
             'status' => ManagementApprovalStatus::REJECTED->value,
             'note' => $this->recycleRequestOne->columns['note'],
+            'remark' => $this->graphqlVariables['remark'],
+            'concludedTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('RecycleRequest', [
             'id' => $this->recycleRequestOne->columns['id'],
             'status' => ManagementApprovalStatus::REJECTED->value,
+            'remark' => $this->graphqlVariables['remark'],
+            'concludedTime' => $this->stringOfCurrentTime(),
         ]);
         $this->seeInDatabase('AssignedCustomer', [
             'id' => $this->customerAssignmentOne->columns['id'],

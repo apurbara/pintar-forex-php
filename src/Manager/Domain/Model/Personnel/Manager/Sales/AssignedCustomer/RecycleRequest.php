@@ -34,11 +34,17 @@ class RecycleRequest implements ContainEventsInterface
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
 
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected DateTimeImmutable $concludedTime;
+
     #[Column(type: "string", enumType: ManagementApprovalStatus::class)]
     protected ManagementApprovalStatus $status;
 
     #[Column(type: "text", nullable: true)]
     protected ?string $note;
+
+    #[Column(type: "text", nullable: true)]
+    protected ?string $remark;
 
     protected function __construct()
     {
@@ -53,18 +59,22 @@ class RecycleRequest implements ContainEventsInterface
         }
     }
 
-    public function approve(): void
+    public function approve(RecycleRequestData $data): void
     {
         $this->assertWaitingForApproval();
         $this->status = ManagementApprovalStatus::APPROVED;
+        $this->concludedTime = new DateTimeImmutable();
+        $this->remark = $data->remark;
         $this->assignedCustomer->recycleAssignment();
         $this->storeChildContainEvents($this->assignedCustomer);
     }
 
-    public function reject(): void
+    public function reject(RecycleRequestData $data): void
     {
         $this->assertWaitingForApproval();
         $this->status = ManagementApprovalStatus::REJECTED;
+        $this->concludedTime = new \DateTimeImmutable();
+        $this->remark = $data->remark;
     }
 
     //

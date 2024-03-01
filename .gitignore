@@ -23,3 +23,6 @@ yarn-error.log
 *.tar
 *.zip
 *.gz
+nbproject/project.xml
+nbproject/project.xml
+nbproject/project.xml

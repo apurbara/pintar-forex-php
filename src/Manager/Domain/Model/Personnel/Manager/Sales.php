@@ -126,7 +126,7 @@ class Sales implements ContainEventsInterface
         return $this->assignedCustomers->matching($criteria)->count();
     }
 
-    protected ?float $activeAssignmentValue;
+    protected ?float $activeAssignmentValue = 0;
 
     public function countActiveAssignmentValue(): float
     {

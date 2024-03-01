@@ -81,8 +81,9 @@ class Dispatcher
 
     public function publishTransactional(): void
     {
-        foreach ($this->dispatchedEvents as $event) {
+        foreach ($this->dispatchedEvents as $key => $event) {
             if (isset($this->transactionalListeners[$event->getName()])) {
+                unset($this->dispatchedEvents[$key]);
                 foreach ($this->transactionalListeners[$event->getName()] as $listener) {
                     $listener->handle($event);
                 }

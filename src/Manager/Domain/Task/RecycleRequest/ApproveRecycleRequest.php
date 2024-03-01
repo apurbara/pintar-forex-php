@@ -3,6 +3,7 @@
 namespace Manager\Domain\Task\RecycleRequest;
 
 use Manager\Domain\Model\Personnel\Manager;
+use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequestData;
 use Manager\Domain\Task\ManagerTask;
 use Resources\Event\Dispatcher;
 
@@ -18,15 +19,15 @@ class ApproveRecycleRequest implements ManagerTask
     /**
      * 
      * @param Manager $manager
-     * @param string $payload recycleRequestId
+     * @param RecycleRequestData $payload
      * @return void
      */
     public function executeByManager(Manager $manager, $payload): void
     {
-        $recycleRequest = $this->recycleRequestRepository->ofId($payload);
+        $recycleRequest = $this->recycleRequestRepository->ofId($payload->id);
         $recycleRequest->assertManageableByManager($manager);
 
-        $recycleRequest->approve();
+        $recycleRequest->approve($payload);
         
         $this->dispatcher->dispatchEventContainer($recycleRequest);
     }

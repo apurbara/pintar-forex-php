@@ -5,6 +5,7 @@ namespace Manager\Domain\Task\AssignedCustomer;
 use Manager\Domain\Model\Personnel\Manager\Sales;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomerData;
 use Manager\Domain\Service\CustomerAssignmentPriorityCalculatorService;
+use PHPUnit\Framework\MockObject\MockObject;
 use Resources\Event\Dispatcher;
 use Tests\src\Manager\Domain\Task\ManagerTaskTestBase;
 
@@ -13,7 +14,7 @@ class AssignCustomerToTopPriorityFreelanceSalesTest extends ManagerTaskTestBase
     protected $task, $dispatcher, $assignmentPriorityCalculator;
     protected $payload;
     //
-    protected $sales;
+    protected MockObject $sales;
 
     protected function setUp(): void
     {

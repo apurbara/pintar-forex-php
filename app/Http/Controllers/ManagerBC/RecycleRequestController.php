@@ -8,6 +8,7 @@ use Manager\Domain\Model\AreaStructure\Area\Customer;
 use Manager\Domain\Model\CustomerJourney;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer;
 use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequest;
+use Manager\Domain\Model\Personnel\Manager\Sales\AssignedCustomer\RecycleRequestData;
 use Manager\Domain\Service\CustomerAssignmentPriorityCalculatorService;
 use Manager\Domain\Task\AssignedCustomer\AssignCustomerToTopPriorityFreelanceSales;
 use Manager\Domain\Task\RecycleRequest\ApproveRecycleRequest;
@@ -47,7 +48,7 @@ class RecycleRequestController extends Controller
 
     //
     #[Mutation]
-    public function approveRecycleRequest(ManagerRoleInterface $user, string $id)
+    public function approveRecycleRequest(ManagerRoleInterface $user, string $id, InputRequest $input)
     {
         $repository = $this->repository();
         $dispatcher = new Dispatcher();
@@ -69,9 +70,12 @@ class RecycleRequestController extends Controller
         $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(),
                 $this->buildInitiateSalesActivityScheduleListener());
 
-        $acceptRecycleRequestFunction = function () use ($user, $repository, $id, $dispatcher) {
+        $payload = (new RecycleRequestData())
+                ->setId($id)
+                ->setRemark($input->get('remark'));
+        $acceptRecycleRequestFunction = function () use ($user, $repository, $payload, $dispatcher) {
             $task = new ApproveRecycleRequest($repository, $dispatcher);
-            $user->executeManagerTask($task, $id);
+            $user->executeManagerTask($task, $payload);
             $dispatcher->publishTransactional();
             $dispatcher->publishTransactional();
         };
@@ -83,12 +87,15 @@ class RecycleRequestController extends Controller
     }
 
     #[Mutation]
-    public function rejectRecycleRequest(ManagerRoleInterface $user, string $id)
+    public function rejectRecycleRequest(ManagerRoleInterface $user, string $id, InputRequest $input)
     {
         $repository = $this->repository();
 
         $task = new RejectRecycleRequest($repository);
-        $user->executeManagerTask($task, $id);
+        $payload = (new RecycleRequestData())
+                ->setId($id)
+                ->setRemark($input->get('remark'));
+        $user->executeManagerTask($task, $payload);
 
         return $repository->queryOneById($id);
     }

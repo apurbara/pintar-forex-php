@@ -337,7 +337,7 @@ class DoctrineEntityToGraphqlFieldMapper
     {
         $excludedProperties = [
             ...$excludedProperties,
-            "createdTime", "lastModifiedTime", "submitTime", "registrationTime",
+            "createdTime", "lastModifiedTime", "submitTime", "registrationTime", "concludedTime",
             "disabled", "cancelled", "suspended", "removed"
         ];
 
