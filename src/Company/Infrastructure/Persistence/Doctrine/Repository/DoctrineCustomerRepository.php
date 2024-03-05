@@ -57,6 +57,18 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
                 }
                 unset($searchSchema['filters'][$key]);
             }
+            if (($filter['column'] ?? null) === 'hasAssignment') {
+                $activeCustomerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
+                $activeCustomerAssignmentQB->select('1')
+                        ->from('AssignedCustomer')
+                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('AssignedCustomer.Customer_id', 'Customer.id'));
+                if ($filter['value'] == true) {
+                    $qb->andWhere("EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
+                } else {
+                    $qb->andWhere("NOT EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
+                }
+                unset($searchSchema['filters'][$key]);
+            }
         }
     }
     
