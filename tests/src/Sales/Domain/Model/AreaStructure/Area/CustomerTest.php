@@ -101,12 +101,17 @@ class CustomerTest extends TestBase
         $this->update();
         $this->assertSame($this->name, $this->customer->name);
         $this->assertSame($this->email, $this->customer->email);
-        $this->assertSame($this->group, $this->customer->source);
     }
     public function test_update_preventUpdatePhone()
     {
         $this->update();
         $this->assertNotSame($this->phone, $this->customer->phone);
+    }
+    public function test_update_preventUpdateSource()
+    {
+        $this->update();
+        $this->assertNotSame($this->phone, $this->customer->phone);
+        $this->assertNotSame($this->group, $this->customer->source);
     }
     
     //

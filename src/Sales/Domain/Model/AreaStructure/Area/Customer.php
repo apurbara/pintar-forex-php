@@ -96,7 +96,6 @@ class Customer
         $this->area = $area;
         $this->setEmail($data->email);
         $this->setName($data->name);
-        $this->source = $data->source;
     }
     
     //
