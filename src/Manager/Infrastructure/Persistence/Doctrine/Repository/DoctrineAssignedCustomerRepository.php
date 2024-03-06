@@ -26,7 +26,8 @@ class DoctrineAssignedCustomerRepository extends DoctrineEntityRepository implem
     public function assignedCustomerListManagedByManager(string $managerId, array $paginationSchema): array
     {
         $qb = $this->createCoreQueryBuilder()
-                ->innerJoin('AssignedCustomer', 'Sales', 'Sales', 'AssignedCustomer.Sales_id = Sales.id');
+                ->innerJoin('AssignedCustomer', 'Sales', 'Sales', 'AssignedCustomer.Sales_id = Sales.id')
+                ->innerJoin('AssignedCustomer', 'Customer', 'Customer', 'AssignedCustomer.Customer_id = Customer.id');
         return $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
                 ->addFilter(new Filter($managerId, 'Sales.Manager_id'))
                 ->paginateResult($qb, 'AssignedCustomer');
