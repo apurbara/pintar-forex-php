@@ -2,7 +2,6 @@
 
 namespace Sales\Domain\Model\AreaStructure\Area;
 
-use Company\Domain\Model\AreaStructure\Area as AreaInCompanyBC;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
@@ -36,7 +35,7 @@ class Customer
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
 
-    #[Column(type: "datetimetz_immutable", nullable: true)]
+    #[Column(type: "datetimetz_immutable", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
     protected DateTimeImmutable $createdTime;
 
     #[Column(type: "string", length: 255, nullable: false)]
