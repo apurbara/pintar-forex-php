@@ -5,13 +5,14 @@ namespace Company\Domain\Model;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\AreaData;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use SharedContext\Domain\ValueObject\Label;
 use Tests\TestBase;
 
 class AreaStructureTest extends TestBase
 {
-    protected $parent;
-    protected $areaStructure;
+    protected $areaStructure, $parent, $child, $area;
     //
     protected $id = 'id';
     //
@@ -20,12 +21,20 @@ class AreaStructureTest extends TestBase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->parent = $this->buildMockOfClass(AreaStructure::class);
         //
         $data = new AreaStructureData($this->createLabelData());
         $data->setId('id');
         $this->areaStructure = new TestableAreaStructure($data);
+        $this->areaStructure->children = new ArrayCollection();
+        $this->areaStructure->areas = new ArrayCollection();
+        
+        $this->parent = $this->buildMockOfClass(AreaStructure::class);
+        $this->child = $this->buildMockOfClass(AreaStructure::class);
+        $this->area = $this->buildMockOfClass(Area::class);
+        
         $this->areaStructure->parent = $this->parent;
+        $this->areaStructure->children->add($this->child);
+        $this->areaStructure->areas->add($this->area);
         //
         $this->areaData = (new AreaData($this->createLabelData()))->setId('areaId');
     }
@@ -54,6 +63,49 @@ class AreaStructureTest extends TestBase
     }
     
     //
+    protected function update()
+    {
+        $this->areaStructure->update($this->createAreaStructureData());
+    }
+    public function test_update_updateLabel()
+    {
+        $this->areaStructure->label = $this->buildMockOfClass(Label::class);
+        $this->update();
+        $this->assertEquals(new Label($this->createLabelData()), $this->areaStructure->label);
+    }
+    
+    //
+    protected function disable()
+    {
+        $this->child->expects($this->any())
+                ->method('isDisabled')
+                ->willReturn(true);
+        $this->area->expects($this->any())
+                ->method('isDisabled')
+                ->willReturn(true);
+        $this->areaStructure->disable();
+    }
+    public function test_disable_setDisabled()
+    {
+        $this->disable();
+        $this->assertTrue($this->areaStructure->disabled);
+    }
+    public function test_disable_containActiveChildren_forbidden()
+    {
+        $this->child->expects($this->once())
+                ->method('isDisabled')
+                ->willReturn(false);
+        $this->assertRegularExceptionThrowed(fn() => $this->disable(), 'Forbidden', 'area structure has active children');
+    }
+    public function test_disable_containActiveArea_forbidden()
+    {
+        $this->area->expects($this->once())
+                ->method('isDisabled')
+                ->willReturn(false);
+        $this->assertRegularExceptionThrowed(fn() => $this->disable(), 'Forbidden', 'area structure has active area');
+    }
+    
+    //
     protected function assertActive()
     {
         $this->areaStructure->assertActive();
@@ -78,6 +130,11 @@ class AreaStructureTest extends TestBase
     {
         $child = $this->createChild();
         $this->assertSame($this->areaStructure, $child->parent);
+    }
+    public function test_createChild_inactiveAreaStructure_forbidden()
+    {
+        $this->areaStructure->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->createChild(), 'Forbidden', 'inactive area structure');
     }
     
     //
@@ -119,4 +176,6 @@ class TestableAreaStructure extends AreaStructure
     public DateTimeImmutable $createdTime;
     public Label $label;
     public ?AreaStructure $parent;
+    public Collection $children;
+    public Collection $areas;
 }

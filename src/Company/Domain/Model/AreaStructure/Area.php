@@ -21,29 +21,34 @@ class Area
 {
 
     #[FetchableObject(targetEntity: AreaStructure::class, joinColumnName: 'AreaStructure_id')]
-    #[ManyToOne(targetEntity: AreaStructure::class)]
+    #[ManyToOne(targetEntity: AreaStructure::class, inversedBy: "areas", fetch: "LAZY")]
     #[JoinColumn(name: "AreaStructure_id", referencedColumnName: "id")]
     protected AreaStructure $areaStructure;
-    
+
     #[Id, Column(type: "guid")]
     protected string $id;
-    
+
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
-    
+
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
-    
+
     #[Embedded(class: Label::class, columnPrefix: false)]
     protected Label $label;
-    
+
     #[FetchableObject(targetEntity: Area::class, joinColumnName: 'Area_idOfParent')]
     #[ManyToOne(targetEntity: Area::class)]
     #[JoinColumn(name: "Area_idOfParent", referencedColumnName: "id")]
     protected ?Area $parent;
-    
+
     #[FetchableObjectList(targetEntity: Area::class, joinColumnName: "Area_idOfParent", paginationRequired: false)]
     protected $children;
+
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
 
     public function __construct(AreaStructure $areaStructure, AreaData $data)
     {
@@ -54,7 +59,17 @@ class Area
         $this->label = new Label($data->labelData);
         $this->parent = null;
     }
-    
+
+    public function update(AreaData $data): void
+    {
+        
+    }
+
+    public function disable(): void
+    {
+        
+    }
+
     //
     public function createChild(AreaStructure $childAreaStructure, AreaData $childData): static
     {
@@ -65,7 +80,7 @@ class Area
         $area->parent = $this;
         return $area;
     }
-    
+
     //
     public function assertActive(): void
     {

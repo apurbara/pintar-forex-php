@@ -8,6 +8,8 @@ use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructureData;
 use Company\Domain\Task\InCompany\AreaStructure\AddChildAreaStructureTask;
 use Company\Domain\Task\InCompany\AreaStructure\AddRootAreaStructureTask;
+use Company\Domain\Task\InCompany\AreaStructure\DisableAreaStructure;
+use Company\Domain\Task\InCompany\AreaStructure\UpdateAreaStructure;
 use Company\Domain\Task\InCompany\AreaStructure\ViewAreaStructureDetailTask;
 use Company\Domain\Task\InCompany\AreaStructure\ViewAreaStructureListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineAreaStructureRepository;
@@ -39,7 +41,8 @@ class AreaStructureController extends Controller
     }
 
     #[Mutation]
-    public function addChildAreaStructure(CompanyUserRoleInterface $user, ?string $parentAreaStructureId, InputRequest $input)
+    public function addChildAreaStructure(CompanyUserRoleInterface $user, ?string $parentAreaStructureId,
+            InputRequest $input)
     {
         $repository = $this->areaStructureRepository();
         $task = new AddChildAreaStructureTask($repository);
@@ -49,24 +52,46 @@ class AreaStructureController extends Controller
 
         return $repository->queryOneById($payload->id);
     }
-    
+
+    #[Mutation]
+    public function updateAreaStructure(CompanyUserRoleInterface $user, string $id, InputRequest $input)
+    {
+        $repository = $this->areaStructureRepository();
+        $task = new UpdateAreaStructure($repository);
+        $payload = (new AreaStructureData($this->createLabelData($input)))
+                ->setId($id);
+        $user->executeTaskInCompany($task, $payload);
+
+        return $repository->queryOneById($payload->id);
+    }
+
+    #[Mutation]
+    public function disableAreaStructure(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->areaStructureRepository();
+        $task = new DisableAreaStructure($repository);
+        $user->executeTaskInCompany($task, $id);
+
+        return $repository->queryOneById($id);
+    }
+
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
     public function areaStructureList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewAreaStructureListTask($this->areaStructureRepository());
         $payload = $this->buildViewPaginationListPayload($input);
         $user->executeTaskInCompany($task, $payload);
-        
+
         return $payload->result;
     }
-    
+
     #[Query]
     public function areaStructureDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewAreaStructureDetailTask($this->areaStructureRepository());
         $payload = new ViewDetailPayload($id);
         $user->executeTaskInCompany($task, $payload);
-        
+
         return $payload->result;
     }
 }

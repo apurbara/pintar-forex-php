@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\AreaStructure;
+use Company\Domain\Model\AreaStructure\Area;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
@@ -12,7 +13,7 @@ class AreaStructureControllerTest extends CompanyBCTestCase
     protected EntityRecord $areaStructureTwo;
     protected EntityRecord $areaStructureThree;
     
-    protected $addAreaStructureRequest = [
+    protected $areaStructurePayload = [
         'name' => "new area structure name",
         'description' => 'new area structure description',
     ];
@@ -20,6 +21,7 @@ class AreaStructureControllerTest extends CompanyBCTestCase
     {
         parent::setUp();
         $this->connection->table('AreaStructure')->truncate();
+        $this->connection->table('Area')->truncate();
         
         $this->areaStructureOne = new EntityRecord(AreaStructure::class, 1);
         $this->areaStructureTwo = new EntityRecord(AreaStructure::class, 2);
@@ -31,6 +33,7 @@ class AreaStructureControllerTest extends CompanyBCTestCase
     {
         parent::tearDown();
         $this->connection->table('AreaStructure')->truncate();
+        $this->connection->table('Area')->truncate();
     }
     
     //
@@ -45,7 +48,7 @@ mutation AddRootAreaStructure( $name: String, $description: String ){
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->addAreaStructureRequest;
+        $this->graphqlVariables = $this->areaStructurePayload;
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_addRoot_200()
@@ -54,15 +57,15 @@ $this->disableExceptionHandling();
         $this->addRoot();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addAreaStructureRequest['name'],
-            'description' => $this->addAreaStructureRequest['description'],
+            'name' => $this->areaStructurePayload['name'],
+            'description' => $this->areaStructurePayload['description'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('AreaStructure', [
-            'name' => $this->addAreaStructureRequest['name'],
-            'description' => $this->addAreaStructureRequest['description'],
+            'name' => $this->areaStructurePayload['name'],
+            'description' => $this->areaStructurePayload['description'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
@@ -84,7 +87,7 @@ mutation ( $AreaStructure_idOfParent: ID!, $name: String, $description: String )
 _QUERY;
         $this->graphqlVariables = [
            'AreaStructure_idOfParent' => $this->areaStructureOne->columns['id'], 
-            ...$this->addAreaStructureRequest
+            ...$this->areaStructurePayload
         ];
         $this->postGraphqlRequest($this->admin->token);
     }
@@ -94,8 +97,8 @@ $this->disableExceptionHandling();
         $this->addChild();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addAreaStructureRequest['name'],
-            'description' => $this->addAreaStructureRequest['description'],
+            'name' => $this->areaStructurePayload['name'],
+            'description' => $this->areaStructurePayload['description'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'parent' => [
@@ -105,12 +108,115 @@ $this->disableExceptionHandling();
         ]);
         
         $this->seeInDatabase('AreaStructure', [
-            'name' => $this->addAreaStructureRequest['name'],
-            'description' => $this->addAreaStructureRequest['description'],
+            'name' => $this->areaStructurePayload['name'],
+            'description' => $this->areaStructurePayload['description'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'AreaStructure_idOfParent' => $this->areaStructureOne->columns['id'],
         ]);
+    }
+    
+    //
+    protected function updateAreaStructure()
+    {
+        $this->prepareAdminDependency();
+        $this->areaStructureOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID, $name: String, $description: String ){
+    updateAreaStructure ( id: $id,  name: $name, description: $description ){
+        id, disabled, createdTime, name, description,
+        parent { id, name }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+           'id' => $this->areaStructureOne->columns['id'], 
+            ...$this->areaStructurePayload
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_updateAreaStructure_200()
+    {
+$this->disableExceptionHandling();
+        $this->updateAreaStructure();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->areaStructureOne->columns['id'], 
+            'name' => $this->areaStructurePayload['name'],
+            'description' => $this->areaStructurePayload['description'],
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('AreaStructure', [
+            'id' => $this->areaStructureOne->columns['id'], 
+            'name' => $this->areaStructurePayload['name'],
+            'description' => $this->areaStructurePayload['description'],
+        ]);
+    }
+    
+    //
+    protected function disableAreaStructure()
+    {
+        $this->prepareAdminDependency();
+        $this->areaStructureOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID ){
+    disableAreaStructure ( id: $id ){
+        id, disabled 
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+           'id' => $this->areaStructureOne->columns['id'], 
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disableAreaStructure_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableAreaStructure();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->areaStructureOne->columns['id'], 
+            'disabled' => true,
+        ]);
+        
+        $this->seeInDatabase('AreaStructure', [
+            'id' => $this->areaStructureOne->columns['id'], 
+            'disabled' => true,
+        ]);
+    }
+    public function test_disable_hasActiveChildren_403()
+    {
+        $this->areaStructureTwo->insert($this->connection);
+        $this->disableAreaStructure();
+        $this->seeStatusCode(403);
+    }
+    public function test_disable_hasNoActiveChildren_200()
+    {
+        $this->areaStructureTwo->columns['disabled'] = true;
+        $this->areaStructureTwo->insert($this->connection);
+        $this->disableAreaStructure();
+        $this->seeStatusCode(200);
+    }
+    public function test_disable_hasActiveArea_403()
+    {
+        $area = new EntityRecord(Area::class, 'area');
+        $area->columns['AreaStructure_id'] = $this->areaStructureOne->columns['id'];
+        $area->insert($this->connection);
+        $this->disableAreaStructure();
+        $this->seeStatusCode(403);
+    }
+    public function test_disable_noActiveArea_200()
+    {
+        $area = new EntityRecord(Area::class, 'area');
+        $area->columns['AreaStructure_id'] = $this->areaStructureOne->columns['id'];
+        $area->columns['disabled'] = true;
+        $area->insert($this->connection);
+        $this->disableAreaStructure();
+        $this->seeStatusCode(200);
     }
     
     //

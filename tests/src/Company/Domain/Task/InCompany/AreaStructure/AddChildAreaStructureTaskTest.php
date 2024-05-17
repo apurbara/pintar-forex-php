@@ -61,10 +61,4 @@ class AddChildAreaStructureTaskTest extends TaskInCompanyTestBase
                 ->willReturn(false);
         $this->assertRegularExceptionThrowed(fn() => $this->executeInCompany(), 'Conflict', 'name is unavailable');
     }
-    public function test_execute_assertParentAreaStructueActive()
-    {
-        $this->areaStructure->expects($this->once())
-                ->method('assertActive');
-        $this->executeInCompany();
-    }
 }
