@@ -144,6 +144,92 @@ $this->disableExceptionHandling();
     }
     
     //
+    protected function updateArea()
+    {
+        $this->prepareAdminDependency();
+        $this->rootAreaStructure->insert($this->connection);
+        $this->areaOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID!, $name: String, $description: String ){
+    updateArea ( id: $id, name: $name, description: $description ){
+        id, disabled, createdTime, name, description,
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+           'id' => $this->areaOne->columns['id'], 
+            ...$this->addAreaRequest
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_updateArea_200()
+    {
+$this->disableExceptionHandling();
+        $this->updateArea();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->areaOne->columns['id'], 
+            'name' => $this->addAreaRequest['name'],
+            'description' => $this->addAreaRequest['description'],
+        ]);
+        
+        $this->seeInDatabase('Area', [
+            'id' => $this->areaOne->columns['id'], 
+            'name' => $this->addAreaRequest['name'],
+            'description' => $this->addAreaRequest['description'],
+        ]);
+    }
+    
+    //
+    protected function disableArea()
+    {
+        $this->prepareAdminDependency();
+        $this->rootAreaStructure->insert($this->connection);
+        $this->areaOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID! ){
+    disableArea ( id: $id ){
+        id, disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+           'id' => $this->areaOne->columns['id'], 
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disableArea_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableArea();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->areaOne->columns['id'], 
+            'disabled' => true,
+        ]);
+        
+        $this->seeInDatabase('Area', [
+            'id' => $this->areaOne->columns['id'], 
+            'disabled' => true,
+        ]);
+    }
+    public function test_disableArea_hasActiveChild_403()
+    {
+        $this->areaTwo->insert($this->connection);
+        $this->disableArea();
+        $this->seeStatusCode(403);
+    }
+    public function test_disableArea_noActiveChild_403()
+    {
+        $this->areaTwo->columns['disabled'] = true;
+        $this->areaTwo->insert($this->connection);
+        $this->disableArea();
+        $this->seeStatusCode(200);
+    }
+    
+    //
     protected function viewList()
     {
         $this->prepareAdminDependency();

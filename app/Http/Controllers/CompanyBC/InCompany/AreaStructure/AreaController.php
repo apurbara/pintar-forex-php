@@ -8,6 +8,8 @@ use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AddChildAreaTask;
 use Company\Domain\Task\InCompany\AreaStructure\Area\AddRootAreaTask;
+use Company\Domain\Task\InCompany\AreaStructure\Area\DisableArea;
+use Company\Domain\Task\InCompany\AreaStructure\Area\UpdateArea;
 use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAllAreaList;
 use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAreaDetail;
 use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAreaListTask;
@@ -56,6 +58,28 @@ class AreaController extends Controller
         $user->executeTaskInCompany($task, $payload);
 
         return $repository->fetchOneByIdOrDie($payload->id);
+    }
+
+    #[Mutation]
+    public function updateArea(CompanyUserRoleInterface $user, string $id, InputRequest $input)
+    {
+        $repository = $this->areaRepository();
+        $task = new UpdateArea($repository);
+        $payload = (new AreaStructure\AreaData($this->createLabelData($input)))
+                ->setId($id);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $repository->fetchOneByIdOrDie($payload->id);
+    }
+
+    #[Mutation]
+    public function disableArea(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->areaRepository();
+        $task = new DisableArea($repository);
+
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]

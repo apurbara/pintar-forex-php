@@ -29,10 +29,8 @@ class AddChildAreaTask implements AdminTaskInCompany
         $payload->setId($this->areaRepository->nextIdentity());
         
         $parent = $this->areaRepository->ofId($payload->parentAreaId);
-        $parent->assertActive();
         
         $areaStructure = $this->areaStructureRepository->ofId($payload->areaStructureId);
-        $areaStructure->assertActive();
         
         $area = $parent->createChild($areaStructure, $payload);
         $this->areaRepository->add($area);

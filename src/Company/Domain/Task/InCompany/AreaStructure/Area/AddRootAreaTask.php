@@ -28,7 +28,6 @@ class AddRootAreaTask implements AdminTaskInCompany
         $payload->setId($this->areaRepository->nextIdentity());
         
         $areaStructure = $this->areaStructureRepository->ofId($payload->areaStructureId);
-        $areaStructure->assertActive();
         
         $area = $areaStructure->createRootArea($payload);
         $this->areaRepository->add($area);
