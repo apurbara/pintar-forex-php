@@ -11,9 +11,9 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filt
 class DoctrineCustomerJourneyRepository extends DoctrineEntityRepository implements CustomerJourneyRepository
 {
 
-    public function aCustomerJourneyDetail(string $id): array
+    public function ofId(string $id): CustomerJourney
     {
-        return $this->fetchOneByIdOrDie($id);
+        return $this->findOneByIdOrDie($id);
     }
 
     public function add(CustomerJourney $customerJourney): void
@@ -29,12 +29,18 @@ class DoctrineCustomerJourneyRepository extends DoctrineEntityRepository impleme
         ]);
     }
 
+    //
+    public function aCustomerJourneyDetail(string $id): array
+    {
+        return $this->fetchOneByIdOrDie($id);
+    }
+
     public function customerJourneyList(array $paginationSchema): array
     {
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
-    
+
     public function fetchInitialCustomerJourneyDetail(): array
     {
         $filters = [

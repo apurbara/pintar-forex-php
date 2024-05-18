@@ -57,6 +57,35 @@ class CustomerJourneyTest extends TestBase
         $this->update();
         $this->assertEquals(new Label($this->createLabelData()), $this->customerJourney->label);
     }
+    
+    //
+    protected function disable()
+    {
+        $this->customerJourney->disable();
+    }
+    public function test_disable_setDisabled()
+    {
+        $this->disable();
+        $this->assertTrue($this->customerJourney->disabled);
+    }
+    public function test_disable_setInitialFalse()
+    {
+        $this->customerJourney->initial = true;
+        $this->disable();
+        $this->assertFalse($this->customerJourney->initial);
+    }
+    
+    //
+    protected function enable()
+    {
+        $this->customerJourney->enable();
+    }
+    public function test_enable_setDisabledFalse()
+    {
+        $this->customerJourney->disabled = true;
+        $this->enable();
+        $this->assertFalse($this->customerJourney->disabled);
+    }
 }
 
 class TestableCustomerJourney extends CustomerJourney

@@ -11,7 +11,7 @@ class CustomerJourneyControllerTest extends CompanyBCTestCase
     protected EntityRecord $customerJourneyOne;
     protected EntityRecord $customerJourneyTwo;
     
-    protected $addCustomerJourneyRequest = [
+    protected $customerJourneyPayload = [
         'name' => "new sales activity name",
         'description' => 'new sales activity description',
     ];
@@ -41,7 +41,7 @@ mutation ( $name: String, $description: String ){
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->addCustomerJourneyRequest;
+        $this->graphqlVariables = $this->customerJourneyPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_setInitial_200()
@@ -50,16 +50,16 @@ $this->disableExceptionHandling();
         $this->setInitial();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addCustomerJourneyRequest['name'],
-            'description' => $this->addCustomerJourneyRequest['description'],
+            'name' => $this->customerJourneyPayload['name'],
+            'description' => $this->customerJourneyPayload['description'],
             'initial' => true,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('CustomerJourney', [
-            'name' => $this->addCustomerJourneyRequest['name'],
-            'description' => $this->addCustomerJourneyRequest['description'],
+            'name' => $this->customerJourneyPayload['name'],
+            'description' => $this->customerJourneyPayload['description'],
             'initial' => true,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
@@ -78,7 +78,7 @@ mutation AddCustomerJourney( $name: String, $description: String ){
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->addCustomerJourneyRequest;
+        $this->graphqlVariables = $this->customerJourneyPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_add_200()
@@ -87,19 +87,128 @@ $this->disableExceptionHandling();
         $this->add();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addCustomerJourneyRequest['name'],
-            'description' => $this->addCustomerJourneyRequest['description'],
+            'name' => $this->customerJourneyPayload['name'],
+            'description' => $this->customerJourneyPayload['description'],
             'initial' => false,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('CustomerJourney', [
-            'name' => $this->addCustomerJourneyRequest['name'],
-            'description' => $this->addCustomerJourneyRequest['description'],
+            'name' => $this->customerJourneyPayload['name'],
+            'description' => $this->customerJourneyPayload['description'],
             'initial' => false,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
+        ]);
+    }
+    
+    //
+    protected function updateCustomerJourney()
+    {
+        $this->prepareAdminDependency();
+        $this->customerJourneyOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID, $name: String, $description: String ) {
+    updateCustomerJourney(id: $id, name: $name, description: $description ){
+        id, disabled, createdTime, name, description, initial
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            ...$this->customerJourneyPayload,
+            'id' => $this->customerJourneyOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_update_200()
+    {
+$this->disableExceptionHandling();
+        $this->updateCustomerJourney();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerJourneyOne->columns['id'],
+            'name' => $this->customerJourneyPayload['name'],
+            'description' => $this->customerJourneyPayload['description'],
+        ]);
+        
+        $this->seeInDatabase('CustomerJourney', [
+            'id' => $this->customerJourneyOne->columns['id'],
+            'name' => $this->customerJourneyPayload['name'],
+            'description' => $this->customerJourneyPayload['description'],
+        ]);
+    }
+    
+    //
+    protected function disableCustomerJourney()
+    {
+        $this->prepareAdminDependency();
+        $this->customerJourneyOne->columns['initial'] = true;
+        $this->customerJourneyOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID ) {
+    disableCustomerJourney( id: $id ){
+        id, disabled, initial
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->customerJourneyOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disable_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableCustomerJourney();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerJourneyOne->columns['id'],
+            'disabled' => true,
+            'initial' => false,
+        ]);
+        
+        $this->seeInDatabase('CustomerJourney', [
+            'id' => $this->customerJourneyOne->columns['id'],
+            'disabled' => true,
+            'initial' => false,
+        ]);
+    }
+    
+    //
+    protected function enableCustomerJourney()
+    {
+        $this->prepareAdminDependency();
+        $this->customerJourneyOne->columns['disabled'] = true;
+        $this->customerJourneyOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID ) {
+    enableCustomerJourney( id: $id ){
+        id, disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->customerJourneyOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_enable_200()
+    {
+$this->disableExceptionHandling();
+        $this->enableCustomerJourney();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerJourneyOne->columns['id'],
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('CustomerJourney', [
+            'id' => $this->customerJourneyOne->columns['id'],
+            'disabled' => false,
         ]);
     }
     

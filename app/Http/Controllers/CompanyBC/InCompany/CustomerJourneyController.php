@@ -7,7 +7,10 @@ use App\Http\Controllers\Controller;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerJourneyData;
 use Company\Domain\Task\InCompany\CustomerJourney\AddCustomerJourney;
+use Company\Domain\Task\InCompany\CustomerJourney\DisableCustomerJourney;
+use Company\Domain\Task\InCompany\CustomerJourney\EnableCustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\SetInitialCustomerJourney;
+use Company\Domain\Task\InCompany\CustomerJourney\UpdateCustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\ViewCustomerJourneyDetail;
 use Company\Domain\Task\InCompany\CustomerJourney\ViewCustomerJourneyList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerJourneyRepository;
@@ -25,6 +28,11 @@ class CustomerJourneyController extends Controller
     {
         return $this->em->getRepository(CustomerJourney::class);
     }
+    
+    private function createData(InputRequest $input): CustomerJourneyData
+    {
+        return new CustomerJourneyData($this->createLabelData($input));
+    }
 
     //
     #[Mutation]
@@ -32,10 +40,9 @@ class CustomerJourneyController extends Controller
     {
         $repository = $this->repository();
         $task = new SetInitialCustomerJourney($repository);
-        $payload = new CustomerJourneyData($this->createLabelData($input));
+        $payload = $this->createData($input);
 
         $user->executeTaskInCompany($task, $payload);
-
         return $repository->fetchInitialCustomerJourneyDetail();
     }
 
@@ -44,11 +51,42 @@ class CustomerJourneyController extends Controller
     {
         $repository = $this->repository();
         $task = new AddCustomerJourney($repository);
-        $payload = new CustomerJourneyData($this->createLabelData($input));
+        $payload = $this->createData($input);
 
         $user->executeTaskInCompany($task, $payload);
-
         return $repository->aCustomerJourneyDetail($payload->id);
+    }
+
+    #[Mutation]
+    public function updateCustomerJourney(CompanyUserRoleInterface $user, string $id, InputRequest $input)
+    {
+        $repository = $this->repository();
+        $task = new UpdateCustomerJourney($repository);
+        $payload = $this->createData($input)
+                ->setId($id);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $repository->aCustomerJourneyDetail($payload->id);
+    }
+
+    #[Mutation]
+    public function disableCustomerJourney(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->repository();
+        $task = new DisableCustomerJourney($repository);
+
+        $user->executeTaskInCompany($task, $id);
+        return $repository->aCustomerJourneyDetail($id);
+    }
+
+    #[Mutation]
+    public function enableCustomerJourney(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->repository();
+        $task = new EnableCustomerJourney($repository);
+
+        $user->executeTaskInCompany($task, $id);
+        return $repository->aCustomerJourneyDetail($id);
     }
 
     #[Query]

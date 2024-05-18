@@ -42,4 +42,15 @@ class CustomerJourney
     {
         $this->label = new Label($data->labelData);
     }
+    
+    public function disable(): void
+    {
+        $this->disabled = true;
+        $this->initial = false;
+    }
+    
+    public function enable(): void
+    {
+        $this->disabled = false;
+    }
 }

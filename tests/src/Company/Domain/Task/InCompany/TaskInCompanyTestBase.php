@@ -132,10 +132,10 @@ class TaskInCompanyTestBase extends TestBase
         $this->customerJourneyRepository = $this->buildMockOfInterface(CustomerJourneyRepository::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
         //
-//        $this->customerJourneyRepository->expects($this->any())
-//                ->method('ofId')
-//                ->with($this->customerJourneyId)
-//                ->willReturn($this->customerJourney);
+        $this->customerJourneyRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerJourneyId)
+                ->willReturn($this->customerJourney);
     }
     
     protected MockObject $customerRepository;
