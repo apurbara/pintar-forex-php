@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\CustomerVerificationData;
 use Company\Domain\Task\InCompany\CustomerVerification\AddCustomerVerificationTask;
+use Company\Domain\Task\InCompany\CustomerVerification\DisableCustomerVerification;
+use Company\Domain\Task\InCompany\CustomerVerification\EnableCustomerVerification;
+use Company\Domain\Task\InCompany\CustomerVerification\UpdateCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationDetailTask;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerVerificationRepository;
@@ -25,6 +28,13 @@ class CustomerVerificationController extends Controller
         return $this->em->getRepository(CustomerVerification::class);
     }
 
+    private function createData(InputRequest $input): CustomerVerificationData
+    {
+        return (new CustomerVerificationData($this->createLabelData($input)))
+                        ->setPosition($input->get('position'))
+                        ->setWeight($input->get('weight'));
+    }
+
     //
     #[Mutation]
     public function addCustomerVerification(CompanyUserRoleInterface $user, InputRequest $input)
@@ -32,12 +42,43 @@ class CustomerVerificationController extends Controller
         $repository = $this->repository();
 
         $task = new AddCustomerVerificationTask($repository);
-        $payload = (new CustomerVerificationData($this->createLabelData($input)))
-                ->setWeight($input->get('weight'))
-                ->setPosition($input->get('position'));
+        $payload = $this->createData($input);
+        
         $user->executeTaskInCompany($task, $payload);
-        //
         return $repository->fetchOneByIdOrDie($payload->id);
+    }
+    
+    #[Mutation]
+    public function updateCustomerVerification(CompanyUserRoleInterface $user, string $id, InputRequest $input)
+    {
+        $repository = $this->repository();
+
+        $task = new UpdateCustomerVerification($repository);
+        $payload = $this->createData($input)
+                ->setId($id);
+        
+        $user->executeTaskInCompany($task, $payload);
+        return $repository->fetchOneByIdOrDie($payload->id);
+    }
+    
+    #[Mutation]
+    public function disableCustomerVerification(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->repository();
+        $task = new DisableCustomerVerification($repository);
+        
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
+    }
+    
+    #[Mutation]
+    public function enableCustomerVerification(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->repository();
+        $task = new EnableCustomerVerification($repository);
+        
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]

@@ -11,6 +11,9 @@ interface CustomerVerificationRepository
 
     public function add(CustomerVerification $customerVerification): void;
 
+    public function ofId(string $id): CustomerVerification;
+
+    //
     public function customerVerificationList(array $paginationSchema): array;
 
     public function customerVerificationDetail(string $id): array;

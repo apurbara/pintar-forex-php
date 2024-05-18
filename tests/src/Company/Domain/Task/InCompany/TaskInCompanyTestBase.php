@@ -104,10 +104,10 @@ class TaskInCompanyTestBase extends TestBase
         $this->customerVerificationRepository = $this->buildMockOfInterface(CustomerVerificationRepository::class);
         $this->customerVerification = $this->buildMockOfClass(CustomerVerification::class);
         //
-//        $this->customerVerificationRepository->expects($this->any())
-//                ->method('ofId')
-//                ->with($this->customerVerificationId)
-//                ->willReturn($this->customerVerification);
+        $this->customerVerificationRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerVerificationId)
+                ->willReturn($this->customerVerification);
     }
     
     protected MockObject $salesActivityRepository;

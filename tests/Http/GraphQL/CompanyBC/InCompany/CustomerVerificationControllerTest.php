@@ -11,7 +11,7 @@ class CustomerVerificationControllerTest extends CompanyBCTestCase
     protected EntityRecord $customerVerificationOne;
     protected EntityRecord $customerVerificationTwo;
     
-    protected $addCustomerVerificationRequest = [
+    protected $customerVerificationPayload = [
         'name' => "new customer verification name",
         'description' => 'new customer verification description',
         'weight' => 10,
@@ -43,7 +43,7 @@ mutation ( $name: String, $description: String, $weight: Int, $position: Int){
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->addCustomerVerificationRequest;
+        $this->graphqlVariables = $this->customerVerificationPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_add_200()
@@ -52,21 +52,145 @@ $this->disableExceptionHandling();
         $this->add();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addCustomerVerificationRequest['name'],
-            'description' => $this->addCustomerVerificationRequest['description'],
-            'weight' => $this->addCustomerVerificationRequest['weight'],
-            'position' => $this->addCustomerVerificationRequest['position'],
+            'name' => $this->customerVerificationPayload['name'],
+            'description' => $this->customerVerificationPayload['description'],
+            'weight' => $this->customerVerificationPayload['weight'],
+            'position' => $this->customerVerificationPayload['position'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('CustomerVerification', [
-            'name' => $this->addCustomerVerificationRequest['name'],
-            'description' => $this->addCustomerVerificationRequest['description'],
-            'weight' => $this->addCustomerVerificationRequest['weight'],
-            'position' => $this->addCustomerVerificationRequest['position'],
+            'name' => $this->customerVerificationPayload['name'],
+            'description' => $this->customerVerificationPayload['description'],
+            'weight' => $this->customerVerificationPayload['weight'],
+            'position' => $this->customerVerificationPayload['position'],
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
+        ]);
+    }
+    
+    //
+    protected function updateCustomerVerification()
+    {
+        $this->prepareAdminDependency();
+        $this->customerVerificationOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( 
+    $id: ID, 
+    $name: String, $description: String, $weight: Int, $position: Int
+){
+    updateCustomerVerification(
+        id: $id, 
+        name: $name, description: $description, weight: $weight, position: $position
+    ){
+        id, name, description, weight, position
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            ...$this->customerVerificationPayload,
+            'id' => $this->customerVerificationOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_updateCustomerVerification_200()
+    {
+$this->disableExceptionHandling();
+        $this->updateCustomerVerification();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerVerificationOne->columns['id'],
+            'name' => $this->customerVerificationPayload['name'],
+            'description' => $this->customerVerificationPayload['description'],
+            'weight' => $this->customerVerificationPayload['weight'],
+            'position' => $this->customerVerificationPayload['position'],
+        ]);
+        
+        $this->seeInDatabase('CustomerVerification', [
+            'id' => $this->customerVerificationOne->columns['id'],
+            'name' => $this->customerVerificationPayload['name'],
+            'description' => $this->customerVerificationPayload['description'],
+            'weight' => $this->customerVerificationPayload['weight'],
+            'position' => $this->customerVerificationPayload['position'],
+        ]);
+    }
+    
+    //
+    protected function disableCustomerVerification()
+    {
+        $this->prepareAdminDependency();
+        $this->customerVerificationOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( 
+    $id: ID, 
+){
+    disableCustomerVerification(
+        id: $id, 
+    ){
+        id, disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->customerVerificationOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disableCustomerVerification_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableCustomerVerification();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerVerificationOne->columns['id'],
+            'disabled' => true,
+        ]);
+        
+        $this->seeInDatabase('CustomerVerification', [
+            'id' => $this->customerVerificationOne->columns['id'],
+            'disabled' => true,
+        ]);
+    }
+    
+    //
+    protected function enableCustomerVerification()
+    {
+        $this->prepareAdminDependency();
+        $this->customerVerificationOne->columns['disabled'] = true;
+        $this->customerVerificationOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( 
+    $id: ID, 
+){
+    enableCustomerVerification(
+        id: $id, 
+    ){
+        id, disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->customerVerificationOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_enableCustomerVerification_200()
+    {
+$this->disableExceptionHandling();
+        $this->enableCustomerVerification();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerVerificationOne->columns['id'],
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('CustomerVerification', [
+            'id' => $this->customerVerificationOne->columns['id'],
+            'disabled' => false,
         ]);
     }
     

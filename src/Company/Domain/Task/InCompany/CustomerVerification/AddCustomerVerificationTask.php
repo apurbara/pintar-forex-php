@@ -22,7 +22,7 @@ class AddCustomerVerificationTask implements AdminTaskInCompany
     public function executeInCompany($payload): void
     {
         $payload->setId($this->customerVerificationRepository->nextIdentity());
-        $customerVerification = new CustomerVerification($payload);
+        $customerVerification = new CustomerVerification($payload->id, $payload);
         $this->customerVerificationRepository->add($customerVerification);
     }
 }

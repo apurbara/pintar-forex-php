@@ -32,13 +32,30 @@ class CustomerVerification
     #[Column(type: "smallint", nullable: true)]
     protected int $position;
 
-    public function __construct(CustomerVerificationData $data)
+    public function __construct(string $id, CustomerVerificationData $data)
     {
-        $this->id = $data->id;
+        $this->id = $id;
         $this->disabled = false;
         $this->createdTime = new DateTimeImmutable();
         $this->label = new Label($data->labelData);
         $this->weight = $data->weight;
         $this->position = $data->position;
+    }
+    
+    public function update(CustomerVerificationData $data): void
+    {
+        $this->label = new Label($data->labelData);
+        $this->weight = $data->weight;
+        $this->position = $data->position;
+    }
+    
+    public function disable(): void
+    {
+        $this->disabled = true;
+    }
+    
+    public function enable(): void
+    {
+        $this->disabled = false;
     }
 }

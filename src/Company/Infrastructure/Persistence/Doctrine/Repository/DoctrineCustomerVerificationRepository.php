@@ -15,6 +15,12 @@ class DoctrineCustomerVerificationRepository extends DoctrineEntityRepository im
         $this->persist($customerVerification);
     }
 
+    public function ofId(string $id): CustomerVerification
+    {
+        return $this->findOneByIdOrDie($id);
+    }
+
+    //
     public function customerVerificationDetail(string $id): array
     {
         return $this->fetchOneByIdOrDie($id);
