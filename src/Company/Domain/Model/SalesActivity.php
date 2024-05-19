@@ -58,4 +58,14 @@ class SalesActivity
         $this->label = new Label($data->labelData);
         $this->setDuration($data->duration);
     }
+    
+    public function disable(): void
+    {
+        $this->disabled = true;
+    }
+    
+    public function enable(): void
+    {
+        $this->disabled = false;
+    }
 }

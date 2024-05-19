@@ -125,10 +125,10 @@ class TaskInCompanyTestBase extends TestBase
         $this->salesActivityRepository = $this->buildMockOfInterface(SalesActivityRepository::class);
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
         //
-//        $this->salesActivityRepository->expects($this->any())
-//                ->method('ofId')
-//                ->with($this->salesActivityId)
-//                ->willReturn($this->salesActivity);
+        $this->salesActivityRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->salesActivityId)
+                ->willReturn($this->salesActivity);
     }
 
     protected MockObject $customerJourneyRepository;

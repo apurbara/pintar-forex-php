@@ -7,7 +7,10 @@ use App\Http\Controllers\Controller;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Model\SalesActivityData;
 use Company\Domain\Task\InCompany\SalesActivity\AddSalesActivityTask;
+use Company\Domain\Task\InCompany\SalesActivity\DisableSalesActivity;
+use Company\Domain\Task\InCompany\SalesActivity\EnableSalesActivity;
 use Company\Domain\Task\InCompany\SalesActivity\SetInitialSalesActivityTask;
+use Company\Domain\Task\InCompany\SalesActivity\UpdateSalesActivity;
 use Company\Domain\Task\InCompany\SalesActivity\ViewSalesActivityDetail;
 use Company\Domain\Task\InCompany\SalesActivity\ViewSalesActivityList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityRepository;
@@ -25,17 +28,20 @@ class SalesActivityController extends Controller
     {
         return $this->em->getRepository(SalesActivity::class);
     }
+    
+    private function createData(InputRequest $input): SalesActivityData
+    {
+        $duration = $input->get('duration');
+        return new SalesActivityData($this->createLabelData($input), $duration);
+    }
 
     //
     #[Mutation]
     public function setInitialSalesActivity(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
-        
         $task = new SetInitialSalesActivityTask($repository);
-        
-        $duration = $input->get('duration');
-        $payload = new SalesActivityData($this->createLabelData($input), $duration);
+        $payload = $this->createData($input);
         
         $user->executeTaskInCompany($task, $payload);
         return $repository->fetchInitialSalesActivityDetail();
@@ -45,14 +51,43 @@ class SalesActivityController extends Controller
     public function addSalesActivity(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
-        
         $task = new AddSalesActivityTask($repository);
-        
-        $duration = $input->get('duration');
-        $payload = new SalesActivityData($this->createLabelData($input), $duration);
+        $payload = $this->createData($input);
         
         $user->executeTaskInCompany($task, $payload);
         return $repository->fetchOneByIdOrDie($payload->id);
+    }
+    
+    #[Mutation]
+    public function updateSalesActivity(CompanyUserRoleInterface $user, string $id, InputRequest $input)
+    {
+        $repository = $this->repository();
+        $task = new UpdateSalesActivity($repository);
+        $payload = $this->createData($input)
+                ->setId($id);
+        
+        $user->executeTaskInCompany($task, $payload);
+        return $repository->fetchOneByIdOrDie($payload->id);
+    }
+    
+    #[Mutation]
+    public function disableSalesActivity(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->repository();
+        $task = new DisableSalesActivity($repository);
+        
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
+    }
+    
+    #[Mutation]
+    public function enableSalesActivity(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->repository();
+        $task = new EnableSalesActivity($repository);
+        
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]

@@ -24,6 +24,12 @@ class DoctrineSalesActivityRepository extends DoctrineEntityRepository implement
         ]);
     }
 
+    public function ofId(string $id): SalesActivity
+    {
+        return $this->findOneByIdOrDie($id);
+    }
+
+    //
     public function salesAcivityDetail(string $id): array
     {
         return $this->fetchOneByIdOrDie($id);

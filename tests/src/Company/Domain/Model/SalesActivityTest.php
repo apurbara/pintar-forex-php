@@ -68,6 +68,29 @@ class SalesActivityTest extends TestBase
         $this->duration = 0;
         $this->assertRegularExceptionThrowed(fn() => $this->update(), 'Bad Request', 'duration is mandatory and must not exceed 60');
     }
+    
+    //
+    protected function disable()
+    {
+        $this->salesActivity->disable();
+    }
+    public function test_disable_setDisabled()
+    {
+        $this->disable();
+        $this->assertTrue($this->salesActivity->disabled);
+    }
+    
+    //
+    protected function enable()
+    {
+        $this->salesActivity->enable();
+    }
+    public function test_enable_setDisabledFalse()
+    {
+        $this->salesActivity->disabled = true;
+        $this->enable();
+        $this->assertFalse($this->salesActivity->disabled);
+    }
 }
 
 class TestableSalesActivity extends SalesActivity

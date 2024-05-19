@@ -11,7 +11,7 @@ class SalesActivityControllerTest extends CompanyBCTestCase
     protected EntityRecord $salesActivityOne;
     protected EntityRecord $salesActivityTwo;
     
-    protected $addSalesActivityRequest = [
+    protected $salesActivityPayload = [
         'name' => "new sales activity name",
         'description' => 'new sales activity description',
         'duration' => 20,
@@ -42,7 +42,7 @@ mutation ( $name: String, $description: String, $duration: Int ){
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->addSalesActivityRequest;
+        $this->graphqlVariables = $this->salesActivityPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_setInitial_200()
@@ -51,18 +51,18 @@ $this->disableExceptionHandling();
         $this->setInitial();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addSalesActivityRequest['name'],
-            'description' => $this->addSalesActivityRequest['description'],
-            'duration' => $this->addSalesActivityRequest['duration'],
+            'name' => $this->salesActivityPayload['name'],
+            'description' => $this->salesActivityPayload['description'],
+            'duration' => $this->salesActivityPayload['duration'],
             'initial' => true,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('SalesActivity', [
-            'name' => $this->addSalesActivityRequest['name'],
-            'description' => $this->addSalesActivityRequest['description'],
-            'duration' => $this->addSalesActivityRequest['duration'],
+            'name' => $this->salesActivityPayload['name'],
+            'description' => $this->salesActivityPayload['description'],
+            'duration' => $this->salesActivityPayload['duration'],
             'initial' => true,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
@@ -81,7 +81,7 @@ mutation AddSalesActivity( $name: String, $description: String, $duration: Int )
     }
 }
 _QUERY;
-        $this->graphqlVariables = $this->addSalesActivityRequest;
+        $this->graphqlVariables = $this->salesActivityPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
     public function test_add_200()
@@ -90,21 +90,138 @@ $this->disableExceptionHandling();
         $this->add();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'name' => $this->addSalesActivityRequest['name'],
-            'description' => $this->addSalesActivityRequest['description'],
-            'duration' => $this->addSalesActivityRequest['duration'],
+            'name' => $this->salesActivityPayload['name'],
+            'description' => $this->salesActivityPayload['description'],
+            'duration' => $this->salesActivityPayload['duration'],
             'initial' => false,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('SalesActivity', [
-            'name' => $this->addSalesActivityRequest['name'],
-            'description' => $this->addSalesActivityRequest['description'],
-            'duration' => $this->addSalesActivityRequest['duration'],
+            'name' => $this->salesActivityPayload['name'],
+            'description' => $this->salesActivityPayload['description'],
+            'duration' => $this->salesActivityPayload['duration'],
             'initial' => false,
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
+        ]);
+    }
+    
+    //
+    protected function updateSalesActivity()
+    {
+        $this->prepareAdminDependency();
+        $this->salesActivityOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation(
+    $id: ID,
+    $name: String, $description: String, $duration: Int
+){
+    updateSalesActivity( id: $id, name: $name, description: $description, duration: $duration ){
+        id, disabled, name, description, duration, initial
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            ...$this->salesActivityPayload,
+            'id' => $this->salesActivityOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_updateSalesActivity_200()
+    {
+$this->disableExceptionHandling();
+        $this->updateSalesActivity();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->salesActivityOne->columns['id'],
+            'name' => $this->salesActivityPayload['name'],
+            'description' => $this->salesActivityPayload['description'],
+            'duration' => $this->salesActivityPayload['duration'],
+            'initial' => false,
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('SalesActivity', [
+            'id' => $this->salesActivityOne->columns['id'],
+            'name' => $this->salesActivityPayload['name'],
+            'description' => $this->salesActivityPayload['description'],
+            'duration' => $this->salesActivityPayload['duration'],
+            'initial' => false,
+            'disabled' => false,
+        ]);
+    }
+    
+    //
+    protected function disableSalesActivity()
+    {
+        $this->prepareAdminDependency();
+        $this->salesActivityOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation(
+    $id: ID,
+){
+    disableSalesActivity( id: $id ){
+        disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->salesActivityOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disableSalesActivity_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableSalesActivity();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'disabled' => true,
+        ]);
+        
+        $this->seeInDatabase('SalesActivity', [
+            'id' => $this->salesActivityOne->columns['id'],
+            'disabled' => true,
+        ]);
+    }
+    
+    //
+    protected function enableSalesActivity()
+    {
+        $this->prepareAdminDependency();
+        $this->salesActivityOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation(
+    $id: ID,
+){
+    enableSalesActivity( id: $id ){
+        disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->salesActivityOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_enableSalesActivity_200()
+    {
+$this->disableExceptionHandling();
+        $this->salesActivityOne->columns['disabled'] = true;
+        $this->enableSalesActivity();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('SalesActivity', [
+            'id' => $this->salesActivityOne->columns['id'],
+            'disabled' => false,
         ]);
     }
     
