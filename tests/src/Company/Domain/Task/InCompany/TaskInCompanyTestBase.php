@@ -9,26 +9,27 @@ use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Model\Personnel\Manager\Sales;
+use Company\Domain\Model\Personnel\Sales;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
-use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
-use Company\Domain\Task\InCompany\Personnel\Manager\Sales\SalesRepository;
+use Company\Domain\Task\InCompany\Manager\ManagerRepository;
 use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
+use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\SalesActivity\SalesActivityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
 class TaskInCompanyTestBase extends TestBase
 {
+
     protected MockObject $personnelRepository;
     protected MockObject $personnel;
     protected string $personnelId = 'personnelId';
-    
+
     protected function preparePersonnelDependency(): void
     {
         $this->personnelRepository = $this->buildMockOfInterface(PersonnelRepository::class);
@@ -39,10 +40,11 @@ class TaskInCompanyTestBase extends TestBase
                 ->with($this->personnelId)
                 ->willReturn($this->personnel);
     }
-    
+
     protected MockObject $areaStructureRepository;
     protected MockObject $areaStructure;
     protected string $areaStructureId = 'areaStructureId';
+
     protected function prepareAreaStructureDependency(): void
     {
         $this->areaStructureRepository = $this->buildMockOfInterface(AreaStructureRepository::class);
@@ -53,10 +55,11 @@ class TaskInCompanyTestBase extends TestBase
                 ->with($this->areaStructureId)
                 ->willReturn($this->areaStructure);
     }
-    
+
     protected MockObject $areaRepository;
     protected MockObject $area;
     protected string $areaId = 'areaId';
+
     protected function prepareAreaDependency(): void
     {
         $this->areaRepository = $this->buildMockOfInterface(AreaRepository::class);
@@ -67,10 +70,11 @@ class TaskInCompanyTestBase extends TestBase
                 ->with($this->areaId)
                 ->willReturn($this->area);
     }
-    
+
     protected MockObject $managerRepository;
     protected MockObject $manager;
     protected string $managerId = 'managerId';
+
     protected function prepareManagerDependency(): void
     {
         $this->managerRepository = $this->buildMockOfInterface(ManagerRepository::class);
@@ -81,24 +85,26 @@ class TaskInCompanyTestBase extends TestBase
                 ->with($this->managerId)
                 ->willReturn($this->manager);
     }
-    
+
     protected MockObject $salesRepository;
     protected MockObject $sales;
     protected string $salesId = 'salesId';
+
     protected function prepareSalesDependency(): void
     {
         $this->salesRepository = $this->buildMockOfInterface(SalesRepository::class);
         $this->sales = $this->buildMockOfClass(Sales::class);
         //
-//        $this->salesRepository->expects($this->any())
-//                ->method('ofId')
-//                ->with($this->salesId)
-//                ->willReturn($this->sales);
+        $this->salesRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->salesId)
+                ->willReturn($this->sales);
     }
-    
+
     protected MockObject $customerVerificationRepository;
     protected MockObject $customerVerification;
     protected string $customerVerificationId = 'customerVerificationId';
+
     protected function prepareCustomerVerificationDependency(): void
     {
         $this->customerVerificationRepository = $this->buildMockOfInterface(CustomerVerificationRepository::class);
@@ -109,10 +115,11 @@ class TaskInCompanyTestBase extends TestBase
                 ->with($this->customerVerificationId)
                 ->willReturn($this->customerVerification);
     }
-    
+
     protected MockObject $salesActivityRepository;
     protected MockObject $salesActivity;
     protected string $salesActivityId = 'salesActivityId';
+
     protected function prepareSalesActivityDependency(): void
     {
         $this->salesActivityRepository = $this->buildMockOfInterface(SalesActivityRepository::class);
@@ -123,10 +130,11 @@ class TaskInCompanyTestBase extends TestBase
 //                ->with($this->salesActivityId)
 //                ->willReturn($this->salesActivity);
     }
-    
+
     protected MockObject $customerJourneyRepository;
     protected MockObject $customerJourney;
     protected string $customerJourneyId = 'customerJourneyId';
+
     protected function prepareCustomerJourneyDependency(): void
     {
         $this->customerJourneyRepository = $this->buildMockOfInterface(CustomerJourneyRepository::class);
@@ -137,10 +145,11 @@ class TaskInCompanyTestBase extends TestBase
                 ->with($this->customerJourneyId)
                 ->willReturn($this->customerJourney);
     }
-    
+
     protected MockObject $customerRepository;
     protected MockObject $customer;
     protected string $customerId = 'customerId';
+
     protected function prepareCustomerDependency(): void
     {
         $this->customerRepository = $this->buildMockOfInterface(CustomerRepository::class);

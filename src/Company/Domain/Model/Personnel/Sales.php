@@ -1,10 +1,9 @@
 <?php
 
-namespace Company\Domain\Model\Personnel\Manager;
+namespace Company\Domain\Model\Personnel;
 
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -18,11 +17,6 @@ use SharedContext\Domain\Enum\SalesType;
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales
 {
-    #[FetchableObject(targetEntity: Manager::class, joinColumnName: "Manager_id")]
-    #[ManyToOne(targetEntity: Manager::class)]
-    #[JoinColumn(name: "Manager_id", referencedColumnName: "id")]
-    protected Manager $manager;
-    
     #[FetchableObject(targetEntity: Personnel::class, joinColumnName: "Personnel_id")]
     #[ManyToOne(targetEntity: Personnel::class)]
     #[JoinColumn(name: "Personnel_id", referencedColumnName: "id")]
@@ -45,15 +39,37 @@ class Sales
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
     
-    public function __construct(Manager $manager, Personnel $personnel, Area $area, SalesData $data)
+//    #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
+//    protected Collection $customerAssignments;
+
+
+    public function __construct(Personnel $personnel, Area $area, string $id, SalesData $data)
     {
-        $this->manager = $manager;
         $this->personnel = $personnel;
         $this->area = $area;
-        $this->id = $data->id;
+        $this->id = $id;
         $this->createdTime = new DateTimeImmutable();
         $this->disabled = false;
         $this->type = SalesType::from($data->type);
+        //
+        $this->personnel->assertActive();
+        $this->area->assertActive();
+    }
+    
+    public function disable(): void
+    {
+        $this->disabled = true;
+//        
+//        $criteria = Criteria::create()
+//                ->andWhere(Criteria::expr()->eq('cancelled', false));
+//        foreach ($this->customerAssignments->matching($criteria)->getIterator() as $customerAssignment) {
+//            $customerAssignment->cancel();
+//        }
+    }
+    
+    public function enable(): void
+    {
+        $this->disabled = false;
     }
 
 }

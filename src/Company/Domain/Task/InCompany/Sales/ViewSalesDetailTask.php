@@ -1,6 +1,6 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\Personnel\Manager\Sales;
+namespace Company\Domain\Task\InCompany\Sales;
 
 use Company\Domain\Model\AdminTaskInCompany;
 use Company\Domain\Model\PersonnelTaskInCompany;

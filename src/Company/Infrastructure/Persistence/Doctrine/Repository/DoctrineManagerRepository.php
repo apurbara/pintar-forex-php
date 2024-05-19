@@ -3,7 +3,7 @@
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
+use Company\Domain\Task\InCompany\Manager\ManagerRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 

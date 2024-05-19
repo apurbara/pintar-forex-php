@@ -1,6 +1,6 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\Personnel\Manager;
+namespace Company\Domain\Task\InCompany\Manager;
 
 use Company\Domain\Model\Personnel\Manager;
 

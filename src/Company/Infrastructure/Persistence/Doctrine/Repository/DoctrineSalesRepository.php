@@ -2,8 +2,8 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
-use Company\Domain\Model\Personnel\Manager\Sales;
-use Company\Domain\Task\InCompany\Personnel\Manager\Sales\SalesRepository;
+use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 
@@ -15,6 +15,12 @@ class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesR
         $this->persist($sales);
     }
 
+    public function ofId(string $id): Sales
+    {
+        return $this->findOneByIdOrDie($id);
+    }
+
+    //
     public function salesDetail(string $id): array
     {
         return $this->fetchOneByIdOrDie($id);

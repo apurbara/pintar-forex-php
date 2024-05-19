@@ -1,18 +1,18 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\Personnel\Manager\Sales;
+namespace Company\Domain\Task\InCompany\Sales;
 
 use Company\Domain\Model\AdminTaskInCompany;
-use Company\Domain\Model\Personnel\Manager\SalesData;
-use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
-use Company\Domain\Task\InCompany\Personnel\Manager\ManagerRepository;
+use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Personnel\SalesData;
+use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
 
 class AssignSalesTask implements AdminTaskInCompany
 {
 
     public function __construct(
-            protected SalesRepository $salesRepository, protected ManagerRepository $managerRepository,
+            protected SalesRepository $salesRepository,
             protected PersonnelRepository $personnelRepository, protected AreaRepository $areaRepository)
     {
         
@@ -28,15 +28,9 @@ class AssignSalesTask implements AdminTaskInCompany
         $payload->setId($this->salesRepository->nextIdentity());
         
         $personnel = $this->personnelRepository->ofId($payload->personnelId);
-        $personnel->assertActive();
-        
         $area = $this->areaRepository->ofId($payload->areaId);
-        $area->assertActive();
+        $sales = new Sales($personnel, $area, $payload->id, $payload);
         
-        $manager = $this->managerRepository->ofId($payload->managerId);
-        $manager->assertActive();
-        
-        $sales = $manager->assignPersonnelAsSales($personnel, $area, $payload);
         $this->salesRepository->add($sales);
     }
 }

@@ -77,6 +77,75 @@ $this->disableExceptionHandling();
     }
     
     //
+    protected function disableManager()
+    {
+        $this->prepareAdminDependency();
+        $this->personnelOne->insert($this->connection);
+        $this->managerOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID ){
+    disableManager ( id: $id ) {
+        disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->managerOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disableManager_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableManager();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'disabled' => true,
+        ]);
+        
+        $this->seeInDatabase('Manager', [
+            'id' => $this->managerOne->columns['id'],
+            'disabled' => true,
+        ]);
+    }
+    
+    //
+    protected function enableManager()
+    {
+        $this->prepareAdminDependency();
+        $this->personnelOne->insert($this->connection);
+        $this->managerOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID ){
+    enableManager ( id: $id ) {
+        disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->managerOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_enableManager_200()
+    {
+$this->disableExceptionHandling();
+        $this->managerOne->columns['disabled'] = true;
+        $this->enableManager();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('Manager', [
+            'id' => $this->managerOne->columns['id'],
+            'disabled' => false,
+        ]);
+    }
+    
+    //
     protected function viewList()
     {
         $this->prepareAdminDependency();

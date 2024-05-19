@@ -87,5 +87,7 @@ class Customer
         $this->setPhone($data->phone);
         $this->setEmail($data->email);
         $this->source = $data->source;
+        //
+        $this->area?->assertActive();
     }
 }

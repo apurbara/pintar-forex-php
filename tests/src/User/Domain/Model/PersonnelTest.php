@@ -53,7 +53,7 @@ class PersonnelTest extends TestBase
     }
     public function test_login_inactivePersonnel_unauthorized()
     {
-        $this->personnel->disabled = true;
+        $this->personnel->suspended = true;
         $this->assertRegularExceptionThrowed(fn() => $this->login(), 'Unauthorized', 'inactive account or invalid email and password');
     }
     
@@ -101,7 +101,7 @@ class PersonnelTest extends TestBase
     }
     public function test_executeTask_disabledPersonnel_forbidden()
     {
-        $this->personnel->disabled = true;
+        $this->personnel->suspended = true;
         $this->assertRegularExceptionThrowed(fn() => $this->executeTask(), 'Forbidden', 'only active personnel can make this request');
     }
 }
@@ -109,7 +109,7 @@ class PersonnelTest extends TestBase
 class TestablePersonnel extends Personnel
 {
     public string $id = 'personnelId';
-    public bool $disabled = false;
+    public bool $suspended = false;
     public DateTimeImmutable $createdTime;
     public AccountInfo $accountInfo;
     

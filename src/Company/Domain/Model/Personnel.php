@@ -3,8 +3,8 @@
 namespace Company\Domain\Model;
 
 use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Model\Personnel\ManagerData;
+use Company\Domain\Model\Personnel\Sales;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;

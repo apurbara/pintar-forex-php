@@ -71,6 +71,12 @@ class CustomerTest extends TestBase
         $this->construct();
         $this->markAsSuccess();
     }
+    public function test_construct_assertAreaActive()
+    {
+        $this->area->expects($this->once())
+                ->method('assertActive');
+        $this->construct();
+    }
 }
 
 class TestableCustomer extends Customer

@@ -2,10 +2,7 @@
 
 namespace Company\Domain\Model\Personnel;
 
-use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager\Sales;
-use Company\Domain\Model\Personnel\Manager\SalesData;
 use DateTimeImmutable;
 use Tests\TestBase;
 
@@ -16,17 +13,12 @@ class ManagerTest extends TestBase
     protected $manager;
     //
     protected $id = 'newId';
-    //
-    protected $area, $salesData;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->personnel = $this->buildMockOfClass(Personnel::class);
         $this->manager = new TestableManager($this->personnel, (new ManagerData())->setId('id'));
-        //
-        $this->area = $this->buildMockOfClass(Area::class);
-        $this->salesData = (new SalesData('IN_HOUSE'))->setId('salesId');
     }
 
     //
@@ -51,6 +43,29 @@ class ManagerTest extends TestBase
     }
     
     //
+    protected function disable()
+    {
+        $this->manager->disable();
+    }
+    public function test_disable_setDisabled()
+    {
+        $this->disable();
+        $this->assertTrue($this->manager->disabled);
+    }
+    
+    //
+    protected function enable()
+    {
+        $this->manager->enable();
+    }
+    public function test_enable_setDisabledFalse()
+    {
+        $this->manager->disabled = true;
+        $this->enable();
+        $this->assertFalse($this->manager->disabled);
+    }
+    
+    //
     protected function assertActive()
     {
         $this->manager->assertActive();
@@ -64,16 +79,6 @@ class ManagerTest extends TestBase
     {
         $this->assertActive();
         $this->markAsSuccess();
-    }
-    
-    //
-    protected function assignPersonnelAsSales()
-    {
-        return $this->manager->assignPersonnelAsSales($this->personnel, $this->area, $this->salesData);
-    }
-    public function test_assignPersonnelAsManager_returnSales()
-    {
-        $this->assertInstanceOf(Sales::class, $this->assignPersonnelAsSales());
     }
 }
 

@@ -24,7 +24,7 @@ class Personnel
     protected string $id;
 
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
+    protected bool $suspended;
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
@@ -61,7 +61,7 @@ class Personnel
     //
     public function login(string $password): string
     {
-        if ($this->disabled || !$this->accountInfo->passwordMatch($password)) {
+        if ($this->suspended || !$this->accountInfo->passwordMatch($password)) {
             throw RegularException::unauthorized('inactive account or invalid email and password');
         }
         return $this->id;
@@ -70,7 +70,7 @@ class Personnel
     //
     public function executeTask(PersonnelTask $task, $payload): void
     {
-        if ($this->disabled) {
+        if ($this->suspended) {
             throw RegularException::forbidden('only active personnel can make this request');
         }
         $task->executeByPersonnel($this, $payload);

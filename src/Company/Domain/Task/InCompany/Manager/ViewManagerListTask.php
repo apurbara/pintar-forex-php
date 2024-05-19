@@ -1,13 +1,14 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\Personnel\Manager\Sales;
+namespace Company\Domain\Task\InCompany\Manager;
 
 use Company\Domain\Model\AdminTaskInCompany;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 
-class ViewSalesListTask implements AdminTaskInCompany
+class ViewManagerListTask implements AdminTaskInCompany
 {
-    public function __construct(protected SalesRepository $salesRepository)
+    
+    public function __construct(protected ManagerRepository $managerRepository)
     {
     }
     
@@ -18,6 +19,6 @@ class ViewSalesListTask implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $payload->setResult($this->salesRepository->salesList($payload->paginationSchema));
+        $payload->setResult($this->managerRepository->managerList($payload->paginationSchema));
     }
 }

@@ -5,18 +5,15 @@ namespace App\Http\Controllers\CompanyBC\InCompany\Personnel;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Model\Personnel\Manager\Sales;
+use Company\Domain\Model\Personnel\Sales;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class SalesControllerTest extends CompanyBCTestCase
 {
-    protected EntityRecord $personnel;
     protected EntityRecord $personnelOne;
     protected EntityRecord $personnelTwo;
     
-    protected EntityRecord $manager;
     protected EntityRecord $areaStructure;
     protected EntityRecord $area;
     
@@ -31,37 +28,29 @@ class SalesControllerTest extends CompanyBCTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->connection->table('Manager')->truncate();
         $this->connection->table('AreaStructure')->truncate();
         $this->connection->table('Area')->truncate();
         $this->connection->table('Personnel')->truncate();
         $this->connection->table('Sales')->truncate();
         
-        $this->personnel = new EntityRecord(Personnel::class, 'main');
         $this->personnelOne = new EntityRecord(Personnel::class, 1);
         $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        
-        $this->manager = new EntityRecord(Manager::class, 'main');
-        $this->manager->columns['Personnel_id'] = $this->personnel->columns['id'];
         
         $this->areaStructure = new EntityRecord(AreaStructure::class, 'main');
         $this->area = new EntityRecord(Area::class, 'main');
         $this->area->columns['AreaStructure_id'] = $this->areaStructure->columns['id'];
         
         $this->salesOne = new EntityRecord(Sales::class, 1);
-        $this->salesOne->columns['Manager_id'] = $this->manager->columns['id'];
         $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesOne->columns['Area_id'] = $this->area->columns['id'];
         
         $this->salesTwo = new EntityRecord(Sales::class, 2);
-        $this->salesTwo->columns['Manager_id'] = $this->manager->columns['id'];
         $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         $this->salesTwo->columns['Area_id'] = $this->area->columns['id'];
     }
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->connection->table('Manager')->truncate();
         $this->connection->table('AreaStructure')->truncate();
         $this->connection->table('Area')->truncate();
         $this->connection->table('Personnel')->truncate();
@@ -72,23 +61,19 @@ class SalesControllerTest extends CompanyBCTestCase
     protected function assign()
     {
         $this->prepareAdminDependency();
-        $this->personnel->insert($this->connection);
         $this->personnelOne->insert($this->connection);
-        $this->manager->insert($this->connection);
         $this->area->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $Manager_id: ID!, $Personnel_id: ID!, $Area_id: ID!, $type: String){
-    assignSales (Manager_id: $Manager_id, Personnel_id: $Personnel_id, Area_id: $Area_id, type: $type ) {
+mutation ( $Personnel_id: ID!, $Area_id: ID!, $type: String ){
+    assignSales ( Personnel_id: $Personnel_id, Area_id: $Area_id, type: $type ) {
         id, disabled, createdTime, type,
         personnel { id, name }
         area { id, name }
-        manager { id, personnel { id, name } }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'Manager_id' => $this->manager->columns['id'],
             'Personnel_id' => $this->personnelOne->columns['id'],
             'Area_id' => $this->area->columns['id'],
             ...$this->salesAssignData,
@@ -113,22 +98,93 @@ $this->disableExceptionHandling();
                 'id' => $this->area->columns['id'],
                 'name' => $this->area->columns['name'],
             ],
-            'manager' => [
-                'id' => $this->manager->columns['id'],
-                'personnel' => [
-                    'id' => $this->personnel->columns['id'],
-                    'name' => $this->personnel->columns['name'],
-                ],
-            ],
         ]);
         
         $this->seeInDatabase('Sales', [
             'disabled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'type' => $this->salesAssignData['type'],
-            'Manager_id' => $this->manager->columns['id'],
             'Personnel_id' => $this->personnelOne->columns['id'],
             'Area_id' => $this->area->columns['id'],
+        ]);
+    }
+    
+    //
+    protected function disableSales()
+    {
+        $this->prepareAdminDependency();
+        $this->area->insert($this->connection);
+        $this->personnelOne->insert($this->connection);
+        $this->salesOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $id: ID
+){
+    disableSales ( id: $id ) {
+        disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->salesOne->columns['id'],
+            ...$this->salesAssignData,
+            
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_disableSales_200()
+    {
+$this->disableExceptionHandling();
+        $this->disableSales();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'disabled' => true,
+        ]);
+        
+        $this->seeInDatabase('Sales', [
+            'id' => $this->salesOne->columns['id'],
+            'disabled' => true,
+        ]);
+    }
+    
+    //
+    protected function enableSales()
+    {
+        $this->prepareAdminDependency();
+        $this->area->insert($this->connection);
+        $this->personnelOne->insert($this->connection);
+        $this->salesOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $id: ID
+){
+    enableSales ( id: $id ) {
+        disabled
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->salesOne->columns['id'],
+            ...$this->salesAssignData,
+            
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_enableSales_200()
+    {
+$this->disableExceptionHandling();
+        $this->salesOne->columns['disabled'] = true;
+        $this->enableSales();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'disabled' => false,
+        ]);
+        
+        $this->seeInDatabase('Sales', [
+            'id' => $this->salesOne->columns['id'],
+            'disabled' => false,
         ]);
     }
     
@@ -140,8 +196,6 @@ $this->disableExceptionHandling();
         $this->personnel->insert($this->connection);
         $this->personnelOne->insert($this->connection);
         $this->personnelTwo->insert($this->connection);
-        
-        $this->manager->insert($this->connection);
         
         $this->area->insert($this->connection);
         
@@ -155,7 +209,6 @@ query SalesList {
             id, disabled, createdTime,
             personnel { id, name }
             area { id, name }
-            manager { id, personnel { id, name } }
         },
         cursorLimit { total, cursorToNextPage }
     }
@@ -181,13 +234,6 @@ _QUERY;
                         'id' => $this->area->columns['id'],
                         'name' => $this->area->columns['name'],
                     ],
-                    'manager' => [
-                        'id' => $this->manager->columns['id'],
-                        'personnel' => [
-                            'id' => $this->personnel->columns['id'],
-                            'name' => $this->personnel->columns['name'],
-                        ],
-                    ],
                 ],
                 [
                     'id' => $this->salesTwo->columns['id'],
@@ -200,13 +246,6 @@ _QUERY;
                     'area' => [
                         'id' => $this->area->columns['id'],
                         'name' => $this->area->columns['name'],
-                    ],
-                    'manager' => [
-                        'id' => $this->manager->columns['id'],
-                        'personnel' => [
-                            'id' => $this->personnel->columns['id'],
-                            'name' => $this->personnel->columns['name'],
-                        ],
                     ],
                 ],
             ],
@@ -221,10 +260,8 @@ _QUERY;
     protected function viewDetail()
     {
         $this->prepareAdminDependency();
-        $this->personnel->insert($this->connection);
         $this->personnelOne->insert($this->connection);
         
-        $this->manager->insert($this->connection);
         $this->area->insert($this->connection);
         
         $this->salesOne->insert($this->connection);
@@ -235,7 +272,6 @@ query SalesDetail ( $id: ID! ) {
         id, disabled, createdTime,
         personnel { id, name }
         area { id, name }
-        manager { id, personnel { id, name } }
     }
 }
 _QUERY;
@@ -257,13 +293,6 @@ _QUERY;
             'area' => [
                 'id' => $this->area->columns['id'],
                 'name' => $this->area->columns['name'],
-            ],
-            'manager' => [
-                'id' => $this->manager->columns['id'],
-                'personnel' => [
-                    'id' => $this->personnel->columns['id'],
-                    'name' => $this->personnel->columns['name'],
-                ],
             ],
         ]);
     }

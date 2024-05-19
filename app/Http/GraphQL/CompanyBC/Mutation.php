@@ -6,10 +6,10 @@ use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
-use App\Http\Controllers\CompanyBC\InCompany\Personnel\Manager\SalesController;
-use App\Http\Controllers\CompanyBC\InCompany\Personnel\ManagerController;
+use App\Http\Controllers\CompanyBC\InCompany\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
+use App\Http\Controllers\CompanyBC\InCompany\SalesController;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
 

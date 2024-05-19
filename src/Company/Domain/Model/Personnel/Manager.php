@@ -2,10 +2,7 @@
 
 namespace Company\Domain\Model\Personnel;
 
-use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager\Sales;
-use Company\Domain\Model\Personnel\Manager\SalesData;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineManagerRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -46,6 +43,16 @@ class Manager
         $this->createdTime = new DateTimeImmutable();
         $this->disabled = false;
     }
+    
+    public function disable(): void
+    {
+        $this->disabled = true;
+    }
+    
+    public function enable(): void
+    {
+        $this->disabled = false;
+    }
 
     //
     public function assertActive(): void
@@ -53,11 +60,5 @@ class Manager
         if ($this->disabled) {
             throw RegularException::forbidden('inactive manager');
         }
-    }
-
-//
-    public function assignPersonnelAsSales(Personnel $personnel, Area $area, SalesData $salesData): Sales
-    {
-        return new Sales($this, $personnel, $area, $salesData);
     }
 }
