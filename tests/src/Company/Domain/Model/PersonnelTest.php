@@ -53,9 +53,32 @@ class PersonnelTest extends TestBase
     {
         $personnel = $this->construct();
         $this->assertSame($this->id, $personnel->id);
-        $this->assertFalse($personnel->disabled);
+        $this->assertFalse($personnel->suspended);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($personnel->createdTime);
         $this->assertInstanceOf(AccountInfo::class, $personnel->accountInfo);
+    }
+    
+    //
+    protected function suspend()
+    {
+        $this->personnel->suspend();
+    }
+    public function test_suspend_setSuspended()
+    {
+        $this->suspend();
+        $this->assertTrue($this->personnel->suspended);
+    }
+    
+    //
+    protected function unsuspend()
+    {
+        $this->personnel->unsuspend();
+    }
+    public function test_unsuspend_setSuspendedFalse()
+    {
+        $this->personnel->suspended = true;
+        $this->unsuspend();
+        $this->assertFalse($this->personnel->suspended);
     }
     
     //
@@ -65,7 +88,7 @@ class PersonnelTest extends TestBase
     }
     public function test_assertActive_inactivePersonnel_forbidden()
     {
-        $this->personnel->disabled = true;
+        $this->personnel->suspended = true;
         $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive personnel');
     }
     public function test_assertActive_activePersonnel_void()
@@ -86,9 +109,9 @@ class PersonnelTest extends TestBase
                 ->with($this->payload);
         $this->executeTaskInCompany();
     }
-    public function test_executeTaskInCompany_disabledPersonnel_forbidden()
+    public function test_executeTaskInCompany_suspendedPersonnel_forbidden()
     {
-        $this->personnel->disabled = true;
+        $this->personnel->suspended = true;
         $this->assertRegularExceptionThrowed(fn() => $this->executeTaskInCompany(), 'Forbidden', 'only active personnel can  make this request');
     }
     public function test_executeTaskInCompany_taskForManagerOnly_hasNoActiveManager()
@@ -118,7 +141,7 @@ class PersonnelTest extends TestBase
     }
     public function test_assignAsManager_disabledManager_forbidden()
     {
-        $this->personnel->disabled = true;
+        $this->personnel->suspended = true;
         $this->assertRegularExceptionThrowed(fn() => $this->assignAsManager(), 'Forbidden', 'only active personnel allow to be assigned as manager');
     }
 }
@@ -127,7 +150,7 @@ class TestablePersonnel extends Personnel
 {
 
     public string $id;
-    public bool $disabled;
+    public bool $suspended;
     public DateTimeImmutable $createdTime;
     public AccountInfo $accountInfo;
     public Collection $managerAssignments;

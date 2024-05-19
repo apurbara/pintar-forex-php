@@ -8,6 +8,7 @@ use Company\Domain\Model\Personnel\ManagerData;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
@@ -27,7 +28,7 @@ class Personnel
     protected string $id;
 
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
+    protected bool $suspended;
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
@@ -46,22 +47,33 @@ class Personnel
     public function __construct(PersonnelData $data)
     {
         $this->id = $data->id;
-        $this->disabled = false;
+        $this->suspended = false;
         $this->createdTime = new \DateTimeImmutable();
         $this->accountInfo = new AccountInfo($data->accountInfoData);
+    }
+    
+    public function suspend(): void
+    {
+        $this->suspended = true;
+    }
+    
+    public function unsuspend(): void
+    {
+        $this->suspended = false;
     }
 
     //
     public function assertActive(): void
     {
-        if ($this->disabled) {
+        if ($this->suspended) {
             throw RegularException::forbidden('inactive personnel');
         }
     }
     protected function assertHavingActiveManagerAssignment(): void
     {
-        $p = fn(Manager $manager) => !$manager->isDisabled();
-        if ($this->managerAssignments->filter($p)->count() < 1) {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('disabled', false));
+        if ($this->managerAssignments->matching($criteria)->isEmpty()) {
             throw RegularException::forbidden('only active personnel having manager assignment can  make this request');
         }
     }
@@ -69,7 +81,7 @@ class Personnel
     //
     public function executeTaskInCompany(PersonnelTaskInCompany $task, $payload): void
     {
-        if ($this->disabled) {
+        if ($this->suspended) {
             throw RegularException::forbidden('only active personnel can  make this request');
         }
         if ($task instanceof PersonnelHavingManagerAssignmentTaskInCompany) {
@@ -81,7 +93,7 @@ class Personnel
     //
     public function assignAsManager(ManagerData $managerData): Manager
     {
-        if ($this->disabled) {
+        if ($this->suspended) {
             throw RegularException::forbidden('only active personnel allow to be assigned as manager');
         }
         return new Manager($this, $managerData);

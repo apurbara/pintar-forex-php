@@ -15,6 +15,7 @@ interface PersonnelRepository
     
     public function isEmailAvailable(string $email): bool;
 
+    //
     public function viewPersonnelList(array $paginationSchema): array;
 
     public function viewPersonnelDetail(string $id): array;

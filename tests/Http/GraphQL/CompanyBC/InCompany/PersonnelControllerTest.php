@@ -58,7 +58,7 @@ class PersonnelControllerTest extends CompanyBCTestCase
         $this->graphqlQuery = <<<'_QUERY'
 mutation AddPersonnel( $name: String, $email: String, $password: String ){
     addPersonnel(name: $name, email: $email, password: $password){
-        id, disabled, createdTime, name, email
+        id, suspended, createdTime, name, email
     }
 }
 _QUERY;
@@ -73,16 +73,83 @@ $this->disableExceptionHandling();
         $this->seeJsonContains([
             'name' => $this->addPersonnelRequest['name'],
             'email' => $this->addPersonnelRequest['email'],
-            'disabled' => false,
+            'suspended' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('Personnel', [
             'name' => $this->addPersonnelRequest['name'],
             'email' => $this->addPersonnelRequest['email'],
-            'disabled' => false,
+            'suspended' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
         ]);
+    }
+    
+    //
+    protected function suspendPersonnel()
+    {
+        $this->prepareAdminDependency();
+        $this->personnelOne->insert($this->connection);
+        //
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $id: ID
+) {
+    suspendPersonnel ( id: $id ) {
+        suspended
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->personnelOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_suspendPersonnel_200()
+    {
+$this->disableExceptionHandling();
+        $this->suspendPersonnel();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains(['suspended' => true]);
+        $this->seeInDatabase('Personnel', [
+            'id' => $this->personnelOne->columns['id'],
+            'suspended' => true,
+         ]);
+    }
+    
+    //
+    protected function unsuspendPersonnel()
+    {
+        $this->prepareAdminDependency();
+        $this->personnelOne->insert($this->connection);
+        //
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $id: ID
+) {
+    unsuspendPersonnel ( id: $id ) {
+        suspended
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->personnelOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_unsuspendPersonnel_200()
+    {
+$this->disableExceptionHandling();
+        $this->personnelOne->columns['suspended'] = true;
+        $this->unsuspendPersonnel();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains(['suspended' => false]);
+        $this->seeInDatabase('Personnel', [
+            'id' => $this->personnelOne->columns['id'],
+            'suspended' => false,
+         ]);
     }
     
     //
@@ -95,7 +162,7 @@ $this->disableExceptionHandling();
         $this->graphqlQuery = <<<'_QUERY'
 query PersonnelList{
     personnelList{
-        list { id, disabled, createdTime, name, email },
+        list { id, suspended, createdTime, name, email },
         cursorLimit { total, cursorToNextPage }
     }
 }
@@ -110,14 +177,14 @@ _QUERY;
             'list' => [
                 [
                     'id' => $this->personnelOne->columns['id'],
-                    'disabled' => $this->personnelOne->columns['disabled'],
+                    'suspended' => $this->personnelOne->columns['suspended'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->personnelOne->columns['createdTime']),
                     'name' => $this->personnelOne->columns['name'],
                     'email' => $this->personnelOne->columns['email'],
                 ],
                 [
                     'id' => $this->personnelTwo->columns['id'],
-                    'disabled' => $this->personnelTwo->columns['disabled'],
+                    'suspended' => $this->personnelTwo->columns['suspended'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->personnelTwo->columns['createdTime']),
                     'name' => $this->personnelTwo->columns['name'],
                     'email' => $this->personnelTwo->columns['email'],
@@ -143,7 +210,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query PersonnelDetail ( $id: ID! ) {
     personnelDetail ( id: $id ) {
-        id, disabled, createdTime, name, email,
+        id, suspended, createdTime, name, email,
         managerAssignments { list { id, disabled } }
         salesAssignments { 
             list {
@@ -163,7 +230,7 @@ _QUERY;
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'id' => $this->personnelOne->columns['id'],
-            'disabled' => $this->personnelOne->columns['disabled'],
+            'suspended' => $this->personnelOne->columns['suspended'],
             'createdTime' => $this->jakartaDateTimeFormat($this->personnelOne->columns['createdTime']),
             'name' => $this->personnelOne->columns['name'],
             'email' => $this->personnelOne->columns['email'],

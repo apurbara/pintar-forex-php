@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\PersonnelData;
 use Company\Domain\Task\InCompany\Personnel\AddPersonnelTask;
+use Company\Domain\Task\InCompany\Personnel\SuspendPersonnel;
+use Company\Domain\Task\InCompany\Personnel\UnsuspendPersonnel;
 use Company\Domain\Task\InCompany\Personnel\ViewPersonnelDetailTask;
 use Company\Domain\Task\InCompany\Personnel\ViewPersonnelListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrinePersonnelRepository;
@@ -20,11 +22,12 @@ use SharedContext\Domain\ValueObject\AccountInfoData;
 #[GraphqlMapableController(entity: Personnel::class)]
 class PersonnelController extends Controller
 {
+
     protected function personnelRepository(): DoctrinePersonnelRepository
     {
         return $this->em->getRepository(Personnel::class);
     }
-    
+
     //
     #[Mutation]
     public function addPersonnel(CompanyUserRoleInterface $user, InputRequest $input)
@@ -39,24 +42,44 @@ class PersonnelController extends Controller
         //
         return $this->personnelRepository()->fetchOneByIdOrDie($payload->id);
     }
-    
+
+    #[Mutation]
+    public function suspendPersonnel(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->personnelRepository();
+        $task = new SuspendPersonnel($repository);
+
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
+    }
+
+    #[Mutation]
+    public function unsuspendPersonnel(CompanyUserRoleInterface $user, string $id)
+    {
+        $repository = $this->personnelRepository();
+        $task = new UnsuspendPersonnel($repository);
+
+        $user->executeTaskInCompany($task, $id);
+        return $repository->fetchOneByIdOrDie($id);
+    }
+
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
     public function personnelList(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewPersonnelListTask($this->personnelRepository());
         $payload = $this->buildViewPaginationListPayload($input);
         $user->executeTaskInCompany($task, $payload);
-        
+
         return $payload->result;
     }
-    
+
     #[Query]
     public function personnelDetail(CompanyUserRoleInterface $user, string $id)
     {
         $task = new ViewPersonnelDetailTask($this->personnelRepository());
         $payload = new ViewDetailPayload($id);
         $user->executeTaskInCompany($task, $payload);
-        
+
         return $payload->result;
     }
 }
