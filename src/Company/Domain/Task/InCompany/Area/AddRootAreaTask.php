@@ -1,19 +1,18 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\AreaStructure\Area;
+namespace Company\Domain\Task\InCompany\Area;
 
 use Company\Domain\Model\AdminTaskInCompany;
 use Company\Domain\Model\AreaStructure\AreaData;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Resources\Exception\RegularException;
 
-class AddChildAreaTask implements AdminTaskInCompany
+class AddRootAreaTask implements AdminTaskInCompany
 {
 
     public function __construct(
             protected AreaRepository $areaRepository, protected AreaStructureRepository $areaStructureRepository)
     {
-        
     }
 
     /**
@@ -23,16 +22,14 @@ class AddChildAreaTask implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        if (!$this->areaRepository->isChildAreaNameAvailable($payload->parentAreaId, $payload->labelData->name)) {
+        if (!$this->areaRepository->isAreaRootNameAvailable($payload->labelData->name)) {
             throw RegularException::conflict('area name is unavailable');
         }
         $payload->setId($this->areaRepository->nextIdentity());
         
-        $parent = $this->areaRepository->ofId($payload->parentAreaId);
-        
         $areaStructure = $this->areaStructureRepository->ofId($payload->areaStructureId);
         
-        $area = $parent->createChild($areaStructure, $payload);
+        $area = $areaStructure->createRootArea($payload);
         $this->areaRepository->add($area);
     }
 }

@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\CompanyBC\InCompany\AreaStructure;
+namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
-use Company\Domain\Task\InCompany\AreaStructure\Area\AddChildAreaTask;
-use Company\Domain\Task\InCompany\AreaStructure\Area\AddRootAreaTask;
-use Company\Domain\Task\InCompany\AreaStructure\Area\DisableArea;
-use Company\Domain\Task\InCompany\AreaStructure\Area\UpdateArea;
-use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAllAreaList;
-use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAreaDetail;
-use Company\Domain\Task\InCompany\AreaStructure\Area\ViewAreaListTask;
+use Company\Domain\Model\AreaStructure\AreaData;
+use Company\Domain\Task\InCompany\Area\AddChildAreaTask;
+use Company\Domain\Task\InCompany\Area\AddRootAreaTask;
+use Company\Domain\Task\InCompany\Area\DisableArea;
+use Company\Domain\Task\InCompany\Area\UpdateArea;
+use Company\Domain\Task\InCompany\Area\ViewAllAreaList;
+use Company\Domain\Task\InCompany\Area\ViewAreaDetail;
+use Company\Domain\Task\InCompany\Area\ViewAreaListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineAreaRepository;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
@@ -40,7 +41,7 @@ class AreaController extends Controller
     {
         $repository = $this->areaRepository();
         $task = new AddRootAreaTask($repository, $this->areaStructureRepository());
-        $payload = (new AreaStructure\AreaData($this->createLabelData($input)))
+        $payload = (new AreaData($this->createLabelData($input)))
                 ->setAreaStructureId($areaStructureId ?? $input->get('AreaStructure_id'));
         $user->executeTaskInCompany($task, $payload);
 
@@ -52,7 +53,7 @@ class AreaController extends Controller
     {
         $repository = $this->areaRepository();
         $task = new AddChildAreaTask($repository, $this->areaStructureRepository());
-        $payload = (new AreaStructure\AreaData($this->createLabelData($input)))
+        $payload = (new AreaData($this->createLabelData($input)))
                 ->setParentAreaId($parentAreaId ?? $input->get('Area_idOfParent'))
                 ->setAreaStructureId($input->get('AreaStructure_id'));
         $user->executeTaskInCompany($task, $payload);
@@ -65,7 +66,7 @@ class AreaController extends Controller
     {
         $repository = $this->areaRepository();
         $task = new UpdateArea($repository);
-        $payload = (new AreaStructure\AreaData($this->createLabelData($input)))
+        $payload = (new AreaData($this->createLabelData($input)))
                 ->setId($id);
 
         $user->executeTaskInCompany($task, $payload);

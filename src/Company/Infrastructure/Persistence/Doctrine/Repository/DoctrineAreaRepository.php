@@ -3,7 +3,7 @@
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\AreaStructure\Area;
-use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
+use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;

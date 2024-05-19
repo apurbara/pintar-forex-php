@@ -1,6 +1,6 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\AreaStructure\Area;
+namespace Company\Domain\Task\InCompany\Area;
 
 use Tests\src\Company\Domain\Task\InCompany\TaskInCompanyTestBase;
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\GraphQL\CompanyBC;
 
-use App\Http\Controllers\CompanyBC\InCompany\AreaStructure\AreaController;
+use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;

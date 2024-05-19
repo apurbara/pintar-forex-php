@@ -1,6 +1,6 @@
 <?php
 
-namespace Company\Domain\Task\InCompany\AreaStructure\Area;
+namespace Company\Domain\Task\InCompany\Area;
 
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\AreaData;

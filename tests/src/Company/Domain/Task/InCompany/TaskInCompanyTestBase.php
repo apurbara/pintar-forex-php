@@ -11,7 +11,7 @@ use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\Manager\Sales;
 use Company\Domain\Model\SalesActivity;
-use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
+use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
