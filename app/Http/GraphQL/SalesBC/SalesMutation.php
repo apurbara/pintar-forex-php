@@ -22,7 +22,7 @@ class SalesMutation extends ObjectType
                     'args' => ['salesId' => Type::nonNull(Type::id())],
                     'resolve' => function ($root, $args, AppContext $app) {
                         app()->singleton(SalesRoleInterface::class,
-                                fn() => app(PersonnelRoleInterface::class)->authorizedAsSales($args['salesId']));
+                                fn() => app(PersonnelRoleInterface::class)->authorizedAsSales($salesId));
                         return TypeRegistry::type(Mutation::class);
                     }
                 ],

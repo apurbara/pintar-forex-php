@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
+use App\Http\Controllers\SalesBC\BySales\CommonSalesMetricSummaryController;
+use App\Http\Middleware\RegisterSalesRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/export-customer-to-csv', [CustomerController::class, 'exportCustomerToCsv']);
 Route::post('/import-customer-from-csv', [CustomerController::class, 'importCustomerFromCsv']);
+
+Route::prefix('/sales/{salesId}')->middleware([RegisterSalesRole::class])->group(function () {
+    Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
+});

@@ -81,7 +81,8 @@ class EntityRecord implements IRecord
             return $enumReflection->getCases()[0]->getName();
         } else {
             return match ($columnAttributeReflection->getArguments()['type']) {
-                'guid' => strtolower($this->tableName) . "-{$index}-id",
+//                'guid' => strtolower($this->tableName) . "-{$index}-id",
+                'guid' => mb_strimwidth("{$index}-id_" . strtolower($this->tableName), 0, 36),
                 'boolean' => false,
                 'integer', 'smallint', 'bigint' => 10,
                 'float', 'decimal' => 999.99,
