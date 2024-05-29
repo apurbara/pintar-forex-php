@@ -4,7 +4,7 @@ namespace App\Http\Controllers\UserRole;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\ManagerBC\ManagerRoleInterface;
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use App\Http\Controllers\UserBC\ByPersonnel\PersonnelRoleInterface;
 use App\Http\Controllers\UserRole\Personnel\ManagerRole;
 use App\Http\Controllers\UserRole\Personnel\SalesRole;

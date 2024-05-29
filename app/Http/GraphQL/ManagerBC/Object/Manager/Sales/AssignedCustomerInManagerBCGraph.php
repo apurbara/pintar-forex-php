@@ -7,7 +7,7 @@ use Company\Domain\Model\Personnel\Manager\Sales;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\Model\AreaStructure\Area\Customer;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Model\Personnel\Sales\CustomerAssignment;
 
 class AssignedCustomerInManagerBCGraph extends GraphqlObjectType
 {
@@ -57,6 +57,6 @@ class AssignedCustomerInManagerBCGraph extends GraphqlObjectType
 
     protected function getClassMetadata(): string
     {
-        return AssignedCustomer::class;
+        return CustomerAssignment::class;
     }
 }

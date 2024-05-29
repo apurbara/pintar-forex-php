@@ -5,7 +5,7 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Model\Personnel\Manager\Sales;
+use Company\Domain\Model\Personnel\Sales;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
 

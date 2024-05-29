@@ -36,7 +36,7 @@ class AssignedCustomerController extends Controller
         $eventName = MultipleCustomerAssignmentReceivedBySales::NAME;
         $salesRepository = $this->em->getRepository(\Sales\Domain\Model\Personnel\Sales::class);
         $salesActivityScheduleRepository = $this->em->getRepository(\Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule::class);
-        $assignedCustomerRepository = $this->em->getRepository(\Sales\Domain\Model\Personnel\Sales\AssignedCustomer::class);
+        $assignedCustomerRepository = $this->em->getRepository(\Sales\Domain\Model\Personnel\Sales\CustomerAssignment::class);
         $salesActivityRepository = $this->em->getRepository(\Sales\Domain\Model\SalesActivity::class);
         $listener = new AllocateInitialSalesActivityScheduleForMultipleAssignmentListener(
                 $salesRepository, $salesActivityScheduleRepository, $assignedCustomerRepository,

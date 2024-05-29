@@ -2,7 +2,7 @@
 
 namespace App\Http\GraphQL\SalesBC;
 
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use App\Http\Controllers\UserBC\ByPersonnel\PersonnelRoleInterface;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;

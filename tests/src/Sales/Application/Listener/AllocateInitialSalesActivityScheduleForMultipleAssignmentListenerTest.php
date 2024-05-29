@@ -2,13 +2,12 @@
 
 namespace Sales\Application\Listener;
 
-use Sales\Application\Listener\AllocateInitialSalesActivityScheduleForMultipleAssignmentListener;
 use Sales\Application\Service\Sales\SalesRepository;
-use Sales\Domain\Model\Personnel\Sales;
-use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
-use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
-use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivityScheduleForMultipleAssignment;
-use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Model\Sales;
+use Sales\Domain\Task\BySales\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\AllocateInitialSalesActivityScheduleForMultipleAssignment;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 use Tests\TestBase;
 
@@ -16,10 +15,10 @@ class AllocateInitialSalesActivityScheduleForMultipleAssignmentListenerTest exte
 {
 
     protected $salesRepository, $sales, $salesId = 'salesId';
-    protected $salesActivityScheduleRepository, $assignedCustomerRepository, $salesActivityRepository;
+    protected $salesActivityScheduleRepository, $customerAssignmentRepository, $salesActivityRepository;
     protected $listener;
     //
-    protected $event, $assignedCustomerIdOne = 'assignedCustomerIdOne', $assignedCustomerIdTwo = 'assignedCustomerIdTwo';
+    protected $event, $customerAssignmentIdOne = 'customerAssignmentIdOne', $customerAssignmentIdTwo = 'customerAssignmentIdTwo';
 
     protected function setUp(): void
     {
@@ -33,15 +32,15 @@ class AllocateInitialSalesActivityScheduleForMultipleAssignmentListenerTest exte
         
         $this->salesActivityScheduleRepository = $this->buildMockOfInterface(SalesActivityScheduleRepository::class);
         $this->salesActivityRepository = $this->buildMockOfInterface(SalesActivityRepository::class);
-        $this->assignedCustomerRepository = $this->buildMockOfInterface(AssignedCustomerRepository::class);
+        $this->customerAssignmentRepository = $this->buildMockOfInterface(CustomerAssignmentRepository::class);
 
         $this->listener = new TestableAllocateInitialSalesActivityScheduleForMultipleAssignmentListener($this->salesRepository,
-                $this->salesActivityScheduleRepository, $this->assignedCustomerRepository,
+                $this->salesActivityScheduleRepository, $this->customerAssignmentRepository,
                 $this->salesActivityRepository);
         //
         $this->event = (new MultipleCustomerAssignmentReceivedBySales($this->salesId))
-                ->addAssignedCustomerIdList($this->assignedCustomerIdOne)
-                ->addAssignedCustomerIdList($this->assignedCustomerIdTwo);
+                ->addCustomerAssignmentId($this->customerAssignmentIdOne)
+                ->addCustomerAssignmentId($this->customerAssignmentIdTwo);
     }
 
     //
@@ -53,7 +52,7 @@ class AllocateInitialSalesActivityScheduleForMultipleAssignmentListenerTest exte
     {
         $this->sales->expects($this->once())
                 ->method('executeTask')
-                ->with($this->isInstanceOf(AllocateInitialSalesActivityScheduleForMultipleAssignment::class), [$this->assignedCustomerIdOne, $this->assignedCustomerIdTwo]);
+                ->with($this->isInstanceOf(AllocateInitialSalesActivityScheduleForMultipleAssignment::class), [$this->customerAssignmentIdOne, $this->customerAssignmentIdTwo]);
         $this->handle();
     }
     public function test_handle_updateRepository()

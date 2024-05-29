@@ -5,10 +5,10 @@ namespace Sales\Application\Listener;
 use Resources\Event\EventInterface;
 use Resources\Event\ListenerInterface;
 use Sales\Application\Service\Sales\SalesRepository;
-use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
-use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
-use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivityScheduleForMultipleAssignment;
-use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Task\BySales\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\AllocateInitialSalesActivityScheduleForMultipleAssignment;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 
 class AllocateInitialSalesActivityScheduleForMultipleAssignmentListener implements ListenerInterface
@@ -17,7 +17,7 @@ class AllocateInitialSalesActivityScheduleForMultipleAssignmentListener implemen
     public function __construct(
             protected SalesRepository $salesRepository,
             protected SalesActivityScheduleRepository $salesActivityScheduleRepository,
-            protected AssignedCustomerRepository $assignedCustomerRepository,
+            protected CustomerAssignmentRepository $customerAssignmentRepository,
             protected SalesActivityRepository $salesActivityRepository
     )
     {
@@ -33,10 +33,10 @@ class AllocateInitialSalesActivityScheduleForMultipleAssignmentListener implemen
     private function execute(MultipleCustomerAssignmentReceivedBySales $event): void
     {
         $task = new AllocateInitialSalesActivityScheduleForMultipleAssignment(
-                $this->salesActivityScheduleRepository, $this->assignedCustomerRepository,
+                $this->salesActivityScheduleRepository, $this->customerAssignmentRepository,
                 $this->salesActivityRepository);
         $this->salesRepository->ofId($event->salesId)
-                ->executeTask($task, $event->getAssignedCustomerIdList());
+                ->executeTask($task, $event->getCustomerAssignmentIdList());
         $this->salesRepository->update();
     }
 }

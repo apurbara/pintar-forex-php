@@ -32,12 +32,12 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
     private function applyFilter(QueryBuilder $qb, &$searchSchema): void
     {
         foreach ($searchSchema['filters'] as $key => $filter) {
-            if (($filter['column'] ?? null) === 'AssignedCustomer.status') {
+            if (($filter['column'] ?? null) === 'CustomerAssignment.status') {
                 $customerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
                 $customerAssignmentQB->select('1')
-                        ->from('AssignedCustomer')
-                        ->andWhere($customerAssignmentQB->expr()->eq('AssignedCustomer.Customer_id', 'Customer.id'))
-                        ->andWhere($customerAssignmentQB->expr()->in('AssignedCustomer.status', ':status'));
+                        ->from('CustomerAssignment')
+                        ->andWhere($customerAssignmentQB->expr()->eq('CustomerAssignment.Customer_id', 'Customer.id'))
+                        ->andWhere($customerAssignmentQB->expr()->in('CustomerAssignment.status', ':status'));
 
                 $qb->andWhere("EXISTS ({$customerAssignmentQB->getSQL()})")
                         ->setParameter('status', $filter['value'], ArrayParameterType::STRING);
@@ -46,9 +46,9 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
             if (($filter['column'] ?? null) === 'hasActiveAssignment') {
                 $activeCustomerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
                 $activeCustomerAssignmentQB->select('1')
-                        ->from('AssignedCustomer')
-                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('AssignedCustomer.Customer_id', 'Customer.id'))
-                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('AssignedCustomer.status',
+                        ->from('CustomerAssignment')
+                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('CustomerAssignment.Customer_id', 'Customer.id'))
+                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('CustomerAssignment.status',
                                         "'" . CustomerAssignmentStatus::ACTIVE->value . "'"));
                 if ($filter['value'] == true) {
                     $qb->andWhere("EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
@@ -60,8 +60,8 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
             if (($filter['column'] ?? null) === 'hasAssignment') {
                 $activeCustomerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
                 $activeCustomerAssignmentQB->select('1')
-                        ->from('AssignedCustomer')
-                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('AssignedCustomer.Customer_id', 'Customer.id'));
+                        ->from('CustomerAssignment')
+                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('CustomerAssignment.Customer_id', 'Customer.id'));
                 if ($filter['value'] == true) {
                     $qb->andWhere("EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
                 } else {
@@ -114,5 +114,10 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
     public function aCustomer(string $id): array
     {
         return $this->queryOneById($id);
+    }
+
+    public function ofId(string $id): Customer
+    {
+        return $this->findOneByIdOrDie($id);
     }
 }

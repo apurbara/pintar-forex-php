@@ -3,8 +3,8 @@
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
-use Sales\Domain\Model\CustomerVerification;
-use Sales\Domain\Task\CustomerVerification\CustomerVerificationRepository;
+use Sales\Domain\DependencyModel\CustomerVerification;
+use Sales\Domain\Task\Dependency\CustomerVerificationRepository;
 
 class DoctrineCustomerVerificationRepository extends DoctrineEntityRepository implements CustomerVerificationRepository
 {

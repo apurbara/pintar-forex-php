@@ -7,8 +7,8 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCate
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
-use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\SalesActivityScheduleRepository;
 
 class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
         implements SalesActivityScheduleRepository
@@ -18,8 +18,8 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         $qb = parent::createCoreQueryBuilder();
-        $qb->innerJoin('SalesActivitySchedule', 'AssignedCustomer', 'AssignedCustomer',
-                'SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id');
+        $qb->innerJoin('SalesActivitySchedule', 'CustomerAssignment', 'CustomerAssignment',
+                'SalesActivitySchedule.CustomerAssignment_id = CustomerAssignment.id');
         return $qb;
     }
 
@@ -36,7 +36,7 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
     public function scheduledSalesActivityBelongsToSalesDetail(string $salesId, string $id): array
     {
         $filters = [
-            new Filter($salesId, 'AssignedCustomer.Sales_id'),
+            new Filter($salesId, 'CustomerAssignment.Sales_id'),
             new Filter($id, 'SalesActivitySchedule.id'),
         ];
         return $this->fetchOneOrDie($filters);
@@ -45,7 +45,7 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
     public function scheduledSalesActivityBelongsToSalesList(string $salesId, array $paginationSchema): array
     {
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($salesId, 'AssignedCustomer.Sales_id'));
+                ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
 
@@ -54,9 +54,9 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
         $qb = $this->dbalQueryBuilder();
         $qb->select('COUNT(SalesActivitySchedule.id)')
                 ->from('SalesActivitySchedule')
-                ->innerJoin('SalesActivitySchedule', "AssignedCustomer", "AssignedCustomer",
-                        "SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id")
-                ->andWhere('AssignedCustomer.Sales_id = :salesId')
+                ->innerJoin('SalesActivitySchedule', "CustomerAssignment", "CustomerAssignment",
+                        "SalesActivitySchedule.CustomerAssignment_id = CustomerAssignment.id")
+                ->andWhere('CustomerAssignment.Sales_id = :salesId')
                 ->setParameter('salesId', $salesId);
 
         foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
@@ -74,9 +74,9 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
                 ->addSelect('SalesActivitySchedule.endTime endTime')
                 ->addSelect('SalesActivitySchedule.status status')
                 ->from('SalesActivitySchedule')
-                ->innerJoin('SalesActivitySchedule', "AssignedCustomer", "AssignedCustomer",
-                        "SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id")
-                ->andWhere('AssignedCustomer.Sales_id = :salesId')
+                ->innerJoin('SalesActivitySchedule', "CustomerAssignment", "CustomerAssignment",
+                        "SalesActivitySchedule.CustomerAssignment_id = CustomerAssignment.id")
+                ->andWhere('CustomerAssignment.Sales_id = :salesId')
                 ->addGroupBy('SalesActivitySchedule.startTime')
                 ->addGroupBy('SalesActivitySchedule.endTime')
                 ->addGroupBy('SalesActivitySchedule.status')

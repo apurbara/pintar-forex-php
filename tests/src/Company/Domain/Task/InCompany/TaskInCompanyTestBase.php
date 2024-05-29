@@ -10,14 +10,20 @@ use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Manager;
 use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
+use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
+use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentRepository;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Manager\ManagerRepository;
 use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
+use Company\Domain\Task\InCompany\RecycleRequest\RecycleRequestRepository;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\SalesActivity\SalesActivityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -155,9 +161,54 @@ class TaskInCompanyTestBase extends TestBase
         $this->customerRepository = $this->buildMockOfInterface(CustomerRepository::class);
         $this->customer = $this->buildMockOfClass(Customer::class);
         //
-//        $this->customerRepository->expects($this->any())
+        $this->customerRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerId)
+                ->willReturn($this->customer);
+    }
+
+    protected MockObject $customerAssignmentRepository;
+    protected MockObject $customerAssignment;
+    protected string $customerAssignmentId = 'customerAssignmentId';
+
+    protected function prepareCustomerAssignmentDependency(): void
+    {
+        $this->customerAssignmentRepository = $this->buildMockOfInterface(CustomerAssignmentRepository::class);
+        $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
+        //
+//        $this->customerAssignmentRepository->expects($this->any())
 //                ->method('ofId')
-//                ->with($this->customerId)
-//                ->willReturn($this->customer);
+//                ->with($this->customerAssignmentId)
+//                ->willReturn($this->customerAssignment);
+    }
+
+    protected MockObject $closingRequestRepository;
+    protected MockObject $closingRequest;
+    protected string $closingRequestId = 'closingRequestId';
+
+    protected function prepareClosingRequestDependency(): void
+    {
+        $this->closingRequestRepository = $this->buildMockOfInterface(ClosingRequestRepository::class);
+        $this->closingRequest = $this->buildMockOfClass(ClosingRequest::class);
+        //
+        $this->closingRequestRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->closingRequestId)
+                ->willReturn($this->closingRequest);
+    }
+
+    protected MockObject $recycleRequestRepository;
+    protected MockObject $recycleRequest;
+    protected string $recycleRequestId = 'recycleRequestId';
+
+    protected function prepareRecycleRequestDependency(): void
+    {
+        $this->recycleRequestRepository = $this->buildMockOfInterface(RecycleRequestRepository::class);
+        $this->recycleRequest = $this->buildMockOfClass(RecycleRequest::class);
+        //
+        $this->recycleRequestRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->recycleRequestId)
+                ->willReturn($this->recycleRequest);
     }
 }

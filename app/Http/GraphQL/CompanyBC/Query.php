@@ -4,11 +4,14 @@ namespace App\Http\GraphQL\CompanyBC;
 
 use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\ClosingRequestController;
+use App\Http\Controllers\CompanyBC\InCompany\CustomerAssignmentController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\ManagerController;
 use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
+use App\Http\Controllers\CompanyBC\InCompany\RecycleRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesController;
 use GraphQL\Type\Definition\ObjectType;
@@ -36,6 +39,9 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ManagerController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
         ];
     }
 }

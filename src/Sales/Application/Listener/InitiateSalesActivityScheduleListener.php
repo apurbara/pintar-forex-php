@@ -5,15 +5,15 @@ namespace Sales\Application\Listener;
 use Resources\Event\EventInterface;
 use Resources\Event\ListenerInterface;
 use Sales\Domain\Service\SalesActivitySchedulerService;
-use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
-use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
+use Sales\Domain\Task\BySales\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 
 readonly class InitiateSalesActivityScheduleListener implements ListenerInterface
 {
 
     public function __construct(
-            protected AssignedCustomerRepository $assignedCustomerRepository,
+            protected CustomerAssignmentRepository $customerAssignmentRepository,
             protected SalesActivityRepository $salesActivityRepository)
     {
         
@@ -28,8 +28,8 @@ readonly class InitiateSalesActivityScheduleListener implements ListenerInterfac
     {
         $initialSalesActivity = $this->salesActivityRepository->anInitialSalesActivity();
         $service = new SalesActivitySchedulerService();
-        $this->assignedCustomerRepository->ofId($event->assignedCustomerId)
+        $this->customerAssignmentRepository->ofId($event->customerAssignmentId)
                 ->initiateSalesActivitySchedule($initialSalesActivity, $service);
-        $this->assignedCustomerRepository->update();
+        $this->customerAssignmentRepository->update();
     }
 }

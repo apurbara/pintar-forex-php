@@ -2,7 +2,7 @@
 
 namespace Sales\Application\Service\Sales;
 
-use Sales\Domain\Task\SalesTask;
+use Sales\Domain\Task\BySales\SalesTask;
 
 class ExecuteSalesTask
 {

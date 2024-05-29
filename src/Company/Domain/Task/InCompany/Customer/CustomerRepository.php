@@ -11,12 +11,13 @@ interface CustomerRepository
 
     public function add(Customer $customer): void;
 
-    public function isPhoneAvailable(string $phone): bool;
-    
-    public function customerList(array $paginationSchema): array;
-    
-    public function allCustomer(array $searchSchema): array;
-    
-    public function aCustomer(string $id): array;
+    public function ofId(string $id): Customer;
 
+    public function isPhoneAvailable(string $phone): bool;
+
+    public function customerList(array $paginationSchema): array;
+
+    public function allCustomer(array $searchSchema): array;
+
+    public function aCustomer(string $id): array;
 }

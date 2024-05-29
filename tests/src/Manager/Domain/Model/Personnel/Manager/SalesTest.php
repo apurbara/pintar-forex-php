@@ -103,7 +103,7 @@ class SalesTest extends TestBase
     {
         $this->receiveCustomerAssignment();
         $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addAssignedCustomerIdList($this->assignedCustomerId);
+                ->addCustomerAssignmentId($this->assignedCustomerId);
         $this->assertEquals($event, $this->sales->recordedEvents[0]);
     }
     public function test_receiveCustomerAssignment_consecutiveAssignmentReceived_storeEvent()
@@ -112,8 +112,8 @@ class SalesTest extends TestBase
         $this->sales->receiveCustomerAssignment($assignedCustomerId = 'assignedCusstomerId', $this->customer, $this->customerJourney);
         $this->sales->receiveCustomerAssignment($otherAssignedCustomerId = 'otherCustomerAssignmentId', $otherCustomer, $this->customerJourney);
         $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addAssignedCustomerIdList($assignedCustomerId)
-                ->addAssignedCustomerIdList($otherAssignedCustomerId);
+                ->addCustomerAssignmentId($assignedCustomerId)
+                ->addCustomerAssignmentId($otherAssignedCustomerId);
         $this->assertEquals($event, $this->sales->recordedEvents[0]);
     }
     public function test_receiveCustomerAssignment_consecutiveAssignmentReceived_storeOnlySingleEvent()
@@ -122,8 +122,8 @@ class SalesTest extends TestBase
         $this->sales->receiveCustomerAssignment($assignedCustomerId = 'assignedCusstomerId', $this->customer, $this->customerJourney);
         $this->sales->receiveCustomerAssignment($otherAssignedCustomerId = 'otherCustomerAssignmentId', $otherCustomer, $this->customerJourney);
         $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addAssignedCustomerIdList($assignedCustomerId)
-                ->addAssignedCustomerIdList($otherAssignedCustomerId);
+                ->addCustomerAssignmentId($assignedCustomerId)
+                ->addCustomerAssignmentId($otherAssignedCustomerId);
         $this->assertEquals($event, $this->sales->recordedEvents[0]);
         $this->assertEquals(1, count($this->sales->recordedEvents));
     }
@@ -136,7 +136,7 @@ class SalesTest extends TestBase
         $otherCustomer = $this->buildMockOfClass(Customer::class);
         $this->sales->receiveCustomerAssignment($otherAssignedCustomerId = 'otherCustomerAssignmentId', $otherCustomer, $this->customerJourney);
         $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addAssignedCustomerIdList($otherAssignedCustomerId);
+                ->addCustomerAssignmentId($otherAssignedCustomerId);
         $this->assertEquals($event, $this->sales->recordedEvents[0]);
     }
     public function test_receiveCustomerAssignment_incrementActiveAssignmentValue()

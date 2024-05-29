@@ -1,0 +1,26 @@
+<?php
+
+namespace Company\Domain\Task\InCompany\RecycleRequest;
+
+use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Resources\Domain\TaskPayload\ViewDetailPayload;
+
+class ViewRecycleRequestDetail implements PersonnelHavingManagerAssignmentTaskInCompany
+{
+
+    public function __construct(protected RecycleRequestRepository $recycleRequestRepository)
+    {
+        
+    }
+
+    /**
+     * 
+     * @param ViewDetailPayload $payload
+     * @return void
+     */
+    public function executeInCompany($payload): void
+    {
+        $result = $this->recycleRequestRepository->aRecycleRequest($payload->id);
+        $payload->setResult($result);
+    }
+}

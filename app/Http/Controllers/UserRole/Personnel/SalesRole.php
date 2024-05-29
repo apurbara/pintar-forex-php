@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\UserRole\Personnel;
 
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use App\Http\Controllers\UserRole\PersonnelRole;
 use Sales\Application\Service\Sales\ExecuteSalesTask;
-use Sales\Domain\Model\Personnel\Sales;
-use Sales\Domain\Task\SalesTask;
+use Sales\Domain\Model\Sales;
+use Sales\Domain\Task\BySales\SalesTask;
 
 class SalesRole extends PersonnelRole implements SalesRoleInterface
 {

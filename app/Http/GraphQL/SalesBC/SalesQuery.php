@@ -2,7 +2,7 @@
 
 namespace App\Http\GraphQL\SalesBC;
 
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use App\Http\Controllers\UserBC\ByPersonnel\PersonnelRoleInterface;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -17,15 +17,15 @@ class SalesQuery extends ObjectType
     {
         parent::__construct([
             'fields' => fn() => [
-        'sales' => [
-            'type' => TypeRegistry::type(Query::class),
-            'args' => ['salesId' => Type::nonNull(Type::id())],
-            'resolve' => function ($root, $args, AppContext $app) {
-                app()->singleton(SalesRoleInterface::class,
-                        fn() => app(PersonnelRoleInterface::class)->authorizedAsSales($args['salesId']));
-                return TypeRegistry::type(Query::class);
-            }
-        ],
+                'sales' => [
+                    'type' => TypeRegistry::type(Query::class),
+                    'args' => ['salesId' => Type::nonNull(Type::id())],
+                    'resolve' => function ($root, $args, AppContext $app) {
+                        app()->singleton(SalesRoleInterface::class,
+                                fn() => app(PersonnelRoleInterface::class)->authorizedAsSales($args['salesId']));
+                        return TypeRegistry::type(Query::class);
+                    }
+                ],
             ],
         ]);
     }

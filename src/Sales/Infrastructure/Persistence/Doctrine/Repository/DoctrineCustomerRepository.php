@@ -4,7 +4,7 @@ namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use Sales\Domain\Task\Customer\CustomerRepository;
+use Sales\Domain\Task\Dependency\CustomerRepository;
 
 class DoctrineCustomerRepository extends DoctrineEntityRepository implements CustomerRepository
 {

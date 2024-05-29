@@ -8,21 +8,21 @@ class MultipleCustomerAssignmentReceivedBySales implements EventInterface
 {
 
     const NAME = "MultipleCustomerAssignmentReceivedBySales";
-    protected array $assignedCustomerIdList = [];
+    protected array $customerAssignmentIdList = [];
     
     public function __construct(public readonly string $salesId)
     {
     }
 
-    public function getAssignedCustomerIdList(): array
+    public function getCustomerAssignmentIdList(): array
     {
-        return $this->assignedCustomerIdList;
+        return $this->customerAssignmentIdList;
     }
 
     //
-    public function addAssignedCustomerIdList(string $assignedCustomerId)
+    public function addCustomerAssignmentId(string $customerAssignmentId)
     {
-        $this->assignedCustomerIdList[] = $assignedCustomerId;
+        $this->customerAssignmentIdList[] = $customerAssignmentId;
         return $this;
     }
 

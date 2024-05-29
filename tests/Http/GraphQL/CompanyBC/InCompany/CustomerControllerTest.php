@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\AreaStructure\Area\Customer;
-use Company\Domain\Model\Personnel\Manager\Sales;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
@@ -24,14 +24,14 @@ class CustomerControllerTest extends CompanyBCTestCase
         parent::setUp();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('Sales')->truncate();
-        $this->connection->table('AssignedCustomer')->truncate();
+        $this->connection->table('CustomerAssignment')->truncate();
         
         $this->customerOne = new EntityRecord(Customer::class, 1);
         $this->customerTwo = new EntityRecord(Customer::class, 2);
         //
         $this->salesOne = new EntityRecord(Sales::class, 1);
         
-        $this->customerAssignmentOne = new EntityRecord(AssignedCustomer::class, 1);
+        $this->customerAssignmentOne = new EntityRecord(CustomerAssignment::class, 1);
         $this->customerAssignmentOne->columns['Customer_id'] = $this->customerOne->columns['id'];
         $this->customerAssignmentOne->columns['Sales_id'] = $this->salesOne->columns['id'];
         $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::ACTIVE->value;
@@ -41,7 +41,7 @@ class CustomerControllerTest extends CompanyBCTestCase
         parent::tearDown();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('Sales')->truncate();
-        $this->connection->table('AssignedCustomer')->truncate();
+        $this->connection->table('CustomerAssignment')->truncate();
     }
     
     //
@@ -91,14 +91,15 @@ _QUERY;
             ]
         ]);
     }
-    public function test_viewList_appyAssignedCustomerStatusFilter()
+    public function test_viewList_appyCustomerAssignmentStatusFilter()
     {
+$this->disableExceptionHandling();
         $this->salesOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
         //
         $this->paginationSchema = [
             'filters' => [
-                ['column' => 'AssignedCustomer.status', 'value' => [CustomerAssignmentStatus::ACTIVE->value], 'comparisonType' => 'IN'],
+                ['column' => 'CustomerAssignment.status', 'value' => [CustomerAssignmentStatus::ACTIVE->value], 'comparisonType' => 'IN'],
             ],
         ];
         //

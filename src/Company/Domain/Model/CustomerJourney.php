@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Resources\Exception\RegularException;
 use SharedContext\Domain\ValueObject\Label;
 
 #[Entity(repositoryClass: DoctrineCustomerJourneyRepository::class)]
@@ -52,5 +53,13 @@ class CustomerJourney
     public function enable(): void
     {
         $this->disabled = false;
+    }
+    
+    //
+    public function assertActive(): void
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('inactive customer journey');
+        }
     }
 }

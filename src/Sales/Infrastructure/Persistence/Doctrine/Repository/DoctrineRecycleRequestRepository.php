@@ -6,8 +6,8 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequest;
-use Sales\Domain\Task\RecycleRequest\RecycleRequestRepository;
+use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
+use Sales\Domain\Task\BySales\RecycleRequest\RecycleRequestRepository;
 
 class DoctrineRecycleRequestRepository extends DoctrineEntityRepository implements RecycleRequestRepository
 {
@@ -26,21 +26,21 @@ class DoctrineRecycleRequestRepository extends DoctrineEntityRepository implemen
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         return parent::createCoreQueryBuilder()
-                        ->innerJoin('RecycleRequest', 'AssignedCustomer', 'AssignedCustomer',
-                                'RecycleRequest.AssignedCustomer_id = AssignedCustomer.id');
+                        ->innerJoin('RecycleRequest', 'CustomerAssignment', 'CustomerAssignment',
+                                'RecycleRequest.CustomerAssignment_id = CustomerAssignment.id');
     }
 
     public function recycleRequestListBelongsToSales(string $salesId, array $paginationSchema): array
     {
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($salesId, 'AssignedCustomer.Sales_id'));
+                ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
 
     public function aRecycleRequestBelongsToSales(string $salesId, string $id): array
     {
         $filters = [
-            new Filter($salesId, 'AssignedCustomer.Sales_id'),
+            new Filter($salesId, 'CustomerAssignment.Sales_id'),
             new Filter($id, 'RecycleRequest.id'),
         ];
         return $this->fetchOneOrDie($filters);

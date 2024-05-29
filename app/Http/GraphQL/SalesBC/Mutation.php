@@ -2,21 +2,21 @@
 
 namespace App\Http\GraphQL\SalesBC;
 
-use App\Http\Controllers\SalesBC\AssignedCustomerController;
-use App\Http\Controllers\SalesBC\ClosingRequestController;
-use App\Http\Controllers\SalesBC\CustomerController;
-use App\Http\Controllers\SalesBC\RecycleRequestController;
-use App\Http\Controllers\SalesBC\SalesActivityReportController;
-use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
-use App\Http\Controllers\SalesBC\VerificationReportController;
+use App\Http\Controllers\SalesBC\BySales\ClosingRequestController;
+use App\Http\Controllers\SalesBC\BySales\CustomerAssignmentController;
+use App\Http\Controllers\SalesBC\BySales\CustomerController;
+use App\Http\Controllers\SalesBC\BySales\RecycleRequestController;
+use App\Http\Controllers\SalesBC\BySales\SalesActivityReportController;
+use App\Http\Controllers\SalesBC\BySales\SalesActivityScheduleController;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\VerificationReportController;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
 use Resources\Infrastructure\GraphQL\DoctrineEntityToGraphqlFieldMapper;
 use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
-use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
+use Sales\Domain\DependencyModel\AreaStructure\Area\Customer\VerificationReport;
 use function app;
 
 class Mutation extends ObjectType
@@ -33,7 +33,7 @@ class Mutation extends ObjectType
     {
         return [
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(AssignedCustomerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityReportController::class),
@@ -43,10 +43,10 @@ class Mutation extends ObjectType
                 'type' => TypeRegistry::objectType(VerificationReport::class),
                 'args' => [
                     ...DoctrineEntityToGraphqlFieldMapper::mapInputFields(VerificationReport::class),
-                    'AssignedCustomer_id' => Type::id(),
+                    'CustomerAssignment_id' => Type::id(),
                 ],
                 'resolve' => fn($root, $args) => app(VerificationReportController::class)
-                        ->submitCustomerVerificationReport(app(SalesRoleInterface::class), $args['AssignedCustomer_id'],
+                        ->submitCustomerVerificationReport(app(SalesRoleInterface::class), $args['CustomerAssignment_id'],
                                 new GraphqlInputRequest($args))
             ],
         ];

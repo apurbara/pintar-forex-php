@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\CompanyBC\InCompany\Personnel;
+namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;

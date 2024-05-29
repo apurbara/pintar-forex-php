@@ -6,10 +6,10 @@ use Resources\Event\EventInterface;
 use Resources\Event\ListenerInterface;
 use Sales\Application\Service\Sales\ExecuteSalesTask;
 use Sales\Application\Service\Sales\SalesRepository;
-use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
-use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
-use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivitySchedule;
-use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Task\BySales\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\AllocateInitialSalesActivitySchedule;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 
 class AllocateInitialSalesActivityScheduleListener implements ListenerInterface
@@ -20,13 +20,13 @@ class AllocateInitialSalesActivityScheduleListener implements ListenerInterface
 
     public function __construct(
             SalesRepository $salesRepository, SalesActivityScheduleRepository $salesActivityScheduleRepository,
-            AssignedCustomerRepository $assignedCustomerRepository, SalesActivityRepository $salesActivityRepository,
+            CustomerAssignmentRepository $customerAssignmentRepository, SalesActivityRepository $salesActivityRepository,
             protected string $personnelId, protected string $salesId
     )
     {
         $this->service = new ExecuteSalesTask($salesRepository);
         $this->task = new AllocateInitialSalesActivitySchedule($salesActivityScheduleRepository,
-                $assignedCustomerRepository, $salesActivityRepository);
+                $customerAssignmentRepository, $salesActivityRepository);
     }
 
     public function handle(EventInterface $event): void
@@ -38,6 +38,6 @@ class AllocateInitialSalesActivityScheduleListener implements ListenerInterface
     {
         $this->service->execute(
                 $this->personnelId, $this->salesId, $this->task,
-                $event->assignedCustomerId);
+                $event->customerAssignmentId);
     }
 }

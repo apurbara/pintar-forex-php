@@ -5,7 +5,7 @@ namespace App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomerInSalesBCGraph;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
+use Sales\Domain\Model\Personnel\Sales\CustomerAssignment;
 use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\RecycleRequest;
 
 class RecycleRequestInSalesBCGraph extends GraphqlObjectType
@@ -17,7 +17,7 @@ class RecycleRequestInSalesBCGraph extends GraphqlObjectType
             ...parent::fieldDefinition(),
             'assignedCustomer' => [
                 'type' => TypeRegistry::objectType(AssignedCustomerInSalesBCGraph::class),
-                'resolve' => fn($root) => $this->buildDoctrineRepository(AssignedCustomer::class)->fetchOneById($root['AssignedCustomer_id'])
+                'resolve' => fn($root) => $this->buildDoctrineRepository(CustomerAssignment::class)->fetchOneById($root['AssignedCustomer_id'])
             ],
         ];
     }

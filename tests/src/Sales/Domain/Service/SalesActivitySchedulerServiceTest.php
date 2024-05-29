@@ -3,8 +3,7 @@
 namespace Sales\Domain\Service;
 
 use DateTimeImmutable;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
-use Sales\Domain\Model\SalesActivity;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Tests\TestBase;
 
 class SalesActivitySchedulerServiceTest extends TestBase

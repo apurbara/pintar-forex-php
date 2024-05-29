@@ -3,18 +3,24 @@
 namespace Company\Domain\Model\AreaStructure\Area;
 
 use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
+use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\ValidationRule;
 use Resources\ValidationService;
-use Sales\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
@@ -45,6 +51,10 @@ class Customer
 
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $source;
+    
+    #[FetchableObjectList(targetEntity: CustomerAssignment::class, joinColumnName: "Customer_id", paginationRequired: true)]
+    #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $customerAssignments;
 
     //QUERY ONLY
     #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id",
@@ -77,6 +87,12 @@ class Customer
     }
 
     //
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    //
     public function __construct(?Area $area, string $id, CustomerData $data)
     {
         $this->area = $area;
@@ -86,8 +102,18 @@ class Customer
         $this->setName($data->name);
         $this->setPhone($data->phone);
         $this->setEmail($data->email);
-        $this->source = $data->source;
+        $this->source = $data->source ?? null;
         //
         $this->area?->assertActive();
+    }
+
+    //
+    public function assertHasNoActiveAssignment(): void
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
+        if (!$this->customerAssignments->matching($criteria)->isEmpty()) {
+            throw RegularException::forbidden('customer already being maintained');
+        }
     }
 }

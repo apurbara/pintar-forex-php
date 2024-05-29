@@ -6,7 +6,7 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use Sales\Domain\Task\VerificationReport\VerificationReportRepository;
+use Sales\Domain\Task\BySales\VerificationReport\VerificationReportRepository;
 
 class DoctrineVerificationReportRepository extends DoctrineEntityRepository implements VerificationReportRepository
 {
@@ -14,15 +14,16 @@ class DoctrineVerificationReportRepository extends DoctrineEntityRepository impl
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         return parent::createCoreQueryBuilder()
-                ->innerJoin('VerificationReport', 'Customer', 'Customer', 'VerificationReport.Customer_id = Customer.id')
-                ->innerJoin('Customer', 'AssignedCustomer', 'AssignedCustomer',
-                'AssignedCustomer.Customer_id = Customer.id');
+                        ->innerJoin('VerificationReport', 'Customer', 'Customer',
+                                'VerificationReport.Customer_id = Customer.id')
+                        ->innerJoin('Customer', 'CustomerAssignment', 'CustomerAssignment',
+                                'CustomerAssignment.Customer_id = Customer.id');
     }
 
     public function aVerificationReportOfCustomerAssgnedToSales(string $salesId, string $id): array
     {
         $filters = [
-            new Filter($salesId, 'AssignedCustomer.Sales_id'),
+            new Filter($salesId, 'CustomerAssignment.Sales_id'),
             new Filter($id, 'VerificationReport.id'),
         ];
         return $this->fetchOneOrDie($filters);
@@ -31,16 +32,16 @@ class DoctrineVerificationReportRepository extends DoctrineEntityRepository impl
     public function verificationReportListOfCustomerAssgnedToSales(string $salesId, array $paginationSchema): array
     {
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($salesId, 'AssignedCustomer.Sales_id'));
+                ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
 
     //
-    public function aVerificationReportOnAssignedCustomerAssociateWithCustomerVerificationId(
-            string $assignedCustomerId, string $customerVerificationId): array
+    public function aVerificationReportOnCustomerAssignmentAssociateWithCustomerVerificationId(
+            string $customerAssignmentId, string $customerVerificationId): array
     {
         $filters = [
-            new Filter($assignedCustomerId, 'AssignedCustomer.id'),
+            new Filter($customerAssignmentId, 'CustomerAssignment.id'),
             new Filter($customerVerificationId, 'VerificationReport.CustomerVerification_id'),
         ];
         return $this->fetchOneOrDie($filters);

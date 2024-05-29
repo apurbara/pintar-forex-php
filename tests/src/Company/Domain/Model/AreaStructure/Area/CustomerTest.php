@@ -3,18 +3,35 @@
 namespace Company\Domain\Model\AreaStructure\Area;
 
 use Company\Domain\Model\AreaStructure\Area;
+use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use Tests\TestBase;
 
 class CustomerTest extends TestBase
 {
     protected $area;
+    protected $customer;
+    protected $customerAssignment;
+    //
     protected $id = 'newId', $name = 'new name', $phone = '0823123131', $email = 'newAddress@email.org', $source = 'new source';
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->area = $this->buildMockOfClass(Area::class);
+        //
+        $data = (new CustomerData())
+                ->setName('name')
+                ->setEmail('customer@email.org')
+                ->setPhone('082131231');
+        $this->customer = new TestableCustomer($this->area, 'id', $data);
+        
+        $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
+        $this->customer->customerAssignments = new ArrayCollection();
+        $this->customer->customerAssignments->add($this->customerAssignment);
     }
 
     //
@@ -77,6 +94,27 @@ class CustomerTest extends TestBase
                 ->method('assertActive');
         $this->construct();
     }
+    
+    //
+    protected function assertHasNoActiveAssignment()
+    {
+        $this->customerAssignment->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->customer->assertHasNoActiveAssignment();
+    }
+    public function test_assertHasNoActiveAssignment_hasActiveAssignment_forbidden()
+    {
+        $this->assertRegularExceptionThrowed(fn() => $this->assertHasNoActiveAssignment(), 'Forbidden', 'customer already being maintained');
+    }
+    public function test_assertHasNoActiveAssignment_noActiveAssignment_void()
+    {
+        $this->customerAssignment->expects($this->once())
+                ->method('getStatus')
+                ->willReturn(CustomerAssignmentStatus::RECYCLED);
+        $this->assertHasNoActiveAssignment();
+        $this->markAsSuccess();
+    }
 }
 
 class TestableCustomer extends Customer
@@ -90,4 +128,5 @@ class TestableCustomer extends Customer
     public ?string $email;
     public string $phone;
     public ?string $source;
+    public Collection $customerAssignments;
 }

@@ -3,8 +3,8 @@
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
-use Sales\Domain\Model\AreaStructure\Area;
-use Sales\Domain\Task\Area\AreaRepository;
+use Sales\Domain\DependencyModel\AreaStructure\Area;
+use Sales\Domain\Task\Dependency\AreaRepository;
 
 class DoctrineAreaRepository extends DoctrineEntityRepository implements AreaRepository
 {

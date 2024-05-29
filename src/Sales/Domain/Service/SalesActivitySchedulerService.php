@@ -5,7 +5,7 @@ namespace Sales\Domain\Service;
 use DateInterval;
 use DateTimeImmutable;
 use Resources\Exception\RegularException;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use SplObjectStorage;
 
 class SalesActivitySchedulerService

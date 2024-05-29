@@ -2,16 +2,16 @@
 
 namespace Sales\Application\Listener;
 
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer;
-use Sales\Domain\Model\SalesActivity;
-use Sales\Domain\Task\AssignedCustomer\AssignedCustomerRepository;
-use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
+use Sales\Domain\DependencyModel\SalesActivity;
+use Sales\Domain\Model\Sales\CustomerAssignment;
+use Sales\Domain\Task\BySales\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 use Tests\TestBase;
 
 class InitiateSalesActivityScheduleListenerTest extends TestBase
 {
-    protected $assignedCustomerRepository, $assignedCustomer, $assignedCustomerId = 'assignedCustomerId';
+    protected $customerAssignmentRepository, $customerAssignment, $customerAssignmentId = 'customerAssignmentId';
     protected $salesActivityRepository, $salesActivity;
     protected $listener;
     protected $event;
@@ -19,24 +19,24 @@ class InitiateSalesActivityScheduleListenerTest extends TestBase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->assignedCustomerRepository = $this->buildMockOfInterface(AssignedCustomerRepository::class);
-        $this->assignedCustomer = $this->buildMockOfClass(AssignedCustomer::class);
+        $this->customerAssignmentRepository = $this->buildMockOfInterface(CustomerAssignmentRepository::class);
+        $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
         
         $this->salesActivityRepository = $this->buildMockOfInterface(SalesActivityRepository::class);
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
         
-        $this->listener = new InitiateSalesActivityScheduleListener($this->assignedCustomerRepository, $this->salesActivityRepository);
+        $this->listener = new InitiateSalesActivityScheduleListener($this->customerAssignmentRepository, $this->salesActivityRepository);
         
-        $this->event = new CustomerAssignedEvent($this->assignedCustomerId);
+        $this->event = new CustomerAssignedEvent($this->customerAssignmentId);
     }
     
     //
     protected function handle()
     {
-        $this->assignedCustomerRepository->expects($this->any())
+        $this->customerAssignmentRepository->expects($this->any())
                 ->method('ofId')
-                ->with($this->assignedCustomerId)
-                ->willReturn($this->assignedCustomer);
+                ->with($this->customerAssignmentId)
+                ->willReturn($this->customerAssignment);
         $this->salesActivityRepository->expects($this->any())
                 ->method('anInitialSalesActivity')
                 ->willReturn($this->salesActivity);
@@ -44,14 +44,14 @@ class InitiateSalesActivityScheduleListenerTest extends TestBase
     }
     public function test_handle_initiateSalesActivityScheduleInAssignment()
     {
-        $this->assignedCustomer->expects($this->once())
+        $this->customerAssignment->expects($this->once())
                 ->method('initiateSalesActivitySchedule')
                 ->with($this->salesActivity, $this->anything());
         $this->handle();
     }
     public function test_handle_updateRepository()
     {
-        $this->assignedCustomerRepository->expects($this->once())
+        $this->customerAssignmentRepository->expects($this->once())
                 ->method('update');
         $this->handle();
     }

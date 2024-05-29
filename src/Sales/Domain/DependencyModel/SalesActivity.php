@@ -1,0 +1,56 @@
+<?php
+
+namespace Sales\Domain\DependencyModel;
+
+use DateTimeImmutable;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Id;
+use Resources\Exception\RegularException;
+use Sales\Domain\Service\SalesActivitySchedulerService;
+use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityRepository;
+
+#[Entity(repositoryClass: DoctrineSalesActivityRepository::class)]
+class SalesActivity
+{
+
+    #[Id, Column(type: "guid")]
+    protected string $id;
+
+    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
+    protected bool $disabled;
+
+    #[Column(type: "smallint", nullable: false)]
+    protected int $duration;
+
+    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
+    protected bool $initial;
+
+    public function getDuration(): int
+    {
+        return $this->duration;
+    }
+
+    public function isInitial(): bool
+    {
+        return $this->initial;
+    }
+
+    protected function __construct()
+    {
+        
+    }
+
+    //
+    public function assertActive(): void
+    {
+        if ($this->disabled) {
+            throw RegularException::forbidden('inactive sales activity');
+        }
+    }
+
+    public function findAvailableTimeSlotForInitialActivity(SalesActivitySchedulerService $schedulerService): DateTimeImmutable
+    {
+        return $schedulerService->nextAvailableTimeSlotForScheduleWithDuration($this->duration);
+    }
+}

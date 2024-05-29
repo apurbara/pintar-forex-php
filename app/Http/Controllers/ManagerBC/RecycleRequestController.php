@@ -25,7 +25,7 @@ use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Resources\Infrastructure\Persistence\Doctrine\DoctrineTransactionalSession;
 use Sales\Application\Listener\InitiateSalesActivityScheduleListener;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer as AssignedCustomer2;
+use Sales\Domain\Model\Personnel\Sales\CustomerAssignment as AssignedCustomer2;
 use Sales\Domain\Model\SalesActivity;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 use SharedContext\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;

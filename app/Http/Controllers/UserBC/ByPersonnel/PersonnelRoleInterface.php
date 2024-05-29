@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\UserBC\ByPersonnel;
 
 use App\Http\Controllers\ManagerBC\ManagerRoleInterface;
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use User\Domain\Task\ByPersonnel\PersonnelTask;
 
 interface PersonnelRoleInterface

@@ -2,8 +2,8 @@
 
 namespace Sales\Application\Service\Sales;
 
-use Sales\Domain\Model\Personnel\Sales;
-use Sales\Domain\Task\SalesTask;
+use Sales\Domain\Model\Sales;
+use Sales\Domain\Task\BySales\SalesTask;
 use Tests\TestBase;
 
 class ExecuteSalesTaskTest extends TestBase

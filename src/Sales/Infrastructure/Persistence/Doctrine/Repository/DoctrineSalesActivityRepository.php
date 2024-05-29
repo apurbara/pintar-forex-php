@@ -3,8 +3,8 @@
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
-use Sales\Domain\Model\SalesActivity;
-use Sales\Domain\Task\SalesActivity\SalesActivityRepository;
+use Sales\Domain\DependencyModel\SalesActivity;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 
 class DoctrineSalesActivityRepository extends DoctrineEntityRepository implements SalesActivityRepository
 {
@@ -17,8 +17,8 @@ class DoctrineSalesActivityRepository extends DoctrineEntityRepository implement
     public function anInitialSalesActivity(): ?SalesActivity
     {
         return $this->findOneBy([
-            'initial' => true,
-            'disabled' => false,
+                    'initial' => true,
+                    'disabled' => false,
         ]);
     }
 }

@@ -6,8 +6,8 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use Sales\Domain\Model\Personnel\Sales\AssignedCustomer\SalesActivitySchedule\SalesActivityReport;
-use Sales\Domain\Task\SalesActivityReport\SalesActivityReportRepository;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
+use Sales\Domain\Task\BySales\SalesActivityReport\SalesActivityReportRepository;
 
 class DoctrineSalesActivityReportRepository extends DoctrineEntityRepository implements SalesActivityReportRepository
 {
@@ -17,8 +17,8 @@ class DoctrineSalesActivityReportRepository extends DoctrineEntityRepository imp
         return parent::createCoreQueryBuilder()
                         ->innerJoin('SalesActivityReport', 'SalesActivitySchedule', 'SalesActivitySchedule',
                                 'SalesActivityReport.SalesActivitySchedule_id = SalesActivitySchedule.id')
-                        ->innerJoin('SalesActivitySchedule', 'AssignedCustomer', 'AssignedCustomer',
-                                'SalesActivitySchedule.AssignedCustomer_id = AssignedCustomer.id');
+                        ->innerJoin('SalesActivitySchedule', 'CustomerAssignment', 'CustomerAssignment',
+                                'SalesActivitySchedule.CustomerAssignment_id = CustomerAssignment.id');
     }
 
     //
@@ -30,7 +30,7 @@ class DoctrineSalesActivityReportRepository extends DoctrineEntityRepository imp
     public function salesActivityReportDetailBelongsToSales(string $salesId, string $id): array
     {
         $filters = [
-            new Filter($salesId, 'AssignedCustomer.Sales_id'),
+            new Filter($salesId, 'CustomerAssignment.Sales_id'),
             new Filter($id, 'SalesActivityReport.id'),
         ];
         return $this->fetchOneOrDie($filters);
@@ -47,8 +47,7 @@ class DoctrineSalesActivityReportRepository extends DoctrineEntityRepository imp
     public function salesActivityReportListBelongsToSales(string $salesId, array $paginationSchema): array
     {
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($salesId, 'AssignedCustomer.Sales_id'));
+                ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
-
 }

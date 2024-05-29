@@ -2,13 +2,13 @@
 
 namespace App\Http\GraphQL\SalesBC;
 
-use App\Http\Controllers\SalesBC\AssignedCustomerController;
-use App\Http\Controllers\SalesBC\ClosingRequestController;
-use App\Http\Controllers\SalesBC\RecycleRequestController;
-use App\Http\Controllers\SalesBC\SalesActivityReportController;
-use App\Http\Controllers\SalesBC\SalesActivityScheduleController;
-use App\Http\Controllers\SalesBC\SalesRoleInterface;
-use App\Http\Controllers\SalesBC\VerificationReportController;
+use App\Http\Controllers\SalesBC\BySales\ClosingRequestController;
+use App\Http\Controllers\SalesBC\BySales\CustomerAssignmentController;
+use App\Http\Controllers\SalesBC\BySales\RecycleRequestController;
+use App\Http\Controllers\SalesBC\BySales\SalesActivityReportController;
+use App\Http\Controllers\SalesBC\BySales\SalesActivityScheduleController;
+use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
+use App\Http\Controllers\SalesBC\BySales\VerificationReportController;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleSummaryInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -33,11 +33,11 @@ class Query extends ObjectType
     protected function fieldDefinition(): array
     {
         return [
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(AssignedCustomerController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentController::class),
             'totalCustomerAssignment' => [
                 'type' => Type::int(),
                 'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),],
-                'resolve' => fn($root, $args, AppContext $app) => (new AssignedCustomerController())
+                'resolve' => fn($root, $args, AppContext $app) => (new CustomerAssignmentController())
                         ->totalCustomerAssignment(app(SalesRoleInterface::class), new GraphqlInputRequest($args))
             ],
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),

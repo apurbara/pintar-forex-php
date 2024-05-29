@@ -108,7 +108,7 @@ class Sales implements ContainEventsInterface
                 $this->multipleCustomerAssignmentReceivedBySalesEvent = new MultipleCustomerAssignmentReceivedBySales($this->id);
                 $this->recordEvent($this->multipleCustomerAssignmentReceivedBySalesEvent);
             }
-            $this->multipleCustomerAssignmentReceivedBySalesEvent->addAssignedCustomerIdList($assignedCustomerId);
+            $this->multipleCustomerAssignmentReceivedBySalesEvent->addCustomerAssignmentId($assignedCustomerId);
             $this->activeAssignmentValue++;
             return $assignedCustomer;
         } catch (RegularException $ex) {

@@ -86,6 +86,22 @@ class CustomerJourneyTest extends TestBase
         $this->enable();
         $this->assertFalse($this->customerJourney->disabled);
     }
+    
+    //
+    protected function assertActive()
+    {
+        $this->customerJourney->assertActive();
+    }
+    public function test_assertActive_disabledCustomerJourney_forbidden()
+    {
+        $this->customerJourney->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive customer journey');
+    }
+    public function test_assertActive_activeCustomerJourney_void()
+    {
+        $this->assertActive();
+        $this->markAsSuccess();
+    }
 }
 
 class TestableCustomerJourney extends CustomerJourney

@@ -9,7 +9,7 @@ namespace App\Http\GraphQL\SalesBC;
 
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
-use Sales\Domain\Model\AreaStructure\Area\Customer;
+use Sales\Domain\DependencyModel\AreaStructure\Area\Customer;
 use function base_path;
 
 TypeRegistry::registerPredefinedClassMaps([

@@ -3,7 +3,7 @@
 namespace Tests\Http\GraphQL\SalesBC;
 
 use Company\Domain\Model\AreaStructure\Area;
-use Sales\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Personnel\Sales;
 use Tests\Http\GraphQL\GraphqlTestCase;
 use Tests\Http\Record\EntityRecord;
 use Tests\Http\Record\Model\PersonnelRecord;
