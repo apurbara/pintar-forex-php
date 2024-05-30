@@ -9,8 +9,7 @@ use Company\Domain\Model\Personnel;
 use Company\Domain\Model\Personnel\Sales;
 use Company\Domain\Model\Personnel\SalesData;
 use Company\Domain\Task\InCompany\Sales\AssignSalesTask;
-use Company\Domain\Task\InCompany\Sales\DisableSales;
-use Company\Domain\Task\InCompany\Sales\EnableSales;
+use Company\Domain\Task\InCompany\Sales\CancelSalesAssignment;
 use Company\Domain\Task\InCompany\Sales\ViewSalesDetailTask;
 use Company\Domain\Task\InCompany\Sales\ViewSalesListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
@@ -49,20 +48,10 @@ class SalesController extends Controller
     }
 
     #[Mutation]
-    public function disableSales(CompanyUserRoleInterface $user, string $id)
+    public function cancelSalesAssignment(CompanyUserRoleInterface $user, string $id)
     {
         $repository = $this->repository();
-        $task = new DisableSales($repository);
-
-        $user->executeTaskInCompany($task, $id);
-        return $this->repository()->fetchOneByIdOrDie($id);
-    }
-
-    #[Mutation]
-    public function enableSales(CompanyUserRoleInterface $user, string $id)
-    {
-        $repository = $this->repository();
-        $task = new EnableSales($repository);
+        $task = new CancelSalesAssignment($repository);
 
         $user->executeTaskInCompany($task, $id);
         return $this->repository()->fetchOneByIdOrDie($id);

@@ -48,8 +48,11 @@ class Sales implements ContainEventsInterface
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
 
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected ?DateTimeImmutable $cancelTime;
+
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
+    protected bool $cancelled;
 
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
@@ -64,27 +67,24 @@ class Sales implements ContainEventsInterface
         $this->area = $area;
         $this->id = $id;
         $this->createdTime = new DateTimeImmutable();
-        $this->disabled = false;
+        $this->cancelTime = null;
+        $this->cancelled = false;
         $this->type = SalesType::from($data->type);
         //
         $this->personnel->assertActive();
         $this->area?->assertActive();
     }
 
-    public function disable(): void
+    public function cancel(): void
     {
-        $this->disabled = true;
+        $this->cancelled = true;
+        $this->cancelTime = new DateTimeImmutable();
 
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
         foreach ($this->customerAssignments->matching($criteria)->getIterator() as $customerAssignment) {
             $customerAssignment->cancel();
         }
-    }
-
-    public function enable(): void
-    {
-        $this->disabled = false;
     }
 
     //
@@ -95,7 +95,7 @@ class Sales implements ContainEventsInterface
 
     public function assertActive(): void
     {
-        if ($this->disabled) {
+        if ($this->cancelled) {
             throw RegularException::forbidden('inactive sales');
         }
     }
@@ -115,12 +115,12 @@ class Sales implements ContainEventsInterface
 
     public function receiveCustomerAssignment(string $id, Customer $customer, ?CustomerJourney $customerJourney): ?CustomerAssignment
     {
-        
+
         if (empty($this->multipleCustomerAssignmentReceivedBySalesEvent)) {
             $this->multipleCustomerAssignmentReceivedBySalesEvent = new MultipleCustomerAssignmentReceivedBySales($this->id);
             $this->recordEvent($this->multipleCustomerAssignmentReceivedBySalesEvent);
         }
-        
+
         try {
             $customerAssignment = new CustomerAssignment($this, $customer, $customerJourney, $id);
             $this->multipleCustomerAssignmentReceivedBySalesEvent->addCustomerAssignmentId($id);

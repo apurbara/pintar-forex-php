@@ -69,7 +69,8 @@ class SalesTest extends TestBase
         $this->assertSame($this->area, $sales->area);
         $this->assertSame($this->id, $this->id);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($sales->createdTime);
-        $this->assertFalse($sales->disabled);
+        $this->assertNull($sales->cancelTime);
+        $this->assertFalse($sales->cancelled);
         $this->assertEquals(SalesType::from($this->salesType), $sales->type);
     }
     public function test_construct_assertPersonnelActive()
@@ -92,7 +93,7 @@ class SalesTest extends TestBase
     }
     
     //
-    protected function disable()
+    protected function cancel()
     {
         $this->customerAssignmentOne->expects($this->any())
                 ->method('getStatus')
@@ -100,41 +101,30 @@ class SalesTest extends TestBase
         $this->customerAssignmentTwo->expects($this->any())
                 ->method('getStatus')
                 ->willReturn(CustomerAssignmentStatus::ACTIVE);
-        $this->sales->disable();
+        $this->sales->cancel();
     }
-    public function test_disable_setDisabled()
+    public function test_cancel_setCancelledAndCancelTime()
     {
-        $this->disable();
-        $this->assertTrue($this->sales->disabled);
+        $this->cancel();
+        $this->assertTrue($this->sales->cancelled);
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($this->sales->cancelTime);
     }
-    public function test_disable_cancelActiveAssignment()
+    public function test_cancel_cancelActiveAssignment()
     {
         $this->customerAssignmentOne->expects($this->once())
                 ->method('cancel');
         $this->customerAssignmentTwo->expects($this->once())
                 ->method('cancel');
-        $this->disable();
+        $this->cancel();
     }
-    public function test_disable_ignoreInactiveAssignment()
+    public function test_cancel_ignoreInactiveAssignment()
     {
         $this->customerAssignmentOne->expects($this->once())
                 ->method('getStatus')
                 ->willReturn(CustomerAssignmentStatus::RECYCLED);
         $this->customerAssignmentOne->expects($this->never())
                 ->method('cancel');
-        $this->disable();
-    }
-    
-    //
-    protected function enable()
-    {
-        $this->sales->enable();
-    }
-    public function test_enable_setDisabledFalse()
-    {
-        $this->sales->disabled = true;
-        $this->enable();
-        $this->assertFalse($this->sales->disabled);
+        $this->cancel();
     }
     
     //
@@ -157,9 +147,9 @@ class SalesTest extends TestBase
     {
         $this->sales->assertActive();
     }
-    public function test_assertActive_disabledSales_forbidden()
+    public function test_assertActive_cancelledSales_forbidden()
     {
-        $this->sales->disabled = true;
+        $this->sales->cancelled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive sales');
     }
     public function test_assertActive_activeSales_void()
@@ -269,7 +259,8 @@ class TestableSales extends Sales
     public ?Area $area;
     public string $id;
     public DateTimeImmutable $createdTime;
-    public bool $disabled;
+    public ?DateTimeImmutable $cancelTime;
+    public bool $cancelled;
     public SalesType $type;
     public Collection $customerAssignments;
     //

@@ -4,7 +4,7 @@ namespace Company\Domain\Task\InCompany\Sales;
 
 use Tests\src\Company\Domain\Task\InCompany\TaskInCompanyTestBase;
 
-class DisableSalesTest extends TaskInCompanyTestBase
+class CancelSalesAssignmentTest extends TaskInCompanyTestBase
 {
     protected $task;
     
@@ -13,7 +13,7 @@ class DisableSalesTest extends TaskInCompanyTestBase
         parent::setUp();
         $this->prepareSalesDependency();
         //
-        $this->task = new DisableSales($this->salesRepository);
+        $this->task = new CancelSalesAssignment($this->salesRepository);
     }
     
     //
@@ -24,7 +24,7 @@ class DisableSalesTest extends TaskInCompanyTestBase
     public function test_execute_disableSales()
     {
         $this->sales->expects($this->once())
-                ->method('disable');
+                ->method('cancel');
         $this->execute();
     }
 }

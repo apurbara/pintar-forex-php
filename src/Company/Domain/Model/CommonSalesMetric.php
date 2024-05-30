@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCommonSalesMetricRepository;
 use SharedContext\Domain\Enum\EvaluationType;
+use SharedContext\Domain\Enum\MetricType;
 use SharedContext\Domain\Enum\RecurrenceType;
-use SharedContext\Domain\Enum\SalesMetricType;
 
 #[Entity(repositoryClass: DoctrineCommonSalesMetricRepository::class)]
 class CommonSalesMetric
@@ -33,8 +33,8 @@ class CommonSalesMetric
     #[Column(type: "integer", nullable: true)]
     protected int $target;
 
-    #[Column(type: "string", enumType: SalesMetricType::class)]
-    protected SalesMetricType $metricType;
+    #[Column(type: "string", enumType: MetricType::class)]
+    protected MetricType $metricType;
 
     #[Column(type: "string", enumType: EvaluationType::class)]
     protected EvaluationType $evaluationType;

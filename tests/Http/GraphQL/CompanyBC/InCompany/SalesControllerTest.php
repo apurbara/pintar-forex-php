@@ -67,7 +67,7 @@ class SalesControllerTest extends CompanyBCTestCase
         $this->graphqlQuery = <<<'_QUERY'
 mutation ( $Personnel_id: ID!, $Area_id: ID!, $type: String ){
     assignSales ( Personnel_id: $Personnel_id, Area_id: $Area_id, type: $type ) {
-        id, disabled, createdTime, type,
+        id, cancelled, createdTime, type,
         personnel { id, name }
         area { id, name }
     }
@@ -87,7 +87,7 @@ $this->disableExceptionHandling();
         $this->assign();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'disabled' => false,
+            'cancelled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'type' => $this->salesAssignData['type'],
             'personnel' => [
@@ -101,7 +101,7 @@ $this->disableExceptionHandling();
         ]);
         
         $this->seeInDatabase('Sales', [
-            'disabled' => false,
+            'cancelled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'type' => $this->salesAssignData['type'],
             'Personnel_id' => $this->personnelOne->columns['id'],
@@ -110,7 +110,7 @@ $this->disableExceptionHandling();
     }
     
     //
-    protected function disableSales()
+    protected function cancelSalesAssignment()
     {
         $this->prepareAdminDependency();
         $this->area->insert($this->connection);
@@ -121,70 +121,30 @@ $this->disableExceptionHandling();
 mutation (
     $id: ID
 ){
-    disableSales ( id: $id ) {
-        disabled
+    cancelSalesAssignment ( id: $id ) {
+        cancelled
     }
 }
 _QUERY;
         $this->graphqlVariables = [
             'id' => $this->salesOne->columns['id'],
-            ...$this->salesAssignData,
             
         ];
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_disableSales_200()
+    public function test_cancelSalesAssignment_200()
     {
 $this->disableExceptionHandling();
-        $this->disableSales();
+        $this->cancelSalesAssignment();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'disabled' => true,
+            'cancelled' => true,
         ]);
         
         $this->seeInDatabase('Sales', [
             'id' => $this->salesOne->columns['id'],
-            'disabled' => true,
-        ]);
-    }
-    
-    //
-    protected function enableSales()
-    {
-        $this->prepareAdminDependency();
-        $this->area->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
-        $this->salesOne->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $id: ID
-){
-    enableSales ( id: $id ) {
-        disabled
-    }
-}
-_QUERY;
-        $this->graphqlVariables = [
-            'id' => $this->salesOne->columns['id'],
-            ...$this->salesAssignData,
-            
-        ];
-        $this->postGraphqlRequest($this->admin->token);
-    }
-    public function test_enableSales_200()
-    {
-$this->disableExceptionHandling();
-        $this->salesOne->columns['disabled'] = true;
-        $this->enableSales();
-        $this->seeStatusCode(200);
-        $this->seeJsonContains([
-            'disabled' => false,
-        ]);
-        
-        $this->seeInDatabase('Sales', [
-            'id' => $this->salesOne->columns['id'],
-            'disabled' => false,
+            'cancelled' => true,
+            'cancelTime' => $this->stringOfCurrentTime(),
         ]);
     }
     
@@ -206,7 +166,7 @@ $this->disableExceptionHandling();
 query SalesList {
     salesList{
         list {
-            id, disabled, createdTime,
+            id, cancelled, createdTime,
             personnel { id, name }
             area { id, name }
         },
@@ -224,7 +184,7 @@ _QUERY;
             'list' => [
                 [
                     'id' => $this->salesOne->columns['id'],
-                    'disabled' => $this->salesOne->columns['disabled'],
+                    'cancelled' => $this->salesOne->columns['cancelled'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
                     'personnel' => [
                         'id' => $this->personnelOne->columns['id'],
@@ -237,7 +197,7 @@ _QUERY;
                 ],
                 [
                     'id' => $this->salesTwo->columns['id'],
-                    'disabled' => $this->salesTwo->columns['disabled'],
+                    'cancelled' => $this->salesTwo->columns['cancelled'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->salesTwo->columns['createdTime']),
                     'personnel' => [
                         'id' => $this->personnelTwo->columns['id'],
@@ -269,7 +229,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query SalesDetail ( $id: ID! ) {
     salesDetail ( id: $id ) {
-        id, disabled, createdTime,
+        id, cancelled, createdTime,
         personnel { id, name }
         area { id, name }
     }
@@ -284,7 +244,7 @@ _QUERY;
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'id' => $this->salesOne->columns['id'],
-            'disabled' => $this->salesOne->columns['disabled'],
+            'cancelled' => $this->salesOne->columns['cancelled'],
             'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
             'personnel' => [
                 'id' => $this->personnelOne->columns['id'],

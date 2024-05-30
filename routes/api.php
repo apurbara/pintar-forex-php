@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
+use App\Http\Controllers\CompanyBC\InCompany\PerformanceSummaryController;
 use App\Http\Controllers\SalesBC\BySales\CommonSalesMetricSummaryController;
 use App\Http\Middleware\RegisterSalesRole;
 use Illuminate\Http\Request;
@@ -27,3 +28,6 @@ Route::post('/import-customer-from-csv', [CustomerController::class, 'importCust
 Route::prefix('/sales/{salesId}')->middleware([RegisterSalesRole::class])->group(function () {
     Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
 });
+Route::get('/view-all-company-metric-summary', [PerformanceSummaryController::class, 'viewAllCompanyMetricSummary']);
+Route::get('/view-all-sales-rank-summary', [PerformanceSummaryController::class, 'viewAllSalesRankSummary']);
+Route::get('/view-all-sales-performance-metric-summary', [PerformanceSummaryController::class, 'viewAllSalesPerformanceMetricSummary']);

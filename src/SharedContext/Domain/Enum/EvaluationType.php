@@ -12,8 +12,8 @@ enum EvaluationType: string
     case MIN = 'MIN';
     case MAX = 'MAX';
     
-    public function applyToQueryBuilder(QueryBuilder $qb, string $metricEvaluationColumn): void
+    public function applyToQuery(QueryBuilder $qb, string $metricEvaluationColumn, ?string $alias = 'achievement'): void
     {
-        $qb->addSelect("{$this->value}($metricEvaluationColumn) 'value'");
+        $qb->addSelect("{$this->value}($metricEvaluationColumn) '$alias'");
     }
 }

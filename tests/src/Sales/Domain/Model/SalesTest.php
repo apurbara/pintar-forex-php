@@ -52,7 +52,7 @@ class SalesTest extends TestBase
     }
     public function test_assertActive_inactiveSales_forbidden()
     {
-        $this->sales->disabled = true;
+        $this->sales->cancelled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive sales');
     }
     public function test_assertActive_activeSales_void()
@@ -75,7 +75,7 @@ class SalesTest extends TestBase
     }
     public function test_executeTask_disabledSales_forbidden()
     {
-        $this->sales->disabled = true;
+        $this->sales->cancelled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->executeTask(), 'Forbidden', 'only active sales can make this request');
     }
     public function test_executeTask_assertPersonnelActive()
@@ -115,7 +115,7 @@ class TestableSales extends Sales
 {
     public Personnel $personnel;
     public string $id = 'id';
-    public bool $disabled = false;
+    public bool $cancelled = false;
     public Collection $customerAssignments;
     
     function __construct()

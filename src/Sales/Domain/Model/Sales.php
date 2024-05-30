@@ -15,9 +15,6 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
-use Sales\Domain\DependencyModel\AreaStructure\Area;
-use Sales\Domain\DependencyModel\AreaStructure\Area\CustomerData;
-use Sales\Domain\DependencyModel\CustomerJourney;
 use Sales\Domain\DependencyModel\Personnel;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
@@ -40,7 +37,7 @@ class Sales
     protected string $id;
 
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
+    protected bool $cancelled;
 
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
@@ -67,7 +64,7 @@ class Sales
     //
     public function assertActive(): void
     {
-        if ($this->disabled) {
+        if ($this->cancelled) {
             throw RegularException::forbidden('inactive sales');
         }
     }
@@ -76,7 +73,7 @@ class Sales
     public function executeTask(SalesTask $task, $payload): void
     {
         $this->personnel->assertActive();
-        if ($this->disabled) {
+        if ($this->cancelled) {
             throw RegularException::forbidden('only active sales can make this request');
         }
         $task->executeBySales($this, $payload);

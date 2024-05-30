@@ -10,8 +10,8 @@ use DateTime;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use SharedContext\Domain\Enum\EvaluationType;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use SharedContext\Domain\Enum\MetricType;
 use SharedContext\Domain\Enum\RecurrenceType;
-use SharedContext\Domain\Enum\SalesMetricType;
 use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
@@ -55,19 +55,19 @@ class CommonSalesMetricSummaryControllerTest extends SalesBCTestCase
         //
         $this->commonSalesMetricOne = new EntityRecord(CommonSalesMetric::class, 1);
         $this->commonSalesMetricOne->columns['target'] = 111;
-        $this->commonSalesMetricOne->columns['metricType'] = SalesMetricType::APPROVED_CLOSING_REQUEST->value;
+        $this->commonSalesMetricOne->columns['metricType'] = MetricType::APPROVED_CLOSING_REQUEST->value;
         $this->commonSalesMetricOne->columns['evaluationType'] = EvaluationType::SUM->value;
         $this->commonSalesMetricOne->columns['recurrenceType'] = RecurrenceType::MONTHLY->value;
         $this->commonSalesMetricOne->columns['recurrenceCount'] = 3;
         $this->commonSalesMetricTwo = new EntityRecord(CommonSalesMetric::class, 2);
         $this->commonSalesMetricTwo->columns['target'] = 222;
-        $this->commonSalesMetricTwo->columns['metricType'] = SalesMetricType::SALES_ACTIVITY_REPORT->value;
+        $this->commonSalesMetricTwo->columns['metricType'] = MetricType::SALES_ACTIVITY_REPORT->value;
         $this->commonSalesMetricTwo->columns['evaluationType'] = EvaluationType::COUNT->value;
         $this->commonSalesMetricTwo->columns['recurrenceType'] = RecurrenceType::MONTHLY->value;
         $this->commonSalesMetricTwo->columns['recurrenceCount'] = 3;
         $this->commonSalesMetricThree = new EntityRecord(CommonSalesMetric::class, 3);
         $this->commonSalesMetricThree->columns['target'] = 333;
-        $this->commonSalesMetricThree->columns['metricType'] = SalesMetricType::APPROVED_CLOSING_REQUEST->value;
+        $this->commonSalesMetricThree->columns['metricType'] = MetricType::APPROVED_CLOSING_REQUEST->value;
         $this->commonSalesMetricThree->columns['evaluationType'] = EvaluationType::COUNT->value;
         $this->commonSalesMetricThree->columns['recurrenceType'] = RecurrenceType::MONTHLY->value;
         $this->commonSalesMetricThree->columns['recurrenceCount'] = 3;
@@ -96,31 +96,31 @@ class CommonSalesMetricSummaryControllerTest extends SalesBCTestCase
         $this->closingRequestMinusOneRecurrenceA = new EntityRecord(ClosingRequest::class, 'minusOneRecurrenceA');
         $this->closingRequestMinusOneRecurrenceA->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
         $this->closingRequestMinusOneRecurrenceA->columns['status'] = ManagementApprovalStatus::APPROVED->value;
-        $this->closingRequestMinusOneRecurrenceA->columns['createdTime'] = (new DateTime('-1 months'))->format('Y-m-d H:i:s');
+        $this->closingRequestMinusOneRecurrenceA->columns['createdTime'] = (new DateTime('first day of -1 months'))->format('Y-m-d H:i:s');
         $this->closingRequestMinusOneRecurrenceA->columns['transactionValue'] = 111;
         $this->closingRequestMinusOneRecurrenceB = new EntityRecord(ClosingRequest::class, 'minusOneRecurrenceB');
         $this->closingRequestMinusOneRecurrenceB->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
         $this->closingRequestMinusOneRecurrenceB->columns['status'] = ManagementApprovalStatus::APPROVED->value;
-        $this->closingRequestMinusOneRecurrenceB->columns['createdTime'] = (new DateTime('-1 months'))->format('Y-m-d H:i:s');
+        $this->closingRequestMinusOneRecurrenceB->columns['createdTime'] = (new DateTime('first day of -1 months'))->format('Y-m-d H:i:s');
         $this->closingRequestMinusOneRecurrenceB->columns['transactionValue'] = 112;
         $this->closingRequestMinusTwoRecurrenceA = new EntityRecord(ClosingRequest::class, 'minusTwoRecurrenceA');
         $this->closingRequestMinusTwoRecurrenceA->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
         $this->closingRequestMinusTwoRecurrenceA->columns['status'] = ManagementApprovalStatus::APPROVED->value;
-        $this->closingRequestMinusTwoRecurrenceA->columns['createdTime'] = (new DateTime('-2 months'))->format('Y-m-d H:i:s');
+        $this->closingRequestMinusTwoRecurrenceA->columns['createdTime'] = (new DateTime('first day of -2 months'))->format('Y-m-d H:i:s');
         $this->closingRequestMinusTwoRecurrenceA->columns['transactionValue'] = 121;
         $this->closingRequestMinusTwoRecurrenceB = new EntityRecord(ClosingRequest::class, 'minusTwoRecurrenceB');
         $this->closingRequestMinusTwoRecurrenceB->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
         $this->closingRequestMinusTwoRecurrenceB->columns['status'] = ManagementApprovalStatus::APPROVED->value;
-        $this->closingRequestMinusTwoRecurrenceB->columns['createdTime'] = (new DateTime('-2 months'))->format('Y-m-d H:i:s');
+        $this->closingRequestMinusTwoRecurrenceB->columns['createdTime'] = (new DateTime('first day of -2 months'))->format('Y-m-d H:i:s');
         $this->closingRequestMinusTwoRecurrenceB->columns['transactionValue'] = 122;
         $this->closingRequestMinusThreeRecurrenceA = new EntityRecord(ClosingRequest::class, 'minusThreeRecurrenceA');
         $this->closingRequestMinusThreeRecurrenceA->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
         $this->closingRequestMinusThreeRecurrenceA->columns['status'] = ManagementApprovalStatus::APPROVED->value;
-        $this->closingRequestMinusThreeRecurrenceA->columns['createdTime'] = (new DateTime('-3 months'))->format('Y-m-d H:i:s');
+        $this->closingRequestMinusThreeRecurrenceA->columns['createdTime'] = (new DateTime('first day of -3 months'))->format('Y-m-d H:i:s');
         $this->closingRequestMinusThreeRecurrenceA->columns['transactionValue'] = 131;
         $this->closingRequestMinusThreeRecurrenceB = new EntityRecord(ClosingRequest::class, 'minusThreeRecurrenceB');
         $this->closingRequestMinusThreeRecurrenceB->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
-        $this->closingRequestMinusThreeRecurrenceB->columns['createdTime'] = (new DateTime('-3 months'))->format('Y-m-d H:i:s');
+        $this->closingRequestMinusThreeRecurrenceB->columns['createdTime'] = (new DateTime('first day of -3 months'))->format('Y-m-d H:i:s');
         $this->closingRequestMinusThreeRecurrenceB->columns['status'] = ManagementApprovalStatus::APPROVED->value;
         $this->closingRequestMinusThreeRecurrenceB->columns['transactionValue'] = 132;
         
@@ -135,22 +135,22 @@ class CommonSalesMetricSummaryControllerTest extends SalesBCTestCase
         $this->salesActivityReportOngoingRecurrenceC->columns['submitTime'] = (new DateTime())->format('Y-m-d H:i:s');
         $this->salesActivityReportMinusOneRecurrenceA = new EntityRecord(SalesActivityReport::class, 'minusOneRecurrenceA');
         $this->salesActivityReportMinusOneRecurrenceA->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
-        $this->salesActivityReportMinusOneRecurrenceA->columns['submitTime'] = (new DateTime('-1 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityReportMinusOneRecurrenceA->columns['submitTime'] = (new DateTime('first day of -1 months'))->format('Y-m-d H:i:s');
         $this->salesActivityReportMinusOneRecurrenceB = new EntityRecord(SalesActivityReport::class, 'minusOneRecurrenceB');
         $this->salesActivityReportMinusOneRecurrenceB->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
-        $this->salesActivityReportMinusOneRecurrenceB->columns['submitTime'] = (new DateTime('-1 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityReportMinusOneRecurrenceB->columns['submitTime'] = (new DateTime('first day of -1 months'))->format('Y-m-d H:i:s');
         $this->salesActivityReportMinusTwoRecurrenceA = new EntityRecord(SalesActivityReport::class, 'minusTwoRecurrenceA');
         $this->salesActivityReportMinusTwoRecurrenceA->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
-        $this->salesActivityReportMinusTwoRecurrenceA->columns['submitTime'] = (new DateTime('-2 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityReportMinusTwoRecurrenceA->columns['submitTime'] = (new DateTime('first day of -2 months'))->format('Y-m-d H:i:s');
         $this->salesActivityReportMinusTwoRecurrenceB = new EntityRecord(SalesActivityReport::class, 'minusTwoRecurrenceB');
         $this->salesActivityReportMinusTwoRecurrenceB->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
-        $this->salesActivityReportMinusTwoRecurrenceB->columns['submitTime'] = (new DateTime('-2 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityReportMinusTwoRecurrenceB->columns['submitTime'] = (new DateTime('first day of -2 months'))->format('Y-m-d H:i:s');
         $this->salesActivityReportMinusThreeRecurrenceA = new EntityRecord(SalesActivityReport::class, 'minusThreeRecurrenceA');
         $this->salesActivityReportMinusThreeRecurrenceA->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
-        $this->salesActivityReportMinusThreeRecurrenceA->columns['submitTime'] = (new DateTime('-3 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityReportMinusThreeRecurrenceA->columns['submitTime'] = (new DateTime('first day of -3 months'))->format('Y-m-d H:i:s');
         $this->salesActivityReportMinusThreeRecurrenceB = new EntityRecord(SalesActivityReport::class, 'minusThreeRecurrenceB');
         $this->salesActivityReportMinusThreeRecurrenceB->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
-        $this->salesActivityReportMinusThreeRecurrenceB->columns['submitTime'] = (new DateTime('-3 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityReportMinusThreeRecurrenceB->columns['submitTime'] = (new DateTime('first day of -3 months'))->format('Y-m-d H:i:s');
     }
     
     protected function tearDown(): void
@@ -207,16 +207,16 @@ $this->disableExceptionHandling();
             'target' => $this->commonSalesMetricOne->columns['target'],
             'result' => [
                 [
-                    'time' => (new DateTime())->format('Y-m'),
-                    'value' => strval(101 + 102 + 103),
+                    'evaluationTime' => (new DateTime())->format('Y-m'),
+                    'achievement' => strval(101 + 102 + 103),
                 ],
                 [
-                    'time' => (new DateTime('-1 months'))->format('Y-m'),
-                    'value' => strval(111 + 112),
+                    'evaluationTime' => (new DateTime('-1 months'))->format('Y-m'),
+                    'achievement' => strval(111 + 112),
                 ],
                 [
-                    'time' => (new DateTime('-2 months'))->format('Y-m'),
-                    'value' => strval(121 + 122),
+                    'evaluationTime' => (new DateTime('-2 months'))->format('Y-m'),
+                    'achievement' => strval(121 + 122),
                 ],
             ],
         ]);
@@ -225,16 +225,16 @@ $this->disableExceptionHandling();
             'target' => $this->commonSalesMetricTwo->columns['target'],
             'result' => [
                 [
-                    'time' => (new DateTime())->format('Y-m'),
-                    'value' => 3,
+                    'evaluationTime' => (new DateTime())->format('Y-m'),
+                    'achievement' => 3,
                 ],
                 [
-                    'time' => (new DateTime('-1 months'))->format('Y-m'),
-                    'value' => 2,
+                    'evaluationTime' => (new DateTime('-1 months'))->format('Y-m'),
+                    'achievement' => 2,
                 ],
                 [
-                    'time' => (new DateTime('-2 months'))->format('Y-m'),
-                    'value' => 2,
+                    'evaluationTime' => (new DateTime('-2 months'))->format('Y-m'),
+                    'achievement' => 2,
                 ],
             ],
         ]);
@@ -243,16 +243,16 @@ $this->disableExceptionHandling();
             'target' => $this->commonSalesMetricThree->columns['target'],
             'result' => [
                 [
-                    'time' => (new DateTime())->format('Y-m'),
-                    'value' => 3,
+                    'evaluationTime' => (new DateTime())->format('Y-m'),
+                    'achievement' => 3,
                 ],
                 [
-                    'time' => (new DateTime('-1 months'))->format('Y-m'),
-                    'value' => 2,
+                    'evaluationTime' => (new DateTime('-1 months'))->format('Y-m'),
+                    'achievement' => 2,
                 ],
                 [
-                    'time' => (new DateTime('-2 months'))->format('Y-m'),
-                    'value' => 2,
+                    'evaluationTime' => (new DateTime('-2 months'))->format('Y-m'),
+                    'achievement' => 2,
                 ],
             ],
         ]);

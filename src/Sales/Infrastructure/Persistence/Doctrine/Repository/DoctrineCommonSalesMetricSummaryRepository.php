@@ -16,8 +16,6 @@ class DoctrineCommonSalesMetricSummaryRepository implements CommonSalesMetricSum
 
     public function summaryOfCommonSalesMetricBelongsToSales(string $salesId, CommonSalesMetric $commonSalesMetric): ?array
     {
-        $qb = $this->em->getConnection()->createQueryBuilder();
-        $commonSalesMetric->applyToQueryBuilder($qb, $salesId);
-        return $commonSalesMetric->wrapMetricSummaryResult($qb->executeQuery()->fetchAllAssociative());
+        return $commonSalesMetric->fetchSummaryResult($this->em->getConnection(), $salesId);
     }
 }
