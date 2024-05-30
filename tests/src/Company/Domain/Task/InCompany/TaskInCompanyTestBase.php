@@ -5,6 +5,7 @@ namespace Tests\src\Company\Domain\Task\InCompany;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\Area\Customer;
+use Company\Domain\Model\CompanyMetric;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Personnel;
@@ -17,6 +18,7 @@ use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
+use Company\Domain\Task\InCompany\CompanyMetric\CompanyMetricRepository;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentRepository;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
@@ -210,5 +212,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->recycleRequestId)
                 ->willReturn($this->recycleRequest);
+    }
+
+    protected MockObject $companyMetricRepository;
+    protected MockObject $companyMetric;
+    protected string $companyMetricId = 'companyMetricId';
+
+    protected function prepareCompanyMetricDependency(): void
+    {
+        $this->companyMetricRepository = $this->buildMockOfInterface(CompanyMetricRepository::class);
+        $this->companyMetric = $this->buildMockOfClass(CompanyMetric::class);
+        //
+        $this->companyMetricRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->companyMetricId)
+                ->willReturn($this->companyMetric);
     }
 }

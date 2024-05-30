@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\ClosingRequestController;
+use App\Http\Controllers\CompanyBC\InCompany\CompanyMetricController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerAssignmentController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
@@ -45,6 +46,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(RecycleRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CompanyMetricController::class),
             ...$this->customerAssignmentMutation(),
         ];
     }

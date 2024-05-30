@@ -5,6 +5,7 @@ namespace App\Http\GraphQL\CompanyBC;
 use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\ClosingRequestController;
+use App\Http\Controllers\CompanyBC\InCompany\CompanyMetricController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerAssignmentController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
@@ -42,6 +43,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CompanyMetricController::class),
         ];
     }
 }
