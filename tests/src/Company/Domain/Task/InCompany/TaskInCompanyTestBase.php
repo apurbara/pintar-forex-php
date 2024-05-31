@@ -15,6 +15,7 @@ use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
 use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
 use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Model\SalesActivity;
+use Company\Domain\Model\SalesRank;
 use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
@@ -28,6 +29,7 @@ use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
 use Company\Domain\Task\InCompany\RecycleRequest\RecycleRequestRepository;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\SalesActivity\SalesActivityRepository;
+use Company\Domain\Task\InCompany\SalesRank\SalesRankRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
@@ -227,5 +229,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->companyMetricId)
                 ->willReturn($this->companyMetric);
+    }
+
+    protected MockObject $salesRankRepository;
+    protected MockObject $salesRank;
+    protected string $salesRankId = 'salesRankId';
+
+    protected function prepareSalesRankDependency(): void
+    {
+        $this->salesRankRepository = $this->buildMockOfInterface(SalesRankRepository::class);
+        $this->salesRank = $this->buildMockOfClass(SalesRank::class);
+        //
+        $this->salesRankRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->salesRankId)
+                ->willReturn($this->salesRank);
     }
 }

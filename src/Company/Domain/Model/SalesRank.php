@@ -9,6 +9,8 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Resources\ValidationRule;
+use Resources\ValidationService;
 use SharedContext\Domain\Enum\EvaluationType;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 use SharedContext\Domain\Enum\MetricType;
@@ -43,15 +45,61 @@ class SalesRank
     #[Column(type: "string", enumType: RecurrenceType::class)]
     protected RecurrenceType $recurrenceType;
 
-    #[Column(type: "smallint", nullable: true)]
-    protected ?int $displaySalesNumber;
+    #[Column(type: "smallint", nullable: false)]
+    protected int $displaySalesNumber;
 
     #[Column(type: "string", enumType: QueryOrder::class)]
-    protected QueryOrder $order;
+    protected QueryOrder $queryOrder;
 
     #[Column(type: "string", length: 1024, nullable: true)]
     protected ?string $displaySchema;
 
+    private function setName(?string $name): void
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::notEmpty())
+                ->execute($name, 'name is mandatory');
+        $this->name = $name;
+    }
+    private function setDisplaySalesNumber(?int $displaySalesNumber): void
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::notEmpty())
+                ->execute($displaySalesNumber, 'display sales number is mandatory');
+        $this->displaySalesNumber = $displaySalesNumber;
+    }
+
+    public function __construct(string $id, SalesRankData $data)
+    {
+        $this->id = $id;
+        $this->disabled = false;
+        $this->createdTime = new DateTimeImmutable();
+        $this->update($data);
+    }
+
+    public function update(SalesRankData $data): void
+    {
+        $this->lastModifiedTime = new DateTimeImmutable();
+        $this->setName($data->name);
+        $this->metricType = MetricType::from($data->metricType);
+        $this->evaluationType = EvaluationType::from($data->evaluationType);
+        $this->recurrenceType = RecurrenceType::from($data->recurrenceType);
+        $this->setDisplaySalesNumber($data->displaySalesNumber);
+        $this->queryOrder = QueryOrder::from($data->order);
+        $this->displaySchema = $data->displaySchema;
+    }
+
+    public function disable(): void
+    {
+        $this->disabled = true;
+    }
+
+    public function enable(): void
+    {
+        $this->disabled = false;
+    }
+
+    //
     public function fetchSummaryResult(Connection $connection): array
     {
         $qb = $connection->createQueryBuilder();
@@ -61,8 +109,8 @@ class SalesRank
                 ->innerJoin('Sales', 'Personnel', 'Personnel', 'Sales.Personnel_id = Personnel.id')
                 ->addGroupBy('Sales.id')
                 ->setMaxResults($this->displaySalesNumber);
-        $this->order->applyToQuery($qb, 'achievement');
-        
+        $this->queryOrder->applyToQuery($qb, 'achievement');
+
         match ($this->metricType) {
             MetricType::SALES_ACTIVITY_REPORT => $this->applySalesActivityReportMetric($qb),
             MetricType::APPROVED_CLOSING_REQUEST => $this->applyApprovedClosingRequestMetric($qb),
@@ -88,8 +136,7 @@ class SalesRank
     protected function applyApprovedClosingRequestMetric(QueryBuilder $qb): void
     {
         $approvedClosingRequestStatus = ManagementApprovalStatus::APPROVED->value;
-        $qb->leftJoin('Sales', 'CustomerAssignment', 'CustomerAssignment',
-                        'CustomerAssignment.Sales_id = Sales.id')
+        $qb->leftJoin('Sales', 'CustomerAssignment', 'CustomerAssignment', 'CustomerAssignment.Sales_id = Sales.id')
                 ->leftJoin('CustomerAssignment', 'ClosingRequest', 'ClosingRequest',
                         "ClosingRequest.CustomerAssignment_id = CustomerAssignment.id AND ClosingRequest.status = '{$approvedClosingRequestStatus}'");
         $this->recurrenceType->applyToQuery($qb, 'ClosingRequest.createdTime', 1);

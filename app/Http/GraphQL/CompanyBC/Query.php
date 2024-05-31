@@ -15,6 +15,7 @@ use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\RecycleRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesController;
+use App\Http\Controllers\CompanyBC\InCompany\SalesRankController;
 use GraphQL\Type\Definition\ObjectType;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
 
@@ -44,6 +45,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CompanyMetricController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesRankController::class),
         ];
     }
 }
