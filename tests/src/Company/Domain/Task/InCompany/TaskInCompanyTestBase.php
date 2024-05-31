@@ -5,6 +5,7 @@ namespace Tests\src\Company\Domain\Task\InCompany;
 use Company\Domain\Model\AreaStructure;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\Area\Customer;
+use Company\Domain\Model\CommonSalesMetric;
 use Company\Domain\Model\CompanyMetric;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
@@ -19,6 +20,7 @@ use Company\Domain\Model\SalesRank;
 use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
 use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
+use Company\Domain\Task\InCompany\CommonSalesMetric\CommonSalesMetricRepository;
 use Company\Domain\Task\InCompany\CompanyMetric\CompanyMetricRepository;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentRepository;
@@ -244,5 +246,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->salesRankId)
                 ->willReturn($this->salesRank);
+    }
+
+    protected MockObject $commonSalesMetricRepository;
+    protected MockObject $commonSalesMetric;
+    protected string $commonSalesMetricId = 'commonSalesMetricId';
+
+    protected function prepareCommonSalesMetricDependency(): void
+    {
+        $this->commonSalesMetricRepository = $this->buildMockOfInterface(CommonSalesMetricRepository::class);
+        $this->commonSalesMetric = $this->buildMockOfClass(CommonSalesMetric::class);
+        //
+        $this->commonSalesMetricRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->commonSalesMetricId)
+                ->willReturn($this->commonSalesMetric);
     }
 }

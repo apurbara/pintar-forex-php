@@ -3,32 +3,43 @@
 namespace Company\Domain\Model;
 
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
-use SharedContext\Domain\ValueObject\DateIntervalData;
-use SharedContext\Domain\ValueObject\LabelData;
 
 readonly class CommonSalesMetricData extends AbstractEntityMutationPayload
 {
 
-    public LabelData $labelData;
-    public int $target;
-    public string $recurrenceType;
+    public ?string $name;
+    public ?int $target;
+    public ?string $metricType;
+    public ?string $evaluationType;
+    public ?string $recurrenceType;
     public ?int $recurrenceCount;
     public ?string $displaySchema;
-    public DateIntervalData $startEndDate;
 
-    public function setLabelData(LabelData $labelData)
+    public function setName(?string $name)
     {
-        $this->labelData = $labelData;
+        $this->name = $name;
         return $this;
     }
 
-    public function setTarget(int $target)
+    public function setTarget(?int $target)
     {
         $this->target = $target;
         return $this;
     }
 
-    public function setRecurrenceType(string $recurrenceType)
+    public function setMetricType(?string $metricType)
+    {
+        $this->metricType = $metricType;
+        return $this;
+    }
+
+    public function setEvaluationType(?string $evaluationType)
+    {
+        $this->evaluationType = $evaluationType;
+        return $this;
+    }
+
+    public function setRecurrenceType(?string $recurrenceType)
     {
         $this->recurrenceType = $recurrenceType;
         return $this;
@@ -43,12 +54,6 @@ readonly class CommonSalesMetricData extends AbstractEntityMutationPayload
     public function setDisplaySchema(?string $displaySchema)
     {
         $this->displaySchema = $displaySchema;
-        return $this;
-    }
-
-    public function setStartEndDate(DateIntervalData $startEndDate)
-    {
-        $this->startEndDate = $startEndDate;
         return $this;
     }
 }

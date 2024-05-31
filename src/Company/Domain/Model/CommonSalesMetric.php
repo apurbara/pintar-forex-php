@@ -2,11 +2,13 @@
 
 namespace Company\Domain\Model;
 
+use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCommonSalesMetricRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
-use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCommonSalesMetricRepository;
+use Resources\ValidationRule;
+use Resources\ValidationService;
 use SharedContext\Domain\Enum\EvaluationType;
 use SharedContext\Domain\Enum\MetricType;
 use SharedContext\Domain\Enum\RecurrenceType;
@@ -48,33 +50,41 @@ class CommonSalesMetric
     #[Column(type: "string", length: 1024, nullable: true)]
     protected ?string $displaySchema;
 
+    private function setName(?string $name)
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::notEmpty())
+                ->execute($name, 'name is mandatory');
+        $this->name = $name;
+    }
+
     public function __construct(string $id, CommonSalesMetricData $data)
     {
-//        $this->id = $id;
-//        $this->disabled = $disabled;
-//        $this->createdTime = $createdTime;
-//        $this->lastModifiedTime = $lastModifiedTime;
-//        $this->name = $name;
-//        $this->target = $target;
-//        $this->metricType = $metricType;
-//        $this->evaluationType = $evaluationType;
-//        $this->recurrenceType = $recurrenceType;
-//        $this->recurrenceCount = $recurrenceCount;
-//        $this->displaySchema = $displaySchema;
+        $this->id = $id;
+        $this->disabled = false;
+        $this->createdTime = new DateTimeImmutable();
+        $this->update($data);
     }
 
     public function update(CommonSalesMetricData $data): void
     {
-        
+        $this->lastModifiedTime = new DateTimeImmutable();
+        $this->setName($data->name);
+        $this->target = $data->target;
+        $this->metricType = MetricType::from($data->metricType);
+        $this->evaluationType = EvaluationType::from($data->evaluationType);
+        $this->recurrenceType = RecurrenceType::from($data->recurrenceType);
+        $this->recurrenceCount = $data->recurrenceCount;
+        $this->displaySchema = $data->displaySchema;
     }
 
     public function disable(): void
     {
-        
+        $this->disabled = true;
     }
 
     public function enable(): void
     {
-        
+        $this->disabled = false;
     }
 }
