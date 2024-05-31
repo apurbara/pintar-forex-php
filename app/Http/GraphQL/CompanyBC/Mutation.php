@@ -16,6 +16,7 @@ use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\RecycleRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesController;
+use App\Http\Controllers\CompanyBC\InCompany\SalesPerformanceMetricController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesRankController;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -51,6 +52,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CompanyMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesRankController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CommonSalesMetricController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesPerformanceMetricController::class),
             ...$this->customerAssignmentMutation(),
         ];
     }

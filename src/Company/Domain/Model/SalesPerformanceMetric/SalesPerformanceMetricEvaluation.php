@@ -3,6 +3,7 @@
 namespace Company\Domain\Model\SalesPerformanceMetric;
 
 use Company\Domain\Model\SalesPerformanceMetric;
+use Company\Domain\Model\SalesPerformanceMetricData;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesPerformanceMetricEvaluationRepository;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Mapping\Column;
@@ -10,6 +11,8 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Resources\ValidationRule;
+use Resources\ValidationService;
 use SharedContext\Domain\Enum\EvaluationType;
 
 #[Entity(repositoryClass: DoctrineSalesPerformanceMetricEvaluationRepository::class)]
@@ -31,6 +34,35 @@ class SalesPerformanceMetricEvaluation
 
     #[Column(type: "string", enumType: EvaluationType::class)]
     protected EvaluationType $evaluationType;
+
+    private function setAlias(?string $alias): void
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::notEmpty())
+                ->execute($alias, 'evaluation alias is mandatory');
+        $this->alias = $alias;
+    }
+
+    public function __construct(SalesPerformanceMetric $salesPerformanceMetric, string $id,
+            SalesPerformanceMetricEvaluationData $data)
+    {
+        $this->salesPerformanceMetric = $salesPerformanceMetric;
+        $this->id = $id;
+        $this->removed = false;
+        $this->setAlias($data->alias);
+        $this->evaluationType = EvaluationType::from($data->evaluationType);
+    }
+
+    public function update(SalesPerformanceMetricData $salesPerformanceMetricData): void
+    {
+        $data = $salesPerformanceMetricData->pullEvaluationDataAssociationWithType($this->evaluationType->value);
+        if ($data) {
+            $this->setAlias($data->alias);
+            $this->removed = false;
+        } else {
+            $this->removed = true;
+        }
+    }
 
     public function isRemoved(): bool
     {

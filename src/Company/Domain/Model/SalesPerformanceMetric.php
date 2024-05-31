@@ -5,6 +5,7 @@ namespace Company\Domain\Model;
 use Company\Domain\Model\SalesPerformanceMetric\SalesPerformanceMetricEvaluation;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesPerformanceMetricRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Connection;
@@ -13,6 +14,12 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToMany;
+use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
+use Resources\Infrastructure\GraphQL\Attributes\IncludeAsInputList;
+use Resources\Uuid;
+use Resources\ValidationRule;
+use Resources\ValidationService;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 use SharedContext\Domain\Enum\RecurrenceType;
 use SharedContext\Domain\Enum\SalesPerformanceMetricType;
@@ -48,10 +55,82 @@ class SalesPerformanceMetric
     #[Column(type: "string", length: 1024, nullable: true)]
     protected ?string $displaySchema;
 
+    #[FetchableObjectList(targetEntity: SalesPerformanceMetricEvaluation::class,
+                joinColumnName: 'SalesPerformanceMetric_id')]
+    #[IncludeAsInputList(targetEntity: SalesPerformanceMetricEvaluation::class)]
     #[OneToMany(targetEntity: SalesPerformanceMetricEvaluation::class, mappedBy: "salesPerformanceMetric",
                 cascade: ["persist"], fetch: "EXTRA_LAZY")]
     protected Collection $evaluations;
 
+    private function setName(?string $name): void
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::notEmpty())
+                ->execute($name, 'name is mandatory');
+        $this->name = $name;
+    }
+
+    private function addEvaluation(SalesPerformanceMetricData $data): void
+    {
+        foreach ($data->getEvaluations() as $evaluationData) {
+            $evaluation = new SalesPerformanceMetricEvaluation($this, Uuid::generateUuid4(), $evaluationData);
+            $this->evaluations->add($evaluation);
+        }
+    }
+
+    private function assertEvaluationExist(): void
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('removed', false));
+        if (empty($this->evaluations->matching($criteria)->count())) {
+            throw RegularException::badRequest('at least one evaluation is required');
+        }
+    }
+
+    public function __construct(string $id, SalesPerformanceMetricData $data)
+    {
+        $this->id = $id;
+        $this->disabled = false;
+        $this->createdTime = new DateTimeImmutable();
+        $this->lastModifiedTime = new DateTimeImmutable();
+        $this->setName($data->name);
+        $this->metricType = SalesPerformanceMetricType::from($data->metricType);
+        $this->recurrenceType = RecurrenceType::from($data->recurrenceType);
+        $this->recurrenceCount = $data->recurrenceCount;
+        $this->displaySchema = $data->displaySchema;
+        //
+        $this->evaluations = new ArrayCollection();
+        $this->addEvaluation($data);
+        $this->assertEvaluationExist();
+    }
+
+    public function update(SalesPerformanceMetricData $data): void
+    {
+        $this->lastModifiedTime = new DateTimeImmutable();
+        $this->setName($data->name);
+        $this->metricType = SalesPerformanceMetricType::from($data->metricType);
+        $this->recurrenceType = RecurrenceType::from($data->recurrenceType);
+        $this->recurrenceCount = $data->recurrenceCount;
+        $this->displaySchema = $data->displaySchema;
+
+        foreach ($this->evaluations->getIterator() as $evaluation) {
+            $evaluation->update($data);
+        }
+        $this->addEvaluation($data);
+        $this->assertEvaluationExist();
+    }
+
+    public function disable(): void
+    {
+        $this->disabled = true;
+    }
+
+    public function enable(): void
+    {
+        $this->disabled = false;
+    }
+
+    //
     public function fetchSummaryResult(Connection $connection): array
     {
         $salesSubquery = $connection->createQueryBuilder();

@@ -6,5 +6,10 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepos
 
 class DoctrineSalesPerformanceMetricEvaluationRepository extends DoctrineEntityRepository
 {
-    
+    protected function createCoreQueryBuilder(): \Doctrine\DBAL\Query\QueryBuilder
+    {
+        $qb = parent::createCoreQueryBuilder();
+        $qb->andWhere($qb->expr()->eq($this->getTableName() . ".removed", 0));
+        return $qb;
+    }
 }

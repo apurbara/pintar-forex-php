@@ -7,9 +7,14 @@ namespace App\Http\GraphQL\CompanyBC;
 //require_once __DIR__ . '/../../vendor/autoload.php';
 
 
+use Company\Domain\Model\SalesPerformanceMetric\SalesPerformanceMetricEvaluation;
 use GraphQL\Type\Schema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use function base_path;
+
+TypeRegistry::registerPredefinedClassMaps([
+    'SalesPerformanceMetricEvaluationInput' => SalesPerformanceMetricEvaluation::class,
+]);
 
 $schema = new Schema([
     'query' => TypeRegistry::type(Query::class),
