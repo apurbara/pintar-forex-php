@@ -57,7 +57,7 @@ $this->disableExceptionHandling();
         
         $this->seeInDatabase('Manager', [
             'suspended' => false,
-            'createdTime' => $this->stringOfJakartaCurrentTime(),
+            'createdTime' => $this->stringOfCurrentTime(),
             'name' => $this->managerPayload['name'],
             'email' => $this->managerPayload['email'],
         ]);

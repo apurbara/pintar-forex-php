@@ -4,8 +4,8 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
-use App\Http\GraphQL\ManagerBC\Object\ClosingRequestMonthlyCountSummaryGraphqlObjectType;
-use App\Http\GraphQL\ManagerBC\Object\ClosingRequestMonthlyTotalTransactionSummaryGraphqlObjectType;
+use App\Http\GraphQL\CompanyBC\Object\ClosingRequestMonthlyCountSummaryGraphqlObjectType;
+use App\Http\GraphQL\CompanyBC\Object\ClosingRequestMonthlyTotalTransactionSummaryGraphqlObjectType;
 use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
 use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
 use Company\Domain\Task\InCompany\ClosingRequest\AcceptClosingRequestTask;
