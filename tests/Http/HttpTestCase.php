@@ -21,6 +21,7 @@ abstract class HttpTestCase extends \Tests\TestCase
         parent::setUp();
         //        $this->disableExceptionHandling();
         $this->connection = DB::connection();
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
         $this->connection->statement('set global max_connections = 800;'); //sometime bulk test cause 'to many connection' error - mysql env
         $this->connection->statement('SET FOREIGN_KEY_CHECKS=0;'); //to enable table truncate without hassle - mysql env
     }

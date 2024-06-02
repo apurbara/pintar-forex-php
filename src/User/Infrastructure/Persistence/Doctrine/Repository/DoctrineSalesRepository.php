@@ -2,18 +2,29 @@
 
 namespace User\Infrastructure\Persistence\Doctrine\Repository;
 
+use Resources\Exception\RegularException;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
-use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
-use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use User\Domain\Task\ByPersonnel\Sales\SalesRepository;
+use User\Application\Service\Guest\SalesRepository as SalesRepository2;
+use User\Application\Service\Sales\SalesRepository;
+use User\Domain\Model\Sales;
 
-class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesRepository
+class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesRepository2, SalesRepository
 {
 
-    public function salesAssignmentListBelongsToPersonnel(string $personnelId, array $paginationSchema): ?array
+    public function activeSalesByEmail(string $email): Sales
     {
-        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($personnelId, 'Sales.Personnel_id'));
-        return $this->fetchPaginationList($doctrinePaginationListCategory);
+        $result = $this->findOneBy([
+            'accountInfo.email' => $email,
+            'cancelled' => false,
+        ]);
+        if (empty($result)) {
+            throw RegularException::notFound('account not found');
+        }
+        return $result;
+    }
+
+    public function ofId(string $id): Sales
+    {
+        return $this->findOneByIdOrDie($id);
     }
 }

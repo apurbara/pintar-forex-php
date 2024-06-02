@@ -4,9 +4,9 @@ namespace App\Http\GraphQL\UserBC\Object;
 
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\GraphqlObjectType;
-use User\Domain\Model\Admin;
+use User\Domain\Model\Sales;
 
-class AdminLoginResponseGraph extends GraphqlObjectType
+class SalesLoginResponseGraph extends GraphqlObjectType
 {
     protected function fieldDefinition(): array
     {
@@ -18,6 +18,6 @@ class AdminLoginResponseGraph extends GraphqlObjectType
 
     protected function getClassMetadata(): string
     {
-        return Admin::class;
+        return Sales::class;
     }
 }

@@ -3,53 +3,52 @@
 namespace Tests\Http\GraphQL\UserBC\Guest;
 
 use Company\Domain\Model\AreaStructure\Area;
-use Sales\Domain\Model\Personnel\Sales;
+use Sales\Domain\Model\Manager\Sales;
 use Tests\Http\GraphQL\GraphqlTestCase;
 use Tests\Http\Record\EntityRecord;
 use Tests\Http\Record\Model\AdminRecord;
-use Tests\Http\Record\Model\PersonnelRecord;
-use User\Domain\Model\Personnel\Manager;
+use Tests\Http\Record\Model\ManagerRecord;
+use Tests\Http\Record\Model\SalesRecord;
+use User\Domain\Model\Manager\Manager;
 
 class LoginControllerTest extends GraphqlTestCase
 {
 
     protected AdminRecord $admin;
-    protected PersonnelRecord $personnel;
-    protected EntityRecord $sales;
-    protected EntityRecord $manager;
+    protected ManagerRecord $manager;
+    protected SalesRecord $sales;
     protected EntityRecord $area;
     
     protected $adminLoginRequest;
-    protected $personnelLoginRequest;
+    protected $managerLoginRequest;
+    protected $salesLoginRequest;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->connection->table('Admin')->truncate();
-        $this->connection->table('Personnel')->truncate();
+        $this->connection->table('Manager')->truncate();
         $this->connection->table('Area')->truncate();
         $this->connection->table('Sales')->truncate();
-        $this->connection->table('Manager')->truncate();
 
-        $this->admin = new AdminRecord('main');
-        $this->personnel = new PersonnelRecord('main');
-        
         $this->area = new EntityRecord(Area::class, 'main');
         
-        $this->sales = new EntityRecord(Sales::class, 'main');
-        $this->sales->columns['Personnel_id'] = $this->personnel->columns['id'];
+        $this->admin = new AdminRecord('main');
+        $this->manager = new ManagerRecord('main');
+        $this->sales = new SalesRecord('main');
         $this->sales->columns['Area_id'] = $this->area->columns['id'];
         
-        $this->manager = new EntityRecord(Manager::class, 'main');
-        $this->manager->columns['Personnel_id'] = $this->personnel->columns['id'];
-
         $this->adminLoginRequest = [
             'email' => $this->admin->columns['email'],
             'password' => $this->admin->rawPassword,
         ];
-        $this->personnelLoginRequest = [
-            'email' => $this->personnel->columns['email'],
-            'password' => $this->personnel->rawPassword,
+        $this->managerLoginRequest = [
+            'email' => $this->manager->columns['email'],
+            'password' => $this->manager->rawPassword,
+        ];
+        $this->salesLoginRequest = [
+            'email' => $this->sales->columns['email'],
+            'password' => $this->sales->rawPassword,
         ];
     }
 
@@ -57,10 +56,9 @@ class LoginControllerTest extends GraphqlTestCase
     {
         parent::tearDown();
         $this->connection->table('Admin')->truncate();
-        $this->connection->table('Personnel')->truncate();
+        $this->connection->table('Manager')->truncate();
         $this->connection->table('Area')->truncate();
         $this->connection->table('Sales')->truncate();
-        $this->connection->table('Manager')->truncate();
     }
     
     //
@@ -103,100 +101,75 @@ _QUERY;
     }
 
     //
-    protected function personnelLogin()
+    protected function managerLogin()
     {
-        $this->personnel->insert($this->connection);
+        $this->manager->insert($this->connection);
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $email: String!, $password: String!, $salesAssignmentFilters: [FilterInput], $managerAssignmentFilters: [FilterInput] ) {
+mutation ( $email: String!, $password: String! ) {
     byGuest {
-        personnelLogin ( email: $email, password: $password ) {
+        managerLogin ( email: $email, password: $password ) {
             id, name, token,
-            salesAssignments ( filters: $salesAssignmentFilters) { list { id, disabled , area { id, name } } }
-            managerAssignments ( filters: $managerAssignmentFilters) { list { id, disabled } }
         }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            ...$this->personnelLoginRequest,
-            'salesAssignmentFilters' => [
-                ['column' => 'Sales.disabled', 'value' => false],
-            ],
-            'managerAssignmentFilters' => [
-                ['column' => 'Manager.disabled', 'value' => false],
-            ],
+            ...$this->managerLoginRequest,
             
         ];
         $this->postGraphqlRequest();
     }
 
-    public function test_personnelLogin_200()
+    public function test_managerLogin_200()
     {
         $this->disableExceptionHandling();
         
-        $this->personnelLogin();
+        $this->managerLogin();
         $this->seeStatusCode(200);
 
         $response = [
-            'id' => $this->personnel->columns['id'],
-            'name' => $this->personnel->columns['name'],
+            'id' => $this->manager->columns['id'],
+            'name' => $this->manager->columns['name'],
         ];
         $this->seeJsonContains($response);
 //$this->seeJsonContains(['print']);
 //        $this->response->dump(); //to check generated JWT token;
     }
-    public function test_personnelLogin_hasActiveSalesRole()
+
+    //
+    protected function salesLogin()
     {
-        $this->area->insert($this->connection);
         $this->sales->insert($this->connection);
-        $this->manager->insert($this->connection);
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $email: String!, $password: String! ) {
+    byGuest {
+        salesLogin ( email: $email, password: $password ) {
+            id, name, token,
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            ...$this->salesLoginRequest,
+            
+        ];
+        $this->postGraphqlRequest();
+    }
+
+    public function test_salesLogin_200()
+    {
+        $this->disableExceptionHandling();
         
-        $this->personnelLogin();
+        $this->salesLogin();
         $this->seeStatusCode(200);
 
         $response = [
-            'id' => $this->personnel->columns['id'],
-            'name' => $this->personnel->columns['name'],
-            'salesAssignments' => [
-                'list' => [
-                    [
-                        'id' => $this->sales->columns['id'],
-                        'disabled' => $this->sales->columns['disabled'],
-                        'area' => [
-                            'id' => $this->area->columns['id'],
-                            'name' => $this->area->columns['name'],
-                        ],
-                    ]
-                ],
-            ],
-            'managerAssignments' => [
-                'list' => [
-                    [
-                        'id' => $this->manager->columns['id'],
-                        'disabled' => $this->manager->columns['disabled'],
-                    ]
-                ],
-            ],
+            'id' => $this->sales->columns['id'],
+            'name' => $this->sales->columns['name'],
         ];
         $this->seeJsonContains($response);
 //$this->seeJsonContains(['print']);
 //        $this->response->dump(); //to check generated JWT token;
-    }
-    public function test_personnelLogin_hideDisabledSalesAssignment_200()
-    {
-        $this->sales->columns['disabled'] = true;
-        $this->sales->insert($this->connection);
-        
-        $this->personnelLogin();
-        $this->seeJsonDoesntContains(['id' => $this->sales->columns['id']]);
-    }
-    public function test_personnelLogin_hideDisabledManagerAssignment_200()
-    {
-        $this->manager->columns['disabled'] = true;
-        $this->manager->insert($this->connection);
-        
-        $this->personnelLogin();
-        $this->seeJsonDoesntContains(['id' => $this->manager->columns['id']]);
     }
 
 }

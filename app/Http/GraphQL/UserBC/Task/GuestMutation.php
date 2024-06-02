@@ -3,12 +3,11 @@
 namespace App\Http\GraphQL\UserBC\Task;
 
 use App\Http\Controllers\UserBC\ByGuest\LoginController;
-use App\Http\Controllers\UserRole\PersonnelRole;
 use App\Http\GraphQL\UserBC\Object\AdminLoginResponseGraph;
-use App\Http\GraphQL\UserBC\Object\PersonnelLoginResponseGraph;
+use App\Http\GraphQL\UserBC\Object\ManagerLoginResponseGraph;
+use App\Http\GraphQL\UserBC\Object\SalesLoginResponseGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 
@@ -34,17 +33,23 @@ class GuestMutation extends ObjectType
                 'resolve' => fn($root, $args) => (new LoginController())
                         ->adminLogin(new GraphqlInputRequest($args))
             ],
-            'personnelLogin' => [
-                'type' => TypeRegistry::objectType(PersonnelLoginResponseGraph::class),
+            'managerLogin' => [
+                'type' => TypeRegistry::objectType(ManagerLoginResponseGraph::class),
                 'args' => [
                     'email' => Type::nonNull(Type::string()),
                     'password' => Type::nonNull(Type::string()),
                 ],
-                'resolve' => function($root, $args, AppContext $app){
-                    $result = (new LoginController())->personnelLogin(new GraphqlInputRequest($args));
-                    $app->user = new PersonnelRole($result['id']);
-                    return $result;
-                }
+                'resolve' => fn($root, $args) => (new LoginController())
+                        ->managerLogin(new GraphqlInputRequest($args))
+            ],
+            'salesLogin' => [
+                'type' => TypeRegistry::objectType(SalesLoginResponseGraph::class),
+                'args' => [
+                    'email' => Type::nonNull(Type::string()),
+                    'password' => Type::nonNull(Type::string()),
+                ],
+                'resolve' => fn($root, $args) => (new LoginController())
+                        ->salesLogin(new GraphqlInputRequest($args))
             ],
         ];
     }

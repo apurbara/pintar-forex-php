@@ -2,18 +2,28 @@
 
 namespace User\Infrastructure\Persistence\Doctrine\Repository;
 
+use Resources\Exception\RegularException;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
-use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
-use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use User\Domain\Task\ByPersonnel\Manager\ManagerRepository;
+use User\Application\Service\Guest\ManagerRepository as ManagerRepository2;
+use User\Application\Service\Manager\ManagerRepository;
+use User\Domain\Model\Manager;
 
-class DoctrineManagerRepository extends DoctrineEntityRepository implements ManagerRepository
+class DoctrineManagerRepository extends DoctrineEntityRepository implements ManagerRepository2, ManagerRepository
 {
 
-    public function managerAssignmentListBelongsToPersonnel(string $personnelId, array $paginationSchema): ?array
+    public function ofId(string $id): Manager
     {
-        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($personnelId, 'Manager.Personnel_id'));
-        return $this->fetchPaginationList($doctrinePaginationListCategory);
+        return $this->findOneByIdOrDie($id);
+    }
+
+    public function ofEmail(string $email): Manager
+    {
+        $result = $this->findOneBy([
+            'accountInfo.email' => $email,
+        ]);
+        if (empty($result)) {
+            throw RegularException::notFound('account not found');
+        }
+        return $result;
     }
 }
