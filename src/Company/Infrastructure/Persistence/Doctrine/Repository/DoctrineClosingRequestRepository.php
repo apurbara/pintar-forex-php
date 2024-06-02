@@ -2,7 +2,7 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
 use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
 use DateTime;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;

@@ -2,10 +2,10 @@
 
 namespace Company\Domain\Task\InCompany\Customer;
 
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 
-class ViewCustomerList implements PersonnelHavingManagerAssignmentTaskInCompany
+class ViewCustomerList implements ManagerTaskInCompany
 {
     public function __construct(protected CustomerRepository $customerRepository)
     {

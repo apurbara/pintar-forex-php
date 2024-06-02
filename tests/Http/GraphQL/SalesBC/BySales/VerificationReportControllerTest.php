@@ -69,21 +69,18 @@ class VerificationReportControllerTest extends SalesBCTestCase
         $this->customerAssignment->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $CustomerAssignment_id: ID!, $CustomerVerification_id: ID!, $note: String ) {
-    sales ( salesId: $salesId ) {
-        submitCustomerVerificationReport ( CustomerAssignment_id: $CustomerAssignment_id, CustomerVerification_id: $CustomerVerification_id, note: $note) {
-            createdTime, note, CustomerVerification_id
-        }
+mutation ( $CustomerAssignment_id: ID!, $CustomerVerification_id: ID!, $note: String ) {
+    submitCustomerVerificationReport ( CustomerAssignment_id: $CustomerAssignment_id, CustomerVerification_id: $CustomerVerification_id, note: $note) {
+        createdTime, note, CustomerVerification_id
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
             'CustomerVerification_id' => $this->customerVerification->columns['id'],
             ...$this->submitReportRequest
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_submitReport_200()
     {
@@ -138,20 +135,17 @@ _QUERY;
         $this->verificationReportTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $filters: [FilterInput]) {
-    sales ( salesId: $salesId ) {
-        verificationReportList (filters: $filters) {
-            list { id, createdTime, note, CustomerVerification_id },
-            cursorLimit { total, cursorToNextPage }
-        }
+query ( $filters: [FilterInput]) {
+    verificationReportList (filters: $filters) {
+        list { id, createdTime, note, CustomerVerification_id },
+        cursorLimit { total, cursorToNextPage }
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['filters'] = [
             ['column' => 'CustomerAssignment.id', 'value' => $this->customerAssignment->columns['id']],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewList_200()
     {
@@ -197,17 +191,14 @@ _QUERY;
         $this->verificationReportOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $id: ID!) {
-    sales ( salesId: $salesId ) {
-        verificationReportDetail ( id: $id ) {
-            id, note, createdTime, customerVerification { id, name }
-        }
+query ( $id: ID!) {
+    verificationReportDetail ( id: $id ) {
+        id, note, createdTime, customerVerification { id, name }
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['id'] = $this->verificationReportOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewDetail_200()
     {

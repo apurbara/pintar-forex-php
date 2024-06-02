@@ -59,24 +59,21 @@ $this->disableExceptionHandling();
         $this->initialCustomerJourney->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $Area_id: ID!, $name: String, $email: String, $phone: String, $source: String ) {
-    sales ( salesId: $salesId ) {
-        registerNewCustomer ( Area_id: $Area_id, name: $name, email: $email, phone: $phone, source: $source ) {
-            id, status, createdTime
-            customer {
-                name, email, phone, source
-                area { id, name }
-            }
-            customerJourney { id, name, initial }
+mutation ( $Area_id: ID!, $name: String, $email: String, $phone: String, $source: String ) {
+    registerNewCustomer ( Area_id: $Area_id, name: $name, email: $email, phone: $phone, source: $source ) {
+        id, status, createdTime
+        customer {
+            name, email, phone, source
+            area { id, name }
         }
+        customerJourney { id, name, initial }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             ...$this->registerNewCustomerRequest
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
 
     public function test_registerNewCustomer_200()

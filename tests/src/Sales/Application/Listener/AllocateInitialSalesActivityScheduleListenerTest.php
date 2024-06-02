@@ -18,7 +18,7 @@ class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
     protected $salesActivityScheduleRepository;
     protected $customerAssignmentRepository;
     protected $salesActivityRepository;
-    protected $personnelId = 'personnelId', $salesId = 'salesId';
+    protected $salesId = 'salesId';
     protected $listener, $service, $task;
     //
     protected $event, $customerAssignmentId = 'customerAssignmentId';
@@ -33,7 +33,7 @@ class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
 
         $this->listener = new TestableAllocateInitialSalesActivityScheduleListener($this->salesRepository,
                 $this->salesActivityScheduleRepository, $this->customerAssignmentRepository,
-                $this->salesActivityRepository, $this->personnelId, $this->salesId);
+                $this->salesActivityRepository, $this->salesId);
 
         $this->service = $this->buildMockOfClass(ExecuteSalesTask::class);
         $this->listener->service = $this->service;
@@ -49,7 +49,7 @@ class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
     {
         return new TestableAllocateInitialSalesActivityScheduleListener($this->salesRepository,
                 $this->salesActivityScheduleRepository, $this->customerAssignmentRepository,
-                $this->salesActivityRepository, $this->personnelId, $this->salesId);
+                $this->salesActivityRepository, $this->salesId);
     }
     public function test_construct_setProperties()
     {
@@ -68,7 +68,7 @@ class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
     {
         $this->service->expects($this->once())
                 ->method('execute')
-                ->with($this->personnelId, $this->salesId, $this->task, $this->customerAssignmentId);
+                ->with($this->salesId, $this->task, $this->customerAssignmentId);
         $this->handle();
     }
 }

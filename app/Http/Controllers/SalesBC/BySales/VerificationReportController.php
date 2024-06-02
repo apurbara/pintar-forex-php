@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
@@ -26,7 +27,7 @@ class VerificationReportController extends Controller
     }
 
     //
-    public function submitCustomerVerificationReport(SalesRoleInterface $user, string $CustomerAssignment_id, InputRequest $input)
+    public function submitCustomerVerificationReport(SalesRole $user, string $CustomerAssignment_id, InputRequest $input)
     {
         $customerAssignmentRepository = $this->em->getRepository(CustomerAssignment::class);
         $customerVerificationRepository = $this->em->getRepository(CustomerVerification::class);
@@ -46,7 +47,7 @@ class VerificationReportController extends Controller
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function verificationReportList(SalesRoleInterface $user, InputRequest $input)
+    public function verificationReportList(SalesRole $user, InputRequest $input)
     {
         $task = new ViewVerificationReportListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -56,7 +57,7 @@ class VerificationReportController extends Controller
     }
 
     #[Query]
-    public function verificationReportDetail(SalesRoleInterface $user, string $id)
+    public function verificationReportDetail(SalesRole $user, string $id)
     {
         $task = new ViewVerificationReportDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);

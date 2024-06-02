@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
@@ -33,7 +34,7 @@ class SalesActivityScheduleController extends Controller
 
     //
     #[Mutation]
-    public function submitSalesActivitySchedule(SalesRoleInterface $user, string $CustomerAssignment_id, InputRequest $input)
+    public function submitSalesActivitySchedule(SalesRole $user, string $CustomerAssignment_id, InputRequest $input)
     {
         $repository = $this->repository();
         $customerAssignmentRepository = $this->em->getRepository(CustomerAssignment::class);
@@ -52,7 +53,7 @@ class SalesActivityScheduleController extends Controller
     }
     
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function salesActivityScheduleList(SalesRoleInterface $user, InputRequest $input)
+    public function salesActivityScheduleList(SalesRole $user, InputRequest $input)
     {
         $task = new ViewSalesActivityScheduleListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -61,7 +62,7 @@ class SalesActivityScheduleController extends Controller
         return $payload->result;
     }
     
-    public function salesActivityScheduleSummaryList(SalesRoleInterface $user, InputRequest $input)
+    public function salesActivityScheduleSummaryList(SalesRole $user, InputRequest $input)
     {
         $task = new ViewSalesActivityScheduleSummary($this->repository());
         $payload = $this->buildViewAllListPayload($input);
@@ -71,7 +72,7 @@ class SalesActivityScheduleController extends Controller
     }
     
     #[Query]
-    public function salesActivityScheduleDetail(SalesRoleInterface $user, string $id)
+    public function salesActivityScheduleDetail(SalesRole $user, string $id)
     {
         $task = new ViewSalesActivityScheduleDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);
@@ -80,7 +81,7 @@ class SalesActivityScheduleController extends Controller
         return $payload->result;
     }
     
-    public function totalSalesActivitySchedule(SalesRoleInterface $user, InputRequest $input)
+    public function totalSalesActivitySchedule(SalesRole $user, InputRequest $input)
     {
         $task = new ViewTotalSalesActivitySchedule($this->repository());
         $searchSchema = [

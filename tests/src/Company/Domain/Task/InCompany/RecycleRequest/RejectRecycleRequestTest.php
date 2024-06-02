@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Task\InCompany\RecycleRequest;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequestData;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Tests\src\Company\Domain\Task\InCompany\TaskInCompanyTestBase;
 
 class RejectRecycleRequestTest extends TaskInCompanyTestBase

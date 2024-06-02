@@ -58,20 +58,17 @@ class ClosingRequestControllerTest extends SalesBCTestCase
         $this->customerAssignment->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $CustomerAssignment_id: ID!, $transactionValue: Int, $note: String ) {
-    sales ( salesId: $salesId ) {
-        submitClosingRequest ( CustomerAssignment_id: $CustomerAssignment_id, transactionValue: $transactionValue, note: $note ) {
-            id, status, createdTime, transactionValue, note
-        }
+mutation ( $CustomerAssignment_id: ID!, $transactionValue: Int, $note: String ) {
+    submitClosingRequest ( CustomerAssignment_id: $CustomerAssignment_id, transactionValue: $transactionValue, note: $note ) {
+        id, status, createdTime, transactionValue, note
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
             ...$this->closingRequestPayload
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_submit_200()
     {
@@ -103,20 +100,17 @@ $this->disableExceptionHandling();
         $this->closingRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $id: ID!, $transactionValue: Int, $note: String ) {
-    sales ( salesId: $salesId ) {
-        updateClosingRequest ( id: $id,  transactionValue: $transactionValue, note: $note ) {
-            id, status, createdTime, transactionValue, note
-        }
+mutation ( $id: ID!, $transactionValue: Int, $note: String ) {
+    updateClosingRequest ( id: $id,  transactionValue: $transactionValue, note: $note ) {
+        id, status, createdTime, transactionValue, note
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'id' => $this->closingRequestOne->columns['id'],
             ...$this->closingRequestPayload,
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_update_200()
     {
@@ -147,20 +141,17 @@ _QUERY;
         $this->closingRequestTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $filters: [FilterInput]) {
-    sales ( salesId: $salesId ) {
-        closingRequestList ( filters: $filters) {
-            list { id, status, createdTime, transactionValue, note, customerAssignment { customer { name } } },
-            cursorLimit { total, cursorToNextPage }
-        }
+query ( $filters: [FilterInput]) {
+    closingRequestList ( filters: $filters) {
+        list { id, status, createdTime, transactionValue, note, customerAssignment { customer { name } } },
+        cursorLimit { total, cursorToNextPage }
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['filters'] = [
             ['column' => 'ClosingRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewList_200()
     {
@@ -216,17 +207,14 @@ _QUERY;
         $this->closingRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $id: ID!) {
-    sales ( salesId: $salesId ) {
-        closingRequestDetail ( id: $id ) {
-            id, status, createdTime, transactionValue, note
-        }
+query ( $id: ID!) {
+    closingRequestDetail ( id: $id ) {
+        id, status, createdTime, transactionValue, note
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['id'] = $this->closingRequestOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewDetail_200()
     {

@@ -3,7 +3,7 @@
 namespace Company\Domain\Model\AreaStructure\Area;
 
 use Company\Domain\Model\AreaStructure\Area;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -84,7 +84,7 @@ class CustomerTest extends TestBase
     }
     public function test_construct_emptyEmail_200()
     {
-        $this->email = '';
+        $this->email = null;
         $this->construct();
         $this->markAsSuccess();
     }

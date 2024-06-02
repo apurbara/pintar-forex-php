@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
@@ -28,7 +29,7 @@ class ClosingRequestController extends Controller
 
     //
     #[Mutation]
-    public function submitClosingRequest(SalesRoleInterface $user, InputRequest $input)
+    public function submitClosingRequest(SalesRole $user, InputRequest $input)
     {
         $repository = $this->repository();
         $customerAssignmentRepository = $this->em->getRepository(CustomerAssignment::class);
@@ -45,7 +46,7 @@ class ClosingRequestController extends Controller
     }
 
     #[Mutation]
-    public function updateClosingRequest(SalesRoleInterface $user, string $id, InputRequest $input)
+    public function updateClosingRequest(SalesRole $user, string $id, InputRequest $input)
     {
         $repository = $this->repository();
         $task = new UpdateClosingRequestTask($repository);
@@ -60,7 +61,7 @@ class ClosingRequestController extends Controller
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function closingRequestList(SalesRoleInterface $user, InputRequest $input)
+    public function closingRequestList(SalesRole $user, InputRequest $input)
     {
         $task = new ViewClosingRequestListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -70,7 +71,7 @@ class ClosingRequestController extends Controller
     }
 
     #[Query]
-    public function closingRequestDetail(SalesRoleInterface $user, string $id)
+    public function closingRequestDetail(SalesRole $user, string $id)
     {
         $task = new ViewClosingRequestDetail($this->repository());
         $payload = new ViewDetailPayload($id);

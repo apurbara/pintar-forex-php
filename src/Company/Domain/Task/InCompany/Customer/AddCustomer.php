@@ -4,11 +4,11 @@ namespace Company\Domain\Task\InCompany\Customer;
 
 use Company\Domain\Model\AreaStructure\Area\Customer;
 use Company\Domain\Model\AreaStructure\Area\CustomerData;
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
-use Company\Domain\Task\InCompany\AreaStructure\Area\AreaRepository;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Resources\Exception\RegularException;
 
-class AddCustomer implements PersonnelHavingManagerAssignmentTaskInCompany
+class AddCustomer implements ManagerTaskInCompany
 {
 
     public function __construct(

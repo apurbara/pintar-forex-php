@@ -2,6 +2,7 @@
 
 namespace Tests\Http\Record\Model;
 
+use App\Http\Controllers\UserRole;
 use Company\Domain\Model\Admin;
 use Tests\Http\Record\EntityRecord;
 use Tests\Http\Record\JwtHeaderTokenGenerator;
@@ -18,7 +19,7 @@ class AdminRecord extends EntityRecord
         $this->columns['aSuperUser'] = true;
         $this->columns['password'] = TestablePassword::getHashedPassword($this->rawPassword);
         $this->token = JwtHeaderTokenGenerator::generate([
-            'userRole' => 'admin',
+            'userRole' => UserRole::ADMIN->value,
             'userId' => $this->columns['id'],
         ]);
     }

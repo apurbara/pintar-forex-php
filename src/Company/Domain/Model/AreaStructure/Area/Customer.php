@@ -4,7 +4,7 @@ namespace Company\Domain\Model\AreaStructure\Area;
 
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\Area\Customer\VerificationReport;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;

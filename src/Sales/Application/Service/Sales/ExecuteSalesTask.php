@@ -12,9 +12,9 @@ class ExecuteSalesTask
         
     }
 
-    public function execute(string $personnelId, string $salesId, SalesTask $task, $payload): void
+    public function execute(string $salesId, SalesTask $task, $payload): void
     {
-        $this->salesRepository->aSalesBelongToPersonnel($personnelId, $salesId)
+        $this->salesRepository->ofId($salesId)
                 ->executeTask($task, $payload);
         $this->salesRepository->update();
     }

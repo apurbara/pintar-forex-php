@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Event\Dispatcher;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
@@ -24,7 +25,7 @@ use SharedContext\Domain\Event\CustomerAssignedEvent;
 class CustomerController extends Controller
 {
     #[Mutation(responseType: CustomerAssignment::class)]
-    public function registerNewCustomer(SalesRoleInterface $user, InputRequest $input)
+    public function registerNewCustomer(SalesRole $user, InputRequest $input)
     {
         $repository = $this->em->getRepository(CustomerAssignment::class);
         $areaRepository = $this->em->getRepository(Area::class);
@@ -37,7 +38,7 @@ class CustomerController extends Controller
         $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
         $listener = new AllocateInitialSalesActivityScheduleListener
                 ($salesRepository, $salesActivityScheduleRepository, $repository, $salesActivityRepository,
-                $user->getPersonnelId(), $user->getSalesId());
+                $user->salesId);
         
         $dispatcher->addTransactionalListener(CustomerAssignedEvent::eventName(), $listener);
 

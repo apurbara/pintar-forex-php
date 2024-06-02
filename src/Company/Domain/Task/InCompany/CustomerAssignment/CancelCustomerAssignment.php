@@ -2,9 +2,9 @@
 
 namespace Company\Domain\Task\InCompany\CustomerAssignment;
 
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 
-class CancelCustomerAssignment implements PersonnelHavingManagerAssignmentTaskInCompany
+class CancelCustomerAssignment implements ManagerTaskInCompany
 {
 
     public function __construct(protected CustomerAssignmentRepository $repository)

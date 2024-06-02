@@ -12,7 +12,6 @@ use App\Http\Controllers\CompanyBC\InCompany\CustomerAssignmentController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\ManagerController;
-use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\RecycleRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesController;
@@ -42,7 +41,6 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(AreaStructureController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerJourneyController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerVerificationController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(PersonnelController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(AreaController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ManagerController::class),

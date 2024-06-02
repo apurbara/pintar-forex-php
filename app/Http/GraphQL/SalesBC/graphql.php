@@ -16,8 +16,8 @@ TypeRegistry::registerPredefinedClassMaps([
     'CustomerInput' => Customer::class,
 ]);
 $schema = new Schema([
-    'query' => TypeRegistry::type(SalesQuery::class),
-    'mutation' => TypeRegistry::type(SalesMutation::class),
+    'query' => TypeRegistry::type(Query::class),
+    'mutation' => TypeRegistry::type(Mutation::class),
     'typeLoader' => static fn($name) => TypeRegistry::type($name),
 ]);
 

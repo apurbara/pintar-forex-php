@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
@@ -32,7 +33,7 @@ class CustomerAssignmentController extends Controller
     }
 
     #[Mutation]
-    public function updateCustomerAssignmentJourney(SalesRoleInterface $user, InputRequest $input)
+    public function updateCustomerAssignmentJourney(SalesRole $user, InputRequest $input)
     {
         $repository = $this->repository();
         $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
@@ -46,7 +47,7 @@ class CustomerAssignmentController extends Controller
     }
 
     #[Mutation]
-    public function updateCustomerBio(SalesRoleInterface $user, InputRequest $input)
+    public function updateCustomerBio(SalesRole $user, InputRequest $input)
     {
         $repository = $this->repository();
         $customerJourneyRepository = $this->em->getRepository(CustomerJourney::class);
@@ -66,7 +67,7 @@ class CustomerAssignmentController extends Controller
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function customerAssignmentList(SalesRoleInterface $user, InputRequest $input)
+    public function customerAssignmentList(SalesRole $user, InputRequest $input)
     {
         $task = new ViewCustomerAssignmentList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -76,7 +77,7 @@ class CustomerAssignmentController extends Controller
     }
 
     #[Query]
-    public function customerAssignmentDetail(SalesRoleInterface $user, string $id)
+    public function customerAssignmentDetail(SalesRole $user, string $id)
     {
         $task = new ViewCustomerAssignmentDetail($this->repository());
         $payload = new ViewDetailPayload($id);
@@ -85,7 +86,7 @@ class CustomerAssignmentController extends Controller
         return $payload->result;
     }
 
-    public function totalCustomerAssignment(SalesRoleInterface $user, InputRequest $input)
+    public function totalCustomerAssignment(SalesRole $user, InputRequest $input)
     {
         $task = new ViewTotalCustomerAssignment($this->repository());
         $searchSchema = [

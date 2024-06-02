@@ -5,19 +5,19 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
 use Company\Domain\Model\AreaStructure\Area;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\SalesData;
-use Company\Domain\Task\InCompany\Sales\AssignSalesTask;
-use Company\Domain\Task\InCompany\Sales\CancelSalesAssignment;
-use Company\Domain\Task\InCompany\Sales\ViewSalesDetailTask;
-use Company\Domain\Task\InCompany\Sales\ViewSalesListTask;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\SalesData;
+use Company\Domain\Task\InCompany\Sales\AddSales;
+use Company\Domain\Task\InCompany\Sales\CancelSales;
+use Company\Domain\Task\InCompany\Sales\ViewSalesDetail;
+use Company\Domain\Task\InCompany\Sales\ViewSalesList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
+use SharedContext\Domain\ValueObject\AccountInfoData;
 
 #[GraphqlMapableController(entity: Sales::class)]
 class SalesController extends Controller
@@ -27,40 +27,47 @@ class SalesController extends Controller
     {
         return $this->em->getRepository(Sales::class);
     }
+    
+    private function createSalesData(InputRequest $input): SalesData
+    {
+        $name = $input->get('name');
+        $email = $input->get('email');
+        $password = $input->get('password');
+        $accountInfoData = new AccountInfoData($name, $email, $password);
+        return (new SalesData())
+        ->setAccountInfoData($accountInfoData)
+                ->setAreaId($input->get('Area_id'))
+                ->setType($input->get('type'));
+    }
 
     //
     #[Mutation]
-    public function assignSales(CompanyUserRoleInterface $user, InputRequest $input)
+    public function addSales(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $repository = $this->repository();
-        $personnelRepository = $this->em->getRepository(Personnel::class);
         $areaRepository = $this->em->getRepository(Area::class);
 
-        $task = new AssignSalesTask($repository, $personnelRepository, $areaRepository);
-
-        $type = $input->get('type');
-        $payload = (new SalesData($type))
-                ->setPersonnelId($input->get('Personnel_id'))
-                ->setAreaId($input->get('Area_id'));
+        $task = new AddSales($repository, $areaRepository);
+        $payload = $this->createSalesData($input);
 
         $user->executeTaskInCompany($task, $payload);
-        return $this->repository()->fetchOneByIdOrDie($payload->id);
+        return $repository->queryOneById($payload->id);
     }
 
     #[Mutation]
     public function cancelSalesAssignment(CompanyUserRoleInterface $user, string $id)
     {
         $repository = $this->repository();
-        $task = new CancelSalesAssignment($repository);
+        $task = new CancelSales($repository);
 
         $user->executeTaskInCompany($task, $id);
-        return $this->repository()->fetchOneByIdOrDie($id);
+        return $this->repository()->queryOneById($id);
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function salesList(CompanyUserRoleInterface $user, InputRequest $input)
+    public function viewSalesList(CompanyUserRoleInterface $user, InputRequest $input)
     {
-        $task = new ViewSalesListTask($this->repository());
+        $task = new ViewSalesList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
         $user->executeTaskInCompany($task, $payload);
 
@@ -68,9 +75,9 @@ class SalesController extends Controller
     }
 
     #[Query]
-    public function salesDetail(CompanyUserRoleInterface $user, string $id)
+    public function viewSalesDetail(CompanyUserRoleInterface $user, string $id)
     {
-        $task = new ViewSalesDetailTask($this->repository());
+        $task = new ViewSalesDetail($this->repository());
         $payload = new ViewDetailPayload($id);
         $user->executeTaskInCompany($task, $payload);
 

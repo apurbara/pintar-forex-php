@@ -3,9 +3,10 @@
 namespace Company\Domain\Task\InCompany\Manager;
 
 use Company\Domain\Model\AdminTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
-class ViewManagerDetailTask implements AdminTaskInCompany
+class ViewManagerDetailTask implements AdminTaskInCompany, ManagerTaskInCompany
 {
 
     public function __construct(protected ManagerRepository $managerRepository)
@@ -20,6 +21,6 @@ class ViewManagerDetailTask implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $payload->setResult($this->managerRepository->managerDetail($payload->id));
+        $payload->setResult($this->managerRepository->viewManagerDetail($payload->id));
     }
 }

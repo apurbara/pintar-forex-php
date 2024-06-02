@@ -105,21 +105,18 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
         $this->customerAssignment->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $CustomerAssignment_id: ID!, $SalesActivity_id: ID!, $startTime: DateTimeZ ) {
-    sales ( salesId: $salesId ) {
-        submitSalesActivitySchedule ( CustomerAssignment_id: $CustomerAssignment_id, SalesActivity_id: $SalesActivity_id, startTime: $startTime ) {
-            id, status, startTime
-            salesActivity { id, name, duration }
-        }
+mutation ( $CustomerAssignment_id: ID!, $SalesActivity_id: ID!, $startTime: DateTimeZ ) {
+    submitSalesActivitySchedule ( CustomerAssignment_id: $CustomerAssignment_id, SalesActivity_id: $SalesActivity_id, startTime: $startTime ) {
+        id, status, startTime
+        salesActivity { id, name, duration }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
             ...$this->submitScheduleRequest
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_submitSchedule_200()
     {
@@ -185,23 +182,21 @@ _QUERY;
         $this->salesActivityScheduleTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!) {
-    sales ( salesId: $salesId ) {
-        salesActivityScheduleList {
-            list {
-                id, status, startTime, endTime
-                customerAssignment {
-                    id, 
-                    customer { id, name }
-                }
-            },
-            cursorLimit { total, cursorToNextPage }
-        }
+query {
+    salesActivityScheduleList {
+        list {
+            id, status, startTime, endTime
+            customerAssignment {
+                id, 
+                customer { id, name }
+            }
+        },
+        cursorLimit { total, cursorToNextPage }
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->graphqlVariables = $this->getPaginationInput();
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewList_200()
     {
@@ -260,16 +255,14 @@ _QUERY;
         $this->salesActivityScheduleTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!) {
-    sales ( salesId: $salesId ) {
-        salesActivityScheduleSummaryList {
-            total, startTime, endTime, status
-        }
+query {
+    salesActivityScheduleSummaryList {
+        total, startTime, endTime, status
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->graphqlVariables = $this->getPaginationInput();
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewSummaryList_200()
     {
@@ -303,21 +296,19 @@ _QUERY;
         $this->salesActivityScheduleOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $id: ID!) {
-    sales ( salesId: $salesId ) {
-        salesActivityScheduleDetail ( id: $id ) {
-            id, status, startTime, endTime
-            customerAssignment {
-                id, 
-                customer { id, name }
-            }
+query ( $id: ID!) {
+    salesActivityScheduleDetail ( id: $id ) {
+        id, status, startTime, endTime
+        customerAssignment {
+            id, 
+            customer { id, name }
         }
     }
 }
 _QUERY;
         $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['id'] = $this->salesActivityScheduleOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewDetail_200()
     {
@@ -361,15 +352,12 @@ _QUERY;
         $this->salesActivityScheduleThree->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $totalUpcomingFilters: [FilterInput], $totalPastScheduleWithoutReportFilters: [FilterInput]) {
-    sales ( salesId: $salesId ) {
-        totalUpcomingSchedule: totalSalesActivitySchedule ( filters: $totalUpcomingFilters),
-        totalPastScheduleWithoutReport: totalSalesActivitySchedule ( filters: $totalPastScheduleWithoutReportFilters)
-    }
+query ( $totalUpcomingFilters: [FilterInput], $totalPastScheduleWithoutReportFilters: [FilterInput]) {
+    totalUpcomingSchedule: totalSalesActivitySchedule ( filters: $totalUpcomingFilters),
+    totalPastScheduleWithoutReport: totalSalesActivitySchedule ( filters: $totalPastScheduleWithoutReportFilters)
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'totalPastScheduleWithoutReportFilters' => [
                 ['column' => 'SalesActivitySchedule.endTime', 'value' => (new \DateTime())->format('Y-m-d H') . ":00:00", 'comparisonType' => 'LTE'],
                 ['column' => 'SalesActivitySchedule.status', 'value' => SalesActivityScheduleStatus::SCHEDULED->value],
@@ -380,7 +368,7 @@ _QUERY;
             ],
             
         ]; 
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewTotal_200()
     {

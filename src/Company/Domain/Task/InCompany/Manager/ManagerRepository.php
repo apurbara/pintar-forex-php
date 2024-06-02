@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Task\InCompany\Manager;
 
-use Company\Domain\Model\Personnel\Manager;
+use Company\Domain\Model\Manager;
 
 interface ManagerRepository
 {
@@ -10,10 +10,13 @@ interface ManagerRepository
     public function nextIdentity(): string;
 
     public function add(Manager $manager): void;
-
+    
     public function ofId(string $id): Manager;
+    
+    public function isEmailAvailable(string $email): bool;
 
-    public function managerList(array $paginationSchema): array;
+    //
+    public function viewManagerList(array $paginationSchema): array;
 
-    public function managerDetail(string $id): array;
+    public function viewManagerDetail(string $id): array;
 }

@@ -8,8 +8,8 @@ use App\Http\Controllers\SalesBC\BySales\CustomerController;
 use App\Http\Controllers\SalesBC\BySales\RecycleRequestController;
 use App\Http\Controllers\SalesBC\BySales\SalesActivityReportController;
 use App\Http\Controllers\SalesBC\BySales\SalesActivityScheduleController;
-use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use App\Http\Controllers\SalesBC\BySales\VerificationReportController;
+use App\Http\Controllers\SalesBC\SalesRole;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
@@ -46,7 +46,7 @@ class Mutation extends ObjectType
                     'CustomerAssignment_id' => Type::id(),
                 ],
                 'resolve' => fn($root, $args) => app(VerificationReportController::class)
-                        ->submitCustomerVerificationReport(app(SalesRoleInterface::class), $args['CustomerAssignment_id'],
+                        ->submitCustomerVerificationReport(app(SalesRole::class), $args['CustomerAssignment_id'],
                                 new GraphqlInputRequest($args))
             ],
         ];

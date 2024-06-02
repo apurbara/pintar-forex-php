@@ -169,6 +169,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\DoctrineEntityManagerProvider::class,
+        App\Providers\CompanyUserRoleProvider::class,
+        App\Providers\SalesRoleProvider::class,
         App\Providers\UserRoleProvider::class,
     ])->toArray(),
 

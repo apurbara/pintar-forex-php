@@ -20,6 +20,7 @@ class AddCustomerTest extends TaskInCompanyTestBase
         $this->payload = (new CustomerData())
                 ->setAreaId($this->areaId)
                 ->setPhone('082131231231')
+                ->setEmail('customer@email.org')
                 ->setName('name');
     }
     
@@ -49,6 +50,7 @@ class AddCustomerTest extends TaskInCompanyTestBase
     {
         $this->payload = (new CustomerData())
                 ->setName('name')
+                ->setEmail('customer@email.org')
                 ->setPhone('08213123123');
         $this->execute();
         $this->markAsSuccess();

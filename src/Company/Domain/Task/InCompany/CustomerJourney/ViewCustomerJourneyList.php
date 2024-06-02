@@ -3,10 +3,11 @@
 namespace Company\Domain\Task\InCompany\CustomerJourney;
 
 use Company\Domain\Model\AdminTaskInCompany;
-use Company\Domain\Model\PersonnelTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\SalesTaskInCompany;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 
-class ViewCustomerJourneyList implements AdminTaskInCompany, PersonnelTaskInCompany
+class ViewCustomerJourneyList implements AdminTaskInCompany, ManagerTaskInCompany, SalesTaskInCompany
 {
     public function __construct(protected CustomerJourneyRepository $customerJourneyRepository)
     {

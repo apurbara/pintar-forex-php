@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\AreaStructure\Area\Customer;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
@@ -47,7 +47,7 @@ class CustomerControllerTest extends CompanyBCTestCase
     //
     protected function viewList()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         
@@ -60,7 +60,7 @@ query CustomerList ( $filters: [FilterInput]) {
 }
 _QUERY;
         $this->graphqlVariables = $this->paginationSchema;
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_viewList_200()
     {

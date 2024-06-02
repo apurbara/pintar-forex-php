@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use Company\Domain\Model\CommonSalesMetric;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\SalesActivitySchedule;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
+use Company\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use DateTime;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use SharedContext\Domain\Enum\EvaluationType;
@@ -155,12 +155,12 @@ class CommonSalesMetricSummaryControllerTest extends SalesBCTestCase
     
     protected function tearDown(): void
     {
-//        parent::tearDown();
-//        $this->connection->table('CommonSalesMetric')->truncate();
-//        $this->connection->table('CustomerAssignment')->truncate();
-//        $this->connection->table('SalesActivitySchedule')->truncate();
-//        $this->connection->table('SalesActivityReport')->truncate();
-//        $this->connection->table('ClosingRequest')->truncate();
+        parent::tearDown();
+        $this->connection->table('CommonSalesMetric')->truncate();
+        $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
+        $this->connection->table('SalesActivityReport')->truncate();
+        $this->connection->table('ClosingRequest')->truncate();
     }
     
     protected function viewAllCommonSalesMetricSummary()
@@ -194,8 +194,7 @@ class CommonSalesMetricSummaryControllerTest extends SalesBCTestCase
         $this->salesActivityReportMinusThreeRecurrenceA->insert($this->connection);
         $this->salesActivityReportMinusThreeRecurrenceB->insert($this->connection);
         //
-//        $this->get("api/sales/{$this->sales->columns['id']}/view-all-common-sales-metric-summary", $this->personnel->token);
-        $this->response = $this->get("api/sales/{$this->sales->columns['id']}/view-all-common-sales-metric-summary", $this->personnel->token);
+        $this->response = $this->get("api/view-all-common-sales-metric-summary", $this->sales->token);
     }
     public function test_viewAllCommonSalesMetricSummary_200()
     {

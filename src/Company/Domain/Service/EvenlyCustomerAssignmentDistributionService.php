@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Service;
 
-use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Sales;
 use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentDistributionServiceInterface;
 
 class EvenlyCustomerAssignmentDistributionService implements CustomerAssignmentDistributionServiceInterface

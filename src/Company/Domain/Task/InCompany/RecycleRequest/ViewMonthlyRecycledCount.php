@@ -2,10 +2,10 @@
 
 namespace Company\Domain\Task\InCompany\RecycleRequest;
 
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewMonthlyRecycledCount implements PersonnelHavingManagerAssignmentTaskInCompany
+class ViewMonthlyRecycledCount implements ManagerTaskInCompany
 {
 
     public function __construct(protected RecycleRequestRepository $recycleRequestRepository)

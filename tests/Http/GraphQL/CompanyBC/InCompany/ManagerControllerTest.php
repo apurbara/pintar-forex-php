@@ -2,91 +2,77 @@
 
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager;
+use Company\Domain\Model\Manager;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class ManagerControllerTest extends CompanyBCTestCase
 {
-    protected EntityRecord $personnelOne;
-    protected EntityRecord $personnelTwo;
-    
     protected EntityRecord $managerOne;
     protected EntityRecord $managerTwo;
-    
+    protected $managerPayload = [
+        'name' => 'new manager name',
+        'email' => 'newmanager@email.org',
+        'password' => 'password123',
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->connection->table('Personnel')->truncate();
         $this->connection->table('Manager')->truncate();
         
-        $this->personnelOne = new EntityRecord(Personnel::class, 1);
-        $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        
         $this->managerOne = new EntityRecord(Manager::class, 1);
-        $this->managerOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->managerTwo = new EntityRecord(Manager::class, 2);
-        $this->managerTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
     }
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->connection->table('Personnel')->truncate();
         $this->connection->table('Manager')->truncate();
     }
     
     //
-    protected function assign()
+    protected function addManager()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $Personnel_id: ID!){
-    assignManager (Personnel_id: $Personnel_id) {
-        id, disabled, createdTime,
-        personnel { id, name }
+mutation ( $name: String, $email: String, $password: String ){
+    addManager ( name: $name, email: $email, password: $password ) {
+        id, name, email
     }
 }
 _QUERY;
-        $this->graphqlVariables = [
-            'Personnel_id' => $this->personnelOne->columns['id'],
-        ];
+        $this->graphqlVariables = $this->managerPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_assign_200()
+    public function test_addManager_200()
     {
 $this->disableExceptionHandling();
-        $this->assign();
+        $this->addManager();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'disabled' => false,
-            'createdTime' => $this->stringOfJakartaCurrentTime(),
-            'personnel' => [
-                'id' => $this->personnelOne->columns['id'],
-                'name' => $this->personnelOne->columns['name'],
-            ],
+            'name' => $this->managerPayload['name'],
+            'email' => $this->managerPayload['email'],
         ]);
         
         $this->seeInDatabase('Manager', [
-            'disabled' => false,
+            'suspended' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
-            'Personnel_id' => $this->personnelOne->columns['id'],
+            'name' => $this->managerPayload['name'],
+            'email' => $this->managerPayload['email'],
         ]);
     }
     
     //
-    protected function disableManager()
+    protected function suspendManager()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
         $this->managerOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 mutation ( $id: ID ){
-    disableManager ( id: $id ) {
-        disabled
+    suspendManager ( id: $id ) {
+        suspended
     }
 }
 _QUERY;
@@ -95,32 +81,31 @@ _QUERY;
         ];
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_disableManager_200()
+    public function test_suspendManager_200()
     {
 $this->disableExceptionHandling();
-        $this->disableManager();
+        $this->suspendManager();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'disabled' => true,
+            'suspended' => true,
         ]);
         
         $this->seeInDatabase('Manager', [
             'id' => $this->managerOne->columns['id'],
-            'disabled' => true,
+            'suspended' => true,
         ]);
     }
     
     //
-    protected function enableManager()
+    protected function unsuspendManager()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
         $this->managerOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 mutation ( $id: ID ){
-    enableManager ( id: $id ) {
-        disabled
+    unsuspendManager ( id: $id ) {
+        suspended
     }
 }
 _QUERY;
@@ -129,37 +114,34 @@ _QUERY;
         ];
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_enableManager_200()
+    public function test_unsuspendManager_200()
     {
 $this->disableExceptionHandling();
-        $this->managerOne->columns['disabled'] = true;
-        $this->enableManager();
+        $this->managerOne->columns['suspended'] = true;
+        $this->unsuspendManager();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'disabled' => false,
+            'suspended' => false,
         ]);
         
         $this->seeInDatabase('Manager', [
             'id' => $this->managerOne->columns['id'],
-            'disabled' => false,
+            'suspended' => false,
         ]);
     }
     
     //
-    protected function viewList()
+    protected function viewManagerList()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
         $this->managerOne->insert($this->connection);
         $this->managerTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query ManagerList {
-    managerList{
+    viewManagerList{
         list {
-            id, disabled, createdTime,
-            personnel { id, name }
+            id, suspended, createdTime, name, email
         },
         cursorLimit { total, cursorToNextPage }
     }
@@ -167,29 +149,25 @@ query ManagerList {
 _QUERY;
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_viewList_200()
+    public function test_viewManagerList_200()
     {
-        $this->viewList();
+        $this->viewManagerList();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'list' => [
                 [
                     'id' => $this->managerOne->columns['id'],
-                    'disabled' => $this->managerOne->columns['disabled'],
+                    'suspended' => $this->managerOne->columns['suspended'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->managerOne->columns['createdTime']),
-                    'personnel' => [
-                        'id' => $this->personnelOne->columns['id'],
-                        'name' => $this->personnelOne->columns['name'],
-                    ],
+                    'name' => $this->managerOne->columns['name'],
+                    'email' => $this->managerOne->columns['email'],
                 ],
                 [
                     'id' => $this->managerTwo->columns['id'],
-                    'disabled' => $this->managerTwo->columns['disabled'],
+                    'suspended' => $this->managerTwo->columns['suspended'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->managerTwo->columns['createdTime']),
-                    'personnel' => [
-                        'id' => $this->personnelTwo->columns['id'],
-                        'name' => $this->personnelTwo->columns['name'],
-                    ],
+                    'name' => $this->managerTwo->columns['name'],
+                    'email' => $this->managerTwo->columns['email'],
                 ],
             ],
             'cursorLimit' => [
@@ -200,35 +178,31 @@ _QUERY;
     }
     
     //
-    protected function viewDetail()
+    protected function viewManagerDetail()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
         $this->managerOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query ManagerDetail ( $id: ID! ) {
-    managerDetail ( id: $id ) {
-        id, disabled, createdTime,
-        personnel { id, name }
+    viewManagerDetail ( id: $id ) {
+        id, suspended, createdTime, name, email
     }
 }
 _QUERY;
         $this->graphqlVariables['id'] = $this->managerOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_viewDetail_200()
+    public function test_viewManagerDetail_200()
     {
-        $this->viewDetail();
+        $this->viewManagerDetail();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'id' => $this->managerOne->columns['id'],
-            'disabled' => $this->managerOne->columns['disabled'],
+            'suspended' => $this->managerOne->columns['suspended'],
             'createdTime' => $this->jakartaDateTimeFormat($this->managerOne->columns['createdTime']),
-            'personnel' => [
-                'id' => $this->personnelOne->columns['id'],
-                'name' => $this->personnelOne->columns['name'],
-            ],
+            'name' => $this->managerOne->columns['name'],
+            'email' => $this->managerOne->columns['email'],
         ]);
     }
 }

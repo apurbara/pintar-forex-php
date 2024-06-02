@@ -2,11 +2,11 @@
 
 namespace Company\Domain\Task\InCompany\RecycleRequest;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequestData;
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Resources\Event\Dispatcher;
 
-class ApproveRecycleRequest implements PersonnelHavingManagerAssignmentTaskInCompany
+class ApproveRecycleRequest implements ManagerTaskInCompany
 {
 
     public function __construct(protected RecycleRequestRepository $recycleRequestRepository,

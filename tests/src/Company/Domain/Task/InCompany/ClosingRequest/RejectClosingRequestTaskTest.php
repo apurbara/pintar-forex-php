@@ -13,7 +13,7 @@ class RejectClosingRequestTaskTest extends \Tests\src\Company\Domain\Task\InComp
         $this->prepareClosingRequestDependency();
         //
         $this->task = new RejectClosingRequestTask($this->closingRequestRepository);
-        $this->payload = (new \Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequestData())
+        $this->payload = (new \Company\Domain\Model\Sales\CustomerAssignment\ClosingRequestData())
                 ->setId($this->closingRequestId);
     }
     

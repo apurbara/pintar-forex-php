@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Service;
 
-use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Sales;
 use Tests\TestBase;
 
 class EvenlyCustomerAssignmentDistributionServiceTest extends TestBase

@@ -34,7 +34,6 @@
             "SharedContext\\": "src/SharedContext",
             "Company\\": "src/Company",
             "User\\": "src/User",
-            "Manager\\": "src/Manager",
             "Sales\\": "src/Sales",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"

@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Task\InCompany\ClosingRequest;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequestData;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
 use Tests\src\Company\Domain\Task\InCompany\TaskInCompanyTestBase;
 
 class AcceptClosingRequestTaskTest extends TaskInCompanyTestBase

@@ -97,20 +97,17 @@ class CustomerAssignmentControllerTest extends SalesBCTestCase
         $this->customerAssignmentOne->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $id: ID, $CustomerJourney_id: ID ) {
-    sales ( salesId: $salesId ) {
-        updateCustomerAssignmentJourney ( id: $id, CustomerJourney_id: $CustomerJourney_id ) {
-            id, customerJourney { id, name, initial }
-        }
+mutation ( $id: ID, $CustomerJourney_id: ID ) {
+    updateCustomerAssignmentJourney ( id: $id, CustomerJourney_id: $CustomerJourney_id ) {
+        id, customerJourney { id, name, initial }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'id' => $this->customerAssignmentOne->columns['id'],
             'CustomerJourney_id' => $this->customerJourneyOne->columns['id'],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_udpateJourney_200()
     {
@@ -146,20 +143,17 @@ _QUERY;
         $this->customerAssignmentOne->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $id: ID, $customer: CustomerInput ) {
-    sales ( salesId: $salesId ) {
-        updateCustomerBio ( id: $id, customer: $customer ) {
-            id, customer { name, email, source, area { id } }
-        }
+mutation ( $id: ID, $customer: CustomerInput ) {
+    updateCustomerBio ( id: $id, customer: $customer ) {
+        id, customer { name, email, source, area { id } }
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'id' => $this->customerAssignmentOne->columns['id'],
             'customer' => $this->customerPayload,
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_udpateCustomerBio_200()
     {
@@ -197,14 +191,12 @@ $this->disableExceptionHandling();
         $this->customerAssignmentOne->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $id: ID!) {
-    sales ( salesId: $salesId ) {
-        customerAssignmentDetail ( id: $id ) {
-            id, status, createdTime
-            customer {
-                id, name, email
-                area { id, name }
-            }
+query ( $id: ID!) {
+    customerAssignmentDetail ( id: $id ) {
+        id, status, createdTime
+        customer {
+            id, name, email
+            area { id, name }
         }
     }
 }
@@ -213,7 +205,7 @@ _QUERY;
             'salesId' => $this->sales->columns['id'],
             'id' => $this->customerAssignmentOne->columns['id'],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
 
     public function test_viewDetail_200()
@@ -246,23 +238,21 @@ _QUERY;
         $this->customerAssignmentTwo->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!) {
-    sales ( salesId: $salesId ) {
-        customerAssignmentList {
-            list {
-                id, status, createdTime
-                customer {
-                    id, name, email
-                    area { id, name }
-                }
-            },
-            cursorLimit { total, cursorToNextPage }
-        }
+query {
+    customerAssignmentList {
+        list {
+            id, status, createdTime
+            customer {
+                id, name, email
+                area { id, name }
+            }
+        },
+        cursorLimit { total, cursorToNextPage }
     }
 }
 _QUERY;
         $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
 
     public function test_viewList_200()
@@ -319,14 +309,11 @@ _QUERY;
         $this->customerAssignmentThree->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $filters: [FilterInput] ) {
-    sales ( salesId: $salesId ) {
-        totalCustomerAssignment (filters: $filters)
-    }
+query ( $filters: [FilterInput] ) {
+    totalCustomerAssignment (filters: $filters)
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
 
     public function test_viewTotalCustomerAssignment_200()
@@ -380,21 +367,17 @@ _QUERY;
 
         $this->graphqlQuery = <<<'_QUERY'
 query (
-    $salesId: ID!, 
     $activeAssignmentFilters: [FilterInput],
     $recycleAssignmentFilters: [FilterInput],
     $goodFundAssignmentFilters: [FilterInput]
 ) {
-    sales ( salesId: $salesId ) {
-        totalCustomerAssignment,
-        totalActiveCustomerAssignment: totalCustomerAssignment ( filters: $activeAssignmentFilters ),
-        totalRecycleCustomerAssignment: totalCustomerAssignment ( filters: $recycleAssignmentFilters ),
-        totalGoodFundCustomerAssignment: totalCustomerAssignment ( filters: $goodFundAssignmentFilters ),
-    }
+    totalCustomerAssignment,
+    totalActiveCustomerAssignment: totalCustomerAssignment ( filters: $activeAssignmentFilters ),
+    totalRecycleCustomerAssignment: totalCustomerAssignment ( filters: $recycleAssignmentFilters ),
+    totalGoodFundCustomerAssignment: totalCustomerAssignment ( filters: $goodFundAssignmentFilters ),
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'activeAssignmentFilters' => [
                 ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
             ],
@@ -405,7 +388,7 @@ _QUERY;
                 ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::GOOD_FUND->value],
             ],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
 
         $this->seeStatusCode(200);
         $this->seeJsonContains([

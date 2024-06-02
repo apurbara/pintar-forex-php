@@ -2,7 +2,7 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 

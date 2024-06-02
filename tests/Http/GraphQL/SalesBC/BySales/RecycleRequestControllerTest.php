@@ -57,20 +57,17 @@ class RecycleRequestControllerTest extends SalesBCTestCase
         $this->customerAssignment->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $CustomerAssignment_id: ID!, $note: String ) {
-    sales ( salesId: $salesId ) {
-        submitRecycleRequest ( CustomerAssignment_id: $CustomerAssignment_id, note: $note ) {
-            id, status, createdTime, note
-        }
+mutation ( $CustomerAssignment_id: ID!, $note: String ) {
+    submitRecycleRequest ( CustomerAssignment_id: $CustomerAssignment_id, note: $note ) {
+        id, status, createdTime, note
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
             ...$this->recycleRequestPayload
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_submit_200()
     {
@@ -99,20 +96,17 @@ _QUERY;
         $this->recycleRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $id: ID!, $note: String ) {
-    sales ( salesId: $salesId ) {
-        updateRecycleRequest ( id: $id,  note: $note ) {
-            id, status, createdTime, note
-        }
+mutation ( $id: ID!, $note: String ) {
+    updateRecycleRequest ( id: $id,  note: $note ) {
+        id, status, createdTime, note
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'id' => $this->recycleRequestOne->columns['id'],
             ...$this->recycleRequestPayload,
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_update_200()
     {
@@ -141,20 +135,17 @@ _QUERY;
         $this->recycleRequestTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $filters: [FilterInput]) {
-    sales ( salesId: $salesId ) {
-        recycleRequestList ( filters: $filters) {
-            list { id, status, createdTime, note, customerAssignment { customer { name } } },
-            cursorLimit { total, cursorToNextPage }
-        }
+query ( $filters: [FilterInput]) {
+    recycleRequestList ( filters: $filters) {
+        list { id, status, createdTime, note, customerAssignment { customer { name } } },
+        cursorLimit { total, cursorToNextPage }
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['filters'] = [
             ['column' => 'RecycleRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewList_200()
     {
@@ -208,17 +199,14 @@ _QUERY;
         $this->recycleRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $id: ID!) {
-    sales ( salesId: $salesId ) {
-        recycleRequestDetail ( id: $id ) {
-            id, status, createdTime, note
-        }
+query ( $id: ID!) {
+    recycleRequestDetail ( id: $id ) {
+        id, status, createdTime, note
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['id'] = $this->recycleRequestOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewDetail_200()
     {

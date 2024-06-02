@@ -20,8 +20,8 @@ class AllocateInitialSalesActivityScheduleListener implements ListenerInterface
 
     public function __construct(
             SalesRepository $salesRepository, SalesActivityScheduleRepository $salesActivityScheduleRepository,
-            CustomerAssignmentRepository $customerAssignmentRepository, SalesActivityRepository $salesActivityRepository,
-            protected string $personnelId, protected string $salesId
+            CustomerAssignmentRepository $customerAssignmentRepository,
+            SalesActivityRepository $salesActivityRepository, protected string $salesId
     )
     {
         $this->service = new ExecuteSalesTask($salesRepository);
@@ -37,7 +37,6 @@ class AllocateInitialSalesActivityScheduleListener implements ListenerInterface
     protected function execute(CustomerAssignedEvent $event): void
     {
         $this->service->execute(
-                $this->personnelId, $this->salesId, $this->task,
-                $event->customerAssignmentId);
+                $this->salesId, $this->task, $event->customerAssignmentId);
     }
 }

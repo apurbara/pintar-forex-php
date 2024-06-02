@@ -2,10 +2,10 @@
 
 namespace Company\Domain\Task\InCompany\ClosingRequest;
 
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewMonthlyTotalClosing implements PersonnelHavingManagerAssignmentTaskInCompany
+class ViewMonthlyTotalClosing implements ManagerTaskInCompany
 {
 
     public function __construct(protected ClosingRequestRepository $closingRequestRepository)

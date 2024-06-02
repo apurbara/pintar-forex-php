@@ -2,10 +2,10 @@
 
 namespace Company\Domain\Task\InCompany\RecycleRequest;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequestData;
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 
-class RejectRecycleRequest implements PersonnelHavingManagerAssignmentTaskInCompany
+class RejectRecycleRequest implements ManagerTaskInCompany
 {
 
     public function __construct(protected RecycleRequestRepository $recycleRequestRepository)

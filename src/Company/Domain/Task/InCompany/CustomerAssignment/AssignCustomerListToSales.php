@@ -2,13 +2,13 @@
 
 namespace Company\Domain\Task\InCompany\CustomerAssignment;
 
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Resources\Event\Dispatcher;
 
-class AssignCustomerListToSales implements PersonnelHavingManagerAssignmentTaskInCompany
+class AssignCustomerListToSales implements ManagerTaskInCompany
 {
 
     public function __construct(

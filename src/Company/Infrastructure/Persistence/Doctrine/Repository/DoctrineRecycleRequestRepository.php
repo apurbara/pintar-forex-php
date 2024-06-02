@@ -2,7 +2,7 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Task\InCompany\RecycleRequest\RecycleRequestRepository;
 use DateTime;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;

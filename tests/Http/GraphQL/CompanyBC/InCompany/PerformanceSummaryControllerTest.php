@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\CompanyMetric;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\SalesActivitySchedule;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
+use Company\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use Company\Domain\Model\SalesPerformanceMetric;
 use Company\Domain\Model\SalesPerformanceMetric\SalesPerformanceMetricEvaluation;
 use Company\Domain\Model\SalesRank;
@@ -37,10 +36,6 @@ class PerformanceSummaryControllerTest extends CompanyBCTestCase
     protected EntityRecord $salesPerformanceMetricEvaluationOneB;
     protected EntityRecord $salesPerformanceMetricEvaluationOneC;
     protected EntityRecord $salesPerformanceMetricEvaluationTwoA;
-    
-    protected EntityRecord $personnelOne;
-    protected EntityRecord $personnelTwo;
-    protected EntityRecord $personnelThree;
     
     protected EntityRecord $salesOne;
     protected EntityRecord $salesTwo;
@@ -121,14 +116,14 @@ class PerformanceSummaryControllerTest extends CompanyBCTestCase
         $this->salesRankOne->columns['metricType'] = MetricType::APPROVED_CLOSING_REQUEST->value;
         $this->salesRankOne->columns['evaluationType'] = EvaluationType::SUM->value;
         $this->salesRankOne->columns['recurrenceType'] = RecurrenceType::MONTHLY->value;
-        $this->salesRankOne->columns['order'] = QueryOrder::DESC->value;
+        $this->salesRankOne->columns['queryOrder'] = QueryOrder::DESC->value;
         $this->salesRankOne->columns['displaySalesNumber'] = 2;
         $this->salesRankTwo = new EntityRecord(SalesRank::class, 2);
         $this->salesRankTwo->columns['name'] = 'least active';
         $this->salesRankTwo->columns['metricType'] = MetricType::SALES_ACTIVITY_REPORT->value;
         $this->salesRankTwo->columns['evaluationType'] = EvaluationType::COUNT->value;
         $this->salesRankTwo->columns['recurrenceType'] = RecurrenceType::MONTHLY->value;
-        $this->salesRankTwo->columns['order'] = QueryOrder::ASC->value;
+        $this->salesRankTwo->columns['queryOrder'] = QueryOrder::ASC->value;
         $this->salesRankTwo->columns['displaySalesNumber'] = 2;
         
         $this->salesPerformanceMetricOne = new EntityRecord(SalesPerformanceMetric::class, 1);
@@ -157,16 +152,9 @@ class PerformanceSummaryControllerTest extends CompanyBCTestCase
         $this->salesPerformanceMetricEvaluationTwoA->columns['evaluationType'] = EvaluationType::AVG->value;
         $this->salesPerformanceMetricEvaluationTwoA->columns['alias'] = 'avgActivity';
         
-        $this->personnelOne = new EntityRecord(Personnel::class, 1);
-        $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        $this->personnelThree = new EntityRecord(Personnel::class, 3);
-        
         $this->salesOne = new EntityRecord(Sales::class, 1);
-        $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
-        $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         $this->salesThree = new EntityRecord(Sales::class, 3);
-        $this->salesThree->columns['Personnel_id'] = $this->personnelThree->columns['id'];
         
         $this->customerAssignmentOneA = new EntityRecord(CustomerAssignment::class, 'OneA');
         $this->customerAssignmentOneA->columns['Sales_id'] = $this->salesOne->columns['id'];
@@ -337,14 +325,10 @@ class PerformanceSummaryControllerTest extends CompanyBCTestCase
     
     protected function viewAllCompanyMetricSummary()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         //
         $this->companyMetricOne->insert($this->connection);
         $this->companyMetricTwo->insert($this->connection);
-        
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
-        $this->personnelThree->insert($this->connection);
         
         $this->salesOne->insert($this->connection);
         $this->salesTwo->insert($this->connection);
@@ -395,7 +379,7 @@ class PerformanceSummaryControllerTest extends CompanyBCTestCase
         $this->closingRequestMinusThreeEvaluationTimeThreeAOneA->insert($this->connection);
         
         
-        $this->response = $this->get('api/view-all-company-metric-summary', $this->personnel->token);
+        $this->response = $this->get('api/view-all-company-metric-summary', $this->manager->token);
     }
     public function test_viewAllCompanyMetricSummary_200()
     {
@@ -443,14 +427,10 @@ $this->disableExceptionHandling();
     
     protected function viewAllSalesRankSummary()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         //
         $this->salesRankOne->insert($this->connection);
         $this->salesRankTwo->insert($this->connection);
-        
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
-        $this->personnelThree->insert($this->connection);
         
         $this->salesOne->insert($this->connection);
         $this->salesTwo->insert($this->connection);
@@ -501,7 +481,7 @@ $this->disableExceptionHandling();
         $this->closingRequestMinusThreeEvaluationTimeThreeAOneA->insert($this->connection);
         
         
-        $this->response = $this->get('api/view-all-sales-rank-summary', $this->personnel->token);
+        $this->response = $this->get('api/view-all-sales-rank-summary', $this->manager->token);
     }
     public function test_viewAllSalesRankSummary_200()
     {
@@ -514,13 +494,13 @@ $this->disableExceptionHandling();
             'result' => [
                 [
                     'id' => $this->salesOne->columns['id'],
-                    'name' => $this->personnelOne->columns['name'],
+                    'name' => $this->salesOne->columns['name'],
                     'evaluationTime' => (new \DateTime())->format('Y-m'),
                     'achievement' => strval(101+102+103),
                 ],
                 [
                     'id' => $this->salesThree->columns['id'],
-                    'name' => $this->personnelThree->columns['name'],
+                    'name' => $this->salesThree->columns['name'],
                     'evaluationTime' => (new \DateTime())->format('Y-m'),
                     'achievement' => strval(301),
                 ],
@@ -531,13 +511,13 @@ $this->disableExceptionHandling();
             'result' => [
                 [
                     'id' => $this->salesThree->columns['id'],
-                    'name' => $this->personnelThree->columns['name'],
+                    'name' => $this->salesThree->columns['name'],
                     'evaluationTime' => (new \DateTime())->format('Y-m'),
                     'achievement' => 1,
                 ],
                 [
                     'id' => $this->salesTwo->columns['id'],
-                    'name' => $this->personnelTwo->columns['name'],
+                    'name' => $this->salesTwo->columns['name'],
                     'evaluationTime' => (new \DateTime())->format('Y-m'),
                     'achievement' => 1,
                 ],
@@ -547,7 +527,7 @@ $this->disableExceptionHandling();
     
     protected function viewAllSalesPerformanceMetricSummary()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         //
         $this->salesPerformanceMetricOne->insert($this->connection);
         $this->salesPerformanceMetricTwo->insert($this->connection);
@@ -555,10 +535,6 @@ $this->disableExceptionHandling();
         $this->salesPerformanceMetricEvaluationOneB->insert($this->connection);
         $this->salesPerformanceMetricEvaluationOneC->insert($this->connection);
         $this->salesPerformanceMetricEvaluationTwoA->insert($this->connection);
-        
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
-        $this->personnelThree->insert($this->connection);
         
         $this->salesOne->insert($this->connection);
         $this->salesTwo->insert($this->connection);
@@ -609,7 +585,7 @@ $this->disableExceptionHandling();
         $this->closingRequestMinusThreeEvaluationTimeThreeAOneA->insert($this->connection);
         
         
-        $this->response = $this->get('api/view-all-sales-performance-metric-summary', $this->personnel->token);
+        $this->response = $this->get('api/view-all-sales-performance-metric-summary', $this->manager->token);
     }
     public function test_viewAllSalesPerformanceMetricSummary_200()
     {

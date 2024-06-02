@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Task\InCompany\RecycleRequest;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
 
 interface RecycleRequestRepository
 {

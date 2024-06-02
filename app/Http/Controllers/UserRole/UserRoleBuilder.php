@@ -13,8 +13,9 @@ class UserRoleBuilder
 {
 
     const GUEST = 'guest';
-    const ADMIN = 'admin';
-    const PERSONNEL = 'personnel';
+    const ADMIN = 'ADMIN';
+    const MANAGER = 'MANAGER';
+    const SALES = 'SALES';
 
     public static function generateJwtToken(string $userRole, string $userId): string
     {

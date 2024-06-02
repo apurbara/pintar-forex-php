@@ -4,8 +4,8 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\Controller;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequestData;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Company\Domain\Task\InCompany\RecycleRequest\ApproveRecycleRequest;
 use Company\Domain\Task\InCompany\RecycleRequest\RejectRecycleRequest;
 use Company\Domain\Task\InCompany\RecycleRequest\ViewMonthlyRecycledCount;

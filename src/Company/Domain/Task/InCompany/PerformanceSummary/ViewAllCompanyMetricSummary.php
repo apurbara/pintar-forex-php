@@ -2,11 +2,11 @@
 
 namespace Company\Domain\Task\InCompany\PerformanceSummary;
 
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Company\Domain\Task\InCompany\CompanyMetric\CompanyMetricRepository;
 use Resources\Domain\TaskPayload\ViewPayload;
 
-class ViewAllCompanyMetricSummary implements PersonnelHavingManagerAssignmentTaskInCompany
+class ViewAllCompanyMetricSummary implements ManagerTaskInCompany
 {
 
     public function __construct(

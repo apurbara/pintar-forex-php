@@ -74,20 +74,17 @@ class SalesActivityReportControllerTest extends SalesBCTestCase
         $this->salesActivitySchedule->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $salesId: ID!, $SalesActivitySchedule_id: ID!, $content: String ) {
-    sales ( salesId: $salesId ) {
-        submitSalesActivityReport (SalesActivitySchedule_id: $SalesActivitySchedule_id, content: $content ) {
-            id, content, submitTime
-        }
+mutation ( $SalesActivitySchedule_id: ID!, $content: String ) {
+    submitSalesActivityReport (SalesActivitySchedule_id: $SalesActivitySchedule_id, content: $content ) {
+        id, content, submitTime
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'salesId' => $this->sales->columns['id'],
             'SalesActivitySchedule_id' => $this->salesActivitySchedule->columns['id'],
             ...$this->submitReportRequest
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_submitSchedule_200()
     {
@@ -120,17 +117,15 @@ _QUERY;
         $this->salesActivityReportTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!) {
-    sales ( salesId: $salesId ) {
-        salesActivityReportList {
-            list { id, submitTime, content },
-            cursorLimit { total, cursorToNextPage }
-        }
+query {
+    salesActivityReportList {
+        list { id, submitTime, content },
+        cursorLimit { total, cursorToNextPage }
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->graphqlVariables = $this->getPaginationInput();
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewList_200()
     {
@@ -167,17 +162,14 @@ _QUERY;
         $this->salesActivityReportOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query ( $salesId: ID!, $id: ID!) {
-    sales ( salesId: $salesId ) {
-        salesActivityReportDetail ( id: $id ) {
-            id, content, submitTime
-        }
+query ( $id: ID!) {
+    salesActivityReportDetail ( id: $id ) {
+        id, content, submitTime
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
         $this->graphqlVariables['id'] = $this->salesActivityReportOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->sales->token);
     }
     public function test_viewDetail_200()
     {

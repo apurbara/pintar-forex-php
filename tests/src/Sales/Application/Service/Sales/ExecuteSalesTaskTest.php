@@ -11,7 +11,7 @@ class ExecuteSalesTaskTest extends TestBase
 
     protected $salesRepository;
     protected $sales;
-    protected $personnelId = 'personnelId', $salesId = 'salesId';
+    protected $salesId = 'salesId';
     protected $service;
     //
     protected $task, $payload = 'string represent task payload';
@@ -30,10 +30,10 @@ class ExecuteSalesTaskTest extends TestBase
     protected function execute()
     {
         $this->salesRepository->expects($this->any())
-                ->method('aSalesBelongToPersonnel')
-                ->with($this->personnelId, $this->salesId)
+                ->method('ofId')
+                ->with($this->salesId)
                 ->willReturn($this->sales);
-        $this->service->execute($this->personnelId, $this->salesId, $this->task, $this->payload);
+        $this->service->execute($this->salesId, $this->task, $this->payload);
     }
 
     public function test_execute_salesExecuteTask()

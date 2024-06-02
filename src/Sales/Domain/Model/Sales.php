@@ -2,20 +2,16 @@
 
 namespace Sales\Domain\Model;
 
-use Company\Domain\Model\Personnel as PersonnelInCompanyBC;
-use Company\Domain\Model\Personnel\Manager as ManagerInCompanyBC;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
-use Sales\Domain\DependencyModel\Personnel;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\BySales\SalesTask;
@@ -26,12 +22,6 @@ use SharedContext\Domain\Enum\SalesType;
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales
 {
-
-    #[FetchableObject(targetEntity: PersonnelInCompanyBC::class, joinColumnName: "Personnel_id")]
-    #[ManyToOne(targetEntity: Personnel::class)]
-    #[JoinColumn(name: "Personnel_id", referencedColumnName: "id")]
-    protected Personnel $personnel;
-
 
     #[Id, Column(type: "guid")]
     protected string $id;
@@ -72,7 +62,6 @@ class Sales
     //
     public function executeTask(SalesTask $task, $payload): void
     {
-        $this->personnel->assertActive();
         if ($this->cancelled) {
             throw RegularException::forbidden('only active sales can make this request');
         }

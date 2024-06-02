@@ -2,10 +2,10 @@
 
 namespace Company\Domain\Task\InCompany\ClosingRequest;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequestData;
-use Company\Domain\Model\PersonnelHavingManagerAssignmentTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
 
-class RejectClosingRequestTask implements PersonnelHavingManagerAssignmentTaskInCompany
+class RejectClosingRequestTask implements ManagerTaskInCompany
 {
 
     public function __construct(protected ClosingRequestRepository $closingRequestRepository)

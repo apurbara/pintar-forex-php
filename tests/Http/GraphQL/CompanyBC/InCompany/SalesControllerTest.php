@@ -2,98 +2,72 @@
 
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
-use Company\Domain\Model\AreaStructure;
-use Company\Domain\Model\AreaStructure\Area;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Sales;
+use Company\Domain\Model\Sales;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
 class SalesControllerTest extends CompanyBCTestCase
 {
-    protected EntityRecord $personnelOne;
-    protected EntityRecord $personnelTwo;
-    
-    protected EntityRecord $areaStructure;
     protected EntityRecord $area;
-    
     protected EntityRecord $salesOne;
     protected EntityRecord $salesTwo;
-    
-    protected $salesAssignData = [
-        'type' => 'IN_HOUSE',
-    ];
-
+    //
+    protected $salesPayload;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->connection->table('AreaStructure')->truncate();
         $this->connection->table('Area')->truncate();
-        $this->connection->table('Personnel')->truncate();
         $this->connection->table('Sales')->truncate();
         
-        $this->personnelOne = new EntityRecord(Personnel::class, 1);
-        $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        
-        $this->areaStructure = new EntityRecord(AreaStructure::class, 'main');
-        $this->area = new EntityRecord(Area::class, 'main');
-        $this->area->columns['AreaStructure_id'] = $this->areaStructure->columns['id'];
+        $this->area = new EntityRecord(\Company\Domain\Model\AreaStructure\Area::class, 'main');
         
         $this->salesOne = new EntityRecord(Sales::class, 1);
-        $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesOne->columns['Area_id'] = $this->area->columns['id'];
-        
         $this->salesTwo = new EntityRecord(Sales::class, 2);
-        $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         $this->salesTwo->columns['Area_id'] = $this->area->columns['id'];
+        //
+        $this->salesPayload = [
+            'name' => 'new sales name',
+            'email' => 'newsales@email.org',
+            'password' => 'password123',
+            'type' => \SharedContext\Domain\Enum\SalesType::IN_HOUSE->value,
+            'Area_id' => $this->area->columns['id'],
+        ];
     }
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->connection->table('AreaStructure')->truncate();
         $this->connection->table('Area')->truncate();
-        $this->connection->table('Personnel')->truncate();
         $this->connection->table('Sales')->truncate();
     }
     
     //
-    protected function assign()
+    protected function addSales()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
         $this->area->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $Personnel_id: ID!, $Area_id: ID!, $type: String ){
-    assignSales ( Personnel_id: $Personnel_id, Area_id: $Area_id, type: $type ) {
-        id, cancelled, createdTime, type,
-        personnel { id, name }
+mutation ( $name: String, $email: String, $password: String, $type: String, $Area_id: ID ){
+    addSales ( name: $name, email: $email, password: $password, type: $type, Area_id: $Area_id ) {
+        id, name, email, type,
         area { id, name }
     }
 }
 _QUERY;
-        $this->graphqlVariables = [
-            'Personnel_id' => $this->personnelOne->columns['id'],
-            'Area_id' => $this->area->columns['id'],
-            ...$this->salesAssignData,
-            
-        ];
+        $this->graphqlVariables = $this->salesPayload;
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_assign_200()
+    public function test_addSales_200()
     {
 $this->disableExceptionHandling();
-        $this->assign();
+        $this->addSales();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'cancelled' => false,
-            'createdTime' => $this->stringOfJakartaCurrentTime(),
-            'type' => $this->salesAssignData['type'],
-            'personnel' => [
-                'id' => $this->personnelOne->columns['id'],
-                'name' => $this->personnelOne->columns['name'],
-            ],
+            'name' => $this->salesPayload['name'],
+            'email' => $this->salesPayload['email'],
+            'type' => $this->salesPayload['type'],
             'area' => [
                 'id' => $this->area->columns['id'],
                 'name' => $this->area->columns['name'],
@@ -103,24 +77,21 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('Sales', [
             'cancelled' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
-            'type' => $this->salesAssignData['type'],
-            'Personnel_id' => $this->personnelOne->columns['id'],
-            'Area_id' => $this->area->columns['id'],
+            'name' => $this->salesPayload['name'],
+            'email' => $this->salesPayload['email'],
+            'type' => $this->salesPayload['type'],
+            'Area_id' => $this->salesPayload['Area_id'],
         ]);
     }
     
     //
-    protected function cancelSalesAssignment()
+    protected function cancelSales()
     {
         $this->prepareAdminDependency();
-        $this->area->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $id: ID
-){
+mutation ( $id: ID ){
     cancelSalesAssignment ( id: $id ) {
         cancelled
     }
@@ -128,15 +99,15 @@ mutation (
 _QUERY;
         $this->graphqlVariables = [
             'id' => $this->salesOne->columns['id'],
-            
         ];
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_cancelSalesAssignment_200()
+    public function test_cancelSales_200()
     {
 $this->disableExceptionHandling();
-        $this->cancelSalesAssignment();
+        $this->cancelSales();
         $this->seeStatusCode(200);
+        
         $this->seeJsonContains([
             'cancelled' => true,
         ]);
@@ -144,31 +115,22 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('Sales', [
             'id' => $this->salesOne->columns['id'],
             'cancelled' => true,
-            'cancelTime' => $this->stringOfCurrentTime(),
         ]);
     }
     
     //
-    protected function viewList()
+    protected function viewSalesList()
     {
         $this->prepareAdminDependency();
-        
-        $this->personnel->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
-        
         $this->area->insert($this->connection);
-        
         $this->salesOne->insert($this->connection);
         $this->salesTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query SalesList {
-    salesList{
+    viewSalesList{
         list {
-            id, cancelled, createdTime,
-            personnel { id, name }
-            area { id, name }
+            id, cancelled, createdTime, name, email
         },
         cursorLimit { total, cursorToNextPage }
     }
@@ -176,9 +138,9 @@ query SalesList {
 _QUERY;
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_viewList_200()
+    public function test_viewSalesList_200()
     {
-        $this->viewList();
+        $this->viewSalesList();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'list' => [
@@ -186,27 +148,15 @@ _QUERY;
                     'id' => $this->salesOne->columns['id'],
                     'cancelled' => $this->salesOne->columns['cancelled'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
-                    'personnel' => [
-                        'id' => $this->personnelOne->columns['id'],
-                        'name' => $this->personnelOne->columns['name'],
-                    ],
-                    'area' => [
-                        'id' => $this->area->columns['id'],
-                        'name' => $this->area->columns['name'],
-                    ],
+                    'name' => $this->salesOne->columns['name'],
+                    'email' => $this->salesOne->columns['email'],
                 ],
                 [
                     'id' => $this->salesTwo->columns['id'],
                     'cancelled' => $this->salesTwo->columns['cancelled'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->salesTwo->columns['createdTime']),
-                    'personnel' => [
-                        'id' => $this->personnelTwo->columns['id'],
-                        'name' => $this->personnelTwo->columns['name'],
-                    ],
-                    'area' => [
-                        'id' => $this->area->columns['id'],
-                        'name' => $this->area->columns['name'],
-                    ],
+                    'name' => $this->salesTwo->columns['name'],
+                    'email' => $this->salesTwo->columns['email'],
                 ],
             ],
             'cursorLimit' => [
@@ -217,20 +167,16 @@ _QUERY;
     }
     
     //
-    protected function viewDetail()
+    protected function viewSalesDetail()
     {
         $this->prepareAdminDependency();
-        $this->personnelOne->insert($this->connection);
-        
         $this->area->insert($this->connection);
-        
         $this->salesOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query SalesDetail ( $id: ID! ) {
-    salesDetail ( id: $id ) {
-        id, cancelled, createdTime,
-        personnel { id, name }
+    viewSalesDetail ( id: $id ) {
+        id, cancelled, createdTime, name, email,
         area { id, name }
     }
 }
@@ -238,18 +184,16 @@ _QUERY;
         $this->graphqlVariables['id'] = $this->salesOne->columns['id'];
         $this->postGraphqlRequest($this->admin->token);
     }
-    public function test_viewDetail_200()
+    public function test_viewSalesDetail_200()
     {
-        $this->viewDetail();
+        $this->viewSalesDetail();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'id' => $this->salesOne->columns['id'],
             'cancelled' => $this->salesOne->columns['cancelled'],
             'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
-            'personnel' => [
-                'id' => $this->personnelOne->columns['id'],
-                'name' => $this->personnelOne->columns['name'],
-            ],
+            'name' => $this->salesOne->columns['name'],
+            'email' => $this->salesOne->columns['email'],
             'area' => [
                 'id' => $this->area->columns['id'],
                 'name' => $this->area->columns['name'],

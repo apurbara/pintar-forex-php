@@ -7,7 +7,6 @@ use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 
 class ViewManagerListTask implements AdminTaskInCompany
 {
-    
     public function __construct(protected ManagerRepository $managerRepository)
     {
     }
@@ -19,6 +18,6 @@ class ViewManagerListTask implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $payload->setResult($this->managerRepository->managerList($payload->paginationSchema));
+        $payload->setResult($this->managerRepository->viewManagerList($payload->paginationSchema));
     }
 }

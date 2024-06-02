@@ -5,10 +5,9 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\AreaStructure\Area\Customer;
 use Company\Domain\Model\CustomerJourney;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Model\SalesActivity;
 use DateTimeImmutable;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
@@ -19,9 +18,6 @@ use Tests\Http\Record\EntityRecord;
 
 class RecycleRequestControllerTest extends CompanyBCTestCase
 {
-    protected $personnelOne;
-    protected $personnelTwo;
-    
     protected $area;
     protected $initialCustomerJourney;
     protected $initialSalesActivity;
@@ -60,15 +56,10 @@ class RecycleRequestControllerTest extends CompanyBCTestCase
         $this->initialSalesActivity = new EntityRecord(SalesActivity::class, 'main');
         $this->initialSalesActivity->columns['initial'] = true;
         
-        $this->personnelOne = new EntityRecord(Personnel::class, 1);
-        $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        
         $this->salesOne = new EntityRecord(Sales::class, 1);
-        $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesOne->columns['type'] = SalesType::IN_HOUSE->value;
         $this->salesOne->columns['Area_id'] = $this->area->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
-        $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         $this->salesTwo->columns['type'] = SalesType::FREELANCE->value;
         $this->salesTwo->columns['Area_id'] = $this->area->columns['id'];
         
@@ -108,12 +99,11 @@ class RecycleRequestControllerTest extends CompanyBCTestCase
     //
     protected function accept()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         
         $this->area->insert($this->connection);
         $this->initialCustomerJourney->insert($this->connection);
         $this->initialSalesActivity->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
@@ -130,7 +120,7 @@ _QUERY;
             'id' => $this->recycleRequestOne->columns['id'],
             'remark' => 'new manager remark',
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_accept_200()
     {
@@ -185,8 +175,7 @@ _QUERY;
     //
     protected function reject()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
@@ -203,7 +192,7 @@ _QUERY;
             'id' => $this->recycleRequestOne->columns['id'],
             'remark' => 'new manager remark',
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_reject_200()
     {
@@ -232,14 +221,12 @@ _QUERY;
     //
     protected function viewList()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
         $this->recycleRequestOne->insert($this->connection);
         
-        $this->personnelTwo->insert($this->connection);
         $this->salesTwo->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         $this->customerAssignmentTwo->insert($this->connection);
@@ -250,7 +237,7 @@ query ( $filters: [FilterInput]) {
     recycleRequestList ( filters: $filters) {
         list { 
             id, status, createdTime, note, 
-            customerAssignment { customer { name }, sales { personnel { name } } } 
+            customerAssignment { customer { name }, sales { name } } 
         },
         cursorLimit { total, cursorToNextPage }
     }
@@ -259,7 +246,7 @@ _QUERY;
         $this->graphqlVariables['filters'] = [
             ['column' => 'RecycleRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_viewList_200()
     {
@@ -276,9 +263,7 @@ _QUERY;
                             'name' => $this->customerOne->columns['name'],
                         ],
                         'sales' => [
-                            'personnel' => [
-                                'name' => $this->personnelOne->columns['name'],
-                            ],
+                            'name' => $this->salesOne->columns['name'],
                         ],
                     ],
                 ],
@@ -292,9 +277,7 @@ _QUERY;
                             'name' => $this->customerTwo->columns['name'],
                         ],
                         'sales' => [
-                            'personnel' => [
-                                'name' => $this->personnelTwo->columns['name'],
-                            ],
+                            'name' => $this->salesTwo->columns['name'],
                         ],
                     ],
                 ],
@@ -317,8 +300,7 @@ _QUERY;
     //
     protected function viewDetail()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
@@ -328,12 +310,12 @@ _QUERY;
 query ( $id: ID!) {
     recycleRequestDetail ( id: $id ) {
         id, status, createdTime, note, 
-        customerAssignment { customer { name }, sales { personnel { name } } } 
+        customerAssignment { customer { name }, sales { name } } 
     }
 }
 _QUERY;
         $this->graphqlVariables['id'] = $this->recycleRequestOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_viewDetail_200()
     {
@@ -348,9 +330,7 @@ _QUERY;
                     'name' => $this->customerOne->columns['name'],
                 ],
                 'sales' => [
-                    'personnel' => [
-                        'name' => $this->personnelOne->columns['name'],
-                    ],
+                    'name' => $this->salesOne->columns['name'],
                 ],
             ],
         ]);

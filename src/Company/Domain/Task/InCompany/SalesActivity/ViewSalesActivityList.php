@@ -3,10 +3,11 @@
 namespace Company\Domain\Task\InCompany\SalesActivity;
 
 use Company\Domain\Model\AdminTaskInCompany;
-use Company\Domain\Model\PersonnelTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\SalesTaskInCompany;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 
-class ViewSalesActivityList implements AdminTaskInCompany, PersonnelTaskInCompany
+class ViewSalesActivityList implements AdminTaskInCompany, ManagerTaskInCompany, SalesTaskInCompany
 {
     public function __construct(protected SalesActivityRepository $salesActivityRepository)
     {

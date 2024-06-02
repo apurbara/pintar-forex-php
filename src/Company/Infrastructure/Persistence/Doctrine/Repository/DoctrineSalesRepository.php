@@ -2,12 +2,13 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
-use Company\Domain\Model\Personnel\Sales;
+use Company\Application\Service\Sales\SalesRepository as SalesRepository2;
+use Company\Domain\Model\Sales;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
-use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 
-class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesRepository
+class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesRepository, SalesRepository2
 {
 
     public function add(Sales $sales): void
@@ -20,15 +21,24 @@ class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesR
         return $this->findOneByIdOrDie($id);
     }
 
-    //
-    public function salesDetail(string $id): array
+    public function isEmailAvailable(string $email): bool
     {
-        return $this->fetchOneByIdOrDie($id);
+        $filters = [
+            new Filter($email, 'Sales.email'),
+            new Filter(false, 'Sales.cancelled'),
+        ];
+        return empty($this->fetchOneBy($filters));
+    }
+
+    //
+
+    public function aSales(string $id)
+    {
+        return $this->queryOneById($id);
     }
 
     public function salesList(array $paginationSchema): array
     {
-        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
-        return $this->fetchPaginationList($doctrinePaginationListCategory);
+        return $this->queryPaginationList($paginationSchema);
     }
 }

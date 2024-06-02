@@ -3,10 +3,11 @@
 namespace Company\Domain\Task\InCompany\Area;
 
 use Company\Domain\Model\AdminTaskInCompany;
-use Company\Domain\Model\PersonnelTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\SalesTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewAllAreaList implements AdminTaskInCompany, PersonnelTaskInCompany
+class ViewAllAreaList implements AdminTaskInCompany, ManagerTaskInCompany, SalesTaskInCompany
 {
     public function __construct(protected AreaRepository $areaRepository)
     {

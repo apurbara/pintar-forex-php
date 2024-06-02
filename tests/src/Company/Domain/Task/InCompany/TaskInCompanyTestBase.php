@@ -9,12 +9,11 @@ use Company\Domain\Model\CommonSalesMetric;
 use Company\Domain\Model\CompanyMetric;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Manager;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\RecycleRequest;
+use Company\Domain\Model\Manager;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Model\SalesPerformanceMetric;
 use Company\Domain\Model\SalesRank;
@@ -28,7 +27,6 @@ use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentRepositor
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Manager\ManagerRepository;
-use Company\Domain\Task\InCompany\Personnel\PersonnelRepository;
 use Company\Domain\Task\InCompany\RecycleRequest\RecycleRequestRepository;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\SalesActivity\SalesActivityRepository;
@@ -40,19 +38,19 @@ use Tests\TestBase;
 class TaskInCompanyTestBase extends TestBase
 {
 
-    protected MockObject $personnelRepository;
-    protected MockObject $personnel;
-    protected string $personnelId = 'personnelId';
+    protected MockObject $managerRepository;
+    protected MockObject $manager;
+    protected string $managerId = 'managerId';
 
-    protected function preparePersonnelDependency(): void
+    protected function prepareManagerDependency(): void
     {
-        $this->personnelRepository = $this->buildMockOfInterface(PersonnelRepository::class);
-        $this->personnel = $this->buildMockOfClass(Personnel::class);
+        $this->managerRepository = $this->buildMockOfInterface(ManagerRepository::class);
+        $this->manager = $this->buildMockOfClass(Manager::class);
         //
-        $this->personnelRepository->expects($this->any())
+        $this->managerRepository->expects($this->any())
                 ->method('ofId')
-                ->with($this->personnelId)
-                ->willReturn($this->personnel);
+                ->with($this->managerId)
+                ->willReturn($this->manager);
     }
 
     protected MockObject $areaStructureRepository;
@@ -83,21 +81,6 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->areaId)
                 ->willReturn($this->area);
-    }
-
-    protected MockObject $managerRepository;
-    protected MockObject $manager;
-    protected string $managerId = 'managerId';
-
-    protected function prepareManagerDependency(): void
-    {
-        $this->managerRepository = $this->buildMockOfInterface(ManagerRepository::class);
-        $this->manager = $this->buildMockOfClass(Manager::class);
-        //
-        $this->managerRepository->expects($this->any())
-                ->method('ofId')
-                ->with($this->managerId)
-                ->willReturn($this->manager);
     }
 
     protected MockObject $salesRepository;

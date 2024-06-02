@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SalesBC\BySales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
@@ -27,7 +28,7 @@ class SalesActivityReportController extends Controller
 
     //
     #[Mutation]
-    public function submitSalesActivityReport(SalesRoleInterface $user, string $SalesActivitySchedule_id, InputRequest $input)
+    public function submitSalesActivityReport(SalesRole $user, string $SalesActivitySchedule_id, InputRequest $input)
     {
         $repository = $this->repository();
         $salesActivityScheduleRepository = $this->em->getRepository(SalesActivitySchedule::class);
@@ -41,7 +42,7 @@ class SalesActivityReportController extends Controller
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
-    public function salesActivityReportList(SalesRoleInterface $user, InputRequest $input)
+    public function salesActivityReportList(SalesRole $user, InputRequest $input)
     {
         $task = new ViewSalesActivityReportListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
@@ -51,7 +52,7 @@ class SalesActivityReportController extends Controller
     }
 
     #[Query]
-    public function salesActivityReportDetail(SalesRoleInterface $user, string $id)
+    public function salesActivityReportDetail(SalesRole $user, string $id)
     {
         $task = new ViewSalesActivityReportDetailTask($this->repository());
         $payload = new ViewDetailPayload($id);

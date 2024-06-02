@@ -7,8 +7,8 @@ use App\Http\Controllers\SalesBC\BySales\CustomerAssignmentController;
 use App\Http\Controllers\SalesBC\BySales\RecycleRequestController;
 use App\Http\Controllers\SalesBC\BySales\SalesActivityReportController;
 use App\Http\Controllers\SalesBC\BySales\SalesActivityScheduleController;
-use App\Http\Controllers\SalesBC\BySales\SalesRoleInterface;
 use App\Http\Controllers\SalesBC\BySales\VerificationReportController;
+use App\Http\Controllers\SalesBC\SalesRole;
 use App\Http\GraphQL\SalesBC\Object\Sales\AssignedCustomer\SalesActivityScheduleSummaryInSalesBCGraph;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -38,7 +38,7 @@ class Query extends ObjectType
                 'type' => Type::int(),
                 'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),],
                 'resolve' => fn($root, $args, AppContext $app) => (new CustomerAssignmentController())
-                        ->totalCustomerAssignment(app(SalesRoleInterface::class), new GraphqlInputRequest($args))
+                        ->totalCustomerAssignment(app(SalesRole::class), new GraphqlInputRequest($args))
             ],
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
@@ -48,14 +48,14 @@ class Query extends ObjectType
                 'type' => Type::listOf(TypeRegistry::objectType(SalesActivityScheduleSummaryInSalesBCGraph::class)),
                 'args' => InputListSchema::allListSchema(),
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
-                        ->salesActivityScheduleSummaryList(app(SalesRoleInterface::class),
+                        ->salesActivityScheduleSummaryList(app(SalesRole::class),
                                 new GraphqlInputRequest($args))
             ],
             'totalSalesActivitySchedule' => [
                 'type' => Type::int(),
                 'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),],
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
-                        ->totalSalesActivitySchedule(app(SalesRoleInterface::class), new GraphqlInputRequest($args))
+                        ->totalSalesActivitySchedule(app(SalesRole::class), new GraphqlInputRequest($args))
             ],
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(VerificationReportController::class),
         ];

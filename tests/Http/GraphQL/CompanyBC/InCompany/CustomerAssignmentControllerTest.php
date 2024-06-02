@@ -4,9 +4,8 @@ namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\AreaStructure\Area\Customer;
 use Company\Domain\Model\CustomerJourney;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Service\CustomerAssignmentDistributionServiceBuilder;
 use Tests\Http\GraphQL\CompanyBC\CompanyBCTestCase;
@@ -18,9 +17,6 @@ class CustomerAssignmentControllerTest extends CompanyBCTestCase
     protected EntityRecord $customerTwo;
     protected EntityRecord $customerThree;
     protected EntityRecord $customerFour;
-    
-    protected EntityRecord $personnelOne;
-    protected EntityRecord $personnelTwo;
     
     protected EntityRecord $salesOne;
     protected EntityRecord $salesTwo;
@@ -50,13 +46,8 @@ class CustomerAssignmentControllerTest extends CompanyBCTestCase
         $this->customerThree = new EntityRecord(Customer::class, 3);
         $this->customerFour = new EntityRecord(Customer::class, 4);
         
-        $this->personnelOne = new EntityRecord(Personnel::class, 1);
-        $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        
         $this->salesOne = new EntityRecord(Sales::class, 1);
-        $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
-        $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         
         $this->customerAssignment_11 = new EntityRecord(CustomerAssignment::class, 11);
         $this->customerAssignment_11->columns['Sales_id'] = $this->salesOne->columns['id'];
@@ -104,15 +95,13 @@ class CustomerAssignmentControllerTest extends CompanyBCTestCase
     //
     protected function assignedMultipleCustomerToMultipleSales()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         $this->customerThree->insert($this->connection);
         $this->customerFour->insert($this->connection);
         
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
         $this->salesOne->insert($this->connection);
         $this->salesTwo->insert($this->connection);
         
@@ -130,7 +119,7 @@ mutation (
 }
 _QUERY;
         $this->graphqlVariables = $this->assignedMultipleCustomerToMultipleSalesInput;
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_assignedMultipleCustomerToMultipleSales_distributeAssignment()
     {
@@ -179,9 +168,8 @@ $this->disableExceptionHandling();
     //
     protected function customerAssignmentDetail()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         $this->customerOne->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         
         $this->customerAssignment_11->insert($this->connection);
@@ -190,7 +178,7 @@ $this->disableExceptionHandling();
 query ( $id: ID) {
     customerAssignmentDetail ( id: $id ) {
         id, 
-        sales { personnel { name } }
+        sales { name }
         customer { name, phone }
     }
 }
@@ -198,7 +186,7 @@ _QUERY;
         $this->graphqlVariables = [
             'id' => $this->customerAssignment_11->columns['id'],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_customerAssignmentDetail_200()
     {
@@ -208,9 +196,7 @@ _QUERY;
         $this->seeJsonContains([
             'id' => $this->customerAssignment_11->columns['id'],
             'sales' => [
-                'personnel' => [
-                    'name' => $this->personnelOne->columns['name'],
-                ],
+                    'name' => $this->salesOne->columns['name'],
             ],
             'customer' => [
                 'name' => $this->customerOne->columns['name'],
@@ -222,13 +208,10 @@ _QUERY;
     //
     protected function customerAssignmentList()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         $this->customerThree->insert($this->connection);
-        
-        $this->personnelOne->insert($this->connection);
-        $this->personnelTwo->insert($this->connection);
         
         $this->salesTwo->insert($this->connection);
         $this->salesOne->insert($this->connection);
@@ -242,7 +225,7 @@ query {
     customerAssignmentList {
         list {
             id, 
-            sales { personnel { name } }
+            sales { name }
             customer { name, phone }
         }
         cursorLimit { total }
@@ -250,7 +233,7 @@ query {
 }
 _QUERY;
         $this->graphqlVariables = $this->getPaginationInput();
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_customerAssignmentList_200()
     {
@@ -262,9 +245,7 @@ _QUERY;
                 [
                     'id' => $this->customerAssignment_11->columns['id'],
                     'sales' => [
-                        'personnel' => [
-                            'name' => $this->personnelOne->columns['name'],
-                        ],
+                        'name' => $this->salesOne->columns['name'],
                     ],
                     'customer' => [
                         'name' => $this->customerOne->columns['name'],
@@ -274,9 +255,7 @@ _QUERY;
                 [
                     'id' => $this->customerAssignment_12->columns['id'],
                     'sales' => [
-                        'personnel' => [
-                            'name' => $this->personnelOne->columns['name'],
-                        ],
+                        'name' => $this->salesOne->columns['name'],
                     ],
                     'customer' => [
                         'name' => $this->customerTwo->columns['name'],
@@ -286,9 +265,7 @@ _QUERY;
                 [
                     'id' => $this->customerAssignment_23->columns['id'],
                     'sales' => [
-                        'personnel' => [
-                            'name' => $this->personnelTwo->columns['name'],
-                        ],
+                        'name' => $this->salesTwo->columns['name'],
                     ],
                     'customer' => [
                         'name' => $this->customerThree->columns['name'],

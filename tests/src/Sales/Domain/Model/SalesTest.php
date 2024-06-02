@@ -6,7 +6,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sales\Domain\DependencyModel\AreaStructure\Area;
 use Sales\Domain\DependencyModel\CustomerJourney;
-use Sales\Domain\DependencyModel\Personnel;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\BySales\SalesTask;
@@ -15,7 +14,7 @@ use Tests\TestBase;
 
 class SalesTest extends TestBase
 {
-    protected $sales, $personnel;
+    protected $sales;
     protected $customerAssignment;
     //
     protected $task, $payload = 'string represent task payload';
@@ -31,9 +30,7 @@ class SalesTest extends TestBase
         $this->sales = new TestableSales();
         
         $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
-        $this->personnel = $this->buildMockOfClass(Personnel::class);
         
-        $this->sales->personnel = $this->personnel;
         $this->sales->customerAssignments = new ArrayCollection();
         $this->sales->customerAssignments->add($this->customerAssignment);
         //
@@ -78,12 +75,6 @@ class SalesTest extends TestBase
         $this->sales->cancelled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->executeTask(), 'Forbidden', 'only active sales can make this request');
     }
-    public function test_executeTask_assertPersonnelActive()
-    {
-        $this->personnel->expects($this->once())
-                ->method('assertActive');
-        $this->executeTask();
-    }
     
     //
     protected function registerAllUpcomingScheduleToScheduler()
@@ -113,7 +104,6 @@ class SalesTest extends TestBase
 
 class TestableSales extends Sales
 {
-    public Personnel $personnel;
     public string $id = 'id';
     public bool $cancelled = false;
     public Collection $customerAssignments;

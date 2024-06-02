@@ -104,9 +104,8 @@ class SalesRank
     {
         $qb = $connection->createQueryBuilder();
         $qb->select('Sales.id')
-                ->addSelect('Personnel.name')
+                ->addSelect('Sales.name')
                 ->from('Sales')
-                ->innerJoin('Sales', 'Personnel', 'Personnel', 'Sales.Personnel_id = Personnel.id')
                 ->addGroupBy('Sales.id')
                 ->setMaxResults($this->displaySalesNumber);
         $this->queryOrder->applyToQuery($qb, 'achievement');

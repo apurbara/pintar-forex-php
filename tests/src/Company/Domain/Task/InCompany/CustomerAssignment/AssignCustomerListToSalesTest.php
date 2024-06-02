@@ -3,8 +3,8 @@
 namespace Company\Domain\Task\InCompany\CustomerAssignment;
 
 use Company\Domain\Model\AreaStructure\Area\Customer;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Domain\Task\InCompany\Customer\CustomerRepository;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use PHPUnit\Framework\MockObject\MockObject;

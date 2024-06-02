@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\CompanyBC\InCompany;
 
 use Company\Domain\Model\AreaStructure\Area\Customer;
-use Company\Domain\Model\Personnel;
-use Company\Domain\Model\Personnel\Sales;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
 use DateTime;
 use DateTimeImmutable;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
@@ -16,9 +15,6 @@ use Tests\Http\Record\EntityRecord;
 
 class ClosingRequestControllerTest extends CompanyBCTestCase
 {
-    protected $personnelOne;
-    protected $personnelTwo;
-    
     protected $salesOne;
     protected $salesTwo;
     
@@ -57,13 +53,8 @@ class ClosingRequestControllerTest extends CompanyBCTestCase
         $this->connection->table('CustomerAssignment')->truncate();
         $this->connection->table('ClosingRequest')->truncate();
         
-        $this->personnelOne = new EntityRecord(Personnel::class, 1);
-        $this->personnelTwo = new EntityRecord(Personnel::class, 2);
-        
         $this->salesOne = new EntityRecord(Sales::class, 1);
-        $this->salesOne->columns['Personnel_id'] = $this->personnelOne->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
-        $this->salesTwo->columns['Personnel_id'] = $this->personnelTwo->columns['id'];
         
         $this->customerOne = new EntityRecord(Customer::class, 1);
         $this->customerTwo = new EntityRecord(Customer::class, 2);
@@ -179,8 +170,7 @@ class ClosingRequestControllerTest extends CompanyBCTestCase
     //
     protected function accept()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
@@ -196,7 +186,7 @@ _QUERY;
         $this->graphqlVariables = [
             'id' => $this->closingRequestOne->columns['id'],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_accept_200()
     {
@@ -223,8 +213,7 @@ $this->disableExceptionHandling();
     //
     protected function reject()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
@@ -240,7 +229,7 @@ _QUERY;
         $this->graphqlVariables = [
             'id' => $this->closingRequestOne->columns['id'],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_reject_200()
     {
@@ -267,14 +256,12 @@ _QUERY;
     //
     protected function viewList()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
         $this->closingRequestOne->insert($this->connection);
         
-        $this->personnelTwo->insert($this->connection);
         $this->salesTwo->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         $this->customerAssignmentTwo->insert($this->connection);
@@ -285,7 +272,7 @@ query ( $filters: [FilterInput]) {
     closingRequestList ( filters: $filters) {
         list { 
             id, status, createdTime, transactionValue, note, 
-            customerAssignment { customer { name }, sales { personnel { name } } } 
+            customerAssignment { customer { name }, sales { name } } 
         },
         cursorLimit { total, cursorToNextPage }
     }
@@ -294,7 +281,7 @@ _QUERY;
         $this->graphqlVariables['filters'] = [
             ['column' => 'ClosingRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value],
         ];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_viewList_200()
     {
@@ -312,9 +299,7 @@ _QUERY;
                             'name' => $this->customerOne->columns['name'],
                         ],
                         'sales' => [
-                            'personnel' => [
-                                'name' => $this->personnelOne->columns['name'],
-                            ],
+                                'name' => $this->salesOne->columns['name'],
                         ],
                     ],
                 ],
@@ -329,9 +314,7 @@ _QUERY;
                             'name' => $this->customerTwo->columns['name'],
                         ],
                         'sales' => [
-                            'personnel' => [
-                                'name' => $this->personnelTwo->columns['name'],
-                            ],
+                            'name' => $this->salesTwo->columns['name'],
                         ],
                     ],
                 ],
@@ -354,8 +337,7 @@ _QUERY;
     //
     protected function viewDetail()
     {
-        $this->preparePersonnelDependency();
-        $this->personnelOne->insert($this->connection);
+        $this->prepareManagerDependency();
         $this->salesOne->insert($this->connection);
         $this->customerOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
@@ -365,12 +347,12 @@ _QUERY;
 query ( $id: ID!) {
     closingRequestDetail ( id: $id ) {
         id, status, createdTime, transactionValue, note, 
-        customerAssignment { customer { name }, sales { personnel { name } } } 
+        customerAssignment { customer { name }, sales { name } } 
     }
 }
 _QUERY;
         $this->graphqlVariables['id'] = $this->closingRequestOne->columns['id'];
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_viewDetail_200()
     {
@@ -386,9 +368,7 @@ _QUERY;
                     'name' => $this->customerOne->columns['name'],
                 ],
                 'sales' => [
-                    'personnel' => [
-                        'name' => $this->personnelOne->columns['name'],
-                    ],
+                    'name' => $this->salesOne->columns['name'],
                 ],
             ],
         ]);
@@ -397,9 +377,8 @@ _QUERY;
     //
     protected function monthlyTotalTransaction()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         $this->customerOne->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
         
@@ -428,7 +407,7 @@ query {
     }
 }
 _QUERY;
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_monthlyTotalTransaction_200()
     {
@@ -449,9 +428,8 @@ _QUERY;
     //
     protected function monthlyTransactionCount()
     {
-        $this->preparePersonnelDependency();
+        $this->prepareManagerDependency();
         $this->customerOne->insert($this->connection);
-        $this->personnelOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
         
@@ -480,7 +458,7 @@ query {
     }
 }
 _QUERY;
-        $this->postGraphqlRequest($this->personnel->token);
+        $this->postGraphqlRequest($this->manager->token);
     }
     public function test_monthlyTransactionCount_200()
     {

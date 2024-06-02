@@ -2,7 +2,7 @@
 
 namespace Company\Domain\Task\InCompany\CustomerAssignment;
 
-use Company\Domain\Model\Personnel\Sales\CustomerAssignment;
+use Company\Domain\Model\Sales\CustomerAssignment;
 
 interface CustomerAssignmentRepository
 {

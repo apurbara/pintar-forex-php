@@ -12,7 +12,6 @@ use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\ManagerController;
-use App\Http\Controllers\CompanyBC\InCompany\PersonnelController;
 use App\Http\Controllers\CompanyBC\InCompany\RecycleRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesController;
@@ -37,7 +36,6 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(AreaStructureController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerJourneyController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerVerificationController::class),
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(PersonnelController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(AreaController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ManagerController::class),
