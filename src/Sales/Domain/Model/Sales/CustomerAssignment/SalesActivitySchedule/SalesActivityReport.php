@@ -17,7 +17,7 @@ class SalesActivityReport
 {
 
     #[FetchableObject(targetEntity: SalesActivitySchedule::class, joinColumnName: "SalesActivitySchedule_id")]
-    #[ManyToOne(targetEntity: SalesActivitySchedule::class)]
+    #[ManyToOne(targetEntity: SalesActivitySchedule::class, cascade: ["persist"])]
     #[JoinColumn(name: "SalesActivitySchedule_id", referencedColumnName: "id")]
     protected SalesActivitySchedule $salesActivitySchedule;
 
@@ -36,5 +36,7 @@ class SalesActivityReport
         $this->id = $data->id;
         $this->submitTime = new \DateTimeImmutable();
         $this->content = $data->content;
+        //
+        $this->salesActivitySchedule->markAsCompleted();
     }
 }

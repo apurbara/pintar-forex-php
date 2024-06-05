@@ -85,6 +85,11 @@ class SalesActivitySchedule
         $this->schedule = new HourlyTimeInterval($data->hourlyTimeIntervalData);
         $this->status = SalesActivityScheduleStatus::SCHEDULED;
     }
+    
+    public function markAsCompleted(): void
+    {
+        $this->status = SalesActivityScheduleStatus::COMPLETED;
+    }
 
     public function relocateTo(\DateTimeImmutable $startTime): void
     {

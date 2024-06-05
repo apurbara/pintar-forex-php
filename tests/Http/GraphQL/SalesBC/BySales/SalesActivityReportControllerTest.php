@@ -65,6 +65,59 @@ class SalesActivityReportControllerTest extends SalesBCTestCase
         $this->connection->table('SalesActivityReport')->truncate();
     }
     
+    protected function submitInitialSalesActivityReport()
+    {
+        $this->prepareSalesDependency();
+        $this->salesActivity->columns['initial'] = true;
+        $this->salesActivity->insert($this->connection);
+        $this->customerAssignment->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $CustomerAssignment_id: ID, $content: String ) {
+    submitInitialSalesActivityReport ( CustomerAssignment_id: $CustomerAssignment_id, content: $content ) {
+        id, status, startTime, endTime,
+        salesActivity { name }
+        salesActivityReport { content }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'content' => 'new report content',
+        ];
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_submitInitialSalesActivityReport_200()
+    {
+$this->disableExceptionHandling();
+        $this->submitInitialSalesActivityReport();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'status' => \SharedContext\Domain\Enum\SalesActivityScheduleStatus::COMPLETED->value,
+            'startTime' => $this->jakartaDateTimeFormat((new \DateTime())->setTime((new \DateTime())->format('H'), 00)->format('Y-m-d H:i:s')),
+            'endTime' => $this->jakartaDateTimeFormat((new \DateTime())->setTime((new \DateTime())->format('H') + 1, 00)->format('Y-m-d H:i:s')),
+            'salesActivity' => [
+                'name' => $this->salesActivity->columns['name'],
+            ],
+            'salesActivityReport' => [
+                'content' => $this->graphqlVariables['content'],
+            ],
+        ]);
+        
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'status' => \SharedContext\Domain\Enum\SalesActivityScheduleStatus::COMPLETED->value,
+            'startTime' => (new \DateTime())->setTime((new \DateTime())->format('H'), 00)->format('Y-m-d H:i:s'),
+            'endTime' => (new \DateTime())->setTime((new \DateTime())->format('H')+1, 00)->format('Y-m-d H:i:s'),
+        ]);
+        
+        $this->seeInDatabase('SalesActivityReport', [
+            'submitTime' => $this->stringOfCurrentTime(),
+            'content' => $this->graphqlVariables['content'],
+        ]);
+    }
+    
     //
     protected function submitReport()
     {

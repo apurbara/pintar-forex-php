@@ -127,4 +127,37 @@ $this->disableExceptionHandling();
         $this->seeJsonContains(['total' => 1]);
     }
     
+    //
+    protected function customerDetail()
+    {
+        $this->prepareManagerDependency();
+        $this->customerOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query CustomerList ( $id: ID ) {
+    customerDetail ( id: $id ) {
+        id, disabled, name, email, phone,
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->customerOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_customerDetail_200()
+    {
+$this->disableExceptionHandling();
+        $this->customerDetail();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'id' => $this->customerOne->columns['id'],
+            'disabled' => $this->customerOne->columns['disabled'],
+            'name' => $this->customerOne->columns['name'],
+            'email' => $this->customerOne->columns['email'],
+            'phone' => $this->customerOne->columns['phone'],
+        ]);
+    }
+    
 }

@@ -17,6 +17,7 @@ use Resources\Infrastructure\GraphQL\DoctrineEntityToGraphqlFieldMapper;
 use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Domain\DependencyModel\AreaStructure\Area\Customer\VerificationReport;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use function app;
 
 class Mutation extends ObjectType
@@ -48,6 +49,15 @@ class Mutation extends ObjectType
                 'resolve' => fn($root, $args) => app(VerificationReportController::class)
                         ->submitCustomerVerificationReport(app(SalesRole::class), $args['CustomerAssignment_id'],
                                 new GraphqlInputRequest($args))
+            ],
+            'submitInitialSalesActivityReport' => [
+                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
+                'args' => [
+                    'content' => Type::string(),
+                    'CustomerAssignment_id' => Type::id(),
+                ],
+                'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
+                        ->submitInitialSalesActivityReport(app(SalesRole::class), new GraphqlInputRequest($args))
             ],
         ];
     }

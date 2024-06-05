@@ -26,8 +26,8 @@ class LoginControllerTest extends GraphqlTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->connection->table('Admin')->truncate();
-        $this->connection->table('Manager')->truncate();
+//        $this->connection->table('Admin')->truncate();
+//        $this->connection->table('Manager')->truncate();
         $this->connection->table('Area')->truncate();
         $this->connection->table('Sales')->truncate();
 
@@ -55,8 +55,8 @@ class LoginControllerTest extends GraphqlTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->connection->table('Admin')->truncate();
-        $this->connection->table('Manager')->truncate();
+//        $this->connection->table('Admin')->truncate();
+//        $this->connection->table('Manager')->truncate();
         $this->connection->table('Area')->truncate();
         $this->connection->table('Sales')->truncate();
     }

@@ -77,6 +77,17 @@ class SalesActivityScheduleTest extends TestBase
     }
     
     //
+    protected function markAsCompleted()
+    {
+        $this->salesActivitySchedule->markAsCompleted();
+    }
+    public function test_markAsCompleted_setCompleted()
+    {
+        $this->markAsCompleted();
+        $this->assertSame(SalesActivityScheduleStatus::COMPLETED, $this->salesActivitySchedule->status);
+    }
+    
+    //
     protected function getActivityDuration()
     {
         return $this->salesActivitySchedule->getActivityDuration();

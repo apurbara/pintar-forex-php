@@ -39,6 +39,12 @@ class SalesActivityReportTest extends TestBase
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($report->submitTime);
         $this->assertSame($this->content, $report->content);
     }
+    public function test_construct_setScheduleCompleted()
+    {
+        $this->salesActivitySchedule->expects($this->once())
+                ->method('markAsCompleted');
+        $this->construct();
+    }
 }
 
 class TestableSalesActivityReport extends SalesActivityReport
