@@ -44,7 +44,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
         'graphql' => [
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':graphql',
+//            \Illuminate\Routing\Middleware\ThrottleRequests::class.':graphql',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];

@@ -34,7 +34,7 @@ final class Query
 //        $this->responseType = $responseType;
 //    }
 
-    public function __construct(?string $responseWrapper = null, ?string $responseType)
+    public function __construct(?string $responseWrapper, ?string $responseType)
     {
 //        $this->inputType = $inputType;
         $this->responseWrapper = $responseWrapper;
