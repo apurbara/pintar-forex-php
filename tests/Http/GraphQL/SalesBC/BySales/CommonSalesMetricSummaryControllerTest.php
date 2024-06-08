@@ -155,12 +155,12 @@ class CommonSalesMetricSummaryControllerTest extends SalesBCTestCase
     
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('CommonSalesMetric')->truncate();
-        $this->connection->table('CustomerAssignment')->truncate();
-        $this->connection->table('SalesActivitySchedule')->truncate();
-        $this->connection->table('SalesActivityReport')->truncate();
-        $this->connection->table('ClosingRequest')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('CommonSalesMetric')->truncate();
+//        $this->connection->table('CustomerAssignment')->truncate();
+//        $this->connection->table('SalesActivitySchedule')->truncate();
+//        $this->connection->table('SalesActivityReport')->truncate();
+//        $this->connection->table('ClosingRequest')->truncate();
     }
     
     protected function viewAllCommonSalesMetricSummary()

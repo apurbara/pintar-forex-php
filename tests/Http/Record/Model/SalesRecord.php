@@ -18,6 +18,7 @@ class SalesRecord extends EntityRecord
     {
         parent::__construct(Sales::class, $index);
         $this->columns['password'] = TestablePassword::getHashedPassword($this->rawPassword);
+        $this->columns['email'] = 'sales@email.org';
         $this->token = JwtHeaderTokenGenerator::generate([
                     'userRole' => UserRole::SALES->value,
                     'userId' => $this->columns['id'],

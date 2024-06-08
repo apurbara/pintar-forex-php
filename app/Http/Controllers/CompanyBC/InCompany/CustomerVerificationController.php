@@ -10,6 +10,7 @@ use Company\Domain\Task\InCompany\CustomerVerification\AddCustomerVerificationTa
 use Company\Domain\Task\InCompany\CustomerVerification\DisableCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\EnableCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\UpdateCustomerVerification;
+use Company\Domain\Task\InCompany\CustomerVerification\ViewAllCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationDetailTask;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerVerificationRepository;

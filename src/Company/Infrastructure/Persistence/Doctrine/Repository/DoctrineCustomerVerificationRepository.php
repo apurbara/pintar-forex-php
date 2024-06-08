@@ -31,4 +31,9 @@ class DoctrineCustomerVerificationRepository extends DoctrineEntityRepository im
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
         return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
+
+    public function allCustomerVerification(array $searchSchema): array
+    {
+        return $this->queryAllList($searchSchema);
+    }
 }

@@ -17,4 +17,6 @@ interface CustomerVerificationRepository
     public function customerVerificationList(array $paginationSchema): array;
 
     public function customerVerificationDetail(string $id): array;
+    
+    public function allCustomerVerification(array $searchSchema): array;
 }

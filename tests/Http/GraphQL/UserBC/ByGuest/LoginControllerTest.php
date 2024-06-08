@@ -57,8 +57,8 @@ class LoginControllerTest extends GraphqlTestCase
         parent::tearDown();
 //        $this->connection->table('Admin')->truncate();
 //        $this->connection->table('Manager')->truncate();
-        $this->connection->table('Area')->truncate();
-        $this->connection->table('Sales')->truncate();
+//        $this->connection->table('Area')->truncate();
+//        $this->connection->table('Sales')->truncate();
     }
     
     //

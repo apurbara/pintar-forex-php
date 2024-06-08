@@ -17,6 +17,7 @@ class AdminRecord extends EntityRecord
     {
         parent::__construct(Admin::class, $index);
         $this->columns['aSuperUser'] = true;
+        $this->columns['email'] = 'admin@email.org';
         $this->columns['password'] = TestablePassword::getHashedPassword($this->rawPassword);
         $this->token = JwtHeaderTokenGenerator::generate([
             'userRole' => UserRole::ADMIN->value,

@@ -17,6 +17,7 @@ class ManagerRecord extends EntityRecord
     {
         parent::__construct(Manager::class, $index);
         $this->columns['password'] = TestablePassword::getHashedPassword($this->rawPassword);
+        $this->columns['email'] = 'manager@email.org';
         $this->token = JwtHeaderTokenGenerator::generate([
             'userRole' => UserRole::MANAGER->value,
             'userId' => $this->columns['id'],
