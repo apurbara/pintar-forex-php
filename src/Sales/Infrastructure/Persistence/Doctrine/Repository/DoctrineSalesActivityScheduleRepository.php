@@ -44,9 +44,12 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
 
     public function scheduledSalesActivityBelongsToSalesList(string $salesId, array $paginationSchema): array
     {
+        $qb = $this->createCoreQueryBuilder()
+                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity', 'SalesActivitySchedule.SalesActivity_id = SalesActivity.id');
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
                 ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
-        return $this->fetchPaginationList($doctrinePaginationListCategory);
+        return $doctrinePaginationListCategory->paginateResult($qb, $this->getTableName());
+//        return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
 
     public function totalSalesActivityScheduleBelongsToSales(string $salesId, array $searchSchema): int
@@ -84,5 +87,13 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
 
         return DoctrineAllListCategory::fromSchema($searchSchema)
                         ->fetchResult($qb);
+    }
+    
+    public function queryAllList(array $searchSchema): array
+    {
+        $qb = $this->createCoreQueryBuilder()
+                ->addOrderBy('SalesActivitySchedule.startTime', 'DESC');
+        return DoctrineAllListCategory::fromSchema($searchSchema)
+                ->fetchResult($qb);
     }
 }

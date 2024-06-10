@@ -11,6 +11,7 @@ use Company\Domain\Task\InCompany\CustomerJourney\DisableCustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\EnableCustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\SetInitialCustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\UpdateCustomerJourney;
+use Company\Domain\Task\InCompany\CustomerJourney\ViewAllActiveCustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\ViewCustomerJourneyDetail;
 use Company\Domain\Task\InCompany\CustomerJourney\ViewCustomerJourneyList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerJourneyRepository;
@@ -104,6 +105,16 @@ class CustomerJourneyController extends Controller
     {
         $task = new ViewCustomerJourneyList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllActiveCustomerJourney(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewAllActiveCustomerJourney($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
 
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;

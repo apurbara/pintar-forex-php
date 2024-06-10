@@ -10,7 +10,7 @@ use Company\Domain\Task\InCompany\CustomerVerification\AddCustomerVerificationTa
 use Company\Domain\Task\InCompany\CustomerVerification\DisableCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\EnableCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\UpdateCustomerVerification;
-use Company\Domain\Task\InCompany\CustomerVerification\ViewAllCustomerVerification;
+use Company\Domain\Task\InCompany\CustomerVerification\ViewAllActiveCustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationDetailTask;
 use Company\Domain\Task\InCompany\CustomerVerification\ViewCustomerVerificationListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerVerificationRepository;
@@ -87,6 +87,16 @@ class CustomerVerificationController extends Controller
     {
         $task = new ViewCustomerVerificationListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+        $user->executeTaskInCompany($task, $payload);
+
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllActiveCustomerVerification(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewAllActiveCustomerVerification($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
         $user->executeTaskInCompany($task, $payload);
 
         return $payload->result;

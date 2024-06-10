@@ -4,6 +4,7 @@ namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 
@@ -34,6 +35,9 @@ class DoctrineCustomerVerificationRepository extends DoctrineEntityRepository im
 
     public function allCustomerVerification(array $searchSchema): array
     {
-        return $this->queryAllList($searchSchema);
+        $doctrineAllListCategory = DoctrineAllListCategory::fromSchema($searchSchema);
+        $qb = $this->createCoreQueryBuilder();
+        $qb->orderBy('CustomerVerification.position', 'ASC');
+        return $doctrineAllListCategory->fetchResult($qb);
     }
 }

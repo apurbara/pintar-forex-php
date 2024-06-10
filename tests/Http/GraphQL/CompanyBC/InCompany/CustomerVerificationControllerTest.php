@@ -240,6 +240,38 @@ _QUERY;
     }
     
     //
+    protected function viewAllActiveCustomerVerification()
+    {
+        $this->prepareSalesDependency();
+        $this->customerVerificationOne->insert($this->connection);
+        $this->customerVerificationTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query {
+    viewAllActiveCustomerVerification {
+        id, name, description,
+    }
+}
+_QUERY;
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_viewAllActiveCustomerVerification_200()
+    {
+        $this->viewAllActiveCustomerVerification();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerVerificationOne->columns['id'],
+            'name' => $this->customerVerificationOne->columns['name'],
+            'description' => $this->customerVerificationOne->columns['description'],
+        ]);
+        $this->seeJsonContains([
+            'id' => $this->customerVerificationTwo->columns['id'],
+            'name' => $this->customerVerificationTwo->columns['name'],
+            'description' => $this->customerVerificationTwo->columns['description'],
+        ]);
+    }
+    
+    //
     protected function viewDetail()
     {
         $this->prepareAdminDependency();

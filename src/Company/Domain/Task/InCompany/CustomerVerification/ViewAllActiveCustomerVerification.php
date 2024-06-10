@@ -5,7 +5,7 @@ namespace Company\Domain\Task\InCompany\CustomerVerification;
 use Company\Domain\Model\SalesTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewAllCustomerVerification implements SalesTaskInCompany
+class ViewAllActiveCustomerVerification implements SalesTaskInCompany
 {
 
     public function __construct(protected CustomerVerificationRepository $repository)

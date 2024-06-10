@@ -40,6 +40,9 @@ class ClosingRequest
     
     #[Column(type: "text", nullable: true)]
     protected ?string $note;
+    
+    #[Column(type: "text", nullable: true)]
+    protected ?string $remark;
 
     protected function setTransactionValue(int $transactionValue)
     {

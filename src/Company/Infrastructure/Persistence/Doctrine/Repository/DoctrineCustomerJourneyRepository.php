@@ -4,6 +4,7 @@ namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
@@ -48,5 +49,12 @@ class DoctrineCustomerJourneyRepository extends DoctrineEntityRepository impleme
             new Filter(false, 'CustomerJourney.disabled'),
         ];
         return $this->fetchOneBy($filters);
+    }
+
+    public function allActiveCustomerJourney(array $searchSchema): array
+    {
+        $doctrineAllListCategory = DoctrineAllListCategory::fromSchema($searchSchema)
+                ->addFilter(new Filter(false, 'CustomerJourney.disabled'));
+        return $this->fetchAllList($doctrineAllListCategory);
     }
 }

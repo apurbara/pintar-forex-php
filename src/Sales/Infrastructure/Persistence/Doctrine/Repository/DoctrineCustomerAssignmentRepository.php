@@ -8,6 +8,7 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationL
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Task\BySales\CustomerAssignment\CustomerAssignmentRepository;
+use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 
 class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository implements CustomerAssignmentRepository
 {
@@ -39,13 +40,51 @@ class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository impl
 
     public function customerAssignmentListBelongsToSales(string $salesId, array $pageSchema): array
     {
+        $newAssignmentSubquery = $this->dbalQueryBuilder();
+        $newAssignmentSubquery->select("1")
+                ->from('SalesActivitySchedule')
+                ->where($newAssignmentSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id", "CustomerAssignment.id"));
+        
+        $activeSalesActivityScheduleStatus = SalesActivityScheduleStatus::SCHEDULED->value;
+        $hasActiveSalesActivityScheduleSubquery = $this->dbalQueryBuilder();
+        $hasActiveSalesActivityScheduleSubquery->select("1")
+                ->from('SalesActivitySchedule')
+                ->where($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id", "CustomerAssignment.id"))
+                ->andWhere($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.status", "'{$activeSalesActivityScheduleStatus}'"));
+        
+        $qb = $this->createCoreQueryBuilder();
+        foreach ($pageSchema['filters'] ?? [] as $key =>  $filterSchema) {
+            if ($filterSchema['column']  === 'newAssignment') {
+                $newAssignmentCriteria = $filterSchema['value'] ? "NOT EXISTS" : "EXISTS";
+                $qb->andWhere($newAssignmentCriteria . sprintf("(%s)", $newAssignmentSubquery->getSQL()));
+                unset($pageSchema['filters'][$key]);
+            }
+            elseif($filterSchema['column']  === 'hasActiveSalesActivitySchedule') {
+                $hasActiveSalesActivityScheduleCriteria = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
+                $qb->andWhere($hasActiveSalesActivityScheduleCriteria . sprintf("(%s)", $hasActiveSalesActivityScheduleSubquery->getSQL()));
+                unset($pageSchema['filters'][$key]);
+            }
+        }
+        
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($pageSchema)
                 ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
-        return $this->fetchPaginationList($doctrinePaginationListCategory);
+        return $doctrinePaginationListCategory->paginateResult($qb, $this->getTableName());
     }
     
     public function totalCustomerAssignmentBelongsToSales(string $salesId, array $searchSchema): int
     {
+        $newAssignmentSubquery = $this->dbalQueryBuilder();
+        $newAssignmentSubquery->select("1")
+                ->from('SalesActivitySchedule')
+                ->where($newAssignmentSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id", "CustomerAssignment.id"));
+        
+        $activeSalesActivityScheduleStatus = SalesActivityScheduleStatus::SCHEDULED->value;
+        $hasActiveSalesActivityScheduleSubquery = $this->dbalQueryBuilder();
+        $hasActiveSalesActivityScheduleSubquery->select("1")
+                ->from('SalesActivitySchedule')
+                ->where($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id", "CustomerAssignment.id"))
+                ->andWhere($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.status", "'{$activeSalesActivityScheduleStatus}'"));
+                
         $qb = $this->dbalQueryBuilder();
         $qb->select('COUNT(CustomerAssignment.id)')
                 ->from('CustomerAssignment')
@@ -53,7 +92,16 @@ class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository impl
                 ->setParameter('salesId', $salesId);
         
         foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
-            Filter::fromSchema($filterSchema)->applyToQuery($qb);
+            if ($filterSchema['column']  === 'newAssignment') {
+                $newAssignmentCriteria = $filterSchema['value'] ? "NOT EXISTS" : "EXISTS";
+                $qb->andWhere($newAssignmentCriteria . sprintf("(%s)", $newAssignmentSubquery->getSQL()));
+            }
+            elseif($filterSchema['column']  === 'hasActiveSalesActivitySchedule') {
+                $hasActiveSalesActivityScheduleCriteria = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
+                $qb->andWhere($hasActiveSalesActivityScheduleCriteria . sprintf("(%s)", $hasActiveSalesActivityScheduleSubquery->getSQL()));
+            } else {
+                Filter::fromSchema($filterSchema)->applyToQuery($qb);
+            }
         }
         
         return $qb->executeQuery()->fetchOne();

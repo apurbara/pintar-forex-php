@@ -4,10 +4,12 @@ namespace App\Http\Controllers\SalesBC\BySales;
 
 use Company\Domain\Model\AreaStructure\Area;
 use Company\Domain\Model\CustomerJourney;
+use Company\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Company\Domain\Model\SalesActivity;
 use Sales\Domain\DependencyModel\AreaStructure\Area\Customer;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
 use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
 
@@ -23,7 +25,10 @@ class CustomerAssignmentControllerTest extends SalesBCTestCase
     protected $initialSalesActivity;
     protected $initialCustomerJourney;
     protected $customerJourneyOne;
-    
+    protected $salesActivityScheduleOneA;
+    protected $salesActivityScheduleOneB;
+    protected $salesActivityScheduleTwoA;
+
     protected $customerPayload;
 
     protected function setUp(): void
@@ -61,12 +66,22 @@ class CustomerAssignmentControllerTest extends SalesBCTestCase
         $this->customerAssignmentTwo->columns['Sales_id'] = $this->sales->columns['id'];
         $this->customerAssignmentTwo->columns['Customer_id'] = $this->customerTwo->columns['id'];
         $this->customerAssignmentTwo->columns['CustomerJourney_id'] = $this->initialCustomerJourney->columns['id'];
-        $this->customerAssignmentTwo->columns['status'] = CustomerAssignmentStatus::RECYCLED->value;
+        $this->customerAssignmentTwo->columns['status'] = CustomerAssignmentStatus::ACTIVE->value;
         $this->customerAssignmentThree = new EntityRecord(CustomerAssignment::class, 3);
         $this->customerAssignmentThree->columns['Sales_id'] = $this->sales->columns['id'];
         $this->customerAssignmentThree->columns['Customer_id'] = $this->customerThree->columns['id'];
         $this->customerAssignmentThree->columns['CustomerJourney_id'] = $this->initialCustomerJourney->columns['id'];
-        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
+        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::ACTIVE->value;
+        
+        $this->salesActivityScheduleOneA = new EntityRecord(SalesActivitySchedule::class, 'OneA');
+        $this->salesActivityScheduleOneA->columns['CustomerAssignment_id'] = $this->customerAssignmentOne->columns['id'];
+        $this->salesActivityScheduleOneA->columns['status'] = SalesActivityScheduleStatus::COMPLETED->value;
+        $this->salesActivityScheduleOneB = new EntityRecord(SalesActivitySchedule::class, 'OneB');
+        $this->salesActivityScheduleOneB->columns['CustomerAssignment_id'] = $this->customerAssignmentOne->columns['id'];
+        $this->salesActivityScheduleOneB->columns['status'] = SalesActivityScheduleStatus::SCHEDULED->value;
+        $this->salesActivityScheduleTwoA = new EntityRecord(SalesActivitySchedule::class, 'TwoA');
+        $this->salesActivityScheduleTwoA->columns['CustomerAssignment_id'] = $this->customerAssignmentTwo->columns['id'];
+        $this->salesActivityScheduleTwoA->columns['status'] = SalesActivityScheduleStatus::COMPLETED->value;
         
         $this->customerPayload = [
             'Area_id' => $this->areaOne->columns['id'],
@@ -74,7 +89,6 @@ class CustomerAssignmentControllerTest extends SalesBCTestCase
             'email' => 'newAddress@email.org',
         ];
     }
-
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -207,7 +221,6 @@ _QUERY;
         ];
         $this->postGraphqlRequest($this->sales->token);
     }
-
     public function test_viewDetail_200()
     {
         $this->viewDetail();
@@ -233,13 +246,19 @@ _QUERY;
         $this->prepareSalesDependency();
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
 
         $this->customerAssignmentOne->insert($this->connection);
         $this->customerAssignmentTwo->insert($this->connection);
+        $this->customerAssignmentThree->insert($this->connection);
+        
+        $this->salesActivityScheduleOneA->insert($this->connection);
+        $this->salesActivityScheduleOneB->insert($this->connection);
+        $this->salesActivityScheduleTwoA->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
-query {
-    customerAssignmentList {
+query ( $filters: [FilterInput] ) {
+    customerAssignmentList ( filters: $filters ) {
         list {
             id, status, createdTime
             customer {
@@ -251,10 +270,9 @@ query {
     }
 }
 _QUERY;
-        $this->graphqlVariables['salesId'] = $this->sales->columns['id'];
+        $this->graphqlVariables = $this->getPaginationInput();
         $this->postGraphqlRequest($this->sales->token);
     }
-
     public function test_viewList_200()
     {
         $this->viewList();
@@ -288,12 +306,70 @@ _QUERY;
                         ],
                     ],
                 ],
+                [
+                    'id' => $this->customerAssignmentThree->columns['id'],
+                    'status' => $this->customerAssignmentThree->columns['status'],
+                    'createdTime' => $this->jakartaDateTimeFormat($this->customerAssignmentThree->columns['createdTime']),
+                    'customer' => [
+                        'id' => $this->customerThree->columns['id'],
+                        'name' => $this->customerThree->columns['name'],
+                        'email' => $this->customerThree->columns['email'],
+                        'area' => [
+                            'id' => $this->area->columns['id'],
+                            'name' => $this->area->columns['name'],
+                        ],
+                    ],
+                ],
             ],
             'cursorLimit' => [
-                'total' => 2,
+                'total' => 3,
                 'cursorToNextPage' => null,
             ],
         ]);
+    }
+    public function test_viewList_activeAssignments_200()
+    {
+        $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
+        $this->filters = [
+            ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value]
+        ];
+        $this->viewList();
+        $this->seeStatusCode(200);
+        $this->seeJsonDoesntContains(['id' => $this->customerAssignmentOne->columns['id']]);
+        $this->seeJsonContains(['id' => $this->customerAssignmentTwo->columns['id']]);
+        $this->seeJsonContains(['id' => $this->customerAssignmentThree->columns['id']]);
+        $this->seeJsonContains(['total' => 2]);
+    }
+    public function test_viewList_newAssignments_200()
+    {
+$this->disableExceptionHandling();
+        $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
+        $this->filters = [
+            ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
+            ['column' => 'newAssignment', 'value' => true]
+        ];
+        $this->viewList();
+        $this->seeStatusCode(200);
+        $this->seeJsonDoesntContains(['id' => $this->customerAssignmentOne->columns['id']]);
+        $this->seeJsonDoesntContains(['id' => $this->customerAssignmentTwo->columns['id']]);
+        $this->seeJsonContains(['id' => $this->customerAssignmentThree->columns['id']]);
+        $this->seeJsonContains(['total' => 1]);
+    }
+    public function test_viewList_idleAssignments_200()
+    {
+$this->disableExceptionHandling();
+        $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
+        $this->filters = [
+            ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
+            ['column' => 'newAssignment', 'value' => false],
+            ['column' => 'hasActiveSalesActivitySchedule', 'value' => false],
+        ];
+        $this->viewList();
+        $this->seeStatusCode(200);
+        $this->seeJsonDoesntContains(['id' => $this->customerAssignmentOne->columns['id']]);
+        $this->seeJsonContains(['id' => $this->customerAssignmentTwo->columns['id']]);
+        $this->seeJsonDoesntContains(['id' => $this->customerAssignmentThree->columns['id']]);
+        $this->seeJsonContains(['total' => 1]);
     }
 
     //
@@ -307,6 +383,10 @@ _QUERY;
         $this->customerAssignmentOne->insert($this->connection);
         $this->customerAssignmentTwo->insert($this->connection);
         $this->customerAssignmentThree->insert($this->connection);
+        
+        $this->salesActivityScheduleOneA->insert($this->connection);
+        $this->salesActivityScheduleOneB->insert($this->connection);
+        $this->salesActivityScheduleTwoA->insert($this->connection);
 
         $this->graphqlQuery = <<<'_QUERY'
 query ( $filters: [FilterInput] ) {
@@ -315,41 +395,58 @@ query ( $filters: [FilterInput] ) {
 _QUERY;
         $this->postGraphqlRequest($this->sales->token);
     }
-
     public function test_viewTotalCustomerAssignment_200()
     {
         $this->disableExceptionHandling();
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 3]);
     }
-
     public function test_viewTotalCustomerAssignment_activeOnly_200()
     {
-        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::ACTIVE->value;
+        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::RECYCLED->value;
         $this->graphqlVariables['filters'] = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
         ];
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 2]);
     }
-
     public function test_viewTotalCustomerAssignment_recycleOnly_200()
     {
+        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::RECYCLED->value;
         $this->graphqlVariables['filters'] = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::RECYCLED->value],
         ];
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 1]);
     }
-
     public function test_viewTotalCustomerAssignment_goodFund_200()
     {
         $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
+        $this->customerAssignmentTwo->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
         $this->graphqlVariables['filters'] = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::GOOD_FUND->value],
         ];
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 2]);
+    }
+    public function test_viewTotalCustomerAssignment_newAssignment_200()
+    {
+        $this->graphqlVariables['filters'] = [
+            ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
+            ['column' => 'newAssignment', 'value' => true],
+        ];
+        $this->viewTotalCustomerAssignment();
+        $this->seeJsonContains(['totalCustomerAssignment' => 1]);
+    }
+    public function test_viewTotalCustomerAssignment_idleAssignment_200()
+    {
+        $this->graphqlVariables['filters'] = [
+            ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
+            ['column' => 'newAssignment', 'value' => false],
+            ['column' => 'hasActiveSalesActivitySchedule', 'value' => false],
+        ];
+        $this->viewTotalCustomerAssignment();
+        $this->seeJsonContains(['totalCustomerAssignment' => 1]);
     }
 
     //
@@ -360,7 +457,7 @@ _QUERY;
         $this->customerTwo->insert($this->connection);
         $this->customerThree->insert($this->connection);
 
-        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::ACTIVE->value;
+        $this->customerAssignmentThree->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
         $this->customerAssignmentOne->insert($this->connection);
         $this->customerAssignmentTwo->insert($this->connection);
         $this->customerAssignmentThree->insert($this->connection);
@@ -394,8 +491,8 @@ _QUERY;
         $this->seeJsonContains([
             'totalCustomerAssignment' => 3,
             'totalActiveCustomerAssignment' => 2,
-            'totalRecycleCustomerAssignment' => 1,
-            'totalGoodFundCustomerAssignment' => 0,
+            'totalRecycleCustomerAssignment' => 0,
+            'totalGoodFundCustomerAssignment' => 1,
         ]);
     }
 }
