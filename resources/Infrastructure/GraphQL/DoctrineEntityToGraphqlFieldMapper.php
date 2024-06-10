@@ -116,7 +116,7 @@ class DoctrineEntityToGraphqlFieldMapper
             $targetEntityReflectionClass = new \ReflectionClass($targetEntityMetadata);
             $targetColumnName = ReflectionHelper::findAttribute($targetEntityReflectionClass, Table::class)?->getArguments()['name'] ??
                     $targetEntityReflectionClass->getShortName();
-            if ($fetchableObjectListAttributeReflection->getArguments()['paginationRequired']) {
+            if ($fetchableObjectListAttributeReflection->getArguments()['paginationRequired'] ?? false) {
                 $fields[$propertyReflection->getName()] = [
                     'type' => TypeRegistry::paginationType($targetEntityMetadata),
 //                    'type' => new Pagination(TypeRegistry::objectType($targetEntityMetadata)),
