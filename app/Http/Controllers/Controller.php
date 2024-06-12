@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
+use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use SharedContext\Domain\ValueObject\LabelData;
 use function app;
 
@@ -22,7 +23,7 @@ class Controller extends BaseController
     }
 
     //
-    protected function buildViewPaginationListPayload(InputRequest $input): ViewPaginationListPayload
+    protected function buildViewPaginationListPayload(InputRequest|Request $input): ViewPaginationListPayload
     {
         return new ViewPaginationListPayload([
             'keywordSearch' => $input->get('keywordSearch') ?? [],
@@ -38,6 +39,14 @@ class Controller extends BaseController
             'keywordSearch' => $input->get('keywordSearch') ?? [],
             'filters' => $input->get('filters') ?? [],
         ]);
+    }
+    
+    protected function buildViewSummaryPayload(InputRequest|Request $input): ViewSummaryPayload
+    {
+        $searchSchema = [
+            'filters' => $input->get('filters'),
+        ];
+        return new ViewSummaryPayload($searchSchema);
     }
 
     //

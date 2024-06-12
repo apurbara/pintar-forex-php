@@ -11,9 +11,11 @@ use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Domain\Service\CustomerAssignmentDistributionServiceBuilder;
 use Company\Domain\Task\InCompany\CustomerAssignment\AssignCustomerListToSales;
 use Company\Domain\Task\InCompany\CustomerAssignment\AssignCustomerListToSalesPayload;
+use Company\Domain\Task\InCompany\CustomerAssignment\ViewCustomerAssignmentCount;
 use Company\Domain\Task\InCompany\CustomerAssignment\ViewCustomerAssignmentDetail;
 use Company\Domain\Task\InCompany\CustomerAssignment\ViewCustomerAssignmentList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
+use GraphQL\Type\Definition\Type;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
@@ -90,6 +92,16 @@ class CustomerAssignmentController extends Controller
     {
         $task = new ViewCustomerAssignmentList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+
+    //
+    public function viewCustomerAssignmentCount(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewCustomerAssignmentCount($this->repository());
+        $payload = $this->buildViewSummaryPayload($input);
 
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;

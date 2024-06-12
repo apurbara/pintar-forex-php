@@ -2,6 +2,7 @@
 
 namespace App\Http\GraphQL\CompanyBC;
 
+use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
 use App\Http\Controllers\CompanyBC\InCompany\ClosingRequestController;
@@ -18,7 +19,12 @@ use App\Http\Controllers\CompanyBC\InCompany\SalesController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesPerformanceMetricController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesRankController;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\Type;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
+use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
+use Resources\Infrastructure\GraphQL\TypeRegistry;
+use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
+use function app;
 
 class Query extends ObjectType
 {
@@ -48,6 +54,20 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesRankController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CommonSalesMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesPerformanceMetricController::class),
+            ...$this->customerAssignmentQuery(),
+        ];
+    }
+    
+    //
+    private function customerAssignmentQuery(): array
+    {
+        return [
+            'viewCustomerAssignmentCount' => [
+                'type' => Type::int(),
+                'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class))],
+                'resolve' => fn($root, $args) => (new CustomerAssignmentController())
+                        ->viewCustomerAssignmentCount(app(CompanyUserRoleInterface::class), new GraphqlInputRequest($args))
+            ]
         ];
     }
 }

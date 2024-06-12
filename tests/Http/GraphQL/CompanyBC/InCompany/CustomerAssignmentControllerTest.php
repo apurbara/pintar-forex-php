@@ -276,4 +276,36 @@ _QUERY;
             'cursorLimit' => ['total' => 3],
         ]);
     }
+    
+    //
+    protected function viewCustomerAssignmentCount()
+    {
+        $this->prepareManagerDependency();
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
+        
+        $this->salesTwo->insert($this->connection);
+        $this->salesOne->insert($this->connection);
+        
+        $this->customerAssignment_11->insert($this->connection);
+        $this->customerAssignment_12->insert($this->connection);
+        $this->customerAssignment_23->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query ($filters: [FilterInput]) {
+    viewCustomerAssignmentCount(filters: $filters)
+}
+_QUERY;
+        $this->graphqlVariables = $this->getPaginationInput();
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_viewCustomerAssignmentCount_200()
+    {
+        $this->viewCustomerAssignmentCount();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains(['viewCustomerAssignmentCount' => 3]);
+    }
+    
 }
