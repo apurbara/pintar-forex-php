@@ -61,25 +61,25 @@ class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository impl
                 ->innerJoin('CustomerAssignment', 'Customer', 'Customer', 'CustomerAssignment.Customer_id = Customer.id')
                 ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
                 ->innerJoin('CustomerAssignment', 'CustomerJourney', 'CustomerJourney', 'CustomerAssignment.CustomerJourney_id = CustomerJourney.id');
-        foreach ($pageSchema['filters'] ?? [] as $key =>  $filterSchema) {
+        foreach ($paginationSchema['filters'] ?? [] as $key =>  $filterSchema) {
             if ($filterSchema['column']  === 'hasSalesActivitySchedule') {
                 $hasSalesActivitySchedule = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
                 $qb->andWhere($hasSalesActivitySchedule . sprintf("(%s)", $hasSalesActivityScheduleSubquery->getSQL()));
-                unset($pageSchema['filters'][$key]);
+                unset($paginationSchema['filters'][$key]);
             } elseif($filterSchema['column']  === 'hasActiveSalesActivitySchedule') {
                 $hasActiveSalesActivityScheduleCriteria = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
                 $qb->andWhere($hasActiveSalesActivityScheduleCriteria . sprintf("(%s)", $hasActiveSalesActivityScheduleSubquery->getSQL()));
-                unset($pageSchema['filters'][$key]);
+                unset($paginationSchema['filters'][$key]);
             }
             elseif($filterSchema['column']  === 'hasPendingRecycleRequest') {
                 $hasPendingRecycleRequestCriteria = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
                 $qb->andWhere($hasPendingRecycleRequestCriteria . sprintf("(%s)", $hasPendingRecycleRequestSubquery->getSQL()));
-                unset($pageSchema['filters'][$key]);
+                unset($paginationSchema['filters'][$key]);
             }
             elseif($filterSchema['column']  === 'hasPendingClosingRequest') {
                 $hasPendingClosingRequestCriteria = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
                 $qb->andWhere($hasPendingClosingRequestCriteria . sprintf("(%s)", $hasPendingClosingRequestSubquery->getSQL()));
-                unset($pageSchema['filters'][$key]);
+                unset($paginationSchema['filters'][$key]);
             }
         }
         

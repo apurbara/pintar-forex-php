@@ -49,18 +49,21 @@ class CustomerAssignmentControllerTest extends CompanyBCTestCase
         $this->salesOne = new EntityRecord(Sales::class, 1);
         $this->salesTwo = new EntityRecord(Sales::class, 2);
         
+        $this->customerJourneyInitial = new EntityRecord(CustomerJourney::class, 'initial');
+        $this->customerJourneyInitial->columns['initial'] = true;
+        
         $this->customerAssignment_11 = new EntityRecord(CustomerAssignment::class, 11);
         $this->customerAssignment_11->columns['Sales_id'] = $this->salesOne->columns['id'];
         $this->customerAssignment_11->columns['Customer_id'] = $this->customerOne->columns['id'];
+        $this->customerAssignment_11->columns['CustomerJourney_id'] = $this->customerJourneyInitial->columns['id'];
         $this->customerAssignment_12 = new EntityRecord(CustomerAssignment::class, 12);
         $this->customerAssignment_12->columns['Sales_id'] = $this->salesOne->columns['id'];
         $this->customerAssignment_12->columns['Customer_id'] = $this->customerTwo->columns['id'];
+        $this->customerAssignment_12->columns['CustomerJourney_id'] = $this->customerJourneyInitial->columns['id'];
         $this->customerAssignment_23 = new EntityRecord(CustomerAssignment::class, 23);
         $this->customerAssignment_23->columns['Sales_id'] = $this->salesTwo->columns['id'];
         $this->customerAssignment_23->columns['Customer_id'] = $this->customerThree->columns['id'];
-        
-        $this->customerJourneyInitial = new EntityRecord(CustomerJourney::class, 'initial');
-        $this->customerJourneyInitial->columns['initial'] = true;
+        $this->customerAssignment_23->columns['CustomerJourney_id'] = $this->customerJourneyInitial->columns['id'];
         
         $this->salesActivityInitial = new EntityRecord(SalesActivity::class, 'initial');
         $this->salesActivityInitial->columns['initial'] = true;
@@ -209,6 +212,8 @@ _QUERY;
     protected function customerAssignmentList()
     {
         $this->prepareManagerDependency();
+        $this->customerJourneyInitial->insert($this->connection);
+        
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         $this->customerThree->insert($this->connection);
@@ -221,8 +226,8 @@ _QUERY;
         $this->customerAssignment_23->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query {
-    customerAssignmentList {
+query ( $filters: [FilterInput] ) {
+    customerAssignmentList ( filters: $filters ) {
         list {
             id, 
             sales { name }
@@ -275,6 +280,15 @@ _QUERY;
             ],
             'cursorLimit' => ['total' => 3],
         ]);
+    }
+    public function test_customerAssignmentList_hasSalesActivityScheduleFilter()
+    {
+        $this->filters = [
+            ['column' => 'hasSalesActivitySchedule', 'value' => false],
+        ];
+        $this->customerAssignmentList();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['total' => 3]);
     }
     
     //

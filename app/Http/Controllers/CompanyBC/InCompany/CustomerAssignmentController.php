@@ -15,7 +15,6 @@ use Company\Domain\Task\InCompany\CustomerAssignment\ViewCustomerAssignmentCount
 use Company\Domain\Task\InCompany\CustomerAssignment\ViewCustomerAssignmentDetail;
 use Company\Domain\Task\InCompany\CustomerAssignment\ViewCustomerAssignmentList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
-use GraphQL\Type\Definition\Type;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
