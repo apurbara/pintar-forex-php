@@ -2,10 +2,11 @@
 
 namespace Company\Domain\Task\InCompany\CustomerJourney;
 
+use Company\Domain\Model\ManagerTaskInCompany;
 use Company\Domain\Model\SalesTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewAllActiveCustomerJourney implements SalesTaskInCompany
+class ViewAllActiveCustomerJourney implements SalesTaskInCompany, ManagerTaskInCompany
 {
     public function __construct(protected CustomerJourneyRepository $repository)
     {

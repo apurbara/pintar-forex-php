@@ -258,6 +258,38 @@ _QUERY;
     }
     
     //
+    protected function viewAllActiveCustomerJourney()
+    {
+        $this->prepareManagerDependency();
+        $this->customerJourneyTwo->columns['disabled'] = true;
+        $this->customerJourneyOne->insert($this->connection);
+        $this->customerJourneyTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query CustomerJourneyList{
+    viewAllActiveCustomerJourney{
+        id, createdTime, name, description,
+    }
+}
+_QUERY;
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_viewAllActiveCustomerJourney_200()
+    {
+        $this->viewAllActiveCustomerJourney();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->customerJourneyOne->columns['id'],
+            'createdTime' => $this->jakartaDateTimeFormat($this->customerJourneyOne->columns['createdTime']),
+            'name' => $this->customerJourneyOne->columns['name'],
+            'description' => $this->customerJourneyOne->columns['description'],
+        ]);
+        $this->seeJsonDoesntContains([
+            'id' => $this->customerJourneyTwo->columns['id'],
+        ]);
+    }
+    
+    //
     protected function viewDetail()
     {
         $this->prepareAdminDependency();

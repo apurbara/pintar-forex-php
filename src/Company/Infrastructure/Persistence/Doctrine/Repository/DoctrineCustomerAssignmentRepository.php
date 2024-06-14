@@ -59,7 +59,8 @@ class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository impl
         
         $qb = $this->createCoreQueryBuilder()
                 ->innerJoin('CustomerAssignment', 'Customer', 'Customer', 'CustomerAssignment.Customer_id = Customer.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id');
+                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
+                ->innerJoin('CustomerAssignment', 'CustomerJourney', 'CustomerJourney', 'CustomerAssignment.CustomerJourney_id = CustomerJourney.id');
         foreach ($pageSchema['filters'] ?? [] as $key =>  $filterSchema) {
             if ($filterSchema['column']  === 'hasSalesActivitySchedule') {
                 $hasSalesActivitySchedule = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
