@@ -200,4 +200,41 @@ _QUERY;
             ],
         ]);
     }
+    
+    //
+    protected function viewAllSales()
+    {
+        $this->prepareManagerDependency();
+        $this->area->insert($this->connection);
+        $this->salesOne->insert($this->connection);
+        $this->salesTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query SalesList {
+    viewAllSales {
+        id, cancelled, createdTime, name, email
+    }
+}
+_QUERY;
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_viewAllSales_200()
+    {
+        $this->viewAllSales();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->salesOne->columns['id'],
+            'cancelled' => $this->salesOne->columns['cancelled'],
+            'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
+            'name' => $this->salesOne->columns['name'],
+            'email' => $this->salesOne->columns['email'],
+        ]);
+        $this->seeJsonContains([
+            'id' => $this->salesTwo->columns['id'],
+            'cancelled' => $this->salesTwo->columns['cancelled'],
+            'createdTime' => $this->jakartaDateTimeFormat($this->salesTwo->columns['createdTime']),
+            'name' => $this->salesTwo->columns['name'],
+            'email' => $this->salesTwo->columns['email'],
+        ]);
+    }
 }

@@ -41,4 +41,9 @@ class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesR
     {
         return $this->queryPaginationList($paginationSchema);
     }
+
+    public function allSales(array $searchSchema)
+    {
+        return $this->queryAllList($searchSchema);
+    }
 }

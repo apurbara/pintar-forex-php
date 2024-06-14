@@ -19,4 +19,6 @@ interface SalesRepository
     public function aSales(string $id);
 
     public function salesList(array $paginationSchema);
+
+    public function allSales(array $searchSchema);
 }

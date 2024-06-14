@@ -5,6 +5,9 @@ namespace Company\Domain\Model\Sales;
 use Company\Domain\Model\AreaStructure\Area\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Sales;
+use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
+use Company\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
@@ -16,6 +19,7 @@ use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use SharedContext\Domain\Enum\CustomerAssignmentStatus;
 use SharedContext\Domain\Event\CustomerAssignedEvent;
 use SharedContext\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;
@@ -51,17 +55,17 @@ class CustomerAssignment implements ContainEventsInterface
     protected CustomerAssignmentStatus $status;
 
     //query purpose
-//    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "CustomerAssignment_id",
-//                paginationRequired: false)]
-//    protected $closingRequests;
-//
-//    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "CustomerAssignment_id",
-//                paginationRequired: false)]
-//    protected $recycleRequests;
-//
-//    #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "CustomerAssignment_id",
-//                paginationRequired: false)]
-//    protected $salesActivitySchedules;
+    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "CustomerAssignment_id",
+                paginationRequired: false)]
+    protected $closingRequests;
+
+    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "CustomerAssignment_id",
+                paginationRequired: false)]
+    protected $recycleRequests;
+
+    #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "CustomerAssignment_id",
+                paginationRequired: false)]
+    protected $salesActivitySchedules;
 
     public function getStatus(): CustomerAssignmentStatus
     {

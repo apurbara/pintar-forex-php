@@ -9,6 +9,7 @@ use Company\Domain\Model\Sales;
 use Company\Domain\Model\SalesData;
 use Company\Domain\Task\InCompany\Sales\AddSales;
 use Company\Domain\Task\InCompany\Sales\CancelSales;
+use Company\Domain\Task\InCompany\Sales\ViewAllSales;
 use Company\Domain\Task\InCompany\Sales\ViewSalesDetail;
 use Company\Domain\Task\InCompany\Sales\ViewSalesList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
@@ -81,6 +82,16 @@ class SalesController extends Controller
         $payload = new ViewDetailPayload($id);
         $user->executeTaskInCompany($task, $payload);
 
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper:Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllSales(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewAllSales($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
+        
+        $user->executeTaskInCompany($task, $payload);
         return $payload->result;
     }
 }
