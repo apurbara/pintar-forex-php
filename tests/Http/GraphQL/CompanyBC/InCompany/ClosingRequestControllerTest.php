@@ -160,11 +160,11 @@ class ClosingRequestControllerTest extends CompanyBCTestCase
     }
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('Sales')->truncate();
-        $this->connection->table('Customer')->truncate();
-        $this->connection->table('CustomerAssignment')->truncate();
-        $this->connection->table('ClosingRequest')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('Sales')->truncate();
+//        $this->connection->table('Customer')->truncate();
+//        $this->connection->table('CustomerAssignment')->truncate();
+//        $this->connection->table('ClosingRequest')->truncate();
     }
     
     //
@@ -484,8 +484,8 @@ _QUERY;
         $this->closingRequestMonthCurrentTwo->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-query {
-    viewClosingRequestCount
+query ( $filters: [FilterInput] ) {
+    viewClosingRequestCount ( filters: $filters )
 }
 _QUERY;
         $this->postGraphqlRequest($this->manager->token);
@@ -493,6 +493,32 @@ _QUERY;
     public function test_viewClosingRequestCount_200()
     {
 $this->disableExceptionHandling();
+        $this->viewClosingRequestCount();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['viewClosingRequestCount' => 2]);
+    }
+    public function test_viewClosingRequestCount_pendingFilter_200()
+    {
+        $this->closingRequestMonthCurrentOne->columns['status'] = ManagementApprovalStatus::WAITING_FOR_APPROVAL->value;
+        $this->closingRequestMonthCurrentTwo->columns['status'] = ManagementApprovalStatus::REJECTED->value;
+        $this->graphqlVariables = [
+            'filters' => [
+                ['column' => 'ClosingRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value],
+            ],
+        ];
+        $this->viewClosingRequestCount();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['viewClosingRequestCount' => 1]);
+    }
+    public function test_viewClosingRequestCount_completed()
+    {
+        $this->closingRequestMonthCurrentOne->columns['status'] = ManagementApprovalStatus::APPROVED->value;
+        $this->closingRequestMonthCurrentTwo->columns['status'] = ManagementApprovalStatus::REJECTED->value;
+        $this->graphqlVariables = [
+            'filters' => [
+                ['column' => 'ClosingRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value, 'comparisonType' => 'NEQ'],
+            ],
+        ];
         $this->viewClosingRequestCount();
         $this->seeStatusCode(200);
         $this->seeJsonContains(['viewClosingRequestCount' => 2]);

@@ -99,7 +99,7 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
                 ->fetchResult($qb);
     }
 
-    public function closingRequestCount(array $searchScema)
+    public function closingRequestCount(array $searchSchema)
     {
         $qb = $this->dbalQueryBuilder();
         $qb->select("COUNT(*)")

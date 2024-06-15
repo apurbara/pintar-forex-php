@@ -106,8 +106,8 @@ class ClosingRequestController extends Controller
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;
     }
-    
-    #[Query(responseType: IntType::class)]
+
+    #[Query(responseWrapper: Query::SUMMARY_RESPONSE_WRAPPER, responseType: IntType::class)]
     public function viewClosingRequestCount(CompanyUserRoleInterface $user, InputRequest $input)
     {
         $task = new ViewClosingRequestCount($this->repository());
@@ -116,5 +116,4 @@ class ClosingRequestController extends Controller
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;
     }
-    
 }
