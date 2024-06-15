@@ -16,4 +16,6 @@ interface ClosingRequestRepository
     public function monthlyTotalClosing(array $searchSchema): array;
 
     public function monthlyClosingCount(array $searchSchema): array;
+    
+    public function closingRequestCount(array $searchScema);
 }

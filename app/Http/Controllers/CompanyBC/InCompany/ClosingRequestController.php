@@ -10,11 +10,13 @@ use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
 use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
 use Company\Domain\Task\InCompany\ClosingRequest\AcceptClosingRequestTask;
 use Company\Domain\Task\InCompany\ClosingRequest\RejectClosingRequestTask;
+use Company\Domain\Task\InCompany\ClosingRequest\ViewClosingRequestCount;
 use Company\Domain\Task\InCompany\ClosingRequest\ViewClosingRequestDetail;
 use Company\Domain\Task\InCompany\ClosingRequest\ViewClosingRequestList;
 use Company\Domain\Task\InCompany\ClosingRequest\ViewMonthlyClosingCount;
 use Company\Domain\Task\InCompany\ClosingRequest\ViewMonthlyTotalClosing;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
+use GraphQL\Type\Definition\IntType;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
@@ -104,4 +106,15 @@ class ClosingRequestController extends Controller
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;
     }
+    
+    #[Query(responseType: IntType::class)]
+    public function viewClosingRequestCount(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewClosingRequestCount($this->repository());
+        $payload = $this->buildViewSummaryPayload($input);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+    
 }

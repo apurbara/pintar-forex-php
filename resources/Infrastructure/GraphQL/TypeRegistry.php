@@ -114,6 +114,9 @@ class TypeRegistry
             return static::$types[$classMetadata];
         }
         $reflectionClass = new ReflectionClass($classMetadata);
+        if ($reflectionClass->isSubclassOf(\GraphQL\Type\Definition\ScalarType::class)) {
+            return $reflectionClass->newInstance();
+        }
         if ($reflectionClass->isSubclassOf(ObjectType::class)) {
             $cacheName = $reflectionClass->getShortName();
             if (!isset(static::$types[$cacheName])) {

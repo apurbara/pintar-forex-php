@@ -7,6 +7,7 @@ use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
 use DateTime;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 
 class DoctrineClosingRequestRepository extends DoctrineEntityRepository implements ClosingRequestRepository
@@ -96,5 +97,16 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
         }
         return DoctrineAllListCategory::fromSchema()
                 ->fetchResult($qb);
+    }
+
+    public function closingRequestCount(array $searchScema)
+    {
+        $qb = $this->dbalQueryBuilder();
+        $qb->select("COUNT(*)")
+                ->from('ClosingRequest');
+        foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
+            Filter::fromSchema($filterSchema)->applyToQuery($qb);
+        }
+        return $qb->executeQuery()->fetchOne();
     }
 }

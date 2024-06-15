@@ -476,4 +476,25 @@ _QUERY;
         $this->seeJsonContains(['yearMonth' => (new DateTime('-11  months'))->format('Ym'), 'closingCount' => 1]);
         $this->seeJsonContains(['yearMonth' => (new DateTime('-12  months'))->format('Ym'), 'closingCount' => 1]);
     }
+    
+    protected function viewClosingRequestCount()
+    {
+        $this->prepareManagerDependency();
+        $this->closingRequestMonthCurrentOne->insert($this->connection);
+        $this->closingRequestMonthCurrentTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query {
+    viewClosingRequestCount
+}
+_QUERY;
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_viewClosingRequestCount_200()
+    {
+$this->disableExceptionHandling();
+        $this->viewClosingRequestCount();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['viewClosingRequestCount' => 2]);
+    }
 }
