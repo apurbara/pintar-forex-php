@@ -335,4 +335,44 @@ _QUERY;
             ],
         ]);
     }
+    
+    protected function viewRecycleRequestCount()
+    {
+        $this->prepareManagerDependency();
+        $this->recycleRequestOne->insert($this->connection);
+        $this->recycleRequestTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query ( $filters: [FilterInput] ) {
+    viewRecycleRequestCount ( filters: $filters )
+}
+_QUERY;
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_viewRecycleRequestCount_pending_200()
+    {
+        $this->recycleRequestOne->columns['status'] = ManagementApprovalStatus::WAITING_FOR_APPROVAL->value;
+        $this->recycleRequestTwo->columns['status'] = ManagementApprovalStatus::APPROVED->value;
+        $this->graphqlVariables =  [
+            'filters' => [
+                ['column' => 'RecycleRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value],
+            ],
+        ];
+        $this->viewRecycleRequestCount();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['viewRecycleRequestCount' => 1]);
+    }
+    public function test_viewRecycleRequestCount_completed_200()
+    {
+        $this->recycleRequestOne->columns['status'] = ManagementApprovalStatus::REJECTED->value;
+        $this->recycleRequestTwo->columns['status'] = ManagementApprovalStatus::APPROVED->value;
+        $this->graphqlVariables =  [
+            'filters' => [
+                ['column' => 'RecycleRequest.status', 'value' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value, 'comparisonType' => 'NEQ'],
+            ],
+        ];
+        $this->viewRecycleRequestCount();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['viewRecycleRequestCount' => 2]);
+    }
 }

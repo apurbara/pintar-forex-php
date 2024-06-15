@@ -9,9 +9,12 @@ interface RecycleRequestRepository
 
     public function ofId(string $id): RecycleRequest;
 
+    //
     public function recycleRequestList(array $paginationSchema): array;
 
     public function aRecycleRequest(string $id): ?array;
 
     public function monthlyRecycledCount(array $searchSchema): array;
+    
+    public function recycleRequestCount(array $searchSchema);
 }

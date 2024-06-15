@@ -9,9 +9,11 @@ use Company\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Company\Domain\Task\InCompany\RecycleRequest\ApproveRecycleRequest;
 use Company\Domain\Task\InCompany\RecycleRequest\RejectRecycleRequest;
 use Company\Domain\Task\InCompany\RecycleRequest\ViewMonthlyRecycledCount;
+use Company\Domain\Task\InCompany\RecycleRequest\ViewRecycleRequestCount;
 use Company\Domain\Task\InCompany\RecycleRequest\ViewRecycleRequestDetail;
 use Company\Domain\Task\InCompany\RecycleRequest\ViewRecycleRequestList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleRequestRepository;
+use GraphQL\Type\Definition\IntType;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
@@ -85,6 +87,16 @@ class RecycleRequestController extends Controller
     {
         $task = new ViewMonthlyRecycledCount($this->repository());
         $payload = $this->buildViewAllListPayload($input);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper:Query::SUMMARY_RESPONSE_WRAPPER,responseType:IntType::class)]
+    public function viewRecycleRequestCount(CompanyUserRoleInterface $user, InputRequest $input)
+    {
+        $task = new ViewRecycleRequestCount($this->repository());
+        $payload = $this->buildViewSummaryPayload($input);
 
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;

@@ -7,6 +7,7 @@ use Company\Domain\Task\InCompany\RecycleRequest\RecycleRequestRepository;
 use DateTime;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 use SharedContext\Domain\Enum\ManagementApprovalStatus;
 
 class DoctrineRecycleRequestRepository extends DoctrineEntityRepository implements RecycleRequestRepository
@@ -61,5 +62,17 @@ class DoctrineRecycleRequestRepository extends DoctrineEntityRepository implemen
     public function recycleRequestList(array $paginationSchema): array
     {
         return $this->queryPaginationList($paginationSchema);
+    }
+
+    public function recycleRequestCount(array $searchSchema)
+    {
+        $qb = $this->dbalQueryBuilder();
+        $qb->select('COUNT(*)')
+                ->from('RecycleRequest');
+        foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
+            Filter::fromSchema($filterSchema)->applyToQuery($qb);
+        }
+        
+        return $qb->executeQuery()->fetchOne();
     }
 }

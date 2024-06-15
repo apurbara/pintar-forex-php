@@ -11,6 +11,7 @@ final class Query
 {
     public const PAGINATION_RESPONSE_WRAPPER = "PAGINATION";
     public const LIST_RESPONSE_WRAPPER = "LIST";
+    public const SUMMARY_RESPONSE_WRAPPER = "SUMMARY";
 
 //    public readonly ?string $inputType;
     

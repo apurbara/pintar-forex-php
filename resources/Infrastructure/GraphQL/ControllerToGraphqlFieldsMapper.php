@@ -9,6 +9,7 @@ use Resources\Application\InputRequest;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
+use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
 use Resources\ReflectionHelper;
 use function app;
 
@@ -97,6 +98,13 @@ class ControllerToGraphqlFieldsMapper
                 $args = [
                     ...$args,
                     ...InputListSchema::allListSchema(),
+                ];
+            } elseif (ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseWrapper') === Query::SUMMARY_RESPONSE_WRAPPER) {
+//                $responseType = Type::listOf(TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseType') ?? $responseTypeMetadata));
+                $responseType = TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseType') ?? $responseTypeMetadata);
+                $args = [
+                    ...$args,
+                    'filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),
                 ];
             } else {
                 $responseType = TypeRegistry::objectType(ReflectionHelper::getAttributeArgument($methodReflection, Query::class, 'responseType') ?? $responseTypeMetadata);

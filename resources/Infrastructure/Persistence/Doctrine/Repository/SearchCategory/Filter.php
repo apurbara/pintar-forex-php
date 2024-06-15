@@ -53,6 +53,7 @@ class Filter
             'GTE' => $qb->expr()->gte($this->column, ":{$cleanColumn}"),
             'LIKE' => $qb->expr()->like($this->column, ":{$cleanColumn}"),
             'IN' => $qb->expr()->in($this->column, ":{$cleanColumn}"),
+            'NEQ' => $qb->expr()->neq($this->column, ":{$cleanColumn}"),
             default => $qb->expr()->eq($this->column, ":{$cleanColumn}"),
         };
         $qb->andWhere($comparison)
