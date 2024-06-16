@@ -346,7 +346,7 @@ $this->disableExceptionHandling();
         $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
         $this->filters = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
-            ['column' => 'newAssignment', 'value' => true]
+            ['column' => 'hasSalesActivitySchedule', 'value' => false]
         ];
         $this->viewList();
         $this->seeStatusCode(200);
@@ -361,8 +361,10 @@ $this->disableExceptionHandling();
         $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::GOOD_FUND->value;
         $this->filters = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
-            ['column' => 'newAssignment', 'value' => false],
+            ['column' => 'hasSalesActivitySchedule', 'value' => true],
             ['column' => 'hasActiveSalesActivitySchedule', 'value' => false],
+            ['column' => 'hasPendingRecycleRequest', 'value' => false],
+            ['column' => 'hasPendingClosingRequest', 'value' => false],
         ];
         $this->viewList();
         $this->seeStatusCode(200);
@@ -433,7 +435,7 @@ _QUERY;
     {
         $this->graphqlVariables['filters'] = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
-            ['column' => 'newAssignment', 'value' => true],
+            ['column' => 'hasSalesActivitySchedule', 'value' => false],
         ];
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 1]);
@@ -442,8 +444,10 @@ _QUERY;
     {
         $this->graphqlVariables['filters'] = [
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
-            ['column' => 'newAssignment', 'value' => false],
+            ['column' => 'hasSalesActivitySchedule', 'value' => true],
             ['column' => 'hasActiveSalesActivitySchedule', 'value' => false],
+            ['column' => 'hasPendingClosingRequest', 'value' => false],
+            ['column' => 'hasPendingRecycleRequest', 'value' => false],
         ];
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 1]);
