@@ -153,8 +153,14 @@ class PerformanceSummaryControllerTest extends CompanyBCTestCase
         $this->salesPerformanceMetricEvaluationTwoA->columns['alias'] = 'avgActivity';
         
         $this->salesOne = new EntityRecord(Sales::class, 1);
+        $this->salesOne->columns['createdTime'] = (new DateTime('-1 years'))->format('Y-m-d H:i:s');
+        $this->salesOne->columns['cancelTime'] = null;
         $this->salesTwo = new EntityRecord(Sales::class, 2);
+        $this->salesTwo->columns['createdTime'] = (new DateTime('-1 years'))->format('Y-m-d H:i:s');
+        $this->salesTwo->columns['cancelTime'] = null;
         $this->salesThree = new EntityRecord(Sales::class, 3);
+        $this->salesThree->columns['createdTime'] = (new DateTime('-1 years'))->format('Y-m-d H:i:s');
+        $this->salesThree->columns['cancelTime'] = null;
         
         $this->customerAssignmentOneA = new EntityRecord(CustomerAssignment::class, 'OneA');
         $this->customerAssignmentOneA->columns['Sales_id'] = $this->salesOne->columns['id'];

@@ -106,6 +106,7 @@ class SalesRank
         $qb->select('Sales.id')
                 ->addSelect('Sales.name')
                 ->from('Sales')
+                ->andWhere($qb->expr()->eq('Sales.cancelled', 0))
                 ->addGroupBy('Sales.id')
                 ->setMaxResults($this->displaySalesNumber);
         $this->queryOrder->applyToQuery($qb, 'achievement');

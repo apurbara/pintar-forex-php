@@ -144,6 +144,13 @@ class SalesPerformanceMetric
         $qb->from(sprintf('(%s)', $salesSubquery->getSQL()), 'salesPerformance')
                 ->addSelect('salesPerformance.evaluationTime')
                 ->addGroupBy('salesPerformance.evaluationTime');
+        match ($this->recurrenceType){
+            RecurrenceType::ONCE=> $qb->innerJoin('salesPerformance', 'Sales', 'Sales', "salesPerformance.id = Sales.id AND Sales.cancelled = 0"),
+            RecurrenceType::DAILY=> $qb->innerJoin('salesPerformance', 'Sales', 'Sales', "salesPerformance.id = Sales.id AND (salesPerformance.evaluationTime BETWEEN DATE_FORMAT(Sales.createdTime, '%Y-%m-%d') AND DATE_FORMAT(COALESCE(Sales.cancelTime, NOW()), '%Y-%m-%d'))"),
+            RecurrenceType::WEEKLY=> $qb->innerJoin('salesPerformance', 'Sales', 'Sales', "salesPerformance.id = Sales.id AND (salesPerformance.evaluationTime BETWEEN DATE_FORMAT(Sales.createdTime, '%Y-%u') AND DATE_FORMAT(COALESCE(Sales.cancelTime, NOW()), '%Y-%u'))"),
+            RecurrenceType::MONTHLY => $qb->innerJoin('salesPerformance', 'Sales', 'Sales', "salesPerformance.id = Sales.id AND (salesPerformance.evaluationTime BETWEEN DATE_FORMAT(Sales.createdTime, '%Y-%m') AND DATE_FORMAT(COALESCE(Sales.cancelTime, NOW()), '%Y-%m'))"),
+            RecurrenceType::YEARLY=> $qb->innerJoin('salesPerformance', 'Sales', 'Sales', "salesPerformance.id = Sales.id AND (salesPerformance.evaluationTime BETWEEN DATE_FORMAT(Sales.createdTime, '%Y') AND DATE_FORMAT(COALESCE(Sales.cancelTime, NOW()), '%Y'))"),
+        };
 
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('removed', false));
