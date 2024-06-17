@@ -16,6 +16,8 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\SubmitScheduleTask;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewAllNonInitialSchedulesInMonth;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewAllNonInitialSchedulesInMonthPayload;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewSalesActivityScheduleSummary;
@@ -90,6 +92,17 @@ class SalesActivityScheduleController extends Controller
         $payload = new ViewSummaryPayload($searchSchema);
         $user->executeSalesTask($task, $payload);
         
+        return $payload->result;
+    }
+    
+    public function viewAllNonInitialSchedulesInMonth(SalesRole $user, InputRequest $input)
+    {
+        $task = new ViewAllNonInitialSchedulesInMonth($this->repository());
+        $payload = (new ViewAllNonInitialSchedulesInMonthPayload())
+                ->setYear($input->get('year'))
+                ->setMonth($input->get('month'));
+        
+        $user->executeSalesTask($task, $payload);
         return $payload->result;
     }
 }

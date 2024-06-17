@@ -18,6 +18,7 @@ use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use function app;
 
 class Query extends ObjectType
@@ -44,6 +45,15 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityReportController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityScheduleController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(VerificationReportController::class),
+            ...$this->salesActivityScheduleCustomQuery(),
+        ];
+    }
+    
+    //
+    private function salesActivityScheduleCustomQuery(): array
+    {
+        return [
             'salesActivityScheduleSummaryList' => [
                 'type' => Type::listOf(TypeRegistry::objectType(SalesActivityScheduleSummaryInSalesBCGraph::class)),
                 'args' => InputListSchema::allListSchema(),
@@ -57,7 +67,15 @@ class Query extends ObjectType
                 'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
                         ->totalSalesActivitySchedule(app(SalesRole::class), new GraphqlInputRequest($args))
             ],
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(VerificationReportController::class),
+            'viewAllNonInitialSchedulesInMonth' => [
+                'type' => Type::listOf(TypeRegistry::objectType(SalesActivitySchedule::class)),
+                'args' => [
+                    'year' => Type::int(),
+                    'month' => Type::int(),
+                ],
+                'resolve' => fn($root, $args, AppContext $app) => (new SalesActivityScheduleController())
+                        ->viewAllNonInitialSchedulesInMonth(app(SalesRole::class), new GraphqlInputRequest($args))
+            ],
         ];
     }
 }

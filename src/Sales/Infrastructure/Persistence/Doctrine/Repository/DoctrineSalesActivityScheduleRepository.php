@@ -2,6 +2,7 @@
 
 namespace Sales\Infrastructure\Persistence\Doctrine\Repository;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
@@ -49,7 +50,6 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
                 ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
         return $doctrinePaginationListCategory->paginateResult($qb, $this->getTableName());
-//        return $this->fetchPaginationList($doctrinePaginationListCategory);
     }
 
     public function totalSalesActivityScheduleBelongsToSales(string $salesId, array $searchSchema): int
@@ -95,5 +95,17 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
                 ->addOrderBy('SalesActivitySchedule.startTime', 'DESC');
         return DoctrineAllListCategory::fromSchema($searchSchema)
                 ->fetchResult($qb);
+    }
+
+    public function allNonInitialSchedulesInMonthBelongsToSales(string $salesId, int $year, int $month)
+    {
+        $monthFormat = (new DateTimeImmutable())->setDate($year, $month, 1)->format('Ym');
+        $qb = $this->createCoreQueryBuilder();
+        $qb->andWhere($qb->expr()->eq('CustomerAssignment.Sales_id', ':salesId'))
+                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity', 'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
+                ->andWhere($qb->expr()->eq('SalesActivity.initial', 0))
+                ->setParameter('salesId', $salesId)
+                ->andWhere($qb->expr()->eq("DATE_FORMAT(SalesActivitySchedule.startTime, '%Y%m')", "'$monthFormat'"));
+        return $qb->executeQuery()->fetchAllAssociative();
     }
 }

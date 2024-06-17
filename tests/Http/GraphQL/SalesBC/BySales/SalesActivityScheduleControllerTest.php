@@ -21,10 +21,12 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
     protected $customer;
     protected $customerOne;
     protected $customerTwo;
+    protected $customerThree;
     
     protected $customerAssignment;
     protected $customerAssignmentOne;
     protected $customerAssignmentTwo;
+    protected $customerAssignmentThree;
     
     protected $salesActivityScheduleOne;
     protected $salesActivityScheduleTwo;
@@ -90,11 +92,11 @@ class SalesActivityScheduleControllerTest extends SalesBCTestCase
     }
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('SalesActivity')->truncate();
-        $this->connection->table('Customer')->truncate();
-        $this->connection->table('CustomerAssignment')->truncate();
-        $this->connection->table('SalesActivitySchedule')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('SalesActivity')->truncate();
+//        $this->connection->table('Customer')->truncate();
+//        $this->connection->table('CustomerAssignment')->truncate();
+//        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
@@ -171,6 +173,8 @@ _QUERY;
         $this->prepareSalesDependency();
         
         $this->salesActivity->insert($this->connection);
+        $this->salesActivityOne->insert($this->connection);
+        $this->initialSalesActivity->insert($this->connection);
         
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
@@ -378,6 +382,65 @@ _QUERY;
         $this->seeJsonContains([
             'totalUpcomingSchedule' => 2,
             'totalPastScheduleWithoutReport' => 1,
+        ]);
+    }
+    
+    //
+    protected function viewAllNonInitialSchedulesInMonth()
+    {
+        $this->prepareSalesDependency();
+        
+        $this->customer->insert($this->connection);
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
+        
+        $this->customerAssignment->insert($this->connection);
+        $this->customerAssignmentOne->insert($this->connection);
+        $this->customerAssignmentTwo->insert($this->connection);
+        $this->customerAssignmentThree->insert($this->connection);
+        
+        $this->salesActivity->insert($this->connection);
+        $this->salesActivityOne->insert($this->connection);
+        $this->initialSalesActivity->insert($this->connection);
+        
+        $this->salesActivityScheduleOne->columns['startTime'] = (new DateTime('-2 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityScheduleThree->columns['startTime'] = (new DateTime())->format('Y-m-d H:i:s');
+        
+        $this->salesActivityScheduleOne->insert($this->connection);
+        $this->salesActivityScheduleTwo->insert($this->connection);
+        $this->salesActivityScheduleThree->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query ( $year: Int, $month: Int ) {
+    viewAllNonInitialSchedulesInMonth ( year: $year, month: $month ) {
+        id,
+        salesActivity { name }
+        customerAssignment { customer { name } }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'year' => (int) (new DateTime())->format('Y'),
+            'month' => (int) (new DateTime())->format('m'),
+        ];
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_viewAllNonInitialSchedulesInMonth_200()
+    {
+        $this->viewAllNonInitialSchedulesInMonth();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'id' => $this->salesActivityScheduleThree->columns['id'],
+            'salesActivity' => [
+                'name' => $this->salesActivity->columns['name']
+            ],
+            'customerAssignment' => [
+                'customer' => [
+                    'name' => $this->customerThree->columns['name'],
+                ]
+            ],
         ]);
     }
     
