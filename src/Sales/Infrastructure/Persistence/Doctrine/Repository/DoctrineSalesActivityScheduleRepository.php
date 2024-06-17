@@ -108,4 +108,14 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
                 ->andWhere($qb->expr()->eq("DATE_FORMAT(SalesActivitySchedule.startTime, '%Y%m')", "'$monthFormat'"));
         return $qb->executeQuery()->fetchAllAssociative();
     }
+
+    public function allNonInitialSchedulesBelongsToSales(string $salesId)
+    {
+        $qb = $this->createCoreQueryBuilder();
+        $qb->andWhere($qb->expr()->eq('CustomerAssignment.Sales_id', ':salesId'))
+                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity', 'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
+                ->andWhere($qb->expr()->eq('SalesActivity.initial', 0))
+                ->setParameter('salesId', $salesId);
+        return $qb->executeQuery()->fetchAllAssociative();
+    }
 }

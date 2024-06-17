@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\SalesBC\SalesRole;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
+use Resources\Domain\TaskPayload\ViewPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
@@ -16,6 +17,7 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\SubmitScheduleTask;
+use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewAllNonInitialSchedules;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewAllNonInitialSchedulesInMonth;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewAllNonInitialSchedulesInMonthPayload;
 use Sales\Domain\Task\BySales\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
@@ -101,6 +103,16 @@ class SalesActivityScheduleController extends Controller
         $payload = (new ViewAllNonInitialSchedulesInMonthPayload())
                 ->setYear($input->get('year'))
                 ->setMonth($input->get('month'));
+        
+        $user->executeSalesTask($task, $payload);
+        return $payload->result;
+    }
+    
+    #[Query(responseWrapper:Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllNonInitialSchedules(SalesRole $user)
+    {
+        $task = new ViewAllNonInitialSchedules($this->repository());
+        $payload = new ViewPayload();
         
         $user->executeSalesTask($task, $payload);
         return $payload->result;

@@ -444,4 +444,70 @@ _QUERY;
         ]);
     }
     
+    //
+    protected function viewAllNonInitialSchedules()
+    {
+        $this->prepareSalesDependency();
+        
+        $this->customer->insert($this->connection);
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
+        
+        $this->customerAssignment->insert($this->connection);
+        $this->customerAssignmentOne->insert($this->connection);
+        $this->customerAssignmentTwo->insert($this->connection);
+        $this->customerAssignmentThree->insert($this->connection);
+        
+        $this->salesActivity->insert($this->connection);
+        $this->salesActivityOne->insert($this->connection);
+        $this->initialSalesActivity->insert($this->connection);
+        
+        $this->salesActivityScheduleOne->columns['startTime'] = (new DateTime('-2 months'))->format('Y-m-d H:i:s');
+        $this->salesActivityScheduleThree->columns['startTime'] = (new DateTime())->format('Y-m-d H:i:s');
+        
+        $this->salesActivityScheduleOne->insert($this->connection);
+        $this->salesActivityScheduleTwo->insert($this->connection);
+        $this->salesActivityScheduleThree->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query {
+    viewAllNonInitialSchedules {
+        id,
+        salesActivity { name }
+        customerAssignment { customer { name } }
+    }
+}
+_QUERY;
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_viewAllNonInitialSchedules_200()
+    {
+        $this->viewAllNonInitialSchedules();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'id' => $this->salesActivityScheduleThree->columns['id'],
+            'salesActivity' => [
+                'name' => $this->salesActivity->columns['name']
+            ],
+            'customerAssignment' => [
+                'customer' => [
+                    'name' => $this->customerThree->columns['name'],
+                ]
+            ],
+        ]);
+        $this->seeJsonContains([
+            'id' => $this->salesActivityScheduleOne->columns['id'],
+            'salesActivity' => [
+                'name' => $this->salesActivityOne->columns['name']
+            ],
+            'customerAssignment' => [
+                'customer' => [
+                    'name' => $this->customerOne->columns['name'],
+                ]
+            ],
+        ]);
+    }
+    
 }
