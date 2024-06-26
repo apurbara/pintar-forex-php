@@ -13,6 +13,7 @@ use App\Http\Controllers\CompanyBC\InCompany\CustomerController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerJourneyController;
 use App\Http\Controllers\CompanyBC\InCompany\CustomerVerificationController;
 use App\Http\Controllers\CompanyBC\InCompany\ManagerController;
+use App\Http\Controllers\CompanyBC\InCompany\ProvinceController;
 use App\Http\Controllers\CompanyBC\InCompany\RecycleRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesActivityController;
 use App\Http\Controllers\CompanyBC\InCompany\SalesController;
@@ -54,6 +55,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesRankController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CommonSalesMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesPerformanceMetricController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(ProvinceController::class),
             ...$this->customerAssignmentQuery(),
         ];
     }

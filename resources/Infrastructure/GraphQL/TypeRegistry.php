@@ -5,6 +5,7 @@ namespace Resources\Infrastructure\GraphQL;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Type\Definition\Type;
 use ReflectionClass;
 use Resources\Exception\RegularException;
@@ -35,13 +36,14 @@ class TypeRegistry
         'DateTimeZ' => DateTimeZ::class,
     ];
     private static $types = [];
+
 //    private static $paginationTypes = [];
 
     public function __construct()
     {
         $this->types = [];
     }
-    
+
     public static function registerPredefinedClassMaps(array $predefinedClassMaps)
     {
         static::$predefinedClassmaps = [...static::$predefinedClassmaps, ...$predefinedClassMaps];
@@ -51,7 +53,6 @@ class TypeRegistry
 //    {
 //        return static::PREDEFINED_CLASS_MAP;
 //    }
-
     //    private static $called = 0;
 //    public static function get(string $classname): Type
 //    {
@@ -99,7 +100,6 @@ class TypeRegistry
 //        }
 //        return static::$types[$listCacheName];
 //    }
-
 //    public static function load(string $classMetadata): Type
 //    {
 //        if (isset(static::$types[$classMetadata])) {
@@ -107,17 +107,16 @@ class TypeRegistry
 //        }
 //        return static::type($classMetadata);
 //    }
-    
+
     public static function objectType(string $classMetadata): Type
     {
         if (isset(static::$types[$classMetadata])) {
             return static::$types[$classMetadata];
         }
         $reflectionClass = new ReflectionClass($classMetadata);
-        if ($reflectionClass->isSubclassOf(\GraphQL\Type\Definition\ScalarType::class)) {
+        if ($reflectionClass->isSubclassOf(ScalarType::class)) {
             return $reflectionClass->newInstance();
-        }
-        if ($reflectionClass->isSubclassOf(ObjectType::class)) {
+        } elseif ($reflectionClass->isSubclassOf(ObjectType::class)) {
             $cacheName = $reflectionClass->getShortName();
             if (!isset(static::$types[$cacheName])) {
                 static::$types[$cacheName] = $reflectionClass->newInstance();
@@ -207,7 +206,7 @@ class TypeRegistry
             return static::inputType($graphqlClassMetadata);
         }
     }
-    
+
     public static function paginationType(string $classMetadata): Type
     {
         $reflectionClass = new ReflectionClass($classMetadata);
@@ -221,9 +220,9 @@ class TypeRegistry
             static::$types[$cacheName] = new ObjectType([
                 'name' => $cacheName,
                 'fields' => fn() => [
-                    'list' => Type::listOf(TypeRegistry::objectType($classMetadata)),
-                    'cursorLimit' => TypeRegistry::objectType(CursorLimit::class),
-                    'offsetLimit' => TypeRegistry::objectType(OffsetLimit::class),
+            'list' => Type::listOf(TypeRegistry::objectType($classMetadata)),
+            'cursorLimit' => TypeRegistry::objectType(CursorLimit::class),
+            'offsetLimit' => TypeRegistry::objectType(OffsetLimit::class),
                 ],
             ]);
         }

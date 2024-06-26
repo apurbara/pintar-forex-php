@@ -10,6 +10,7 @@ use Company\Domain\Model\CompanyMetric;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Manager;
+use Company\Domain\Model\Province;
 use Company\Domain\Model\Sales;
 use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
@@ -27,6 +28,7 @@ use Company\Domain\Task\InCompany\CustomerAssignment\CustomerAssignmentRepositor
 use Company\Domain\Task\InCompany\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\InCompany\CustomerVerification\CustomerVerificationRepository;
 use Company\Domain\Task\InCompany\Manager\ManagerRepository;
+use Company\Domain\Task\InCompany\Province\ProvinceRepository;
 use Company\Domain\Task\InCompany\RecycleRequest\RecycleRequestRepository;
 use Company\Domain\Task\InCompany\Sales\SalesRepository;
 use Company\Domain\Task\InCompany\SalesActivity\SalesActivityRepository;
@@ -261,5 +263,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->salesPerformanceMetricId)
                 ->willReturn($this->salesPerformanceMetric);
+    }
+
+    protected MockObject $provinceRepository;
+    protected MockObject $province;
+    protected string $provinceId = 'provinceId';
+
+    protected function prepareProvinceDependency(): void
+    {
+        $this->provinceRepository = $this->buildMockOfInterface(ProvinceRepository::class);
+        $this->province = $this->buildMockOfClass(Province::class);
+        //
+        $this->provinceRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->provinceId)
+                ->willReturn($this->province);
     }
 }
