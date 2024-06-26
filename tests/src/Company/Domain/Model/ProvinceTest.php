@@ -83,6 +83,22 @@ class ProvinceTest extends TestBase
         $this->enable();
         $this->assertFalse($this->province->disabled);
     }
+    
+    //
+    protected function assertActive()
+    {
+        $this->province->assertActive();
+    }
+    public function test_assertActive_disabledProvince_forbidden()
+    {
+        $this->province->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive province');
+    }
+    public function test_assertActive_activeProvince_void()
+    {
+        $this->assertActive();
+        $this->markAsSuccess();
+    }
 }
 
 class TestableProvince extends Province

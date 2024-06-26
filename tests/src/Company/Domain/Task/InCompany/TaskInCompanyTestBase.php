@@ -11,6 +11,7 @@ use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
 use Company\Domain\Model\Manager;
 use Company\Domain\Model\Province;
+use Company\Domain\Model\Province\City;
 use Company\Domain\Model\Sales;
 use Company\Domain\Model\Sales\CustomerAssignment;
 use Company\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
@@ -20,6 +21,7 @@ use Company\Domain\Model\SalesPerformanceMetric;
 use Company\Domain\Model\SalesRank;
 use Company\Domain\Task\InCompany\Area\AreaRepository;
 use Company\Domain\Task\InCompany\AreaStructure\AreaStructureRepository;
+use Company\Domain\Task\InCompany\City\CityRepository;
 use Company\Domain\Task\InCompany\ClosingRequest\ClosingRequestRepository;
 use Company\Domain\Task\InCompany\CommonSalesMetric\CommonSalesMetricRepository;
 use Company\Domain\Task\InCompany\CompanyMetric\CompanyMetricRepository;
@@ -278,5 +280,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->provinceId)
                 ->willReturn($this->province);
+    }
+
+    protected MockObject $cityRepository;
+    protected MockObject $city;
+    protected string $cityId = 'cityId';
+
+    protected function prepareCityDependency(): void
+    {
+        $this->cityRepository = $this->buildMockOfInterface(CityRepository::class);
+        $this->city = $this->buildMockOfClass(City::class);
+        //
+        $this->cityRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->cityId)
+                ->willReturn($this->city);
     }
 }

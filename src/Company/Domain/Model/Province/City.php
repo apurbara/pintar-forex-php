@@ -1,19 +1,27 @@
 <?php
 
-namespace Company\Domain\Model;
+namespace Company\Domain\Model\Province;
 
-use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineProvinceRepository;
+use Company\Domain\Model\Province;
+use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCityRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
-use Resources\Exception\RegularException;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\ValidationRule;
 use Resources\ValidationService;
 
-#[Entity(repositoryClass: DoctrineProvinceRepository::class)]
-class Province
+#[Entity(repositoryClass: DoctrineCityRepository::class)]
+class City
 {
+
+    #[FetchableObject(targetEntity: Province::class, joinColumnName: "Province_id")]
+    #[ManyToOne(targetEntity: Province::class, fetch: "EXTRA_LAZY")]
+    #[JoinColumn(name: "Province_id", referencedColumnName: "id")]
+    protected Province $province;
 
     #[Id, Column(type: "guid")]
     protected string $id;
@@ -31,21 +39,29 @@ class Province
     {
         ValidationService::build()
                 ->addRule(ValidationRule::notEmpty())
-                ->execute($name, 'province name is mandatory');
+                ->execute($name, 'city name is mandatory');
         $this->name = $name;
     }
 
-    public function __construct(string $id, ProvinceData $data)
+    public function __construct(Province $province, string $id, CityData $data)
     {
+        $this->province = $province;
         $this->id = $id;
         $this->createdTime = new \DateTimeImmutable();
         $this->disabled = false;
         $this->setName($data->name);
+
+        //
+        $this->province->assertActive();
     }
 
-    public function update(ProvinceData $data): void
+    public function update(Province $province, CityData $data): void
     {
+        $this->province = $province;
         $this->setName($data->name);
+
+        //
+        $this->province->assertActive();
     }
 
     public function disable(): void
@@ -56,13 +72,5 @@ class Province
     public function enable(): void
     {
         $this->disabled = false;
-    }
-
-    //
-    public function assertActive(): void
-    {
-        if ($this->disabled) {
-            throw RegularException::forbidden('inactive province');
-        }
     }
 }

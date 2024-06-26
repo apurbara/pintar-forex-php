@@ -5,6 +5,7 @@ namespace App\Http\GraphQL\CompanyBC;
 use App\Http\Controllers\CompanyBC\CompanyUserRoleInterface;
 use App\Http\Controllers\CompanyBC\InCompany\AreaController;
 use App\Http\Controllers\CompanyBC\InCompany\AreaStructureController;
+use App\Http\Controllers\CompanyBC\InCompany\CityController;
 use App\Http\Controllers\CompanyBC\InCompany\ClosingRequestController;
 use App\Http\Controllers\CompanyBC\InCompany\CommonSalesMetricController;
 use App\Http\Controllers\CompanyBC\InCompany\CompanyMetricController;
@@ -53,6 +54,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CommonSalesMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesPerformanceMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ProvinceController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CityController::class),
             ...$this->customerAssignmentMutation(),
         ];
     }
