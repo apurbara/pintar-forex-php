@@ -1,0 +1,163 @@
+<?php
+
+namespace Company\Application\Controllers;
+
+use Company\Domain\Model\Customer;
+use Company\Domain\Model\Manager\Sales;
+use Company\Domain\Model\Manager\Sales\CustomerAssignment;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Tests\Company\Application\Controllers\CompanyControllerTestCase;
+use Tests\resources\Application\EntityRecord;
+
+class CustomerControllerTest extends CompanyControllerTestCase
+{
+    protected EntityRecord $customerOne;
+    protected EntityRecord $customerTwo;
+    //
+    protected EntityRecord $salesOne;
+    protected EntityRecord $customerAssignmentOne;
+    //
+    protected $paginationSchema = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->connection->table('Customer')->truncate();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('CustomerAssignment')->truncate();
+        
+        $this->customerOne = new EntityRecord(Customer::class, 1);
+        $this->customerTwo = new EntityRecord(Customer::class, 2);
+        //
+        $this->salesOne = new EntityRecord(Sales::class, 1);
+        
+        $this->customerAssignmentOne = new EntityRecord(CustomerAssignment::class, 1);
+        $this->customerAssignmentOne->columns['Customer_id'] = $this->customerOne->columns['id'];
+        $this->customerAssignmentOne->columns['Sales_id'] = $this->salesOne->columns['id'];
+        $this->customerAssignmentOne->columns['status'] = CustomerAssignmentStatus::ACTIVE->value;
+    }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->connection->table('Customer')->truncate();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('CustomerAssignment')->truncate();
+    }
+    
+    //
+    protected function viewList()
+    {
+        $this->prepareManagerDependency();
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query CustomerList ( $filters: [FilterInput]) {
+    customerList ( filters: $filters ) {
+        list { id, disabled, createdTime, name, email, phone },
+        cursorLimit { total, cursorToNextPage }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = $this->paginationSchema;
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_viewList_200()
+    {
+        $this->viewList();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'list' => [
+                [
+                    'id' => $this->customerOne->columns['id'],
+                    'disabled' => $this->customerOne->columns['disabled'],
+                    'createdTime' => $this->jakartaDateTimeFormat($this->customerOne->columns['createdTime']),
+                    'name' => $this->customerOne->columns['name'],
+                    'email' => $this->customerOne->columns['email'],
+                    'phone' => $this->customerOne->columns['phone'],
+                ],
+                [
+                    'id' => $this->customerTwo->columns['id'],
+                    'disabled' => $this->customerTwo->columns['disabled'],
+                    'createdTime' => $this->jakartaDateTimeFormat($this->customerTwo->columns['createdTime']),
+                    'name' => $this->customerTwo->columns['name'],
+                    'email' => $this->customerTwo->columns['email'],
+                    'phone' => $this->customerTwo->columns['phone'],
+                ],
+            ],
+            'cursorLimit' => [
+                'total' => 2,
+                'cursorToNextPage' => null,
+            ]
+        ]);
+    }
+    public function test_viewList_appyCustomerAssignmentStatusFilter()
+    {
+$this->disableExceptionHandling();
+        $this->salesOne->insert($this->connection);
+        $this->customerAssignmentOne->insert($this->connection);
+        //
+        $this->paginationSchema = [
+            'filters' => [
+                ['column' => 'CustomerAssignment.status', 'value' => [CustomerAssignmentStatus::ACTIVE->value], 'comparisonType' => 'IN'],
+            ],
+        ];
+        //
+        $this->viewList();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['id' => $this->customerOne->columns['id']]);
+        $this->seeJsonDoesntContains(['id' => $this->customerTwo->columns['id']]);
+        $this->seeJsonContains(['total' => 1]);
+    }
+    public function test_viewList_appyHasActiveAssignmentFilter()
+    {
+        $this->salesOne->insert($this->connection);
+        $this->customerAssignmentOne->insert($this->connection);
+        //
+        $this->paginationSchema = [
+            'filters' => [
+                ['column' => 'hasActiveAssignment', 'value' => true, 'comparisonType' => 'EQ'],
+            ],
+        ];
+        //
+        $this->viewList();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains(['id' => $this->customerOne->columns['id']]);
+        $this->seeJsonDoesntContains(['id' => $this->customerTwo->columns['id']]);
+        $this->seeJsonContains(['total' => 1]);
+    }
+    
+    //
+    protected function customerDetail()
+    {
+        $this->prepareManagerDependency();
+        $this->customerOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query CustomerList ( $id: ID ) {
+    customerDetail ( id: $id ) {
+        id, disabled, name, email, phone,
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'id' => $this->customerOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->manager->token);
+    }
+    public function test_customerDetail_200()
+    {
+$this->disableExceptionHandling();
+        $this->customerDetail();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'id' => $this->customerOne->columns['id'],
+            'disabled' => $this->customerOne->columns['disabled'],
+            'name' => $this->customerOne->columns['name'],
+            'email' => $this->customerOne->columns['email'],
+            'phone' => $this->customerOne->columns['phone'],
+        ]);
+    }
+    
+}

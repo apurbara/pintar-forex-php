@@ -172,6 +172,8 @@ return [
         App\Providers\CompanyUserRoleProvider::class,
         App\Providers\SalesRoleProvider::class,
         App\Providers\UserRoleProvider::class,
+        \Manager\Application\Providers\ManagerProvider::class,
+        \Company\Application\Providers\CompanyUserProvider::class,
     ])->toArray(),
 
     /*

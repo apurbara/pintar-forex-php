@@ -1,0 +1,25 @@
+<?php
+
+namespace Company\Domain\Task\SalesPerformanceMetric;
+
+use Company\Domain\Model\AdminTaskInCompany;
+
+class EnableSalesPerformanceMetric implements AdminTaskInCompany
+{
+
+    public function __construct(protected SalesPerformanceMetricRepository $repository)
+    {
+        
+    }
+
+    /**
+     * 
+     * @param string $payload SalesPerformanceMetricId
+     * @return void
+     */
+    public function executeInCompany($payload): void
+    {
+        $this->repository->ofId($payload)
+                ->enable();
+    }
+}

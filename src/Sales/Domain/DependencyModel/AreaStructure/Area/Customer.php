@@ -25,9 +25,9 @@ use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerReposit
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
 {
-    #[FetchableObject(targetEntity: FetchableAreaFromCompanyBC::class, joinColumnName: "Area_id")]
+    #[FetchableObject(targetEntity: FetchableAreaFromCompanyBC::class, joinColumnName: "City_id")]
     #[ManyToOne(targetEntity: Area::class)]
-    #[JoinColumn(name: "Area_id", referencedColumnName: "id")]
+    #[JoinColumn(name: "City_id", referencedColumnName: "id")]
     protected Area $area;
 
     #[Id, Column(type: "guid")]

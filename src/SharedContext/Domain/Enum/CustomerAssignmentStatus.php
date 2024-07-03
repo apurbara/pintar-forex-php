@@ -8,4 +8,5 @@ enum CustomerAssignmentStatus: string
     case RECYCLED = "RECYCLED";
     case GOOD_FUND = "GOOD_FUND";
     case CANCELLED = "CANCELLED";
+    case CANCELLED_BY_SYSTEM = "CANCELLED_BY_SYSTEM";
 }

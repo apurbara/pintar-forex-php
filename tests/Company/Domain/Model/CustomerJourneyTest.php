@@ -1,0 +1,114 @@
+<?php
+
+namespace Company\Domain\Model;
+
+use DateTimeImmutable;
+use SharedContext\Domain\ValueObject\Label;
+use SharedContext\Domain\ValueObject\LabelData;
+use Tests\TestBase;
+
+class CustomerJourneyTest extends TestBase
+{
+    protected  $customerJourney;
+    protected $id = 'newId', $initial = true;
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $data = (new CustomerJourneyData(new LabelData('name', 'description')))
+                ->setId('id');
+        $this->customerJourney = new TestableCustomerJourney('id', $data);
+    }
+    
+    //
+    protected function createData()
+    {
+        return (new CustomerJourneyData($this->createLabelData()));
+    }
+    
+    //
+    protected function construct()
+    {
+        return new TestableCustomerJourney($this->id, $this->createData());
+    }
+    public function test_construct_setProperties()
+    {
+        $customerJourney = $this->construct();
+        $this->assertSame($this->id, $customerJourney->id);
+        $this->assertFalse($customerJourney->disabled);
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($customerJourney->createdTime);
+        $this->assertInstanceOf(Label::class, $customerJourney->label);
+        $this->assertFalse($customerJourney->initial);
+    }
+    public function test_construct_initialSet()
+    {
+        $payload = $this->createData()->setInitial();
+        $customerJourney = new TestableCustomerJourney($this->id, $payload);
+        $this->assertTrue($customerJourney->initial);
+    }
+    
+    //
+    protected function update()
+    {
+        $this->customerJourney->update($this->createData());
+    }
+    public function test_update_updateProperties()
+    {
+        $this->update();
+        $this->assertEquals(new Label($this->createLabelData()), $this->customerJourney->label);
+    }
+    
+    //
+    protected function disable()
+    {
+        $this->customerJourney->disable();
+    }
+    public function test_disable_setDisabled()
+    {
+        $this->disable();
+        $this->assertTrue($this->customerJourney->disabled);
+    }
+    public function test_disable_setInitialFalse()
+    {
+        $this->customerJourney->initial = true;
+        $this->disable();
+        $this->assertFalse($this->customerJourney->initial);
+    }
+    
+    //
+    protected function enable()
+    {
+        $this->customerJourney->enable();
+    }
+    public function test_enable_setDisabledFalse()
+    {
+        $this->customerJourney->disabled = true;
+        $this->enable();
+        $this->assertFalse($this->customerJourney->disabled);
+    }
+    
+    //
+    protected function assertActive()
+    {
+        $this->customerJourney->assertActive();
+    }
+    public function test_assertActive_disabledCustomerJourney_forbidden()
+    {
+        $this->customerJourney->disabled = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive customer journey');
+    }
+    public function test_assertActive_activeCustomerJourney_void()
+    {
+        $this->assertActive();
+        $this->markAsSuccess();
+    }
+}
+
+class TestableCustomerJourney extends CustomerJourney
+{
+    public string $id;
+    public bool $disabled;
+    public DateTimeImmutable $createdTime;
+    public Label $label;
+    public bool $initial;
+}

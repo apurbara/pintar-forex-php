@@ -1,0 +1,43 @@
+<?php
+
+namespace Company\Infrastructure\Persistence\Doctrine\Repository;
+
+use Company\Domain\Model\CustomerVerification;
+use Company\Domain\Task\CustomerVerification\CustomerVerificationRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
+
+class DoctrineCustomerVerificationRepository extends DoctrineEntityRepository implements CustomerVerificationRepository
+{
+
+    public function add(CustomerVerification $customerVerification): void
+    {
+        $this->persist($customerVerification);
+    }
+
+    public function ofId(string $id): CustomerVerification
+    {
+        return $this->findOneByIdOrDie($id);
+    }
+
+    //
+    public function customerVerificationDetail(string $id): array
+    {
+        return $this->fetchOneByIdOrDie($id);
+    }
+
+    public function customerVerificationList(array $paginationSchema): array
+    {
+        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema);
+        return $this->fetchPaginationList($doctrinePaginationListCategory);
+    }
+
+    public function allCustomerVerification(array $searchSchema): array
+    {
+        $doctrineAllListCategory = DoctrineAllListCategory::fromSchema($searchSchema);
+        $qb = $this->createCoreQueryBuilder();
+        $qb->orderBy('CustomerVerification.position', 'ASC');
+        return $doctrineAllListCategory->fetchResult($qb);
+    }
+}
