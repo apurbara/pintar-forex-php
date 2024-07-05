@@ -35,11 +35,11 @@
             "App\\": "app/",
             "Resources\\": "resources/",
             "SharedContext\\": "src/SharedContext",
-            "Manager\\": "Manager/",
             "Company\\": "Company/",
+            "Manager\\": "Manager/",
+            "Sales\\": "Sales/",
             "Shared\\": "Shared//",
             "User\\": "src/User",
-            "Sales\\": "src/Sales",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

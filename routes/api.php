@@ -4,12 +4,12 @@
 //use App\Http\Controllers\CompanyBC\InCompany\PerformanceSummaryController;
 
 
-use App\Http\Controllers\SalesBC\BySales\CommonSalesMetricSummaryController;
 use Company\Application\Controllers\CustomerController;
 use Company\Application\Controllers\PerformanceSummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Manager\Application\Controllers\PerformanceSummaryController as PerformanceSummaryController2;
+use Sales\Application\Controllers\CommonSalesMetricSummaryController;
 
 /*
   |--------------------------------------------------------------------------

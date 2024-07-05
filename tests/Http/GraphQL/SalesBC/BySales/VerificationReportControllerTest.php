@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\SalesBC\BySales;
+namespace Sales\Application\Controllers;
 
-use Company\Domain\Model\AreaStructure\Area\Customer;
+use Company\Domain\Model\Customer\VerificationReport;
 use Company\Domain\Model\CustomerVerification;
-use Sales\Domain\DependencyModel\AreaStructure\Area\Customer\VerificationReport;
+use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\Model\Sales\CustomerAssignment;
-use Tests\Http\GraphQL\SalesBC\SalesBCTestCase;
 use Tests\Http\Record\EntityRecord;
+use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 
-class VerificationReportControllerTest extends SalesBCTestCase
+class VerificationReportControllerTest extends SalesControllerTestCase
 {
     protected $customerVerification;
     protected $customerVerificationOne;

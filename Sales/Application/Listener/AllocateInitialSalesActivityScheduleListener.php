@@ -1,0 +1,42 @@
+<?php
+
+namespace Sales\Application\Listener;
+
+use Resources\Event\EventInterface;
+use Resources\Event\ListenerInterface;
+use Sales\Application\Service\Sales\ExecuteSalesTask;
+use Sales\Application\Service\Sales\SalesRepository;
+use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivitySchedule;
+use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
+use SharedContext\Domain\Event\CustomerAssignedEvent;
+
+class AllocateInitialSalesActivityScheduleListener implements ListenerInterface
+{
+
+    protected ExecuteSalesTask $service;
+    protected AllocateInitialSalesActivitySchedule $task;
+
+    public function __construct(
+            SalesRepository $salesRepository, SalesActivityScheduleRepository $salesActivityScheduleRepository,
+            CustomerAssignmentRepository $customerAssignmentRepository,
+            SalesActivityRepository $salesActivityRepository, protected string $salesId
+    )
+    {
+        $this->service = new ExecuteSalesTask($salesRepository);
+        $this->task = new AllocateInitialSalesActivitySchedule($salesActivityScheduleRepository,
+                $customerAssignmentRepository, $salesActivityRepository);
+    }
+
+    public function handle(EventInterface $event): void
+    {
+        $this->execute($event);
+    }
+
+    protected function execute(CustomerAssignedEvent $event): void
+    {
+        $this->service->execute(
+                $this->salesId, $this->task, $event->customerAssignmentId);
+    }
+}
