@@ -10,7 +10,7 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCate
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 
 class DoctrineRecycleRequestRepository extends DoctrineEntityRepository implements RecycleRequestRepository
 {

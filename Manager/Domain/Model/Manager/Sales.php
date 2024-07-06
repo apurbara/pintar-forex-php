@@ -22,10 +22,10 @@ use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\SalesType;
-use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesType;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Shared\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales implements ContainEventsInterface
@@ -42,13 +42,13 @@ class Sales implements ContainEventsInterface
     protected string $id;
 
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $cancelled;
+    protected bool $contractTerminated;
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
-    protected ?DateTimeImmutable $cancelTime;
+    protected ?DateTimeImmutable $contractTerminatedTime;
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
@@ -73,7 +73,7 @@ class Sales implements ContainEventsInterface
 
     public function assertActive(): void
     {
-        if ($this->cancelled) {
+        if ($this->contractTerminated) {
             throw RegularException::forbidden('inactive sales');
         }
     }

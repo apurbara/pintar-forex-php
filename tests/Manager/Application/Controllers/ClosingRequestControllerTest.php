@@ -8,8 +8,8 @@ use DateTimeImmutable;
 use Manager\Domain\Model\Manager\Sales;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 use Tests\Http\Record\EntityRecord;
 use Tests\Manager\Application\Controllers\ManagerControllerTestCase;
 

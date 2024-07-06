@@ -9,9 +9,9 @@ use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
-use SharedContext\Domain\ValueObject\HourlyTimeInterval;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\ValueObject\HourlyTimeInterval;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 
 class SalesActivityScheduleTest extends TestBase

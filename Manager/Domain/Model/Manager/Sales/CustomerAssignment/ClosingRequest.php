@@ -13,7 +13,7 @@ use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 
 #[Entity(repositoryClass: DoctrineClosingRequestRepository::class)]
 class ClosingRequest

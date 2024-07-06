@@ -8,7 +8,7 @@ use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 

@@ -5,7 +5,7 @@ namespace Sales\Application\Controllers;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\SalesActivity;
 use DateTimeImmutable;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 

@@ -9,12 +9,8 @@ use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use Resources\Exception\RegularException;
-use SharedContext\Domain\Model\Form\StringFieldData;
-use SharedContext\Domain\Model\FormData;
-use SharedContext\Domain\ValueObject\AccountInfoData;
-use SharedContext\Domain\ValueObject\BaseFormFieldData;
-use SharedContext\Domain\ValueObject\IntegerRangeData;
-use SharedContext\Domain\ValueObject\LabelData;
+use Shared\Domain\ValueObject\AccountInfoData;
+use Shared\Domain\ValueObject\LabelData;
 
 class TestBase extends TestCase
 {
@@ -122,15 +118,5 @@ class TestBase extends TestCase
     protected function createLabelData()
     {
         return new LabelData('label name', 'label description');
-    }
-
-    protected function createFormData()
-    {
-        $formData = new FormData();
-        $baseFormFieldData = new BaseFormFieldData('name', null, null, false);
-        $minMaxlengthData = new IntegerRangeData(null, null);
-        $stringFieldData = new StringFieldData($baseFormFieldData, $minMaxlengthData, null);
-        $formData->addStringFieldData($stringFieldData, null);
-        return $formData;
     }
 }

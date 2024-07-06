@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\ExcludeFromInput;
-use SharedContext\Domain\ValueObject\Label;
+use Shared\Domain\ValueObject\Label;
 
 #[Entity(repositoryClass: DoctrineSalesActivityRepository::class)]
 class SalesActivity

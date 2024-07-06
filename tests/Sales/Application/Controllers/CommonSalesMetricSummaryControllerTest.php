@@ -8,10 +8,10 @@ use Company\Domain\Model\Manager\Sales\CustomerAssignment\SalesActivitySchedule\
 use DateTime;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
-use SharedContext\Domain\Enum\EvaluationType;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
-use SharedContext\Domain\Enum\MetricType;
-use SharedContext\Domain\Enum\RecurrenceType;
+use Shared\Domain\Enum\EvaluationType;
+use Shared\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\MetricType;
+use Shared\Domain\Enum\RecurrenceType;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 

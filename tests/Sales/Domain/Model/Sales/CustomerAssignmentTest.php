@@ -20,11 +20,11 @@ use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
-use SharedContext\Domain\Event\CustomerAssignedEvent;
-use SharedContext\Domain\ValueObject\HourlyTimeInterval;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Event\CustomerAssignedEvent;
+use Shared\Domain\ValueObject\HourlyTimeInterval;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 
 class CustomerAssignmentTest extends TestBase

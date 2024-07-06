@@ -20,7 +20,7 @@ use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Event\Dispatcher;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
-use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 
 #[GraphqlMapableController(entity: CustomerAssignment::class)]
 class CustomerAssignmentController extends BaseController

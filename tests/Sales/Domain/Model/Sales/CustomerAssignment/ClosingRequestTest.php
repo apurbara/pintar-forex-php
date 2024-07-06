@@ -5,7 +5,7 @@ namespace Sales\Domain\Model\Sales\CustomerAssignment;
 use DateTimeImmutable;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 use Tests\TestBase;
 
 class ClosingRequestTest extends TestBase

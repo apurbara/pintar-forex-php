@@ -7,9 +7,9 @@ use Manager\Domain\DependencyModel\Customer;
 use Manager\Domain\DependencyModel\CustomerJourney;
 use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Event\CustomerAssignedEvent;
-use SharedContext\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Event\CustomerAssignedEvent;
+use Shared\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;
 use Tests\TestBase;
 
 class CustomerAssignmentTest extends TestBase

@@ -37,10 +37,10 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
-use SharedContext\Domain\Event\CustomerAssignedEvent;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Event\CustomerAssignedEvent;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 #[Entity(repositoryClass: DoctrineCustomerAssignmentRepository::class)]
 class CustomerAssignment implements ContainEventsInterface

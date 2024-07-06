@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\Id;
 use Manager\Domain\Task\ManagerTask;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineManagerRepository;
 use Resources\Exception\RegularException;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrineManagerRepository::class)]
 class Manager

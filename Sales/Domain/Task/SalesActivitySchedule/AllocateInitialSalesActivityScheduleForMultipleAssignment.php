@@ -8,7 +8,7 @@ use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
 use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use Sales\Domain\Task\SalesTask;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 class AllocateInitialSalesActivityScheduleForMultipleAssignment implements SalesTask
 {

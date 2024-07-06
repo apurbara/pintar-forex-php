@@ -8,8 +8,8 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationL
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
 
 class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository implements CustomerAssignmentRepository
 {

@@ -69,7 +69,7 @@ class SalesRankController extends BaseController
         $repository = $this->repository();
         $task = new DisableSalesRank($repository);
 
-        $this->executeMutationTaskInCompany($user, $task, $payload);
+        $this->executeMutationTaskInCompany($user, $task, $id);
         return $repository->queryOneById($id);
     }
 
@@ -79,7 +79,7 @@ class SalesRankController extends BaseController
         $repository = $this->repository();
         $task = new EnableSalesRank($repository);
 
-        $this->executeMutationTaskInCompany($user, $task, $payload);
+        $this->executeMutationTaskInCompany($user, $task, $id);
         return $repository->queryOneById($id);
     }
 

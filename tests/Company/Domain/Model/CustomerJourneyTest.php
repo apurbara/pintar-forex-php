@@ -3,8 +3,8 @@
 namespace Company\Domain\Model;
 
 use DateTimeImmutable;
-use SharedContext\Domain\ValueObject\Label;
-use SharedContext\Domain\ValueObject\LabelData;
+use Shared\Domain\ValueObject\Label;
+use Shared\Domain\ValueObject\LabelData;
 use Tests\TestBase;
 
 class CustomerJourneyTest extends TestBase

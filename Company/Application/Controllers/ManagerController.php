@@ -16,7 +16,7 @@ use Resources\Domain\TaskPayload\ViewDetailPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
-use SharedContext\Domain\ValueObject\AccountInfoData;
+use Shared\Domain\ValueObject\AccountInfoData;
 
 #[GraphqlMapableController(entity: Manager::class)]
 class ManagerController extends BaseController

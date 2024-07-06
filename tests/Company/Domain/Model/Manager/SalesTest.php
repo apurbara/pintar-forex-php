@@ -12,8 +12,8 @@ use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\MockObject\MockObject;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\SalesType;
-use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Shared\Domain\ValueObject\AccountInfo;
 use Tests\TestBase;
 
 class SalesTest extends TestBase

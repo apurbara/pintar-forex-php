@@ -15,7 +15,7 @@ use Resources\ValidationService;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineClosingRequestRepository;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 
 #[Entity(repositoryClass: DoctrineClosingRequestRepository::class)]
 class ClosingRequest

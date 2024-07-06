@@ -4,7 +4,7 @@ namespace Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 
 use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 use Tests\TestBase;
 
 class ClosingRequestTest extends TestBase

@@ -24,7 +24,7 @@ use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\SalesType;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales implements CompanyUser

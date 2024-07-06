@@ -3,7 +3,7 @@
 namespace Company\Domain\Model;
 
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
-use SharedContext\Domain\ValueObject\LabelData;
+use Shared\Domain\ValueObject\LabelData;
 
 readonly class SalesActivityData extends AbstractEntityMutationPayload
 {

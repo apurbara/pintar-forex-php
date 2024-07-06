@@ -201,11 +201,11 @@ class SalesActivitySchedulerServiceTest extends TestBase
         if ((new \DateTimeImmutable())->format('w') == 4) {
             $this->assertEquals((new \DateTimeImmutable('+4 days'))->setTime(10, 0),
                     $this->nextAvailableTimeSlotForScheduleWithDuration());
-        } elseif ((new \DateTimeImmutable())->format('w') != 5 || (new \DateTimeImmutable())->format('w') != 6) {
-            $this->assertEquals((new \DateTimeImmutable('+3 days'))->setTime(10, 0),
+        } elseif ((new \DateTimeImmutable())->format('w') == 5 || (new \DateTimeImmutable())->format('w') == 6) {
+            $this->assertEquals((new \DateTimeImmutable('next monday'))->setTime(10, 0),
                     $this->nextAvailableTimeSlotForScheduleWithDuration());
         } else {
-            $this->assertEquals((new \DateTimeImmutable('next monday'))->setTime(10, 0),
+            $this->assertEquals((new \DateTimeImmutable('+2 days'))->setTime(10, 0),
                     $this->nextAvailableTimeSlotForScheduleWithDuration());
         }
     }

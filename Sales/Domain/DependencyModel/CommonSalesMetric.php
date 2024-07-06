@@ -9,10 +9,10 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCommonSalesMetricRepository;
-use SharedContext\Domain\Enum\EvaluationType;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
-use SharedContext\Domain\Enum\MetricType;
-use SharedContext\Domain\Enum\RecurrenceType;
+use Shared\Domain\Enum\EvaluationType;
+use Shared\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\MetricType;
+use Shared\Domain\Enum\RecurrenceType;
 
 #[Entity(repositoryClass: DoctrineCommonSalesMetricRepository::class)]
 class CommonSalesMetric

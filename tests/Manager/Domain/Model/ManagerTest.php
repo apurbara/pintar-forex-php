@@ -4,7 +4,7 @@ namespace Manager\Domain\Model;
 
 use DateTimeImmutable;
 use Manager\Domain\Task\ManagerTask;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\AccountInfo;
 use Tests\TestBase;
 
 class ManagerTest extends TestBase

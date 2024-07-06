@@ -8,7 +8,7 @@ use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class AllocateInitialSalesActivityScheduleForMultipleAssignmentTest extends SalesTaskTestBase

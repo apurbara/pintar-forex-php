@@ -5,7 +5,7 @@ namespace Sales\Application\Controllers;
 use Company\Domain\Model\Customer;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 use Tests\resources\Application\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 

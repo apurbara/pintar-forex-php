@@ -1,13 +1,12 @@
 <?php
 
-namespace Company\Application\Service\Sales;
+namespace Sales\Domain\Task;
 
-use Company\Domain\Model\Sales;
+use Sales\Domain\Model\Sales;
 
 interface SalesRepository
 {
-
     public function ofId(string $id): Sales;
-
+    
     public function update(): void;
 }

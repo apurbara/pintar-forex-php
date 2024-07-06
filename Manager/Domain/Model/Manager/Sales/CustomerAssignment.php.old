@@ -23,9 +23,9 @@ use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Event\CustomerAssignedEvent;
-use SharedContext\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Event\CustomerAssignedEvent;
+use Shared\Domain\Event\InHouseSalesCustomerAssignmentRecycledEvent;
 
 #[Entity(repositoryClass: DoctrineCustomerAssignmentRepository::class)]
 class CustomerAssignment implements ContainEventsInterface

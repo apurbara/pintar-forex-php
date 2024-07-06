@@ -5,7 +5,7 @@ namespace Manager\Domain\DependencyModel;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Tests\TestBase;
 
 class CustomerTest extends TestBase

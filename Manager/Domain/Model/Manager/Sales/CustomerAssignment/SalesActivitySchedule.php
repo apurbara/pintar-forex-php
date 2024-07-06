@@ -14,8 +14,8 @@ use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
-use SharedContext\Domain\ValueObject\HourlyTimeInterval;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\ValueObject\HourlyTimeInterval;
 
 #[Entity(repositoryClass: DoctrineSalesActivityScheduleRepository::class)]
 class SalesActivitySchedule

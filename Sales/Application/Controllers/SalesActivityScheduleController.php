@@ -24,7 +24,7 @@ use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleSummary;
 use Sales\Domain\Task\SalesActivitySchedule\ViewTotalSalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 #[GraphqlMapableController(entity: SalesActivitySchedule::class)]
 class SalesActivityScheduleController extends BaseController

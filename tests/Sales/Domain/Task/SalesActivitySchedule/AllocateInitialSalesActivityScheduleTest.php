@@ -5,7 +5,7 @@ namespace Sales\Domain\Task\SalesActivitySchedule;
 use DateTimeImmutable;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class AllocateInitialSalesActivityScheduleTest extends SalesTaskTestBase

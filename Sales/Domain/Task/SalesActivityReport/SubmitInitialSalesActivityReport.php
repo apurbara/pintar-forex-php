@@ -10,7 +10,7 @@ use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
 use Sales\Domain\Task\SalesTask;
 use Sales\Domain\Task\Dependency\SalesActivityRepository;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 class SubmitInitialSalesActivityReport implements SalesTask
 {

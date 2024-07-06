@@ -8,8 +8,8 @@ use Company\Domain\Model\Province\City;
 use Company\Domain\Model\SalesActivity;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 

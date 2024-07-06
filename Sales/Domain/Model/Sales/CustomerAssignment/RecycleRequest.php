@@ -13,7 +13,7 @@ use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineRecycleRequestRepository;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 
 #[Entity(repositoryClass: DoctrineRecycleRequestRepository::class)]
 class RecycleRequest

@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use Resources\Exception\RegularException;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
 
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer

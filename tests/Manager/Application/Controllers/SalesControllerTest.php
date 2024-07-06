@@ -47,7 +47,7 @@ class SalesControllerTest extends ManagerControllerTestCase
 query SalesList {
     viewSalesList{
         list {
-            id, cancelled, createdTime, name, email
+            id, contractTerminated, createdTime, name, email
         },
         cursorLimit { total, cursorToNextPage }
     }
@@ -63,14 +63,14 @@ _QUERY;
             'list' => [
                 [
                     'id' => $this->salesOne->columns['id'],
-                    'cancelled' => $this->salesOne->columns['cancelled'],
+                    'contractTerminated' => $this->salesOne->columns['contractTerminated'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
                     'name' => $this->salesOne->columns['name'],
                     'email' => $this->salesOne->columns['email'],
                 ],
                 [
                     'id' => $this->salesTwo->columns['id'],
-                    'cancelled' => $this->salesTwo->columns['cancelled'],
+                    'contractTerminated' => $this->salesTwo->columns['contractTerminated'],
                     'createdTime' => $this->jakartaDateTimeFormat($this->salesTwo->columns['createdTime']),
                     'name' => $this->salesTwo->columns['name'],
                     'email' => $this->salesTwo->columns['email'],
@@ -93,7 +93,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query SalesDetail ( $id: ID! ) {
     viewSalesDetail ( id: $id ) {
-        id, cancelled, createdTime, name, email,
+        id, contractTerminated, createdTime, name, email,
     }
 }
 _QUERY;
@@ -106,7 +106,7 @@ _QUERY;
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'id' => $this->salesOne->columns['id'],
-            'cancelled' => $this->salesOne->columns['cancelled'],
+            'contractTerminated' => $this->salesOne->columns['contractTerminated'],
             'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
             'name' => $this->salesOne->columns['name'],
             'email' => $this->salesOne->columns['email'],
@@ -124,7 +124,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query SalesList {
     viewAllSales {
-        id, cancelled, createdTime, name, email
+        id, contractTerminated, createdTime, name, email
     }
 }
 _QUERY;
@@ -136,14 +136,14 @@ _QUERY;
         $this->seeStatusCode(200);
         $this->seeJsonContains([
             'id' => $this->salesOne->columns['id'],
-            'cancelled' => $this->salesOne->columns['cancelled'],
+            'contractTerminated' => $this->salesOne->columns['contractTerminated'],
             'createdTime' => $this->jakartaDateTimeFormat($this->salesOne->columns['createdTime']),
             'name' => $this->salesOne->columns['name'],
             'email' => $this->salesOne->columns['email'],
         ]);
         $this->seeJsonContains([
             'id' => $this->salesTwo->columns['id'],
-            'cancelled' => $this->salesTwo->columns['cancelled'],
+            'contractTerminated' => $this->salesTwo->columns['contractTerminated'],
             'createdTime' => $this->jakartaDateTimeFormat($this->salesTwo->columns['createdTime']),
             'name' => $this->salesTwo->columns['name'],
             'email' => $this->salesTwo->columns['email'],

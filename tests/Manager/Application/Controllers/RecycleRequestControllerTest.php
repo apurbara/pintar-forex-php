@@ -6,9 +6,9 @@ use Company\Domain\Model\Customer;
 use Manager\Domain\Model\Manager\Sales;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment\RecycleRequest;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\ManagementApprovalStatus;
-use SharedContext\Domain\Enum\SalesType;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
+use Shared\Domain\Enum\SalesType;
 use Tests\Http\Record\EntityRecord;
 use Tests\Manager\Application\Controllers\ManagerControllerTestCase;
 

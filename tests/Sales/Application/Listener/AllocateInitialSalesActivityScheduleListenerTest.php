@@ -2,24 +2,21 @@
 
 namespace Sales\Application\Listener;
 
-use Sales\Application\Service\Sales\ExecuteSalesTask;
-use Sales\Application\Service\Sales\SalesRepository;
+use Sales\Domain\Model\Sales;
 use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivitySchedule;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
-use Sales\Domain\Task\Dependency\SalesActivityRepository;
-use SharedContext\Domain\Event\CustomerAssignedEvent;
+use Sales\Domain\Task\SalesRepository;
+use Shared\Domain\Event\CustomerAssignedEvent;
 use Tests\TestBase;
 
 class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
 {
 
-    protected $salesRepository;
-    protected $salesActivityScheduleRepository;
-    protected $customerAssignmentRepository;
-    protected $salesActivityRepository;
-    protected $salesId = 'salesId';
-    protected $listener, $service, $task;
+    protected $salesRepository, $sales, $salesId = 'salesId';
+    protected $salesActivityScheduleRepository, $customerAssignmentRepository, $salesActivityRepository;
+    protected $listener;
     //
     protected $event, $customerAssignmentId = 'customerAssignmentId';
 
@@ -27,35 +24,21 @@ class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
     {
         parent::setUp();
         $this->salesRepository = $this->buildMockOfInterface(SalesRepository::class);
+        $this->sales = $this->buildMockOfClass(Sales::class);
+        $this->salesRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->salesId)
+                ->willReturn($this->sales);
+        
         $this->salesActivityScheduleRepository = $this->buildMockOfInterface(SalesActivityScheduleRepository::class);
-        $this->customerAssignmentRepository = $this->buildMockOfInterface(CustomerAssignmentRepository::class);
         $this->salesActivityRepository = $this->buildMockOfInterface(SalesActivityRepository::class);
+        $this->customerAssignmentRepository = $this->buildMockOfInterface(CustomerAssignmentRepository::class);
 
-        $this->listener = new TestableAllocateInitialSalesActivityScheduleListener($this->salesRepository,
+        $this->listener = new AllocateInitialSalesActivityScheduleListener($this->salesRepository,
                 $this->salesActivityScheduleRepository, $this->customerAssignmentRepository,
                 $this->salesActivityRepository, $this->salesId);
-
-        $this->service = $this->buildMockOfClass(ExecuteSalesTask::class);
-        $this->listener->service = $this->service;
-
-        $this->task = $this->buildMockOfClass(AllocateInitialSalesActivitySchedule::class);
-        $this->listener->task = $this->task;
-        //
+        
         $this->event = new CustomerAssignedEvent($this->customerAssignmentId);
-    }
-
-    //
-    protected function construct()
-    {
-        return new TestableAllocateInitialSalesActivityScheduleListener($this->salesRepository,
-                $this->salesActivityScheduleRepository, $this->customerAssignmentRepository,
-                $this->salesActivityRepository, $this->salesId);
-    }
-    public function test_construct_setProperties()
-    {
-        $listener = $this->construct();
-        $this->assertInstanceOf(ExecuteSalesTask::class, $listener->service);
-        $this->assertInstanceOf(AllocateInitialSalesActivitySchedule::class, $listener->task);
     }
 
     //
@@ -63,19 +46,17 @@ class AllocateInitialSalesActivityScheduleListenerTest extends TestBase
     {
         $this->listener->handle($this->event);
     }
-
-    public function test_handle_serviceExecuteTask()
+    public function test_handle_salesExecuteTask()
     {
-        $this->service->expects($this->once())
-                ->method('execute')
-                ->with($this->salesId, $this->task, $this->customerAssignmentId);
+        $this->sales->expects($this->once())
+                ->method('executeTask')
+                ->with($this->isInstanceOf(AllocateInitialSalesActivitySchedule::class), $this->customerAssignmentId);
         $this->handle();
     }
-}
-
-class TestableAllocateInitialSalesActivityScheduleListener extends AllocateInitialSalesActivityScheduleListener
-{
-
-    public ExecuteSalesTask $service;
-    public AllocateInitialSalesActivitySchedule $task;
+    public function test_handle_updateRepository()
+    {
+        $this->salesRepository->expects($this->once())
+                ->method('update');
+        $this->handle();
+    }
 }

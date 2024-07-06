@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Resources\Exception\RegularException;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrineAdminRepository::class)]
 #[UniqueConstraint(name: "admin_mail_idx", columns: ["email"])]

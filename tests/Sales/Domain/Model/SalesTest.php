@@ -8,7 +8,7 @@ use Sales\Domain\DependencyModel\CustomerJourney;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesTask;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Tests\TestBase;
 
 class SalesTest extends TestBase

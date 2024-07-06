@@ -2,13 +2,13 @@
 
 namespace Sales\Application\Listener;
 
-use Sales\Application\Service\Sales\SalesRepository;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivityScheduleForMultipleAssignment;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
-use Sales\Domain\Task\Dependency\SalesActivityRepository;
-use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Sales\Domain\Task\SalesRepository;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 use Tests\TestBase;
 
 class AllocateInitialSalesActivityScheduleForMultipleAssignmentListenerTest extends TestBase

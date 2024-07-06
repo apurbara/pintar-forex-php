@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
-use SharedContext\Domain\ValueObject\Label;
+use Shared\Domain\ValueObject\Label;
 
 #[Entity(repositoryClass: DoctrineCustomerVerificationRepository::class)]
 class CustomerVerification

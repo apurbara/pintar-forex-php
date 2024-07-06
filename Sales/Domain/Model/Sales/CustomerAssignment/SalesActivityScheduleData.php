@@ -4,7 +4,7 @@ namespace Sales\Domain\Model\Sales\CustomerAssignment;
 
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 readonly class SalesActivityScheduleData extends AbstractEntityMutationPayload
 {

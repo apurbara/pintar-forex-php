@@ -4,8 +4,8 @@ namespace Company\Domain\Model;
 
 use Company\Domain\Task\TaskInCompany;
 use DateTimeImmutable;
-use SharedContext\Domain\ValueObject\AccountInfo;
-use SharedContext\Domain\ValueObject\AccountInfoData;
+use Shared\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\AccountInfoData;
 use Tests\TestBase;
 
 class ManagerTest extends TestBase

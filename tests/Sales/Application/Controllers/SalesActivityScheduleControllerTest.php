@@ -8,7 +8,7 @@ use DateTime;
 use DateTimeImmutable;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 

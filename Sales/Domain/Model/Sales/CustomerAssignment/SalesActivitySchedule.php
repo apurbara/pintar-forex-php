@@ -19,9 +19,9 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
-use SharedContext\Domain\Enum\SalesActivityScheduleStatus;
-use SharedContext\Domain\ValueObject\HourlyTimeInterval;
-use SharedContext\Domain\ValueObject\HourlyTimeIntervalData;
+use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\ValueObject\HourlyTimeInterval;
+use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 #[Entity(repositoryClass: DoctrineSalesActivityScheduleRepository::class)]
 class SalesActivitySchedule

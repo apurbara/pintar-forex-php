@@ -4,12 +4,12 @@ namespace Sales\Application\Listener;
 
 use Resources\Event\EventInterface;
 use Resources\Event\ListenerInterface;
-use Sales\Application\Service\Sales\SalesRepository;
 use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Task\Dependency\SalesActivityRepository;
 use Sales\Domain\Task\SalesActivitySchedule\AllocateInitialSalesActivityScheduleForMultipleAssignment;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
-use Sales\Domain\Task\Dependency\SalesActivityRepository;
-use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Sales\Domain\Task\SalesRepository;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 
 class AllocateInitialSalesActivityScheduleForMultipleAssignmentListener implements ListenerInterface
 {

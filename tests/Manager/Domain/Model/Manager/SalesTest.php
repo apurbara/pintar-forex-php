@@ -11,10 +11,10 @@ use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
 use PHPUnit\Framework\MockObject\MockObject;
 use Resources\Exception\RegularException;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\SalesType;
-use SharedContext\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
-use SharedContext\Domain\ValueObject\AccountInfo;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesType;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Shared\Domain\ValueObject\AccountInfo;
 use Tests\TestBase;
 
 class SalesTest extends TestBase
@@ -69,7 +69,7 @@ class SalesTest extends TestBase
     }
     public function test_assertActive_cancelledSales_forbidden()
     {
-        $this->sales->cancelled = true;
+        $this->sales->contractTerminated = true;
         $this->assertRegularExceptionThrowed(fn() => $this->assertActive(), 'Forbidden', 'inactive sales');
     }
     public function test_assertActive_activeSales_void()
@@ -208,8 +208,8 @@ class TestableSales extends Sales
     public Manager $manager;
     public string $id = 'id';
     public DateTimeImmutable $createdTime;
-    public ?DateTimeImmutable $cancelTime;
-    public bool $cancelled = false;
+    public ?DateTimeImmutable $contractTerminatedTime;
+    public bool $contractTerminated = false;
     public SalesType $type = SalesType::IN_HOUSE;
     public AccountInfo $accountInfo;
     public Collection $customerAssignments;

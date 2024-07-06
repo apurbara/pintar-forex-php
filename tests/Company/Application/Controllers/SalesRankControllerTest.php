@@ -2,6 +2,15 @@
 
 namespace Company\Application\Controllers;
 
+use Company\Domain\Model\SalesRank;
+use DateTime;
+use Shared\Domain\Enum\EvaluationType;
+use Shared\Domain\Enum\MetricType;
+use Shared\Domain\Enum\QueryOrder;
+use Shared\Domain\Enum\RecurrenceType;
+use Tests\Company\Application\Controllers\CompanyControllerTestCase;
+use Tests\resources\Application\EntityRecord;
+
 class SalesRankControllerTest extends CompanyControllerTestCase
 {
     protected EntityRecord $salesRankOne;

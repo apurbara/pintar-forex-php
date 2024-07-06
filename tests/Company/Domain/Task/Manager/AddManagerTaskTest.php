@@ -3,7 +3,7 @@
 namespace Company\Domain\Task\Manager;
 
 use Company\Domain\Model\ManagerData;
-use SharedContext\Domain\ValueObject\AccountInfoData;
+use Shared\Domain\ValueObject\AccountInfoData;
 use Tests\Company\Domain\Task\TaskInCompanyTestBase;
 
 class AddManagerTaskTest extends TaskInCompanyTestBase

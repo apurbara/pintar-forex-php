@@ -16,8 +16,8 @@ use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesTask;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
-use SharedContext\Domain\Enum\CustomerAssignmentStatus;
-use SharedContext\Domain\Enum\SalesType;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesType;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales

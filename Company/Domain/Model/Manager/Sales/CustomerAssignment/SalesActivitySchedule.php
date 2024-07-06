@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
-use SharedContext\Domain\ValueObject\HourlyTimeInterval;
+use Shared\Domain\ValueObject\HourlyTimeInterval;
 
 #[Entity(repositoryClass: DoctrineSalesActivityScheduleRepository::class)]
 class SalesActivitySchedule
