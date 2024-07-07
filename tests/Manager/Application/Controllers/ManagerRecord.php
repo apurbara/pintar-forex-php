@@ -2,8 +2,8 @@
 
 namespace Tests\Manager\Application\Controllers;
 
-use App\Http\Controllers\UserRole;
 use Manager\Domain\Model\Manager;
+use Shared\Application\UserRole;
 use Tests\Http\Record\EntityRecord;
 use Tests\Http\Record\JwtHeaderTokenGenerator;
 use Tests\Http\Record\TestablePassword;

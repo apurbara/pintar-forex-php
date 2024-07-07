@@ -2,9 +2,9 @@
 
 namespace Manager\Application\Controllers;
 
-use App\Http\Controllers\Controller;
 use Manager\Domain\Model\Manager;
 use Manager\Domain\Task\ManagerTask;
+use Shared\Application\Controllers\Controller;
 
 class BaseController extends Controller
 {

@@ -2,9 +2,9 @@
 
 namespace Company\Application\Controllers;
 
-use App\Http\Controllers\Controller;
 use Company\Domain\Model\CompanyUser;
 use Company\Domain\Task\TaskInCompany;
+use Shared\Application\Controllers\Controller;
 
 class BaseController extends Controller
 {

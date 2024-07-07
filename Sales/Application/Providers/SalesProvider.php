@@ -2,13 +2,13 @@
 
 namespace Sales\Application\Providers;
 
-use App\Http\Controllers\JwtHelper;
-use App\Http\Controllers\UserRole;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Resources\Exception\RegularException;
 use Sales\Domain\Model\Sales;
+use Shared\Application\JwtHelper;
+use Shared\Application\UserRole;
 use function app;
 use function request;
 

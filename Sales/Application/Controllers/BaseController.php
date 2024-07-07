@@ -2,9 +2,9 @@
 
 namespace Sales\Application\Controllers;
 
-use App\Http\Controllers\Controller;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Task\SalesTask;
+use Shared\Application\Controllers\Controller;
 
 class BaseController extends Controller
 {

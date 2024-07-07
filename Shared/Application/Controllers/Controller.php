@@ -9,7 +9,7 @@ use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
-use SharedContext\Domain\ValueObject\LabelData;
+use Shared\Domain\ValueObject\LabelData;
 use function app;
 
 class Controller extends IlluminateController
