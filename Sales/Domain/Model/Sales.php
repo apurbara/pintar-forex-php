@@ -2,9 +2,11 @@
 
 namespace Sales\Domain\Model;
 
+use Company\Domain\Model\Manager as FetchableManagerFromCompanyBC;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -18,6 +20,8 @@ use Sales\Domain\Task\SalesTask;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\SalesType;
+use Shared\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\ChangeUserPasswordData;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
 class Sales
@@ -32,12 +36,15 @@ class Sales
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
     
+    #[Embedded(class: AccountInfo::class, columnPrefix: false)]
+    protected AccountInfo $accountInfo;
+    
     #[FetchableObjectList(targetEntity: CustomerAssignment::class, joinColumnName: "Sales_id", paginationRequired: true)]
     #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "sales", fetch: 'EXTRA_LAZY')]
     protected Collection $customerAssignments;
     
     //
-    #[FetchableObject(targetEntity: ManagerInCompanyBC::class, joinColumnName: "Manager_id")]
+    #[FetchableObject(targetEntity: FetchableManagerFromCompanyBC::class, joinColumnName: "Manager_id")]
     #[JoinColumn(name: "Manager_id", referencedColumnName: "id")]
     protected $manager;
 
@@ -49,6 +56,24 @@ class Sales
     protected function __construct()
     {
         
+    }
+    
+    public function changePassword(ChangeUserPasswordData $changePasswordData): void
+    {
+        $this->accountInfo = $this->accountInfo->changePassword($changePasswordData);
+    }
+
+    public function changeName(string $name): void
+    {
+        $this->accountInfo = $this->accountInfo->changeName($name);
+    }
+
+    public function login(string $password): string
+    {
+        if ($this->contractTerminated || !$this->accountInfo->passwordMatch($password)) {
+            throw RegularException::unauthorized('inactive account or invalid email and password');
+        }
+        return $this->id;
     }
     
     //

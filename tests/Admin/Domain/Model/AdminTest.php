@@ -1,32 +1,27 @@
 <?php
 
-namespace Manager\Domain\Model;
+namespace Admin\Domain\Model;
 
 use DateTimeImmutable;
-use Manager\Domain\Task\ManagerTask;
 use Shared\Domain\ValueObject\AccountInfo;
 use Shared\Domain\ValueObject\ChangeUserPasswordData;
 use Tests\TestBase;
 
-class ManagerTest extends TestBase
+class AdminTest extends TestBase
 {
-    protected $manager, $accountInfo;
-    protected $payload = 'task payload', $task;
+    protected $admin, $accountInfo;
     //
     protected $newAccountInfo;
     protected $changePasswordData;
     protected $name = 'new name';
     protected $password = 'password123';
-    
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->manager = new TestableManager();
-        //
-        $this->task = $this->buildMockOfInterface(ManagerTask::class);
-        //
+        $this->admin = new TestableAdmin();
         $this->accountInfo = $this->buildMockOfClass(AccountInfo::class);
-        $this->manager->accountInfo = $this->accountInfo;
+        $this->admin->accountInfo = $this->accountInfo;
         //
         $this->newAccountInfo = $this->buildMockOfClass(AccountInfo::class);
         $this->changePasswordData = $this->buildMockOfReadonlyClass(ChangeUserPasswordData::class);
@@ -35,7 +30,7 @@ class ManagerTest extends TestBase
     //
     protected function changePassword()
     {
-        $this->manager->changePassword($this->changePasswordData);
+        $this->admin->changePassword($this->changePasswordData);
     }
     public function test_changePassword_changeAccountInfoPassword()
     {
@@ -44,13 +39,13 @@ class ManagerTest extends TestBase
                 ->with($this->changePasswordData)
                 ->willReturn($this->newAccountInfo);
         $this->changePassword();
-        $this->assertSame($this->newAccountInfo, $this->manager->accountInfo);
+        $this->assertSame($this->newAccountInfo, $this->admin->accountInfo);
     }
     
     //
     protected function changeName()
     {
-        $this->manager->changeName($this->name);
+        $this->admin->changeName($this->name);
     }
     public function test_changeName_changeAccountInfoPassword()
     {
@@ -59,7 +54,7 @@ class ManagerTest extends TestBase
                 ->with($this->name)
                 ->willReturn($this->newAccountInfo);
         $this->changeName();
-        $this->assertSame($this->newAccountInfo, $this->manager->accountInfo);
+        $this->assertSame($this->newAccountInfo, $this->admin->accountInfo);
     }
     
     //
@@ -68,15 +63,15 @@ class ManagerTest extends TestBase
         $this->accountInfo->expects($this->any())
                 ->method('passwordMatch')
                 ->willReturn(true);
-        return $this->manager->login($this->password);
+        return $this->admin->login($this->password);
     }
-    public function test_login_returnManagerId()
+    public function test_login_returnAdminId()
     {
-        $this->assertSame($this->manager->id, $this->login());
+        $this->assertSame($this->admin->id, $this->login());
     }
-    public function test_login_suspendedManager_forbidden()
+    public function test_login_disabledAdmin_forbidden()
     {
-        $this->manager->suspended = true;
+        $this->admin->disabled = true;
         $this->assertRegularExceptionThrowed(fn() => $this->login(), 'Unauthorized', 'inactive account or invalid email and password');
     }
     public function test_login_unmatchPassword_forbidden()
@@ -87,33 +82,17 @@ class ManagerTest extends TestBase
                 ->willReturn(false);
         $this->assertRegularExceptionThrowed(fn() => $this->login(), 'Unauthorized', 'inactive account or invalid email and password');
     }
-    
-    //
-    protected function executeTask()
-    {
-        $this->manager->executeTask($this->task, $this->payload);
-    }
-    public function test_executeTask_executeTask()
-    {
-        $this->task->expects($this->once())
-                ->method('executeByManager')
-                ->with($this->manager, $this->payload);
-        $this->executeTask();
-    }
-    public function test_executeTask_suspendedManager()
-    {
-        $this->manager->suspended = true;
-        $this->assertRegularExceptionThrowed(fn() => $this->executeTask(), 'Forbidden', 'only active manager can make this request');
-    }
 }
 
-class TestableManager extends Manager
+class TestableAdmin extends Admin
 {
-    public string $id = 'id';
-    public bool $suspended = false;
+
+    public string $id = 'adminId';
+    public bool $disabled = false;
     public DateTimeImmutable $createdTime;
+    public bool $aSuperUser;
     public AccountInfo $accountInfo;
-    
+
     function __construct()
     {
         parent::__construct();

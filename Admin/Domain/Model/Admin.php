@@ -1,30 +1,32 @@
 <?php
 
-namespace Manager\Domain\Model;
+namespace Admin\Domain\Model;
 
+use Admin\Infrastructure\Persistence\Doctrine\Repository\DoctrineAdminRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
-use Manager\Domain\Task\ManagerTask;
-use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineManagerRepository;
 use Resources\Exception\RegularException;
 use Shared\Domain\ValueObject\AccountInfo;
 use Shared\Domain\ValueObject\ChangeUserPasswordData;
 
-#[Entity(repositoryClass: DoctrineManagerRepository::class)]
-class Manager
+#[Entity(repositoryClass: DoctrineAdminRepository::class)]
+class Admin
 {
 
     #[Id, Column(type: "guid")]
     protected string $id;
 
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $suspended;
+    protected bool $disabled;
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
+
+    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
+    protected bool $aSuperUser;
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
@@ -38,7 +40,7 @@ class Manager
     {
         
     }
-    
+
     public function changePassword(ChangeUserPasswordData $changePasswordData): void
     {
         $this->accountInfo = $this->accountInfo->changePassword($changePasswordData);
@@ -51,18 +53,9 @@ class Manager
 
     public function login(string $password): string
     {
-        if ($this->suspended || !$this->accountInfo->passwordMatch($password)) {
+        if ($this->disabled || !$this->accountInfo->passwordMatch($password)) {
             throw RegularException::unauthorized('inactive account or invalid email and password');
         }
         return $this->id;
-    }
-
-    //
-    public function executeTask(ManagerTask $task, $payload): void
-    {
-        if ($this->suspended) {
-            throw RegularException::forbidden('only active manager can make this request');
-        }
-        $task->executeByManager($this, $payload);
     }
 }

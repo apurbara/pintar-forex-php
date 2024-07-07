@@ -18,6 +18,9 @@ Route::post('/company', function (Request $request) {
 //    return require __DIR__ .  '../../app/Http/GraphQL/CompanyBC/graphql.php';
     return require __DIR__ .  '../../Company/Application/GraphQL/graphql.php';
 });
+Route::post('/admin', function (Request $request) {
+    return require __DIR__ .  '../../Admin/Application/GraphQL/graphql.php';
+});
 Route::post('/sales', function (Request $request) {
     return require __DIR__ .  '../../Sales/Application/GraphQL/graphql.php';
 });

@@ -9,23 +9,36 @@ use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesTask;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\ValueObject\AccountInfo;
+use Shared\Domain\ValueObject\ChangeUserPasswordData;
 use Tests\TestBase;
 
 class SalesTest extends TestBase
 {
-    protected $sales;
+    protected $sales, $accountInfo;
     protected $customerAssignment;
+    protected $newAccountInfo;
+    protected $changePasswordData;
+    protected $name = 'new name';
+    protected $password = 'password123';
     //
     protected $task, $payload = 'string represent task payload';
     //
     protected $customerJourney;
     //
     protected $schedulerService;
+    //
+    //
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->sales = new TestableSales();
+        $this->accountInfo = $this->buildMockOfClass(AccountInfo::class);
+        $this->newAccountInfo = $this->buildMockOfClass(AccountInfo::class);
+        $this->sales->accountInfo = $this->accountInfo;
+        
+        $this->changePasswordData = $this->buildMockOfReadonlyClass(ChangeUserPasswordData::class);
         
         $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
         
@@ -37,6 +50,62 @@ class SalesTest extends TestBase
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
         //
         $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
+    }
+    
+    //
+    protected function changePassword()
+    {
+        $this->sales->changePassword($this->changePasswordData);
+    }
+    public function test_changePassword_changeAccountInfoPassword()
+    {
+        $this->accountInfo->expects($this->once())
+                ->method('changePassword')
+                ->with($this->changePasswordData)
+                ->willReturn($this->newAccountInfo);
+        $this->changePassword();
+        $this->assertSame($this->newAccountInfo, $this->sales->accountInfo);
+    }
+    
+    //
+    protected function changeName()
+    {
+        $this->sales->changeName($this->name);
+    }
+    public function test_changeName_changeAccountInfoPassword()
+    {
+        $this->accountInfo->expects($this->once())
+                ->method('changeName')
+                ->with($this->name)
+                ->willReturn($this->newAccountInfo);
+        $this->changeName();
+        $this->assertSame($this->newAccountInfo, $this->sales->accountInfo);
+    }
+    
+    //
+    protected function login()
+    {
+        $this->accountInfo->expects($this->any())
+                ->method('passwordMatch')
+                ->willReturn(true);
+        return $this->sales->login($this->password);
+    }
+    public function test_login_returnSalesId()
+    {
+        $this->assertSame($this->sales->id, $this->login());
+    }
+    public function test_login_disabledSales_forbidden()
+    {
+        $this->sales->contractTerminated = true;
+        $this->assertRegularExceptionThrowed(fn() => $this->login(), 'Unauthorized', 'inactive account or invalid email and password');
+    }
+    public function test_login_unmatchPassword_forbidden()
+    {
+        $this->accountInfo->expects($this->once())
+                ->method('passwordMatch')
+                ->with($this->password)
+                ->willReturn(false);
+        $this->assertRegularExceptionThrowed(fn() => $this->login(), 'Unauthorized', 'inactive account or invalid email and password');
     }
     
     //
@@ -104,6 +173,7 @@ class TestableSales extends Sales
     public string $id = 'id';
     public bool $contractTerminated = false;
     public Collection $customerAssignments;
+    public AccountInfo $accountInfo;
     
     function __construct()
     {
