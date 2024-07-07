@@ -18,7 +18,12 @@ use Tests\TestBase;
 
 class CustomerAssignmentTest extends TestBase
 {
+    protected $sales;
+    protected $customer, $customerId = 'customerId';
+    protected $customerJourney;
     protected $customerAssignment;
+    //
+    protected $id = 'newId';
     //
     protected $closingRequest;
     protected $recycleRequest;
@@ -27,7 +32,10 @@ class CustomerAssignmentTest extends TestBase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->customerAssignment = new TestableCustomerAssignment();
+        $this->sales = $this->buildMockOfClass(Sales::class);
+        $this->customer = $this->buildMockOfClass(Customer::class);
+        $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        $this->customerAssignment = new TestableCustomerAssignment($this->sales, $this->customer, $this->customerJourney, 'id');
         
         $this->closingRequest = $this->buildMockOfClass(ClosingRequest::class);
         $this->recycleRequest = $this->buildMockOfClass(RecycleRequest::class);
@@ -40,6 +48,87 @@ class CustomerAssignmentTest extends TestBase
         $this->customerAssignment->closingRequests->add($this->closingRequest);
         $this->customerAssignment->recycleRequests->add($this->recycleRequest);
         $this->customerAssignment->salesActivitySchedules->add($this->salesActivitySchedule);
+    }
+    
+    //
+    protected function construct()
+    {
+        return new TestableCustomerAssignment($this->sales, $this->customer, $this->customerJourney, $this->id);
+    }
+    public function test_construct_setProperties()
+    {
+        $assignment = $this->construct();
+        $this->assertSame($this->sales, $assignment->sales);
+        $this->assertSame($this->customer, $assignment->customer);
+        $this->assertSame($this->customerJourney, $assignment->customerJourney);
+        $this->assertSame($this->id, $assignment->id);
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($assignment->createdTime);
+        $this->assertSame(CustomerAssignmentStatus::ACTIVE, $assignment->status);
+    }
+    public function test_construct_assertCustomerJourneyActive()
+    {
+        $this->customerJourney->expects($this->once())
+                ->method('assertActive');
+        $this->construct();
+    }
+    public function test_construct_assertCustomerHasNoActiveAssignment()
+    {
+        $this->customer->expects($this->once())
+                ->method('assertHasNoActiveAssignment');
+        $this->construct();
+    }
+    public function test_construct_assertSalesActive()
+    {
+        $this->sales->expects($this->once())
+                ->method('assertActive');
+        $this->construct();
+    }
+    public function test_construct_noInitialJourney()
+    {
+        $this->customerJourney = null;
+        $this->construct();
+        $this->markAsSuccess();
+    }
+    
+    //
+    protected function cancel()
+    {
+        $this->closingRequest->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(ManagementApprovalStatus::REJECTED);
+        $this->recycleRequest->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(ManagementApprovalStatus::REJECTED);
+        $this->salesActivitySchedule->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(SalesActivityScheduleStatus::COMPLETED);
+        $this->customerAssignment->cancel();
+    }
+    public function test_cancel_setStatusCancelled()
+    {
+        $this->cancel();
+        $this->assertSame(CustomerAssignmentStatus::CANCELLED, $this->customerAssignment->status);
+    }
+    public function test_cancel_hasPedingClosingRequest_forbidden()
+    {
+        $this->closingRequest->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(ManagementApprovalStatus::WAITING_FOR_APPROVAL);
+        $this->assertRegularExceptionThrowed(fn() => $this->cancel(), 'Forbidden', 'customer assignment has pending request or schedule');
+    }
+    public function test_cancel_hasPedingRecycleRequest_forbidden()
+    {
+        $this->recycleRequest->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(ManagementApprovalStatus::WAITING_FOR_APPROVAL);
+        $this->assertRegularExceptionThrowed(fn() => $this->cancel(), 'Forbidden', 'customer assignment has pending request or schedule');
+    }
+    public function test_cancel_hasScheduledActivity_forbidden()
+    {
+        $this->salesActivitySchedule->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(SalesActivityScheduleStatus::SCHEDULED);
+        $this->assertRegularExceptionThrowed(fn() => $this->cancel(), 'Forbidden', 'customer assignment has pending request or schedule');
     }
     
     //
@@ -119,9 +208,4 @@ class TestableCustomerAssignment extends CustomerAssignment
     public Collection $closingRequests;
     public Collection $recycleRequests;
     public Collection $salesActivitySchedules;
-    
-    function __construct()
-    {
-        parent::__construct();
-    }
 }

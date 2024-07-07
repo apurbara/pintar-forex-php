@@ -20,6 +20,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
+use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
@@ -76,9 +77,33 @@ class CustomerAssignment implements ContainEventsInterface
         return $this->status;
     }
 
-    protected function __construct()
+    public function __construct(Sales $sales, Customer $customer, ?CustomerJourney $customerJourney, string $id)
     {
-        
+        $this->sales = $sales;
+        $this->customer = $customer;
+        $this->customerJourney = $customerJourney;
+        $this->id = $id;
+        $this->createdTime = new \DateTimeImmutable();
+        $this->status = CustomerAssignmentStatus::ACTIVE;
+        //
+        $this->sales->assertActive();
+        $this->customer->assertHasNoActiveAssignment();
+        $this->customerJourney?->assertActive();
+    }
+
+    public function cancel(): void
+    {
+        $pendingRequestCriteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', ManagementApprovalStatus::WAITING_FOR_APPROVAL));
+        $scheduledActivityCriteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED));
+        $hasPendingRequestOrSchedule = !$this->closingRequests->matching($pendingRequestCriteria)->isEmpty() 
+                || !$this->recycleRequests->matching($pendingRequestCriteria)->isEmpty() 
+                || !$this->salesActivitySchedules->matching($scheduledActivityCriteria)->isEmpty();
+        if ($hasPendingRequestOrSchedule) {
+            throw RegularException::forbidden('customer assignment has pending request or schedule');
+        }
+        $this->status = CustomerAssignmentStatus::CANCELLED;
     }
 
     public function cancelBySystem(): void

@@ -1,6 +1,6 @@
 <?php
 
-namespace Company\Domain\Model\AreaStructure\Area;
+namespace Company\Domain\Model;
 
 use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerData;
@@ -116,6 +116,26 @@ class CustomerTest extends TestBase
                 ->willReturn(CustomerAssignmentStatus::RECYCLED);
         $this->assertHasNoActiveAssignment();
         $this->markAsSuccess();
+    }
+    
+    //
+    protected function hasActiveAssignment()
+    {
+        $this->customerAssignment->expects($this->any())
+                ->method('getStatus')
+                ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        return $this->customer->hasActiveAssignment();
+    }
+    public function test_hasActiveAssignment_hasActiveAssignment_returnTrue()
+    {
+        $this->assertTrue($this->hasActiveAssignment());
+    }
+    public function test_hasActiveAssignment_hasNoAssignment_returnFalse()
+    {
+        $this->customerAssignment->expects($this->once())
+                ->method('getStatus')
+                ->willReturn(CustomerAssignmentStatus::RECYCLED);
+        $this->assertFalse($this->hasActiveAssignment());
     }
 }
 

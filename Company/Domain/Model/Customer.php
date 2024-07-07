@@ -110,10 +110,15 @@ class Customer
     //
     public function assertHasNoActiveAssignment(): void
     {
-        $criteria = Criteria::create()
-                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
-        if (!$this->customerAssignments->matching($criteria)->isEmpty()) {
+        if ($this->hasActiveAssignment()) {
             throw RegularException::forbidden('customer already being maintained');
         }
+    }
+    
+    public function hasActiveAssignment(): bool
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
+        return !$this->customerAssignments->matching($criteria)->isEmpty();
     }
 }

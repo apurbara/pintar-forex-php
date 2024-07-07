@@ -3,6 +3,8 @@
 namespace Company\Domain\Model\Manager;
 
 use Company\Domain\Model\CompanyUser;
+use Company\Domain\Model\Customer;
+use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Manager;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment;
 use Company\Domain\Model\Province\City;
@@ -18,17 +20,21 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use Resources\Event\ContainEventsInterface;
+use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\ExcludeFromInput;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\SalesType;
+use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 use Shared\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
-class Sales implements CompanyUser
+class Sales implements CompanyUser, ContainEventsInterface
 {
+    use ContainEventsTrait;
 
     #[FetchableObject(targetEntity: Manager::class, joinColumnName: "Manager_id")]
     #[ManyToOne(targetEntity: Manager::class)]
@@ -95,6 +101,14 @@ class Sales implements CompanyUser
             $customerAssignment->cancelBySystem();
         }
     }
+    
+    //
+    public function assertActive(): void
+    {
+        if ($this->contractTerminated) {
+            throw RegularException::forbidden('inactive sales');
+        }
+    }
 
     //
     private function executeSalesTaskInCompany(SalesTaskInCompany $task, $payload): void
@@ -108,5 +122,35 @@ class Sales implements CompanyUser
             throw RegularException::forbidden('only active sales can make this request');
         }
         $this->executeSalesTaskInCompany($task, $payload);
+    }
+    
+    //
+    protected ?int $activeCustomerAssignmentCount = null;
+
+    public function calculateActiveCustomerAssignmentsCount(): ?int
+    {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
+        $this->activeCustomerAssignmentCount ??= $this->customerAssignments->matching($criteria)->count();
+        return $this->activeCustomerAssignmentCount;
+    }
+
+    protected ?MultipleCustomerAssignmentReceivedBySales $multipleCustomerAssignmentReceivedBySalesEvent;
+
+    public function receiveCustomerAssignment(string $id, Customer $customer, ?CustomerJourney $customerJourney): ?CustomerAssignment
+    {
+
+        if (empty($this->multipleCustomerAssignmentReceivedBySalesEvent)) {
+            $this->multipleCustomerAssignmentReceivedBySalesEvent = new MultipleCustomerAssignmentReceivedBySales($this->id);
+            $this->recordEvent($this->multipleCustomerAssignmentReceivedBySalesEvent);
+        }
+
+        if ($customer->hasActiveAssignment()) {
+            return null;
+        }
+        $customerAssignment = new CustomerAssignment($this, $customer, $customerJourney, $id);
+        $this->multipleCustomerAssignmentReceivedBySalesEvent->addCustomerAssignmentId($id);
+        $this->activeCustomerAssignmentCount++;
+        return $customerAssignment;
     }
 }

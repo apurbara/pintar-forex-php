@@ -7,6 +7,7 @@ use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Manager\Sales;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment;
 use Company\Domain\Model\SalesActivity;
+use Company\Domain\Service\CustomerAssignmentDistributionServiceBuilder;
 use Tests\Company\Application\Controllers\CompanyControllerTestCase;
 use Tests\resources\Application\EntityRecord;
 
@@ -26,6 +27,8 @@ class CustomerAssignmentControllerTest extends CompanyControllerTestCase
     
     protected EntityRecord $customerJourneyInitial;
     protected EntityRecord $salesActivityInitial;
+    
+    protected $assignedMultipleCustomerToMultipleSalesInput = [];
     
     protected function setUp(): void
     {
@@ -65,16 +68,104 @@ class CustomerAssignmentControllerTest extends CompanyControllerTestCase
         $this->salesActivityInitial = new EntityRecord(SalesActivity::class, 'initial');
         $this->salesActivityInitial->columns['initial'] = true;
         $this->salesActivityInitial->columns['duration'] = 20;
+        
+        $this->assignedMultipleCustomerToMultipleSalesInput = [
+            'distributionStrategy' => CustomerAssignmentDistributionServiceBuilder::EVEN_DISTRIBUTION,
+            'initiateSchedules' => false,
+            'salesList' => [
+                $this->salesOne->columns['id'],
+                $this->salesTwo->columns['id'],
+            ],
+            'customerList' => [
+                $this->customerOne->columns['id'],
+                $this->customerTwo->columns['id'],
+                $this->customerThree->columns['id'],
+                $this->customerFour->columns['id'],
+            ],
+        ];
     }
     protected function tearDown(): void
     {
-//        parent::tearDown();
-//        $this->connection->table('Sales')->truncate();
-//        $this->connection->table('Customer')->truncate();
-//        $this->connection->table('CustomerAssignment')->truncate();
-//        $this->connection->table('CustomerJourney')->truncate();
-//        $this->connection->table('SalesActivity')->truncate();
-//        $this->connection->table('SalesActivitySchedule')->truncate();
+        parent::tearDown();
+        $this->connection->table('Sales')->truncate();
+        $this->connection->table('Customer')->truncate();
+        $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('CustomerJourney')->truncate();
+        $this->connection->table('SalesActivity')->truncate();
+        $this->connection->table('SalesActivitySchedule')->truncate();
+    }
+    
+    //
+    protected function assignedMultipleCustomerToMultipleSales()
+    {
+        $this->prepareAdminDependency();
+        
+        $this->customerOne->insert($this->connection);
+        $this->customerTwo->insert($this->connection);
+        $this->customerThree->insert($this->connection);
+        $this->customerFour->insert($this->connection);
+        
+        $this->salesOne->insert($this->connection);
+        $this->salesTwo->insert($this->connection);
+        
+        $this->customerJourneyInitial->insert($this->connection);
+        $this->salesActivityInitial->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( 
+    $salesList: [ID], $customerList: [ID], $distributionStrategy: String, $initiateSchedules: Boolean
+) {
+    assignMultipleCustomerToMultipleSales (
+        salesList: $salesList, customerList: $customerList, distributionStrategy: $distributionStrategy, 
+        initiateSchedules: $initiateSchedules
+    )
+}
+_QUERY;
+        $this->graphqlVariables = $this->assignedMultipleCustomerToMultipleSalesInput;
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_assignedMultipleCustomerToMultipleSales_distributeAssignment()
+    {
+$this->disableExceptionHandling();
+        $this->assignedMultipleCustomerToMultipleSales();
+        $this->seeStatusCode(200);
+        
+        $this->seeInDatabase('CustomerAssignment', [
+            'Sales_id' => $this->salesOne->columns['id'],
+            'Customer_id' => $this->customerOne->columns['id'],
+            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
+        ]);
+        
+        $this->seeInDatabase('CustomerAssignment', [
+            'Sales_id' => $this->salesOne->columns['id'],
+            'Customer_id' => $this->customerThree->columns['id'],
+            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
+        ]);
+        
+        $this->seeInDatabase('CustomerAssignment', [
+            'Sales_id' => $this->salesTwo->columns['id'],
+            'Customer_id' => $this->customerTwo->columns['id'],
+            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
+        ]);
+        
+        $this->seeInDatabase('CustomerAssignment', [
+            'Sales_id' => $this->salesTwo->columns['id'],
+            'Customer_id' => $this->customerFour->columns['id'],
+            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
+        ]);
+    }
+    public function test_assignedMultipleCustomerToMultipleSales_initiateSchedulesTrue_allocateInitialSalesActivity()
+    {
+$this->disableExceptionHandling();
+        $this->assignedMultipleCustomerToMultipleSalesInput['initiateSchedules'] = true;
+        $this->assignedMultipleCustomerToMultipleSalesInput['salesList'] = [$this->salesOne->columns['id']];
+        $this->assignedMultipleCustomerToMultipleSales();
+        $this->seeStatusCode(200);
+        
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'SalesActivity_id' => $this->salesActivityInitial->columns['id'],
+        ]);
+//check db manually to see if contain sales activity schedule in 11.00
     }
     
     //
