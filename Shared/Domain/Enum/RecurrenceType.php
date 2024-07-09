@@ -69,7 +69,7 @@ enum RecurrenceType: string
         
         $recurrenceCount = $recurrenceCount ?? 1;
         $endTime = (new DateTime())->format('Y');
-        $startTime = (new \DateTime("first day of -{$recurrenceCount} year"))->format('Ym');
+        $startTime = (new \DateTime("first day of -{$recurrenceCount} year"))->format('Y');
         $qb->andWhere($qb->expr()->lte("DATE_FORMAT($metricTimeColumn, '%Y')", $endTime))
                 ->andWhere($qb->expr()->gt("DATE_FORMAT($metricTimeColumn, '%Y')", $startTime));
     }
