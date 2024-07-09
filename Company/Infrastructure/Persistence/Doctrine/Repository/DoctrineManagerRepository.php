@@ -38,4 +38,9 @@ class DoctrineManagerRepository extends DoctrineEntityRepository implements Mana
     {
         return $this->queryPaginationList($paginationSchema);
     }
+
+    public function viewAllManager(array $searchSchema): array
+    {
+        return $this->queryAllList($searchSchema);
+    }
 }

@@ -41,7 +41,7 @@ class DoctrineSalesRepository extends DoctrineEntityRepository implements SalesR
 
     public function allSalesBelongsToManager(string $managerId, array $searchSchema)
     {
-        return DoctrineAllListCategory::fromSchema()
+        return DoctrineAllListCategory::fromSchema($searchSchema)
                         ->fetchResult($this->createManagerAggregateCoreQueryBuilder($managerId));
     }
 }

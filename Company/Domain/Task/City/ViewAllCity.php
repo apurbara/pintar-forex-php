@@ -3,9 +3,11 @@
 namespace Company\Domain\Task\City;
 
 use Company\Domain\Model\AdminTaskInCompany;
+use Company\Domain\Model\Manager\SalesTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewAllCity implements AdminTaskInCompany
+class ViewAllCity implements AdminTaskInCompany, ManagerTaskInCompany, SalesTaskInCompany
 {
 
     public function __construct(protected CityRepository $repository)

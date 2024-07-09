@@ -17,4 +17,6 @@ interface CityRepository
     public function cityList(array $paginationSchema);
 
     public function allCity(array $searchSchema);
+
+    public function aCity(string $id);
 }

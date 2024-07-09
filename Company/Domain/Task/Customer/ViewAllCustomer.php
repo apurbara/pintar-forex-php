@@ -2,10 +2,11 @@
 
 namespace Company\Domain\Task\Customer;
 
+use Company\Domain\Model\AdminTaskInCompany;
 use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewAllListPayload;
 
-class ViewAllCustomer implements ManagerTaskInCompany
+class ViewAllCustomer implements AdminTaskInCompany, ManagerTaskInCompany
 {
 
     public function __construct(protected CustomerRepository $customerRepository)

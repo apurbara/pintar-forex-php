@@ -1,14 +1,14 @@
 <?php
 
-namespace Company\Domain\Task\CustomerAssignment;
+namespace Company\Domain\Task\City;
 
 use Company\Domain\Model\AdminTaskInCompany;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
-class ViewCustomerAssignmentDetail implements AdminTaskInCompany
+class ViewCityDetail implements AdminTaskInCompany
 {
 
-    public function __construct(protected CustomerAssignmentRepository $assignedCustomerRepository)
+    public function __construct(protected CityRepository $repository)
     {
         
     }
@@ -20,7 +20,7 @@ class ViewCustomerAssignmentDetail implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $result = $this->assignedCustomerRepository->aCustomerAssignment($payload->id);
+        $result = $this->repository->aCity($payload->id);
         $payload->setResult($result);
     }
 }

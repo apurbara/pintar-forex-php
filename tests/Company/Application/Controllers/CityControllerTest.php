@@ -281,4 +281,33 @@ $this->disableExceptionHandling();
             ],
         ]);
     }
+    
+    //
+    protected function viewCityDetail()
+    {
+        $this->prepareAdminDependency();
+        $this->provinceOne->insert($this->connection);
+        $this->cityOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+query ( $id: ID ) {
+    viewCityDetail ( id: $id ) { id, name, province { name } }
+}
+_QUERY;
+        $this->graphqlVariables = ['id' => $this->cityOne->columns['id']];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_viewCityDetail_200()
+    {
+$this->disableExceptionHandling();
+        $this->viewCityDetail();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'id' => $this->cityOne->columns['id'],
+            'name' => $this->cityOne->columns['name'],
+            'province' => [
+                'name' => $this->provinceOne->columns['name'],
+            ],
+        ]);
+    }
 }

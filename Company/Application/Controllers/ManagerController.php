@@ -8,6 +8,7 @@ use Company\Domain\Model\ManagerData;
 use Company\Domain\Task\Manager\AddManagerTask;
 use Company\Domain\Task\Manager\SuspendManager;
 use Company\Domain\Task\Manager\UnsuspendManager;
+use Company\Domain\Task\Manager\ViewAllManager;
 use Company\Domain\Task\Manager\ViewManagerDetailTask;
 use Company\Domain\Task\Manager\ViewManagerListTask;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineManagerRepository;
@@ -74,6 +75,16 @@ class ManagerController extends BaseController
     {
         $task = new ViewManagerListTask($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllManager(CompanyUser $user, InputRequest $input)
+    {
+        $task = new ViewAllManager($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
 
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;

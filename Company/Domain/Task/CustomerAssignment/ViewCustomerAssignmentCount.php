@@ -2,10 +2,10 @@
 
 namespace Company\Domain\Task\CustomerAssignment;
 
-use Company\Domain\Model\ManagerTaskInCompany;
+use Company\Domain\Model\AdminTaskInCompany;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
 
-class ViewCustomerAssignmentCount implements ManagerTaskInCompany
+class ViewCustomerAssignmentCount implements AdminTaskInCompany
 {
     public function __construct(protected CustomerAssignmentRepository $repository)
     {

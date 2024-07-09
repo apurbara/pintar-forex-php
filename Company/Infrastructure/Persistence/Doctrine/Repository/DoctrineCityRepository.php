@@ -29,4 +29,9 @@ class DoctrineCityRepository extends DoctrineEntityRepository implements CityRep
     {
         return $this->queryAllList($searchSchema);
     }
+
+    public function aCity(string $id)
+    {
+        return $this->queryOneById($id);
+    }
 }
