@@ -9,6 +9,7 @@ use Company\Domain\Model\Manager\SalesData;
 use Company\Domain\Model\Province\City;
 use Company\Domain\Task\Sales\AddSales;
 use Company\Domain\Task\Sales\TerminateSalesContract;
+use Company\Domain\Task\Sales\UpdateSales;
 use Company\Domain\Task\Sales\ViewAllSales;
 use Company\Domain\Task\Sales\ViewSalesDetail;
 use Company\Domain\Task\Sales\ViewSalesList;
@@ -52,6 +53,24 @@ class SalesController extends BaseController
         $payload = $this->createSalesData($input)
                 ->setManagerId($input->get('Manager_id'))
                 ->setCityId($input->get('City_id'));
+
+        $this->executeMutationTaskInCompany($user, $task, $payload);
+        return $repository->queryOneById($payload->id);
+    }
+    
+    #[Mutation]
+    public function updateSales(CompanyUser $user, string $id, InputRequest $input)
+    {
+        $repository = $this->repository();
+        $managerRepository = $this->em->getRepository(Manager::class);
+        $cityRepository = $this->em->getRepository(City::class);
+
+        $task = new UpdateSales($repository, $managerRepository, $cityRepository);
+        $payload = (new SalesData())
+                ->setType($input->get('type'))
+                ->setManagerId($input->get('Manager_id'))
+                ->setCityId($input->get('City_id'))
+                ->setId($id);
 
         $this->executeMutationTaskInCompany($user, $task, $payload);
         return $repository->queryOneById($payload->id);

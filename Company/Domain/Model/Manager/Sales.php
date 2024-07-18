@@ -85,6 +85,16 @@ class Sales implements CompanyUser, ContainEventsInterface
         $this->manager->assertActive();
         $this->city?->assertActive();
     }
+    
+    public function update(Manager $manager, ?City $city, SalesData $data): void
+    {
+        $this->manager = $manager;
+        $this->city = $city;
+        $this->type = SalesType::from($data->type);
+        //
+        $this->manager->assertActive();
+        $this->city?->assertActive();
+    }
 
     public function terminateContract(): void
     {

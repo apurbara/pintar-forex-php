@@ -30,8 +30,10 @@ class SalesControllerTest extends CompanyControllerTestCase
         
         $this->salesOne = new EntityRecord(Sales::class, 1);
         $this->salesOne->columns['City_id'] = $this->city->columns['id'];
+        $this->salesOne->columns['Manager_id'] = $this->managerOne->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
         $this->salesTwo->columns['City_id'] = $this->city->columns['id'];
+        $this->salesTwo->columns['Manager_id'] = $this->managerOne->columns['id'];
         //
         $this->salesPayload = [
             'name' => 'new sales name',
@@ -93,6 +95,56 @@ $this->disableExceptionHandling();
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'name' => $this->salesPayload['name'],
             'email' => $this->salesPayload['email'],
+            'type' => $this->salesPayload['type'],
+            'City_id' => $this->salesPayload['City_id'],
+            'Manager_id' => $this->salesPayload['Manager_id'],
+        ]);
+    }
+    
+    //
+    protected function updateSales()
+    {
+        $this->prepareAdminDependency();
+        $this->managerOne->insert($this->connection);
+        $this->city->insert($this->connection);
+        
+        $this->salesOne->columns['City_id'] = null;
+        $this->salesOne->columns['Manager_id'] = $this->manager->columns['id'];
+        $this->salesOne->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( $id: ID, $type: String, $City_id: ID, $Manager_id: ID ){
+    updateSales ( id: $id, type: $type, City_id: $City_id, Manager_id: $Manager_id ) {
+        id, name, email, type,
+        city { id, name }
+        manager { id, name }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            ...$this->salesPayload,
+            'id' => $this->salesOne->columns['id'],
+        ];
+        $this->postGraphqlRequest($this->admin->token);
+    }
+    public function test_updateSales_200()
+    {
+$this->disableExceptionHandling();
+        $this->updateSales();
+        $this->seeStatusCode(200);
+        $this->seeJsonContains([
+            'type' => $this->salesPayload['type'],
+            'city' => [
+                'id' => $this->city->columns['id'],
+                'name' => $this->city->columns['name'],
+            ],
+            'manager' => [
+                'id' => $this->managerOne->columns['id'],
+                'name' => $this->managerOne->columns['name'],
+            ],
+        ]);
+        
+        $this->seeInDatabase('Sales', [
             'type' => $this->salesPayload['type'],
             'City_id' => $this->salesPayload['City_id'],
             'Manager_id' => $this->salesPayload['Manager_id'],

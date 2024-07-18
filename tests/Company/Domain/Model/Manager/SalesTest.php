@@ -139,6 +139,40 @@ class SalesTest extends TestBase
     }
     
     //
+    protected function update()
+    {
+        $this->sales->update($this->manager, $this->city, $this->createSaleData());
+    }
+    public function test_update_setProperties()
+    {
+        $this->sales->manager = $this->buildMockOfClass(Manager::class);
+        $this->sales->city = null;
+        $this->sales->type = SalesType::IN_HOUSE;
+        $this->update();
+        $this->assertSame($this->manager, $this->sales->manager);
+        $this->assertSame($this->city, $this->sales->city);
+        $this->assertEquals(SalesType::from($this->salesType), $this->sales->type);
+    }
+    public function test_update_assertManagerActive()
+    {
+        $this->manager->expects($this->once())
+                ->method('assertActive');
+        $this->update();
+    }
+    public function test_update_assertCityActive()
+    {
+        $this->city->expects($this->once())
+                ->method('assertActive');
+        $this->update();
+    }
+    public function test_update_emptyCity()
+    {
+        $this->city = null;
+        $this->update();
+        $this->markAsSuccess();
+    }
+    
+    //
     protected function assertActive()
     {
         $this->sales->assertActive();
