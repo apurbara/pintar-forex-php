@@ -35,6 +35,13 @@ return [
             'root' => storage_path('app'),
             'throw' => false,
         ],
+        
+        'mysql' => [
+            'driver' => 'local',
+//            'root' => env('MYSQL_SECURE_FILE_PRIV', '/var/lib/mysql-files'),
+            'root' => storage_path('app/mysql'),
+            'throw' => false,
+        ],
 
         'public' => [
             'driver' => 'local',

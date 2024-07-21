@@ -37,7 +37,7 @@ class Customer
     #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
     protected bool $disabled;
 
-    #[Column(type: "datetimetz_immutable", nullable: true)]
+    #[Column(type: "datetimetz_immutable", nullable: true, options: ["default" => "CURRENT_TIMESTAMP"])]
     protected DateTimeImmutable $createdTime;
 
     #[Column(type: "string", length: 255, nullable: false)]
@@ -46,13 +46,14 @@ class Customer
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $email;
 
-    #[Column(type: "string", length: 255, nullable: false)]
+    #[Column(type: "string", length: 255, nullable: false, unique:true)]
     protected string $phone;
 
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $source;
-    
-    #[FetchableObjectList(targetEntity: CustomerAssignment::class, joinColumnName: "Customer_id", paginationRequired: true)]
+
+    #[FetchableObjectList(targetEntity: CustomerAssignment::class, joinColumnName: "Customer_id",
+                paginationRequired: true)]
     #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $customerAssignments;
 
@@ -114,7 +115,7 @@ class Customer
             throw RegularException::forbidden('customer already being maintained');
         }
     }
-    
+
     public function hasActiveAssignment(): bool
     {
         $criteria = Criteria::create()

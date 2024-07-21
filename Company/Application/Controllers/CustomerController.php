@@ -5,9 +5,6 @@ namespace Company\Application\Controllers;
 use Company\Application\GraphQL\Object\CustomerObjectInCompanyBC;
 use Company\Domain\Model\CompanyUser;
 use Company\Domain\Model\Customer;
-use Company\Domain\Model\CustomerData;
-use Company\Domain\Model\Province\City;
-use Company\Domain\Task\Customer\AddCustomer;
 use Company\Domain\Task\Customer\ViewAllCustomer;
 use Company\Domain\Task\Customer\ViewCustomerDetail;
 use Company\Domain\Task\Customer\ViewCustomerList;
@@ -17,7 +14,6 @@ use League\Csv\Reader;
 use League\Csv\Writer;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
-use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
 use function response;
@@ -40,30 +36,15 @@ class CustomerController extends BaseController
         $reader = Reader::createFromFileObject($file->openFile());
         $reader->setDelimiter(';');
         $reader->setHeaderOffset(0);
-
-        $cityRepository = $this->em->getRepository(City::class);
-        $task = new AddCustomer($this->repository(), $cityRepository);
-
-        $failedImportList = [];
+        
+        
+        $insertIntoValues = "";
         foreach ($reader->getRecords() as $record) {
-            $payload = (new CustomerData())
-                    ->setName($record['name'] ?? null)
-                    ->setPhone($record['phone'] ?? null)
-                    ->setEmail($record['email'] ?? null)
-                    ->setSource($record['source'] ?? null);
-            try {
-                $this->executeMutationTaskInCompany($user, $task, $payload);
-            } catch (RegularException $ex) {
-                $failedImportList[] = [
-                    'name' => $payload->name ?? null,
-                    'phone' => $payload->phone ?? null,
-                    'email' => $payload->email ?? null,
-                    'source' => $payload->source ?? null,
-                    'errorDetail' => $ex->getErrorDetail(),
-                ];
-            }
+            $value = "('{$record['name']}', '{$record['phone']}', '{$record['email']}', '{$record['source']}')";
+            $insertIntoValues .= empty($insertIntoValues) ? "{$value}" : ", {$value}";
         }
-        return response()->json($failedImportList);
+        
+        $this->repository()->importFromCsvFile($insertIntoValues);
     }
 
     public function exportCustomerToCsv(CompanyUser $user, Request $request)

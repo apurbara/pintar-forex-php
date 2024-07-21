@@ -120,4 +120,14 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
     {
         return $this->findOneByIdOrDie($id);
     }
+    
+    public function importFromCsvFile(string $insertIntoValues): void
+    {
+        $sql = <<<_SQL
+INSERT IGNORE INTO Customer(name, phone, email, `source`)
+VALUES $insertIntoValues
+_SQL;
+        $connection = $this->getEntityManager()->getConnection();
+        $connection->executeQuery($sql);
+    }
 }

@@ -144,7 +144,7 @@ $this->disableExceptionHandling();
             ],
         ]);
         
-        $this->seeInDatabase('Sales', [
+            $this->seeInDatabase('Sales', [
             'type' => $this->salesPayload['type'],
             'City_id' => $this->salesPayload['City_id'],
             'Manager_id' => $this->salesPayload['Manager_id'],
