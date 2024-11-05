@@ -10,6 +10,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerStatus;
 use Tests\TestBase;
 
 class CustomerTest extends TestBase
@@ -58,6 +59,7 @@ class CustomerTest extends TestBase
         $this->assertSame($this->id, $customer->id);
         $this->assertFalse($customer->disabled);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($customer->createdTime);
+        $this->assertSame(CustomerStatus::NEW, $customer->status);
         $this->assertSame($this->name, $customer->name);
         $this->assertSame($this->phone, $customer->phone);
         $this->assertSame($this->email, $customer->email);
@@ -113,7 +115,7 @@ class CustomerTest extends TestBase
     {
         $this->customerAssignment->expects($this->once())
                 ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::RECYCLED);
+                ->willReturn(CustomerAssignmentStatus::CANCELLED);
         $this->assertHasNoActiveAssignment();
         $this->markAsSuccess();
     }
@@ -134,7 +136,7 @@ class CustomerTest extends TestBase
     {
         $this->customerAssignment->expects($this->once())
                 ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::RECYCLED);
+                ->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
         $this->assertFalse($this->hasActiveAssignment());
     }
 }
@@ -146,6 +148,7 @@ class TestableCustomer extends Customer
     public string $id;
     public bool $disabled;
     public DateTimeImmutable $createdTime;
+    public CustomerStatus $status;
     public string $name;
     public ?string $email;
     public string $phone;

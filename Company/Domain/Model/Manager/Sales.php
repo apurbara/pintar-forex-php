@@ -27,6 +27,7 @@ use Resources\Infrastructure\GraphQL\Attributes\ExcludeFromInput;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesRole;
 use Shared\Domain\Enum\SalesType;
 use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 use Shared\Domain\ValueObject\AccountInfo;
@@ -63,6 +64,9 @@ class Sales implements CompanyUser, ContainEventsInterface
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
 
+    #[Column(type: "string", enumType: SalesRole::class)]
+    protected SalesRole $role;
+
     #[Column(type: "string", enumType: SalesType::class)]
     protected SalesType $type;
 
@@ -79,6 +83,7 @@ class Sales implements CompanyUser, ContainEventsInterface
         $this->createdTime = new DateTimeImmutable();
         $this->contractTerminatedTime = null;
         $this->type = SalesType::from($data->type);
+        $this->role = SalesRole::from($data->role);
         $this->accountInfo = new AccountInfo($data->accountInfoData);
 
         //
@@ -91,6 +96,7 @@ class Sales implements CompanyUser, ContainEventsInterface
         $this->manager = $manager;
         $this->city = $city;
         $this->type = SalesType::from($data->type);
+        $this->role = SalesRole::from($data->role);
         //
         $this->manager->assertActive();
         $this->city?->assertActive();

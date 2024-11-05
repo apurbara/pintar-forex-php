@@ -20,10 +20,8 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/nbproject/private/
+/nbproject
 *.tar
 *.zip
 *.gz
-nbproject/project.xml
-nbproject/project.xml
-nbproject/project.xml
+/doctrine_proxy

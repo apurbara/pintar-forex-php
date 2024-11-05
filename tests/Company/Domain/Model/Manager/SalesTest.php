@@ -12,8 +12,8 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\MockObject\MockObject;
-use Resources\Exception\RegularException;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\SalesRole;
 use Shared\Domain\Enum\SalesType;
 use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
 use Shared\Domain\ValueObject\AccountInfo;
@@ -28,7 +28,7 @@ class SalesTest extends TestBase
     protected $sales;
     protected MockObject $customerAssignmentOne, $customerAssignmentTwo;
     //
-    protected $id = 'newId', $salesType;
+    protected $id = 'newId', $salesType, $salesRole;
     protected $customerAssignmentId = 'customerAssignmentId', $customer, $customerJourney;
     //
     protected $payload = 'task payload', $salesTaskInCompany;
@@ -41,6 +41,7 @@ class SalesTest extends TestBase
         //
         $data = (new SalesData())
                 ->setType(SalesType::IN_HOUSE->value)
+                ->setRole(SalesRole::FACT_FINDER->value)
                 ->setAccountInfoData($this->createAccountInfoData());
         $this->sales = new TestableSales($this->manager, $this->city, 'id', $data);
         
@@ -52,6 +53,7 @@ class SalesTest extends TestBase
         $this->sales->customerAssignments->add($this->customerAssignmentTwo);
         //
         $this->salesType = SalesType::FREELANCE->value;
+        $this->salesRole = SalesRole::STRIKER->value;
         //
         $this->customer = $this->buildMockOfClass(Customer::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
@@ -64,6 +66,7 @@ class SalesTest extends TestBase
     {
         return (new SalesData())
                 ->setType($this->salesType)
+                ->setRole($this->salesRole)
                 ->setAccountInfoData($this->createAccountInfoData());
     }
     
@@ -82,6 +85,7 @@ class SalesTest extends TestBase
         $this->assertNull($sales->contractTerminatedTime);
         $this->assertFalse($sales->contractTerminated);
         $this->assertEquals(SalesType::from($this->salesType), $sales->type);
+        $this->assertEquals(SalesRole::from($this->salesRole), $sales->role);
         $this->assertInstanceOf(AccountInfo::class, $sales->accountInfo);
     }
     public function test_construct_assertManagerActive()
@@ -132,7 +136,7 @@ class SalesTest extends TestBase
     {
         $this->customerAssignmentOne->expects($this->once())
                 ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::RECYCLED);
+                ->willReturn(CustomerAssignmentStatus::COMPLETED);
         $this->customerAssignmentOne->expects($this->never())
                 ->method('cancelBySystem');
         $this->terminateContract();
@@ -152,6 +156,7 @@ class SalesTest extends TestBase
         $this->assertSame($this->manager, $this->sales->manager);
         $this->assertSame($this->city, $this->sales->city);
         $this->assertEquals(SalesType::from($this->salesType), $this->sales->type);
+        $this->assertEquals(SalesRole::from($this->salesRole), $this->sales->role);
     }
     public function test_update_assertManagerActive()
     {
@@ -319,6 +324,7 @@ class TestableSales extends Sales
     public DateTimeImmutable $createdTime;
     public ?DateTimeImmutable $contractTerminatedTime;
     public SalesType $type;
+    public SalesRole $role;
     public AccountInfo $accountInfo;
     public Collection $customerAssignments;
     //

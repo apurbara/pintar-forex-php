@@ -21,6 +21,7 @@ use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\ValidationRule;
 use Resources\ValidationService;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerStatus;
 
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
@@ -39,6 +40,9 @@ class Customer
 
     #[Column(type: "datetimetz_immutable", nullable: true, options: ["default" => "CURRENT_TIMESTAMP"])]
     protected DateTimeImmutable $createdTime;
+    
+    #[Column(type: "string", enumType: CustomerStatus::class, options: ["default" => CustomerStatus::NEW->value])]
+    protected CustomerStatus $status;
 
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $name;
@@ -100,6 +104,7 @@ class Customer
         $this->id = $id;
         $this->disabled = false;
         $this->createdTime = new DateTimeImmutable();
+        $this->status = CustomerStatus::NEW;
         $this->setName($data->name);
         $this->setPhone($data->phone);
         $this->setEmail($data->email);
