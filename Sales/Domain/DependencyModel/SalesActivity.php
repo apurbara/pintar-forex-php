@@ -48,9 +48,4 @@ class SalesActivity
             throw RegularException::forbidden('inactive sales activity');
         }
     }
-
-    public function findAvailableTimeSlotForInitialActivity(SalesActivitySchedulerService $schedulerService): DateTimeImmutable
-    {
-        return $schedulerService->nextAvailableTimeSlotForScheduleWithDuration($this->duration);
-    }
 }

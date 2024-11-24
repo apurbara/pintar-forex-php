@@ -2,31 +2,31 @@
 
 namespace Sales\Application\Controllers;
 
+use GraphQL\Type\Definition\IntType;
 use Resources\Application\InputRequest;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
-use Resources\Domain\TaskPayload\ViewPayload;
 use Resources\Domain\TaskPayload\ViewSummaryPayload;
 use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
+use Sales\Application\GraphQL\Object\SalesActivityScheduleGraphqlObjectInSalesBC;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
-use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
-use Sales\Domain\Service\SalesActivitySchedulerService;
+use Sales\Domain\Model\Sales\FactFindingAssignment;
+use Sales\Domain\Model\Sales\GreetingAssignment;
+use Sales\Domain\Model\Sales\StrikingAssignment;
+use Sales\Domain\Task\Dependency\ContainCustomerAssignmentRepository;
 use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
-use Sales\Domain\Task\SalesActivitySchedule\ViewAllNonInitialSchedules;
-use Sales\Domain\Task\SalesActivitySchedule\ViewAllNonInitialSchedulesInMonth;
-use Sales\Domain\Task\SalesActivitySchedule\ViewAllNonInitialSchedulesInMonthPayload;
-use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetailTask;
-use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleListTask;
-use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleSummary;
+use Sales\Domain\Task\SalesActivitySchedule\ViewAllOngoingSchedule;
+use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetail;
+use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleList;
 use Sales\Domain\Task\SalesActivitySchedule\ViewTotalSalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
-#[GraphqlMapableController(entity: SalesActivitySchedule::class)]
+#[GraphqlMapableController(entity: SalesActivitySchedule::class, responseType: SalesActivityScheduleGraphqlObjectInSalesBC::class)]
 class SalesActivityScheduleController extends BaseController
 {
 
@@ -36,54 +36,67 @@ class SalesActivityScheduleController extends BaseController
     }
 
     //
-    #[Mutation]
-    public function submitSalesActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
+    private function submitSalesActivitySchedule(
+            Sales $sales, string $CustomerAssignment_id, InputRequest $input,
+            ContainCustomerAssignmentRepository $customerAssignmentRepository)
     {
         $repository = $this->repository();
-        $customerAssignmentRepository = $this->em->getRepository(CustomerAssignment::class);
         $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
-        $schedulerService = new SalesActivitySchedulerService();
-//        $task = new SubmitScheduleTask($repository, $customerAssignmentRepository, $salesActivityRepository);
-        $task = new SubmitScheduleTask($repository, $customerAssignmentRepository, $salesActivityRepository, $schedulerService);
-
+        $task = new SubmitScheduleTask($repository, $customerAssignmentRepository, $salesActivityRepository);
+        
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($input->get('startTime'));
         $payload = (new SalesActivityScheduleData($hourlyTimeIntervalData))
                 ->setCustomerAssignmentId($CustomerAssignment_id)
                 ->setSalesActivityId($input->get('SalesActivity_id'));
         
-        $this->executeSalesMutationTask($sales, $task, $payload);
+        $sales->executeTask($task, $payload);
+        $this->em->flush();
+        
         return $repository->queryOneById($payload->id);
     }
-    
+
+    #[Mutation]
+    public function submitGreetingActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
+    {
+        $greetingAssignmentRepository = $this->em->getRepository(GreetingAssignment::class);
+        return $this->submitSalesActivitySchedule($sales, $CustomerAssignment_id, $input, $greetingAssignmentRepository);
+    }
+
+    #[Mutation]
+    public function submitFactFindingActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
+    {
+        $factFindingAssignmentRepository = $this->em->getRepository(FactFindingAssignment::class);
+        return $this->submitSalesActivitySchedule($sales, $CustomerAssignment_id, $input, $factFindingAssignmentRepository);
+    }
+
+    #[Mutation]
+    public function submitStrikingActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
+    {
+        $strikingAssignmentRepository = $this->em->getRepository(StrikingAssignment::class);
+        return $this->submitSalesActivitySchedule($sales, $CustomerAssignment_id, $input, $strikingAssignmentRepository);
+    }
+
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
     public function salesActivityScheduleList(Sales $sales, InputRequest $input)
     {
-        $task = new ViewSalesActivityScheduleListTask($this->repository());
+        $task = new ViewSalesActivityScheduleList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
-        
+
         $sales->executeTask($task, $payload);
         return $payload->result;
     }
-    
-    public function salesActivityScheduleSummaryList(Sales $sales, InputRequest $input)
-    {
-        $task = new ViewSalesActivityScheduleSummary($this->repository());
-        $payload = $this->buildViewAllListPayload($input);
-        
-        $sales->executeTask($task, $payload);
-        return $payload->result;
-    }
-    
+
     #[Query]
     public function salesActivityScheduleDetail(Sales $sales, string $id)
     {
-        $task = new ViewSalesActivityScheduleDetailTask($this->repository());
+        $task = new ViewSalesActivityScheduleDetail($this->repository());
         $payload = new ViewDetailPayload($id);
-        
+
         $sales->executeTask($task, $payload);
         return $payload->result;
     }
-    
+
+    #[Query(responseWrapper:Query::SUMMARY_RESPONSE_WRAPPER, responseType:IntType::class)]
     public function totalSalesActivitySchedule(Sales $sales, InputRequest $input)
     {
         $task = new ViewTotalSalesActivitySchedule($this->repository());
@@ -91,28 +104,17 @@ class SalesActivityScheduleController extends BaseController
             'filters' => $input->get('filters'),
         ];
         $payload = new ViewSummaryPayload($searchSchema);
-        
+
         $sales->executeTask($task, $payload);
         return $payload->result;
     }
-    
-    public function viewAllNonInitialSchedulesInMonth(Sales $sales, InputRequest $input)
+
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllOngoingSchedule(Sales $sales, InputRequest $input)
     {
-        $task = new ViewAllNonInitialSchedulesInMonth($this->repository());
-        $payload = (new ViewAllNonInitialSchedulesInMonthPayload())
-                ->setYear($input->get('year'))
-                ->setMonth($input->get('month'));
-        
-        $sales->executeTask($task, $payload);
-        return $payload->result;
-    }
-    
-    #[Query(responseWrapper:Query::LIST_RESPONSE_WRAPPER)]
-    public function viewAllNonInitialSchedules(Sales $sales)
-    {
-        $task = new ViewAllNonInitialSchedules($this->repository());
-        $payload = new ViewPayload();
-        
+        $task = new ViewAllOngoingSchedule($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
+
         $sales->executeTask($task, $payload);
         return $payload->result;
     }

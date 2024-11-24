@@ -4,11 +4,14 @@ namespace Company\Domain\Model;
 
 use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerData;
-use Company\Domain\Model\Manager\Sales\CustomerAssignment;
+use Company\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Company\Domain\Model\Manager\Sales\GreetingAssignment;
+use Company\Domain\Model\Manager\Sales\StrikingAssignment;
 use Company\Domain\Model\Province\City;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use PHPUnit\Framework\MockObject\MockObject;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
 use Tests\TestBase;
@@ -17,7 +20,7 @@ class CustomerTest extends TestBase
 {
     protected $city;
     protected $customer;
-    protected $customerAssignment;
+    protected MockObject $greetingAssignment, $factFindingAssignment, $strikingAssignment;
     //
     protected $id = 'newId', $name = 'new name', $phone = '0823123131', $email = 'newAddress@email.org', $source = 'new source';
 
@@ -32,9 +35,17 @@ class CustomerTest extends TestBase
                 ->setPhone('082131231');
         $this->customer = new TestableCustomer($this->city, 'id', $data);
         
-        $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
-        $this->customer->customerAssignments = new ArrayCollection();
-        $this->customer->customerAssignments->add($this->customerAssignment);
+        $this->greetingAssignment = $this->buildMockOfClass(GreetingAssignment::class);
+        $this->customer->greetingAssignments = new ArrayCollection();
+        $this->customer->greetingAssignments->add($this->greetingAssignment);
+        
+        $this->factFindingAssignment = $this->buildMockOfClass(FactFindingAssignment::class);
+        $this->customer->factFindingAssignments = new ArrayCollection();
+        $this->customer->factFindingAssignments->add($this->factFindingAssignment);
+        
+        $this->strikingAssignment = $this->buildMockOfClass(StrikingAssignment::class);
+        $this->customer->strikingAssignments = new ArrayCollection();
+        $this->customer->strikingAssignments->add($this->strikingAssignment);
     }
 
     //
@@ -102,42 +113,45 @@ class CustomerTest extends TestBase
     //
     protected function assertHasNoActiveAssignment()
     {
-        $this->customerAssignment->expects($this->any())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->greetingAssignment->expects($this->any()) ->method('getStatus') ->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
+        $this->factFindingAssignment->expects($this->any()) ->method('getStatus') ->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
+        $this->strikingAssignment->expects($this->any()) ->method('getStatus') ->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
         $this->customer->assertHasNoActiveAssignment();
-    }
-    public function test_assertHasNoActiveAssignment_hasActiveAssignment_forbidden()
-    {
-        $this->assertRegularExceptionThrowed(fn() => $this->assertHasNoActiveAssignment(), 'Forbidden', 'customer already being maintained');
     }
     public function test_assertHasNoActiveAssignment_noActiveAssignment_void()
     {
-        $this->customerAssignment->expects($this->once())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::CANCELLED);
         $this->assertHasNoActiveAssignment();
         $this->markAsSuccess();
     }
+    public function test_assertHasNoActiveAssignment_hasActiveGreetingAssignment_forbidden()
+    {
+        $this->greetingAssignment->expects($this->any()) ->method('getStatus') ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->assertRegularExceptionThrowed(fn() => $this->assertHasNoActiveAssignment(), 'Forbidden', 'customer already being maintained');
+    }
+    public function test_assertHasNoActiveAssignment_hasActiveFactFindingAssignment_forbidden()
+    {
+        $this->factFindingAssignment->expects($this->any()) ->method('getStatus') ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->assertRegularExceptionThrowed(fn() => $this->assertHasNoActiveAssignment(), 'Forbidden', 'customer already being maintained');
+    }
+    public function test_assertHasNoActiveAssignment_hasActiveStrikingAssignment_forbidden()
+    {
+        $this->strikingAssignment->expects($this->any()) ->method('getStatus') ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->assertRegularExceptionThrowed(fn() => $this->assertHasNoActiveAssignment(), 'Forbidden', 'customer already being maintained');
+    }
     
-    //
-    protected function hasActiveAssignment()
+    protected function assertStatusEquals()
     {
-        $this->customerAssignment->expects($this->any())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::ACTIVE);
-        return $this->customer->hasActiveAssignment();
+        $this->customer->assertStatusEquals(CustomerStatus::NEW);
     }
-    public function test_hasActiveAssignment_hasActiveAssignment_returnTrue()
+    public function test_assertStatusEquals_differentStatus_forbidden()
     {
-        $this->assertTrue($this->hasActiveAssignment());
+        $this->customer->status = CustomerStatus::FACT_FINDING_REQUIRED;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertStatusEquals(), 'Forbidden', 'unmatch customer status');
     }
-    public function test_hasActiveAssignment_hasNoAssignment_returnFalse()
+    public function test_assertStatusEquals_samesStatus_void()
     {
-        $this->customerAssignment->expects($this->once())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
-        $this->assertFalse($this->hasActiveAssignment());
+        $this->assertStatusEquals();
+        $this->markAsSuccess();
     }
 }
 
@@ -153,5 +167,7 @@ class TestableCustomer extends Customer
     public ?string $email;
     public string $phone;
     public ?string $source;
-    public Collection $customerAssignments;
+    public Collection $greetingAssignments;
+    public Collection $factFindingAssignments;
+    public Collection $strikingAssignments;
 }

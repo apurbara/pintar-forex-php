@@ -4,7 +4,7 @@ namespace Manager\Infrastructure\Persistence\Doctrine\Repository;
 
 use DateTime;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequest;
 use Manager\Domain\Task\ClosingRequest\ClosingRequestRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
@@ -19,16 +19,17 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
     {
         return $this->findOneByIdOrDie($id);
     }
-    
+
     //
-    
+
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         return parent::createCoreQueryBuilder()
-                ->innerJoin('ClosingRequest', 'CustomerAssignment', 'CustomerAssignment', 'ClosingRequest.CustomerAssignment_id = CustomerAssignment.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id');
+                        ->innerJoin('ClosingRequest', 'StrikingAssignment', 'StrikingAssignment',
+                                'ClosingRequest.StrikingAssignment_id = StrikingAssignment.id')
+                        ->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id');
     }
-    
+
     public function aClosingRequestBelongsToManager(string $managerId, string $id): ?array
     {
         $filters = [
@@ -50,8 +51,9 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
         $qb = $this->dbalQueryBuilder();
         $qb->select("COUNT(*)")
                 ->from('ClosingRequest')
-                ->innerJoin('ClosingRequest', 'CustomerAssignment', 'CustomerAssignment', 'ClosingRequest.CustomerAssignment_id = CustomerAssignment.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
+                ->innerJoin('ClosingRequest', 'StrikingAssignment', 'StrikingAssignment',
+                        'ClosingRequest.StrikingAssignment_id = StrikingAssignment.id')
+                ->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id')
                 ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
                 ->setParameter('managerId', $managerId);
         foreach ($searchSchema['filters'] ?? [] as $filterSchema) {
@@ -66,13 +68,15 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
         $qb->select('COUNT(*) closingCount')
                 ->addSelect('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime) yearMonth')
                 ->from('ClosingRequest')
-                ->innerJoin('ClosingRequest', 'CustomerAssignment', 'CustomerAssignment', 'ClosingRequest.CustomerAssignment_id = CustomerAssignment.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
+                ->innerJoin('ClosingRequest', 'StrikingAssignment', 'StrikingAssignment',
+                        'ClosingRequest.StrikingAssignment_id = StrikingAssignment.id')
+                ->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id')
                 ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
                 ->setParameter('managerId', $managerId)
-                ->andWhere($qb->expr()->eq('ClosingRequest.status', sprintf("'%s'", ManagementApprovalStatus::APPROVED->value)))
+                ->andWhere($qb->expr()->eq('ClosingRequest.status',
+                                sprintf("'%s'", ManagementApprovalStatus::APPROVED->value)))
                 ->groupBy('yearMonth');
-        
+
         $startMonthDefined = false;
         $endMonthDefined = false;
         foreach ($searchSchema['filters'] ?? [] as $filter) {
@@ -84,19 +88,22 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
             }
             if ($filter['columns'] ?? null === 'yearMonth' && $filter['comparisonType'] ?? null === 'LTE') {
                 $endMonthDefined = true;
-                $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', $filter['value'] ?? (new DateTime())->format('Ym')));
+                $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)',
+                                $filter['value'] ?? (new DateTime())->format('Ym')));
                 break;
             }
         }
-        
+
         if (!$startMonthDefined) {
-            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime('-12 months'))->format('Ym')));
+            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)',
+                            (new DateTime('-12 months'))->format('Ym')));
         }
         if (!$endMonthDefined) {
-            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime())->format('Ym')));
+            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)',
+                            (new DateTime())->format('Ym')));
         }
         return DoctrineAllListCategory::fromSchema()
-                ->fetchResult($qb);
+                        ->fetchResult($qb);
     }
 
     public function monthlyTotalClosingBelongsToManager(string $managerId, array $searchSchema): array
@@ -105,13 +112,15 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
         $qb->select('SUM(ClosingRequest.transactionValue) totalTransaction')
                 ->addSelect('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime) yearMonth')
                 ->from('ClosingRequest')
-                ->innerJoin('ClosingRequest', 'CustomerAssignment', 'CustomerAssignment', 'ClosingRequest.CustomerAssignment_id = CustomerAssignment.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
+                ->innerJoin('ClosingRequest', 'StrikingAssignment', 'StrikingAssignment',
+                        'ClosingRequest.StrikingAssignment_id = StrikingAssignment.id')
+                ->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id')
                 ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
                 ->setParameter('managerId', $managerId)
-                ->andWhere($qb->expr()->eq('ClosingRequest.status', sprintf("'%s'", ManagementApprovalStatus::APPROVED->value)))
+                ->andWhere($qb->expr()->eq('ClosingRequest.status',
+                                sprintf("'%s'", ManagementApprovalStatus::APPROVED->value)))
                 ->groupBy('yearMonth');
-        
+
         $startMonthDefined = false;
         $endMonthDefined = false;
         foreach ($searchSchema['filters'] ?? [] as $filter) {
@@ -123,18 +132,21 @@ class DoctrineClosingRequestRepository extends DoctrineEntityRepository implemen
             }
             if ($filter['columns'] ?? null === 'yearMonth' && $filter['comparisonType'] ?? null === 'LTE') {
                 $endMonthDefined = true;
-                $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', $filter['value'] ?? (new DateTime())->format('Ym')));
+                $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)',
+                                $filter['value'] ?? (new DateTime())->format('Ym')));
                 break;
             }
         }
-        
+
         if (!$startMonthDefined) {
-            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime('-12 months'))->format('Ym')));
+            $qb->andWhere($qb->expr()->gte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)',
+                            (new DateTime('-12 months'))->format('Ym')));
         }
         if (!$endMonthDefined) {
-            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)', (new DateTime())->format('Ym')));
+            $qb->andWhere($qb->expr()->lte('EXTRACT(YEAR_MONTH FROM ClosingRequest.createdTime)',
+                            (new DateTime())->format('Ym')));
         }
         return DoctrineAllListCategory::fromSchema()
-                ->fetchResult($qb);
+                        ->fetchResult($qb);
     }
 }

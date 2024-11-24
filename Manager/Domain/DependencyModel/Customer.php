@@ -8,10 +8,13 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToMany;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
+use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use Resources\Exception\RegularException;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerStatus;
 
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
@@ -20,11 +23,17 @@ class Customer
     #[Id, Column(type: "guid")]
     protected string $id;
 
-    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
+    #[Column(type: "string", enumType: CustomerStatus::class, options: ["default" => CustomerStatus::NEW->value])]
+    protected CustomerStatus $status;
 
-    #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
-    protected Collection $customerAssignments;
+    #[OneToMany(targetEntity: GreetingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $greetingAssignments;
+
+    #[OneToMany(targetEntity: FactFindingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $factFindingAssignments;
+
+    #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $strikingAssignments;
 
     public function getId(): string
     {
@@ -38,19 +47,22 @@ class Customer
     }
 
     //
-    public function assertActive(): void
-    {
-        if ($this->disabled) {
-            throw RegularException::forbidden('inactive customer');
-        }
-    }
-    
     public function assertHasNoActiveAssignment(): void
     {
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
-        if (!$this->customerAssignments->matching($criteria)->isEmpty()) {
+        $hasActiveAssignment = !$this->greetingAssignments->matching($criteria)->isEmpty() 
+                || !$this->factFindingAssignments->matching($criteria)->isEmpty()
+                || !$this->strikingAssignments->matching($criteria)->isEmpty();
+        if ($hasActiveAssignment) {
             throw RegularException::forbidden('customer already being maintained');
+        }
+    }
+
+    public function assertStatusEquals(CustomerStatus $status): void
+    {
+        if ($this->status !== $status) {
+            throw RegularException::forbidden('unmatch customer status');
         }
     }
 }

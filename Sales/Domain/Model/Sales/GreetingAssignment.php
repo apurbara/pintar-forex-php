@@ -2,66 +2,46 @@
 
 namespace Sales\Domain\Model\Sales;
 
-use Company\Domain\Model\Customer as FetchableCustomerFromCompanyBC;
-use Company\Domain\Model\CustomerJourney as CustomerJourneyInCompanyBC;
-use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OneToOne;
+use Resources\Attributes\Composed;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
-use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\Infrastructure\GraphQL\Attributes\IncludeAsInput;
-use Resources\Uuid;
 use Sales\Domain\DependencyModel\Customer;
-use Sales\Domain\DependencyModel\Customer\VerificationReportData;
 use Sales\Domain\DependencyModel\CustomerData;
-use Sales\Domain\DependencyModel\CustomerJourney;
-use Sales\Domain\DependencyModel\CustomerVerification;
 use Sales\Domain\DependencyModel\Province\City;
 use Sales\Domain\DependencyModel\SalesActivity;
+use Sales\Domain\Event\CustomerValidated;
 use Sales\Domain\Model\Sales;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
-use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
-use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
-use Sales\Domain\Service\SalesActivitySchedulerService;
-use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
+use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineGreetingAssignmentRepository;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
-use Shared\Domain\Enum\SalesActivityScheduleStatus;
-use Shared\Domain\Event\CustomerAssignedEvent;
-use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
-#[Entity(repositoryClass: DoctrineCustomerAssignmentRepository::class)]
-class CustomerAssignment implements ContainEventsInterface
+#[Entity(repositoryClass: DoctrineGreetingAssignmentRepository::class)]
+class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssignmentInterface
 {
 
     use ContainEventsTrait;
 
-    #[ManyToOne(targetEntity: Sales::class, inversedBy: "customerAssignments", fetch: "LAZY")]
+    #[ManyToOne(targetEntity: Sales::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
-    #[FetchableObject(targetEntity: FetchableCustomerFromCompanyBC::class, joinColumnName: "Customer_id")]
     #[IncludeAsInput(targetEntity: Customer::class)]
-    #[ManyToOne(targetEntity: Customer::class, cascade: ["persist"])]
+    #[FetchableObject(targetEntity: Customer::class, joinColumnName: "Customer_id")]
+    #[ManyToOne(targetEntity: Customer::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
-
-    #[FetchableObject(targetEntity: CustomerJourneyInCompanyBC::class, joinColumnName: "CustomerJourney_id")]
-    #[ManyToOne(targetEntity: CustomerJourney::class)]
-    #[JoinColumn(name: "CustomerJourney_id", referencedColumnName: "id")]
-    protected ?CustomerJourney $customerJourney;
 
     #[Id, Column(type: "guid")]
     protected string $id;
@@ -69,138 +49,73 @@ class CustomerAssignment implements ContainEventsInterface
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
 
-    #[Column(type: "datetimetz_immutable", nullable: true)]
-    protected DateTimeImmutable $createdTime;
+    #[Composed(class: CustomerAssignment::class)]
+    #[OneToOne(targetEntity: CustomerAssignment::class, inversedBy: "greetingAssignment", cascade: ["persist"])]
+    #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
+    protected CustomerAssignment $customerAssignment;
 
-    #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "CustomerAssignment_id",
-                paginationRequired: false)]
-    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "customerAssignment")]
-    protected Collection $closingRequests;
-
-    #[FetchableObjectList(targetEntity: RecycleRequest::class, joinColumnName: "CustomerAssignment_id",
-                paginationRequired: false)]
-    #[OneToMany(targetEntity: RecycleRequest::class, mappedBy: "customerAssignment")]
-    protected Collection $recycleRequests;
-
-    #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "CustomerAssignment_id",
-                paginationRequired: false)]
-    #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "customerAssignment", cascade: ["persist"],
-                fetch: 'EXTRA_LAZY')]
-    protected Collection $salesActivitySchedules;
-
-    public function getStatus(): CustomerAssignmentStatus
+    protected function __construct()
     {
-        return $this->status;
+        
     }
 
-    public function __construct(Sales $sales, Customer $customer, ?CustomerJourney $customerJourney, string $id)
+    //
+    private function assertActive(): void
     {
-        $this->sales = $sales;
-        $this->customer = $customer;
-        $this->customerJourney = $customerJourney;
-        $this->id = $id;
-        $this->status = CustomerAssignmentStatus::ACTIVE;
-        $this->createdTime = new DateTimeImmutable();
-        //
-        $this->sales->assertActive();
-        $this->customerJourney?->assertActive();
-        //
-        $this->salesActivitySchedules = new ArrayCollection();
-
-        $this->recordEvent(new CustomerAssignedEvent($this->id));
+        if ($this->status !== CustomerAssignmentStatus::ACTIVE) {
+            throw RegularException::forbidden('inactive assignment');
+        }
+    }
+    
+    public function isBelongsToSales(Sales $sales): bool
+    {
+        return $this->sales === $sales;
     }
 
-    public function updateJourney(CustomerJourney $customerJourney): void
+    public function assertBelongsToSales(Sales $sales): void
     {
-        $customerJourney->assertActive();
-        $this->customerJourney = $customerJourney;
+        if ($this->sales !== $sales) {
+            throw RegularException::forbidden('unmanaged assignment');
+        }
     }
 
-    public function updateCustomer(City $city, CustomerData $customerData): void
+    //
+    public function updateCustomer(CustomerData $customerData, ?City $city): void
     {
         $this->assertActive();
         $this->customer->update($city, $customerData);
     }
 
-    public function SubmitCustomerVerificationReport(
-            CustomerVerification $customerVerification, VerificationReportData $verificationReportData): void
+    public function validateCustomer(): void
     {
         $this->assertActive();
-        $this->customer->submitVerificationReport($customerVerification, $verificationReportData);
+        $this->customer->validate();
+        $this->status = CustomerAssignmentStatus::COMPLETED;
+        
+        $event = new CustomerValidated($this->id);
+        $this->recordEvent($event);
     }
 
-    //
-    public function assertBelongsToSales(Sales $sales): void
+    public function recycleCustomer(): void
     {
-        if ($this->sales !== $sales) {
-            throw RegularException::forbidden('unmanaged assigned customer');
-        }
+        $this->assertActive();
+        $this->customer->recycle();
+        $this->status = CustomerAssignmentStatus::COMPLETED;
     }
 
-    public function assertActive(): void
+    public function submitNonScheduledSalesActivityReport(
+            SalesActivity $salesActivity, string $reportId, SalesActivityReportData $salesActivityReportData): SalesActivityReport
     {
-        if ($this->status !== CustomerAssignmentStatus::ACTIVE) {
-            throw RegularException::forbidden('inactive customer assignment');
-        }
+        $this->assertActive();
+        return $this->customerAssignment
+                        ->submitNonScheduledSalesActivityReport($salesActivity, $reportId, $salesActivityReportData);
     }
 
-    //
     public function submitSalesActivitySchedule(
-            SalesActivity $salesActivity, SalesActivityScheduleData $scheduledSalesActivityData): SalesActivitySchedule
+            SalesActivity $salesActivity, string $scheduleId, SalesActivityScheduleData $salesActivityScheduleData): SalesActivitySchedule
     {
         $this->assertActive();
-        return new SalesActivitySchedule($this, $salesActivity, $scheduledSalesActivityData);
-    }
-
-    //
-    protected function assertNoOngoingRequest(): void
-    {
-        $closingRequestFilter = fn(ClosingRequest $closingRequest) => $closingRequest->isOngoing();
-        $containOngoingClosingRequest = !$this->closingRequests->filter($closingRequestFilter)->isEmpty();
-
-        $recycleRequestFilter = fn(RecycleRequest $recycleRequest) => $recycleRequest->isOngoing();
-        $containOngoingRecycleRequest = !$this->recycleRequests->filter($recycleRequestFilter)->isEmpty();
-
-        if ($containOngoingClosingRequest || $containOngoingRecycleRequest) {
-            throw RegularException::forbidden('there area still ongoing closing/recycle request on this assignment');
-        }
-    }
-
-    public function submitClosingRequest(ClosingRequestData $closingRequestData): ClosingRequest
-    {
-        $this->assertActive();
-        $this->assertNoOngoingRequest();
-        return new ClosingRequest($this, $closingRequestData);
-    }
-
-    public function submitRecycleRequest(RecycleRequestData $recycleRequestData): RecycleRequest
-    {
-        $this->assertActive();
-        $this->assertNoOngoingRequest();
-        return new RecycleRequest($this, $recycleRequestData);
-    }
-
-    //
-    public function addUpcomingScheduleToSchedulerService(SalesActivitySchedulerService $service): void
-    {
-        $criteria = Criteria::create()
-                ->andWhere(Criteria::expr()->gte('schedule.startTime', new DateTimeImmutable()))
-                ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED));
-        foreach ($this->salesActivitySchedules->matching($criteria)->getIterator() as $schedule) {
-            $schedule->includeInSchedulerService($service);
-        }
-    }
-
-    public function initiateSalesActivitySchedule(SalesActivity $initialSalesActivity,
-            SalesActivitySchedulerService $schedulerService): void
-    {
-        $this->sales->registerAllUpcomingScheduleToScheduler($schedulerService);
-
-        $startTime = $schedulerService->nextAvailableTimeSlotForScheduleWithDuration($initialSalesActivity->getDuration())->format('Y-m-d H:i:s');
-        $hourlyTimeIntervalData = new HourlyTimeIntervalData($startTime);
-        $scheduledSalesActivityData = (new SalesActivityScheduleData($hourlyTimeIntervalData))->setId(Uuid::generateUuid4());
-
-        $salesActivitySchedule = $this->submitSalesActivitySchedule($initialSalesActivity, $scheduledSalesActivityData);
-        $this->salesActivitySchedules->add($salesActivitySchedule);
+        return new SalesActivitySchedule($this->customerAssignment, $salesActivity, $scheduleId,
+                $salesActivityScheduleData);
     }
 }

@@ -7,7 +7,7 @@ use Resources\Domain\TaskPayload\ViewSummaryPayload;
 
 class ViewCustomerAssignmentCount implements AdminTaskInCompany
 {
-    public function __construct(protected CustomerAssignmentRepository $repository)
+    public function __construct(protected CustomerAssignmentRepository $customerAssignmentRepository)
     {
     }
     
@@ -18,6 +18,6 @@ class ViewCustomerAssignmentCount implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $payload->setResult($this->repository->assignmentCount($payload->searchSchema));
+        $payload->setResult($this->customerAssignmentRepository->assignmentCount($payload->searchSchema));
     }
 }

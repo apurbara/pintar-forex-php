@@ -3,7 +3,9 @@
 namespace Company\Domain\Model;
 
 use Company\Domain\Model\Customer\VerificationReport;
-use Company\Domain\Model\Manager\Sales\CustomerAssignment;
+use Company\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Company\Domain\Model\Manager\Sales\GreetingAssignment;
+use Company\Domain\Model\Manager\Sales\StrikingAssignment;
 use Company\Domain\Model\Province\City;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use DateTimeImmutable;
@@ -35,12 +37,9 @@ class Customer
     #[Id, Column(type: "guid")]
     protected string $id;
 
-    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
-
     #[Column(type: "datetimetz_immutable", nullable: true, options: ["default" => "CURRENT_TIMESTAMP"])]
     protected DateTimeImmutable $createdTime;
-    
+
     #[Column(type: "string", enumType: CustomerStatus::class, options: ["default" => CustomerStatus::NEW->value])]
     protected CustomerStatus $status;
 
@@ -50,16 +49,29 @@ class Customer
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $email;
 
-    #[Column(type: "string", length: 255, nullable: false, unique:true)]
+    #[Column(type: "string", length: 255, nullable: false, unique: true)]
     protected string $phone;
 
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $source;
 
-    #[FetchableObjectList(targetEntity: CustomerAssignment::class, joinColumnName: "Customer_id",
+    #[Column(type: "smallint", nullable: true)]
+    protected ?int $rating;
+
+    #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Customer_id",
                 paginationRequired: true)]
-    #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
-    protected Collection $customerAssignments;
+    #[OneToMany(targetEntity: GreetingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $greetingAssignments;
+
+    #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Customer_id",
+                paginationRequired: true)]
+    #[OneToMany(targetEntity: FactFindingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $factFindingAssignments;
+
+    #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Customer_id",
+                paginationRequired: true)]
+    #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
+    protected Collection $strikingAssignments;
 
     //QUERY ONLY
     #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id",
@@ -116,15 +128,20 @@ class Customer
     //
     public function assertHasNoActiveAssignment(): void
     {
-        if ($this->hasActiveAssignment()) {
+        $criteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
+        $hasActiveAssignment = !$this->greetingAssignments->matching($criteria)->isEmpty() 
+                || !$this->factFindingAssignments->matching($criteria)->isEmpty()
+                || !$this->strikingAssignments->matching($criteria)->isEmpty();
+        if ($hasActiveAssignment) {
             throw RegularException::forbidden('customer already being maintained');
         }
     }
 
-    public function hasActiveAssignment(): bool
+    public function assertStatusEquals(CustomerStatus $status): void
     {
-        $criteria = Criteria::create()
-                ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
-        return !$this->customerAssignments->matching($criteria)->isEmpty();
+        if ($this->status != $status) {
+            throw RegularException::forbidden('unmatch customer status');
+        }
     }
 }

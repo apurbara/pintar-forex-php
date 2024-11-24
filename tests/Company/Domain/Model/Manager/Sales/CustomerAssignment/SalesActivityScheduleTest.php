@@ -26,6 +26,12 @@ class SalesActivityScheduleTest extends TestBase
         $this->cancelBySystem();
         $this->assertEquals(SalesActivityScheduleStatus::CANCELLED_BY_SYSTEM, $this->salesActivitySchedule->status);
     }
+    public function test_cancelBySystem_ConcludedSchedule_NOP()
+    {
+        $this->salesActivitySchedule->status = SalesActivityScheduleStatus::COMPLETED;
+        $this->cancelBySystem();
+        $this->assertEquals(SalesActivityScheduleStatus::COMPLETED, $this->salesActivitySchedule->status);
+    }
 
 
 }

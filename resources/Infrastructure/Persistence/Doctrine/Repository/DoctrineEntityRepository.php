@@ -1,7 +1,6 @@
 <?php
 
 namespace Resources\Infrastructure\Persistence\Doctrine\Repository;
-//use Resources\Infrastructure\Persistence\Doctrine\Attribute\QueryEntity;
 
 
 use Doctrine\DBAL\Query\QueryBuilder;

@@ -21,7 +21,6 @@ use Shared\Domain\ValueObject\HourlyTimeInterval;
 class SalesActivitySchedule
 {
 
-    #[FetchableObject(targetEntity: CustomerAssignment::class, joinColumnName: "CustomerAssignment_id")]
     #[ManyToOne(targetEntity: CustomerAssignment::class, inversedBy: "salesActivitySchedules", fetch: "LAZY")]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
     protected CustomerAssignment $customerAssignment;
@@ -37,16 +36,30 @@ class SalesActivitySchedule
 
     #[Column(type: "string", enumType: SalesActivityScheduleStatus::class)]
     protected SalesActivityScheduleStatus $status;
-    
-    //
-    #[FetchableObject(targetEntity: SalesActivityReport::class, joinColumnName: "id", referenceColumnName: "SalesActivitySchedule_id")]
-    protected SalesActivityReport $salesActivityReport;
 
+    //
     #[FetchableObject(targetEntity: SalesActivity::class, joinColumnName: "SalesActivity_id")]
     #[JoinColumn(name: "SalesActivity_id", referencedColumnName: "id")]
     protected SalesActivity $salesActivity;
     
-    protected  function __construct()
+    #[FetchableObject(targetEntity: SalesActivityReport::class, joinColumnName: "id",
+                referenceColumnName: "SalesActivitySchedule_id")]
+    protected SalesActivityReport $salesActivityReport;
+
+    public function getStatus(): SalesActivityScheduleStatus
     {
+        return $this->status;
+    }
+
+    protected function __construct()
+    {
+        
+    }
+
+    public function cancelBySystem()
+    {
+        if ($this->status == SalesActivityScheduleStatus::SCHEDULED) {
+            $this->status = SalesActivityScheduleStatus::CANCELLED_BY_SYSTEM;
+        }
     }
 }

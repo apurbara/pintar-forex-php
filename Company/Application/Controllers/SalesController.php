@@ -38,7 +38,7 @@ class SalesController extends BaseController
         $accountInfoData = new AccountInfoData($name, $email, $password);
         return (new SalesData())
                         ->setAccountInfoData($accountInfoData)
-                        ->setType($input->get('type'));
+                        ->setRole($input->get('role'));
     }
 
     //
@@ -57,7 +57,7 @@ class SalesController extends BaseController
         $this->executeMutationTaskInCompany($user, $task, $payload);
         return $repository->queryOneById($payload->id);
     }
-    
+
     #[Mutation]
     public function updateSales(CompanyUser $user, string $id, InputRequest $input)
     {
@@ -67,7 +67,7 @@ class SalesController extends BaseController
 
         $task = new UpdateSales($repository, $managerRepository, $cityRepository);
         $payload = (new SalesData())
-                ->setType($input->get('type'))
+                ->setRole($input->get('role'))
                 ->setManagerId($input->get('Manager_id'))
                 ->setCityId($input->get('City_id'))
                 ->setId($id);

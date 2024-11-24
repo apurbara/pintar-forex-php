@@ -4,7 +4,8 @@ namespace Sales\Application\Controllers;
 
 use Company\Domain\Model\Customer;
 use Sales\Domain\Model\Sales\CustomerAssignment;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
+use Sales\Domain\Model\Sales\StrikingAssignment;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequest;
 use Shared\Domain\Enum\ManagementApprovalStatus;
 use Tests\resources\Application\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
@@ -13,7 +14,7 @@ class ClosingRequestControllerTest extends SalesControllerTestCase
 {
     protected $customer;
     
-    protected $customerAssignment;
+    protected $strikingAssignment, $customerAssignment;
     
     protected $closingRequestOne;
     protected $closingRequestTwo;
@@ -28,18 +29,22 @@ class ClosingRequestControllerTest extends SalesControllerTestCase
         parent::setUp();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('StrikingAssignment')->truncate();
         $this->connection->table('ClosingRequest')->truncate();
         
         $this->customer = new EntityRecord(Customer::class, 'main');
         
         $this->customerAssignment = new EntityRecord(CustomerAssignment::class, 'main');
-        $this->customerAssignment->columns['Customer_id'] = $this->customer->columns['id'];
-        $this->customerAssignment->columns['Sales_id'] = $this->sales->columns['id'];
+        $this->strikingAssignment = new EntityRecord(StrikingAssignment::class, 'main');
+        $this->strikingAssignment->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->strikingAssignment->columns['id'] = $this->customerAssignment->columns['id'];
+        $this->strikingAssignment->columns['Customer_id'] = $this->customer->columns['id'];
+        $this->strikingAssignment->columns['Sales_id'] = $this->sales->columns['id'];
         
         $this->closingRequestOne = new EntityRecord(ClosingRequest::class, 1);
-        $this->closingRequestOne->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->closingRequestOne->columns['StrikingAssignment_id'] = $this->strikingAssignment->columns['id'];
         $this->closingRequestTwo = new EntityRecord(ClosingRequest::class, 2);
-        $this->closingRequestTwo->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->closingRequestTwo->columns['StrikingAssignment_id'] = $this->strikingAssignment->columns['id'];
         
     }
     protected function tearDown(): void
@@ -47,6 +52,7 @@ class ClosingRequestControllerTest extends SalesControllerTestCase
         parent::tearDown();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('StrikingAssignment')->truncate();
         $this->connection->table('ClosingRequest')->truncate();
     }
     
@@ -56,16 +62,17 @@ class ClosingRequestControllerTest extends SalesControllerTestCase
         $this->prepareSalesDependency();
         $this->customer->insert($this->connection);
         $this->customerAssignment->insert($this->connection);
+        $this->strikingAssignment->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $CustomerAssignment_id: ID!, $transactionValue: Int, $note: String ) {
-    submitClosingRequest ( CustomerAssignment_id: $CustomerAssignment_id, transactionValue: $transactionValue, note: $note ) {
+mutation ( $StrikingAssignment_id: ID!, $transactionValue: Int, $note: String ) {
+    submitClosingRequest ( StrikingAssignment_id: $StrikingAssignment_id, transactionValue: $transactionValue, note: $note ) {
         id, status, createdTime, transactionValue, note
     }
 }
 _QUERY;
         $this->graphqlVariables = [
-            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'StrikingAssignment_id' => $this->strikingAssignment->columns['id'],
             ...$this->closingRequestPayload
         ];
         $this->postGraphqlRequest($this->sales->token);
@@ -83,7 +90,7 @@ $this->disableExceptionHandling();
         ]);
         
         $this->seeInDatabase('ClosingRequest', [
-            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'StrikingAssignment_id' => $this->strikingAssignment->columns['id'],
             'status' => ManagementApprovalStatus::WAITING_FOR_APPROVAL->value,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'transactionValue' => $this->closingRequestPayload['transactionValue'],
@@ -97,6 +104,7 @@ $this->disableExceptionHandling();
         $this->prepareSalesDependency();
         $this->customer->insert($this->connection);
         $this->customerAssignment->insert($this->connection);
+        $this->strikingAssignment->insert($this->connection);
         $this->closingRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
@@ -136,6 +144,7 @@ _QUERY;
         
         $this->customer->insert($this->connection);
         $this->customerAssignment->insert($this->connection);
+        $this->strikingAssignment->insert($this->connection);
         
         $this->closingRequestOne->insert($this->connection);
         $this->closingRequestTwo->insert($this->connection);
@@ -143,7 +152,7 @@ _QUERY;
         $this->graphqlQuery = <<<'_QUERY'
 query ( $filters: [FilterInput]) {
     closingRequestList ( filters: $filters) {
-        list { id, status, createdTime, transactionValue, note, customerAssignment { customer { name } } },
+        list { id, status, createdTime, transactionValue, note, strikingAssignment { customer { name } } },
         cursorLimit { total, cursorToNextPage }
     }
 }
@@ -164,7 +173,7 @@ _QUERY;
                     'createdTime' => $this->jakartaDateTimeFormat($this->closingRequestOne->columns['createdTime']),
                     'transactionValue' => $this->closingRequestOne->columns['transactionValue'],
                     'note' => $this->closingRequestOne->columns['note'],
-                    'customerAssignment' => [
+                    'strikingAssignment' => [
                         'customer' => [
                             'name' => $this->customer->columns['name'],
                         ],
@@ -176,7 +185,7 @@ _QUERY;
                     'createdTime' => $this->jakartaDateTimeFormat($this->closingRequestTwo->columns['createdTime']),
                     'transactionValue' => $this->closingRequestTwo->columns['transactionValue'],
                     'note' => $this->closingRequestTwo->columns['note'],
-                    'customerAssignment' => [
+                    'strikingAssignment' => [
                         'customer' => [
                             'name' => $this->customer->columns['name'],
                         ],
@@ -204,6 +213,7 @@ _QUERY;
         $this->prepareSalesDependency();
         $this->customer->insert($this->connection);
         $this->customerAssignment->insert($this->connection);
+        $this->strikingAssignment->insert($this->connection);
         $this->closingRequestOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'

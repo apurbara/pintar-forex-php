@@ -8,7 +8,7 @@ use Resources\Domain\TaskPayload\ViewPaginationListPayload;
 class ViewCustomerAssignmentList implements AdminTaskInCompany
 {
 
-    public function __construct(protected CustomerAssignmentRepository $assignedCustomerRepository)
+    public function __construct(protected CustomerAssignmentRepository $customerAssignmentRepository)
     {
         
     }
@@ -20,7 +20,7 @@ class ViewCustomerAssignmentList implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $result = $this->assignedCustomerRepository
+        $result = $this->customerAssignmentRepository
                 ->customerAssignmentList($payload->paginationSchema);
         $payload->setResult($result);
     }

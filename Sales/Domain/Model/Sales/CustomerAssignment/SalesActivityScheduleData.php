@@ -3,7 +3,6 @@
 namespace Sales\Domain\Model\Sales\CustomerAssignment;
 
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
-use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
 readonly class SalesActivityScheduleData extends AbstractEntityMutationPayload
@@ -11,7 +10,6 @@ readonly class SalesActivityScheduleData extends AbstractEntityMutationPayload
 
     public string $customerAssignmentId;
     public string $salesActivityId;
-    public SalesActivityReportData $salesActivityReportData;
 
     public function setCustomerAssignmentId(string $customerAssignmentId)
     {
@@ -22,12 +20,6 @@ readonly class SalesActivityScheduleData extends AbstractEntityMutationPayload
     public function setSalesActivityId(string $salesActivityId)
     {
         $this->salesActivityId = $salesActivityId;
-        return $this;
-    }
-
-    public function setSalesActivityReportData(SalesActivityReportData $salesActivityReportData)
-    {
-        $this->salesActivityReportData = $salesActivityReportData;
         return $this;
     }
 

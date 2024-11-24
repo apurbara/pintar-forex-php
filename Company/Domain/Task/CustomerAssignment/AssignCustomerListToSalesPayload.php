@@ -5,8 +5,8 @@ namespace Company\Domain\Task\CustomerAssignment;
 class AssignCustomerListToSalesPayload
 {
 
-    protected array $customerIdList;
-    protected array $salesIdList;
+    protected array $customerIdList = [];
+    protected array $salesIdList = [];
 
     public function __construct()
     {

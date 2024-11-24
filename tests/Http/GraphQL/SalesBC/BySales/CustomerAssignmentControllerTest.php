@@ -363,7 +363,6 @@ $this->disableExceptionHandling();
             ['column' => 'CustomerAssignment.status', 'value' => CustomerAssignmentStatus::ACTIVE->value],
             ['column' => 'hasSalesActivitySchedule', 'value' => true],
             ['column' => 'hasActiveSalesActivitySchedule', 'value' => false],
-            ['column' => 'hasPendingRecycleRequest', 'value' => false],
             ['column' => 'hasPendingClosingRequest', 'value' => false],
         ];
         $this->viewList();
@@ -447,7 +446,6 @@ _QUERY;
             ['column' => 'hasSalesActivitySchedule', 'value' => true],
             ['column' => 'hasActiveSalesActivitySchedule', 'value' => false],
             ['column' => 'hasPendingClosingRequest', 'value' => false],
-            ['column' => 'hasPendingRecycleRequest', 'value' => false],
         ];
         $this->viewTotalCustomerAssignment();
         $this->seeJsonContains(['totalCustomerAssignment' => 1]);

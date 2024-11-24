@@ -12,10 +12,10 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
-use Manager\Domain\DependencyModel\Customer;
-use Manager\Domain\DependencyModel\CustomerJourney;
 use Manager\Domain\Model\Manager;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
+use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesRepository;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
@@ -23,8 +23,7 @@ use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
-use Shared\Domain\Enum\SalesType;
-use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Shared\Domain\Enum\SalesRole;
 use Shared\Domain\ValueObject\AccountInfo;
 
 #[Entity(repositoryClass: DoctrineSalesRepository::class)]
@@ -52,13 +51,22 @@ class Sales implements ContainEventsInterface
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
+    
+    #[Column(type: "string", enumType: SalesRole::class)]
+    protected SalesRole $role;
+    
+    #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Sales_id", paginationRequired: true)]
+    #[OneToMany(targetEntity: GreetingAssignment::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
+    protected Collection $greetingAssignments;
 
-    #[Column(type: "string", enumType: SalesType::class)]
-    protected SalesType $type;
+    #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Sales_id",
+                paginationRequired: true)]
+    #[OneToMany(targetEntity: FactFindingAssignment::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
+    protected Collection $factFindingAssignments;
 
-    #[FetchableObjectList(targetEntity: CustomerAssignment::class, joinColumnName: "Sales_id", paginationRequired: true)]
-    #[OneToMany(targetEntity: CustomerAssignment::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
-    protected Collection $customerAssignments;
+    #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Sales_id", paginationRequired: true)]
+    #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "sales", fetch: "EXTRA_LAZY")]
+    protected Collection $strikingAssignments;
 
     protected function __construct()
     {
@@ -66,15 +74,17 @@ class Sales implements ContainEventsInterface
     }
 
     //
-    public function isInHouseSales(): bool
-    {
-        return $this->type === SalesType::IN_HOUSE;
-    }
-
     public function assertActive(): void
     {
         if ($this->contractTerminated) {
             throw RegularException::forbidden('inactive sales');
+        }
+    }
+    
+    public function assertRoleEquals(SalesRole $role): void
+    {
+        if ($this->role !== $role) {
+            throw RegularException::forbidden('unmatch role');
         }
     }
 
@@ -97,27 +107,16 @@ class Sales implements ContainEventsInterface
     {
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
-        $this->activeCustomerAssignmentCount ??= $this->customerAssignments->matching($criteria)->count();
+        $this->activeCustomerAssignmentCount ??= match ($this->role) {
+            SalesRole::GREETER => $this->greetingAssignments->matching($criteria)->count(),
+            SalesRole::FACT_FINDER => $this->factFindingAssignments->matching($criteria)->count(),
+            SalesRole::STRIKER => $this->strikingAssignments->matching($criteria)->count(),
+        };
         return $this->activeCustomerAssignmentCount;
     }
-
-    protected ?MultipleCustomerAssignmentReceivedBySales $multipleCustomerAssignmentReceivedBySalesEvent;
-
-    public function receiveCustomerAssignment(string $id, Customer $customer, ?CustomerJourney $customerJourney): ?CustomerAssignment
+    
+    public function incrementActiveAssignmentCount(): void
     {
-
-        if (empty($this->multipleCustomerAssignmentReceivedBySalesEvent)) {
-            $this->multipleCustomerAssignmentReceivedBySalesEvent = new MultipleCustomerAssignmentReceivedBySales($this->id);
-            $this->recordEvent($this->multipleCustomerAssignmentReceivedBySalesEvent);
-        }
-
-        try {
-            $customerAssignment = new CustomerAssignment($this, $customer, $customerJourney, $id);
-            $this->multipleCustomerAssignmentReceivedBySalesEvent->addCustomerAssignmentId($id);
-            $this->activeCustomerAssignmentCount++;
-            return $customerAssignment;
-        } catch (RegularException $ex) {
-            return null;
-        }
+        $this->activeCustomerAssignmentCount++;
     }
 }

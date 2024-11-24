@@ -22,14 +22,13 @@ class SalesActivityReportTest extends TestBase
     //
     protected function createData()
     {
-        return (new SalesActivityReportData($this->content))
-                        ->setId($this->id);
+        return (new SalesActivityReportData($this->content));
     }
 
     //
     protected function construct()
     {
-        return new TestableSalesActivityReport($this->salesActivitySchedule, $this->createData());
+        return new TestableSalesActivityReport($this->salesActivitySchedule, $this->id, $this->createData());
     }
     public function test_construct_setProperties()
     {
@@ -38,6 +37,12 @@ class SalesActivityReportTest extends TestBase
         $this->assertSame($this->id, $report->id);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($report->submitTime);
         $this->assertSame($this->content, $report->content);
+    }
+    public function test_construct_assertScheduleIncomplete()
+    {
+        $this->salesActivitySchedule->expects($this->once())
+                ->method('assertIncomplete');
+        $this->construct();
     }
     public function test_construct_setScheduleCompleted()
     {

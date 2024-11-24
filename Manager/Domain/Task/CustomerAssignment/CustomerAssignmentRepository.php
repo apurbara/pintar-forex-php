@@ -8,15 +8,11 @@ interface CustomerAssignmentRepository
 {
 
     public function nextIdentity(): string;
-
-    public function add(CustomerAssignment $customerAssignment): void;
-
-    public function ofId(string $id): CustomerAssignment;
-
-    //
-    public function customerAssignmentListBelongsToManager(string $managerId, array $paginationSchema): array;
-
-    public function aCustomerAssignmentBelongsToManager(string $managerId, string $id): array;
     
-    public function assignmentCountBelongsToManager(string $managerId, array $searchSchema): ?int;
+    //
+    public function customerAssignmentListBelongsByManager(string $managerId, array $paginationSchema): array;
+
+    public function aCustomerAssignmentBelongsByManager(string $managerId, string $id): array;
+
+    public function assignmentCountBelongsByManager(string $managerId, array $searchSchema): ?int;
 }

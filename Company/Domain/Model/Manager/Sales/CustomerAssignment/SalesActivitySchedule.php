@@ -2,8 +2,7 @@
 
 namespace Company\Domain\Model\Manager\Sales\CustomerAssignment;
 
-use Company\Domain\Model\Manager\Sales\CustomerAssignment;
-use Company\Domain\Model\Manager\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
+use Company\Domain\Model\Manager\Sales\Assignment\SalesActivitySchedule\SalesActivityReport;
 use Company\Domain\Model\SalesActivity;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
 use DateTimeImmutable;
@@ -14,6 +13,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Sales\Domain\Model\Sales\CustomerAssignment;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Shared\Domain\ValueObject\HourlyTimeInterval;
 
@@ -59,6 +59,8 @@ class SalesActivitySchedule
 
     public function cancelBySystem()
     {
-        $this->status = SalesActivityScheduleStatus::CANCELLED_BY_SYSTEM;
+        if ($this->status == SalesActivityScheduleStatus::SCHEDULED) {
+            $this->status = SalesActivityScheduleStatus::CANCELLED_BY_SYSTEM;
+        }
     }
 }

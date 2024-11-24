@@ -30,10 +30,12 @@ class SalesActivityReport
     #[Column(type: "text", nullable: true)]
     protected string $content;
 
-    public function __construct(SalesActivitySchedule $salesActivitySchedule, SalesActivityReportData $data)
+    public function __construct(SalesActivitySchedule $salesActivitySchedule, string $id, SalesActivityReportData $data)
     {
+        $salesActivitySchedule->assertIncomplete();
+        //
         $this->salesActivitySchedule = $salesActivitySchedule;
-        $this->id = $data->id;
+        $this->id = $id;
         $this->submitTime = new \DateTimeImmutable();
         $this->content = $data->content;
         //

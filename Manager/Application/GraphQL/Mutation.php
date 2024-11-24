@@ -8,7 +8,6 @@ use Manager\Application\Controllers\AccountController;
 use Manager\Application\Controllers\ClosingRequestController;
 use Manager\Application\Controllers\CustomerAssignmentController;
 use Manager\Application\Controllers\LoginController;
-use Manager\Application\Controllers\RecycleRequestController;
 use Manager\Application\GraphQL\Object\ManagerLoginResponse;
 use Manager\Domain\Model\Manager;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
@@ -36,7 +35,6 @@ class Mutation extends ObjectType
             ...$this->customerAssignmentMutation(),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(RecycleRequestController::class),
         ];
     }
 

@@ -6,15 +6,17 @@ use Manager\Domain\DependencyModel\Customer;
 use Manager\Domain\DependencyModel\CustomerJourney;
 use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\RecycleRequest;
+use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequest;
 use Manager\Domain\Task\ClosingRequest\ClosingRequestRepository;
-use Manager\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
 use Manager\Domain\Task\Dependency\CustomerJourneyRepository;
 use Manager\Domain\Task\Dependency\CustomerRepository;
-use Manager\Domain\Task\RecycleRequest\RecycleRequestRepository;
+use Manager\Domain\Task\FactFindingAssignment\FactFindingAssignmentRepository;
+use Manager\Domain\Task\GreetingAssignment\GreetingAssignmentRepository;
 use Manager\Domain\Task\Sales\SalesRepository;
+use Manager\Domain\Task\StrikingAssignment\StrikingAssignmentRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
@@ -65,28 +67,40 @@ class ManagerTaskTestBase extends TestBase
                 ->willReturn($this->closingRequest);
     }
     
-    protected MockObject $recycleRequestRepository, $recycleRequest;
-    protected string $recycleRequestId = 'recycleRequestId';
-    protected function prepareRecycleRequestDependency(): void
+    protected MockObject $greetingAssignmentRepository, $greetingAssignment;
+    protected string $greetingAssignmentId = 'greetingAssignmentId';
+    protected function prepareGreetingAssignmentDependency(): void
     {
-        $this->recycleRequestRepository = $this->buildMockOfInterface(RecycleRequestRepository::class);
-        $this->recycleRequest = $this->buildMockOfClass(RecycleRequest::class);
-        $this->recycleRequestRepository->expects($this->any())
-                ->method('ofId')
-                ->with($this->recycleRequestId)
-                ->willReturn($this->recycleRequest);
+        $this->greetingAssignmentRepository = $this->buildMockOfInterface(GreetingAssignmentRepository::class);
+        $this->greetingAssignment = $this->buildMockOfClass(GreetingAssignment::class);
+//        $this->greetingAssignmentRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->greetingAssignmentId)
+//                ->willReturn($this->greetingAssignment);
     }
     
-    protected MockObject $customerAssignmentRepository, $customerAssignment;
-    protected string $customerAssignmentId = 'customerAssignmentId';
-    protected function prepareCustomerAssignmentDependency(): void
+    protected MockObject $factFindingAssignmentRepository, $factFindingAssignment;
+    protected string $factFindingAssignmentId = 'factFindingAssignmentId';
+    protected function prepareFactFindingAssignmentDependency(): void
     {
-        $this->customerAssignmentRepository = $this->buildMockOfInterface(CustomerAssignmentRepository::class);
-        $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
-        $this->customerAssignmentRepository->expects($this->any())
-                ->method('ofId')
-                ->with($this->customerAssignmentId)
-                ->willReturn($this->customerAssignment);
+        $this->factFindingAssignmentRepository = $this->buildMockOfInterface(FactFindingAssignmentRepository::class);
+        $this->factFindingAssignment = $this->buildMockOfClass(FactFindingAssignment::class);
+//        $this->factFindingAssignmentRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->factFindingAssignmentId)
+//                ->willReturn($this->factFindingAssignment);
+    }
+    
+    protected MockObject $strikingAssignmentRepository, $strikingAssignment;
+    protected string $strikingAssignmentId = 'strikingAssignmentId';
+    protected function prepareStrikingAssignmentDependency(): void
+    {
+        $this->strikingAssignmentRepository = $this->buildMockOfInterface(StrikingAssignmentRepository::class);
+        $this->strikingAssignment = $this->buildMockOfClass(StrikingAssignment::class);
+//        $this->strikingAssignmentRepository->expects($this->any())
+//                ->method('ofId')
+//                ->with($this->strikingAssignmentId)
+//                ->willReturn($this->strikingAssignment);
     }
     
     protected MockObject $salesRepository, $sales;

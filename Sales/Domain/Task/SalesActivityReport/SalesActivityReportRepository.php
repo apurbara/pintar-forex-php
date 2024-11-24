@@ -11,7 +11,7 @@ interface SalesActivityReportRepository
 
     public function add(SalesActivityReport $salesActivityReport): void;
 
-    public function salesActivityReportListBelongsToSales(string $salesId, array $paginationSchema): array;
-
-    public function salesActivityReportDetailBelongsToSales(string $salesId, string $id): array;
+//    public function salesActivityReportListBelongsToSales(string $salesId, array $paginationSchema): array;
+//
+//    public function salesActivityReportDetailBelongsToSales(string $salesId, string $id): array;
 }

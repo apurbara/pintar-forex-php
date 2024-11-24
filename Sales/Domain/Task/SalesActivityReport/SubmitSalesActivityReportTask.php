@@ -3,6 +3,7 @@
 namespace Sales\Domain\Task\SalesActivityReport;
 
 use Sales\Domain\Model\Sales;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Task\SalesActivitySchedule\SalesActivityScheduleRepository;
 use Sales\Domain\Task\SalesTask;
@@ -11,7 +12,7 @@ class SubmitSalesActivityReportTask implements SalesTask
 {
 
     public function __construct(
-            protected SalesActivityReportRepository $salesActivityReportRepository,
+            protected SalesActivityReportRepository $repository,
             protected SalesActivityScheduleRepository $salesActivityScheduleRepository)
     {
         
@@ -25,12 +26,12 @@ class SubmitSalesActivityReportTask implements SalesTask
      */
     public function executeBySales(Sales $sales, $payload): void
     {
-        $payload->setId($this->salesActivityReportRepository->nextIdentity());
+        $payload->setId($this->repository->nextIdentity());
 
         $salesActivitySchedule = $this->salesActivityScheduleRepository->ofId($payload->salesActivityScheduleId);
         $salesActivitySchedule->assertBelongsToSales($sales);
-
-        $salesActivityReport = $salesActivitySchedule->submitReport($payload);
-        $this->salesActivityReportRepository->add($salesActivityReport);
+        
+        $salesActivityReport = new SalesActivityReport($salesActivitySchedule, $payload->id, $payload);
+        $this->repository->add($salesActivityReport);
     }
 }

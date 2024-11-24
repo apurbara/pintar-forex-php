@@ -7,5 +7,5 @@ use Manager\Domain\DependencyModel\CustomerJourney;
 interface CustomerJourneyRepository
 {
 
-    public function anInitialCustomerJourney(): CustomerJourney;
+    public function anInitialCustomerJourney(): ?CustomerJourney;
 }

@@ -5,9 +5,8 @@ namespace Shared\Domain\Enum;
 enum CustomerStatus: string
 {
     case NEW = 'NEW';
-    case GREETING_REQUIRED = 'GREETING_REQUIRED';
-    case INVALID = 'INVALID';
+    case RECYCLED = 'RECYCLED';
     case FACT_FINDING_REQUIRED = 'FACT_FINDING_REQUIRED';
-    case NEGOTIATION_REQUIRED = 'NEGOTIATION_REQUIRED';
+    case STRIKING_REQUIRED = 'STRIKING_REQUIRED';
     case GOOD_FUND = 'GOOD_FUND';
 }

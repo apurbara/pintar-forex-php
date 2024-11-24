@@ -9,7 +9,7 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepos
 class DoctrineCustomerJourneyRepository extends DoctrineEntityRepository implements CustomerJourneyRepository
 {
 
-    public function anInitialCustomerJourney(): CustomerJourney
+    public function anInitialCustomerJourney(): ?CustomerJourney
     {
         return $this->findOneBy([
                     'disabled' => false,

@@ -2,6 +2,7 @@
 
 namespace Company\Domain\Model;
 
+use Company\Domain\Service\SalesFinderService;
 use Company\Domain\Task\TaskInCompany;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineManagerRepository;
 use DateTimeImmutable;
@@ -29,7 +30,12 @@ class Manager implements CompanyUser
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
-    
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
     public function __construct(string $id, ManagerData $data)
     {
         $this->id = $id;
@@ -37,17 +43,17 @@ class Manager implements CompanyUser
         $this->createdTime = new \DateTimeImmutable();
         $this->accountInfo = new AccountInfo($data->accountInfoData);
     }
-    
+
     public function suspend(): void
     {
         $this->suspended = true;
     }
-    
+
     public function unsuspend(): void
     {
         $this->suspended = false;
     }
-    
+
     //
     public function assertActive(): void
     {
@@ -61,6 +67,7 @@ class Manager implements CompanyUser
     {
         $task->executeInCompany($payload);
     }
+
     public function executeTaskInCompany(TaskInCompany $task, $payload): void
     {
         if ($this->suspended) {

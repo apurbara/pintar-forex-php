@@ -12,10 +12,11 @@ use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
 use Sales\Application\Controllers\ClosingRequestController;
 use Sales\Application\Controllers\CustomerAssignmentController;
-use Sales\Application\Controllers\RecycleRequestController;
+use Sales\Application\Controllers\FactFindingAssignmentController;
+use Sales\Application\Controllers\GreetingAssignmentController;
 use Sales\Application\Controllers\SalesActivityReportController;
 use Sales\Application\Controllers\SalesActivityScheduleController;
-use Sales\Application\Controllers\VerificationReportController;
+use Sales\Application\Controllers\StrikingAssignmentController;
 use Sales\Application\GraphQL\Object\SalesActivityScheduleSummaryInSalesBCGraph;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -34,18 +35,12 @@ class Query extends ObjectType
     protected function fieldDefinition(): array
     {
         return [
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentController::class),
-            'totalCustomerAssignment' => [
-                'type' => Type::int(),
-                'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class)),],
-                'resolve' => fn($root, $args, AppContext $app) => (new CustomerAssignmentController())
-                        ->totalCustomerAssignment(app(Sales::class), new GraphqlInputRequest($args))
-            ],
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(GreetingAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(FactFindingAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(StrikingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityReportController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityScheduleController::class),
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(VerificationReportController::class),
             ...$this->salesActivityScheduleCustomQuery(),
         ];
     }

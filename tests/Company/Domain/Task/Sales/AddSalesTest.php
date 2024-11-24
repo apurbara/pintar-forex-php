@@ -3,6 +3,7 @@
 namespace Company\Domain\Task\Sales;
 
 use Company\Domain\Model\Manager\SalesData;
+use Shared\Domain\Enum\SalesRole;
 use Shared\Domain\Enum\SalesType;
 use Tests\Company\Domain\Task\TaskInCompanyTestBase;
 
@@ -23,7 +24,7 @@ class AddSalesTest extends TaskInCompanyTestBase
                 ->setManagerId($this->managerId)
                 ->setCityId($this->cityId)
                 ->setAccountInfoData($this->createAccountInfoData())
-                ->setType(SalesType::FREELANCE->value);
+                ->setRole(SalesRole::FACT_FINDER->value);
     }
     
     //
@@ -61,7 +62,7 @@ class AddSalesTest extends TaskInCompanyTestBase
         $this->payload = (new SalesData())
                 ->setManagerId($this->managerId)
                 ->setAccountInfoData($this->createAccountInfoData())
-                ->setType(SalesType::FREELANCE->value);
+                ->setRole(SalesRole::FACT_FINDER->value);
         $this->execute();
     }
 }

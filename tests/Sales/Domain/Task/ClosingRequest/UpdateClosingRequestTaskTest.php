@@ -2,7 +2,7 @@
 
 namespace Sales\Domain\Task\ClosingRequest;
 
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequestData;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class UpdateClosingRequestTaskTest extends SalesTaskTestBase

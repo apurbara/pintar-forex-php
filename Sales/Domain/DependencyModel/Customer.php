@@ -2,6 +2,7 @@
 
 namespace Sales\Domain\DependencyModel;
 
+use Company\Domain\Model\Province\City as City2;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
@@ -10,6 +11,8 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Uuid;
 use Resources\ValidationRule;
 use Resources\ValidationService;
@@ -17,34 +20,40 @@ use Sales\Domain\DependencyModel\Customer\VerificationReport;
 use Sales\Domain\DependencyModel\Customer\VerificationReportData;
 use Sales\Domain\DependencyModel\Province\City;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
+use Shared\Domain\Enum\CustomerStatus;
 
 #[Entity(repositoryClass: DoctrineCustomerRepository::class)]
 class Customer
 {
+
+    #[FetchableObject(targetEntity: City2::class, joinColumnName: "City_id")]
     #[ManyToOne(targetEntity: City::class)]
     #[JoinColumn(name: "City_id", referencedColumnName: "id")]
-    protected City $city;
+    protected ?City $city;
 
     #[Id, Column(type: "guid")]
     protected string $id;
 
-    #[Column(type: "boolean", nullable: false, options: ["default" => 0])]
-    protected bool $disabled;
-
     #[Column(type: "datetimetz_immutable", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
     protected DateTimeImmutable $createdTime;
+
+    #[Column(type: "string", enumType: CustomerStatus::class, options: ["default" => CustomerStatus::NEW->value])]
+    protected CustomerStatus $status;
 
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $name;
 
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $email;
-    
+
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $phone;
-    
+
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $source;
+
+    #[Column(type: "smallint", nullable: true)]
+    protected ?int $rating;
 
     #[OneToMany(targetEntity: VerificationReport::class, mappedBy: "customer", cascade: ["persist"])]
     protected Collection $verificationReports;
@@ -65,35 +74,44 @@ class Customer
         $this->email = $email;
     }
 
-    protected function setPhone(string $phone)
+    protected function __construct()
     {
-        ValidationService::build()
-                ->addRule(ValidationRule::phone())
-                ->execute($phone, 'customer phone is mandatory and must be in valid phone format');
-        $this->phone = $phone;
+        
     }
 
-    public function __construct(City $city, string $id, CustomerData $data)
+    public function update(?City $city, CustomerData $data): void
     {
-        $this->city = $city;
-        $this->id = $id;
-        $this->disabled = false;
-        $this->createdTime = new DateTimeImmutable();
-        $this->setName($data->name);
-        $this->setEmail($data->email);
-        $this->setPhone($data->phone);
-        $this->source = $data->source ?? null;
+        $city?->assertActive();
         //
-        $this->city->assertActive();
-    }
-    
-    public function update(City $city, CustomerData $data): void
-    {
         $this->city = $city;
         $this->setEmail($data->email);
         $this->setName($data->name);
     }
-    
+
+    public function updateRating(int $rating): void
+    {
+        if ($rating > 5 || $rating < 0) {
+            throw RegularException::badRequest('invalid rating value');
+        }
+        $this->rating = $rating;
+    }
+
+    public function recycle(): void
+    {
+        $this->status = match ($this->status) {
+            CustomerStatus::NEW, CustomerStatus::RECYCLED => CustomerStatus::RECYCLED,
+            default => throw RegularException::forbidden('unable to invalidate customer'),
+        };
+    }
+
+    public function validate(): void
+    {
+        $this->status = match ($this->status) {
+            CustomerStatus::NEW, CustomerStatus::RECYCLED => CustomerStatus::FACT_FINDING_REQUIRED,
+            default => throw RegularException::forbidden('unable to validate customer'),
+        };
+    }
+
     //
     public function submitVerificationReport(
             CustomerVerification $customerVerification, VerificationReportData $verificationReportData): void
@@ -103,10 +121,30 @@ class Customer
         if ($verificationReport) {
             $verificationReport->update($verificationReportData);
         } else {
-            $verificationReportData->setId(Uuid::generateUuid4());
-            $verificationReport = new VerificationReport($this, $customerVerification, $verificationReportData->id, $verificationReportData);
+            $verificationReport = new VerificationReport(
+                    $this, $customerVerification, Uuid::generateUuid4(), $verificationReportData);
             $this->verificationReports->add($verificationReport);
         }
-        
+        $verificationReportData->setId($verificationReport->getId());
+    }
+
+    /**
+     * 
+     * @param CustomerVerification[] $allActiveCustomerVerification
+     * @return void
+     */
+    public function markVerificationComplete(array $allActiveCustomerVerifications): void
+    {
+        foreach ($allActiveCustomerVerifications as $customerVerification) {
+            $p = fn(VerificationReport $verificationReport) => $verificationReport->associateWithCustomerVerification($customerVerification);
+            if ($this->verificationReports->filter($p)->isEmpty()) {
+                throw RegularException::forbidden('incomplete verfication report');
+            }
+        }
+
+        $this->status = match ($this->status) {
+            CustomerStatus::FACT_FINDING_REQUIRED => CustomerStatus::STRIKING_REQUIRED,
+            default => throw RegularException::forbidden('unable to set customer to striking phase'),
+        };
     }
 }

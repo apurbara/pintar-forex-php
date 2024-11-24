@@ -11,7 +11,6 @@ readonly class SalesData extends AbstractEntityMutationPayload
     public ?string $managerId;
     public ?string $cityId;
     public ?AccountInfoData $accountInfoData;
-    public ?string $type;
     public ?string $role;
 
     public function setManagerId(?string $managerId)
@@ -29,12 +28,6 @@ readonly class SalesData extends AbstractEntityMutationPayload
     public function setAccountInfoData(?AccountInfoData $accountInfoData)
     {
         $this->accountInfoData = $accountInfoData;
-        return $this;
-    }
-
-    public function setType(?string $type)
-    {
-        $this->type = $type;
         return $this;
     }
 

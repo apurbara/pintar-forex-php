@@ -27,27 +27,27 @@ class DoctrineSalesActivityReportRepository extends DoctrineEntityRepository imp
         $this->persist($salesActivityReport);
     }
 
-    public function salesActivityReportDetailBelongsToSales(string $salesId, string $id): array
-    {
-        $filters = [
-            new Filter($salesId, 'CustomerAssignment.Sales_id'),
-            new Filter($id, 'SalesActivityReport.id'),
-        ];
-        return $this->fetchOneOrDie($filters);
-    }
-
-    public function aSalesActivityReportAssociateWithSchedule(string $scheduleId)
-    {
-        $filters = [
-            new Filter($scheduleId, 'SalesActivityReport.SalesActivitySchedule_id'),
-        ];
-        return $this->fetchOneBy($filters);
-    }
-
-    public function salesActivityReportListBelongsToSales(string $salesId, array $paginationSchema): array
-    {
-        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
-                ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
-        return $this->fetchPaginationList($doctrinePaginationListCategory);
-    }
+//    public function salesActivityReportDetailBelongsToSales(string $salesId, string $id): array
+//    {
+//        $filters = [
+//            new Filter($salesId, 'CustomerAssignment.Sales_id'),
+//            new Filter($id, 'SalesActivityReport.id'),
+//        ];
+//        return $this->fetchOneOrDie($filters);
+//    }
+//
+//    public function aSalesActivityReportAssociateWithSchedule(string $scheduleId)
+//    {
+//        $filters = [
+//            new Filter($scheduleId, 'SalesActivityReport.SalesActivitySchedule_id'),
+//        ];
+//        return $this->fetchOneBy($filters);
+//    }
+//
+//    public function salesActivityReportListBelongsToSales(string $salesId, array $paginationSchema): array
+//    {
+//        $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
+//                ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
+//        return $this->fetchPaginationList($doctrinePaginationListCategory);
+//    }
 }

@@ -5,15 +5,17 @@ namespace Company\Application\GraphQL;
 use Company\Application\Controllers\CityController;
 use Company\Application\Controllers\CommonSalesMetricController;
 use Company\Application\Controllers\CompanyMetricController;
-use Company\Application\Controllers\CustomerAssignmentController;
 use Company\Application\Controllers\CustomerJourneyController;
 use Company\Application\Controllers\CustomerVerificationController;
+use Company\Application\Controllers\FactFindingAssignmentController;
+use Company\Application\Controllers\GreetingAssignmentController;
 use Company\Application\Controllers\ManagerController;
 use Company\Application\Controllers\ProvinceController;
 use Company\Application\Controllers\SalesActivityController;
 use Company\Application\Controllers\SalesController;
 use Company\Application\Controllers\SalesPerformanceMetricController;
 use Company\Application\Controllers\SalesRankController;
+use Company\Application\Controllers\StrikingAssignmentController;
 use Company\Domain\Model\CompanyUser;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -54,16 +56,35 @@ class Mutation extends ObjectType
     protected function customerAssignmentMutation(): array
     {
         return [
-            'assignMultipleCustomerToMultipleSales' => [
+            'assignGreetingActivityOfCustomerListToSales' => [
                 'type' => TypeRegistry::type(NoResponse::class),
                 'args' => [
                     'salesList' => Type::listOf(Type::id()),
                     'customerList' => Type::listOf(Type::id()),
                     'distributionStrategy' => Type::string(),
-                    'initiateSchedules' => Type::boolean(),
                 ],
-                'resolve' => fn($root, $args) => app(CustomerAssignmentController::class)
-                        ->assignedMultipleCustomerToMultipleSales(app(CompanyUser::class), new GraphqlInputRequest($args))
+                'resolve' => fn($root, $args) => app(GreetingAssignmentController::class)
+                        ->assignGreetingActivityOfCustomerListToSales(app(CompanyUser::class), new GraphqlInputRequest($args))
+            ],
+            'assignFactFindingActivityOfCustomerListToSales' => [
+                'type' => TypeRegistry::type(NoResponse::class),
+                'args' => [
+                    'salesList' => Type::listOf(Type::id()),
+                    'customerList' => Type::listOf(Type::id()),
+                    'distributionStrategy' => Type::string(),
+                ],
+                'resolve' => fn($root, $args) => app(FactFindingAssignmentController::class)
+                        ->assignFactFindingActivityOfCustomerListToSales(app(CompanyUser::class), new GraphqlInputRequest($args))
+            ],
+            'assignStrikingActivityOfCustomerListToSales' => [
+                'type' => TypeRegistry::type(NoResponse::class),
+                'args' => [
+                    'salesList' => Type::listOf(Type::id()),
+                    'customerList' => Type::listOf(Type::id()),
+                    'distributionStrategy' => Type::string(),
+                ],
+                'resolve' => fn($root, $args) => app(StrikingAssignmentController::class)
+                        ->assignStrikingActivityOfCustomerListToSales(app(CompanyUser::class), new GraphqlInputRequest($args))
             ],
         ];
     }

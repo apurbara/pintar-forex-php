@@ -8,12 +8,12 @@ use Doctrine\Common\Collections\Collection;
 use Manager\Domain\DependencyModel\Customer;
 use Manager\Domain\DependencyModel\CustomerJourney;
 use Manager\Domain\Model\Manager;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
+use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment;
 use PHPUnit\Framework\MockObject\MockObject;
-use Resources\Exception\RegularException;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
-use Shared\Domain\Enum\SalesType;
-use Shared\Domain\Event\MultipleCustomerAssignmentReceivedBySales;
+use Shared\Domain\Enum\SalesRole;
 use Shared\Domain\ValueObject\AccountInfo;
 use Tests\TestBase;
 
@@ -21,7 +21,7 @@ class SalesTest extends TestBase
 {
 
     protected $sales, $manager;
-    protected MockObject $customerAssignmentOne, $customerAssignmentTwo;
+    protected MockObject $greetingAssignment, $factFindingAssignment, $strikingAssignment;
     //
     protected $id = 'newId', $salesType;
     protected $customerAssignmentId = 'customerAssignmentId', $customer, $customerJourney;
@@ -30,36 +30,25 @@ class SalesTest extends TestBase
     {
         parent::setUp();
         $this->sales = new TestableSales();
+        $this->sales->role = SalesRole::FACT_FINDER;
         
         $this->manager = $this->buildMockOfClass(Manager::class);
         $this->sales->manager = $this->manager;
         
-        $this->customerAssignmentOne = $this->buildMockOfClass(CustomerAssignment::class);
-        $this->customerAssignmentTwo = $this->buildMockOfClass(CustomerAssignment::class);
+        $this->greetingAssignment = $this->buildMockOfClass(GreetingAssignment::class);
+        $this->sales->greetingAssignments = new ArrayCollection();
+        $this->sales->greetingAssignments->add($this->greetingAssignment);
         
-        $this->sales->customerAssignments = new ArrayCollection();
-        $this->sales->customerAssignments->add($this->customerAssignmentOne);
-        $this->sales->customerAssignments->add($this->customerAssignmentTwo);
-        //
-        $this->salesType = SalesType::FREELANCE->value;
+        $this->factFindingAssignment = $this->buildMockOfClass(FactFindingAssignment::class);
+        $this->sales->factFindingAssignments = new ArrayCollection();
+        $this->sales->factFindingAssignments->add($this->factFindingAssignment);
+        
+        $this->strikingAssignment = $this->buildMockOfClass(StrikingAssignment::class);
+        $this->sales->strikingAssignments = new ArrayCollection();
+        $this->sales->strikingAssignments->add($this->strikingAssignment);
         //
         $this->customer = $this->buildMockOfClass(Customer::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
-    }
-
-    //
-    protected function isInHouseSales()
-    {
-        return $this->sales->isInHouseSales();
-    }
-    public function test_isInHouseSales_inHouseSales_returnTrue()
-    {
-        $this->assertTrue($this->isInHouseSales());
-    }
-    public function test_isInHouseSales_freelanceSales_returnFalse()
-    {
-        $this->sales->type = SalesType::FREELANCE;
-        $this->assertFalse($this->isInHouseSales());
     }
     
     //
@@ -75,6 +64,22 @@ class SalesTest extends TestBase
     public function test_assertActive_activeSales_void()
     {
         $this->assertActive();
+        $this->markAsSuccess();
+    }
+    
+    //
+    protected function assertRoleEquals()
+    {
+        $this->sales->assertRoleEquals(SalesRole::FACT_FINDER);
+    }
+    public function test_assertRoleEquals_differentRole_forbidden()
+    {
+        $this->sales->role = SalesRole::GREETER;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertRoleEquals(), 'Forbidden', 'unmatch role');
+    }
+    public function test_assertRoleEquals_sameRole_void()
+    {
+        $this->assertRoleEquals();
         $this->markAsSuccess();
     }
     
@@ -112,29 +117,40 @@ class SalesTest extends TestBase
     //
     protected function calculateActiveCustomerAssignmentsCount()
     {
-        $this->customerAssignmentOne->expects($this->any())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::ACTIVE);
-        $this->customerAssignmentTwo->expects($this->any())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->greetingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->factFindingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::ACTIVE);
+        $this->strikingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::ACTIVE);
         return $this->sales->calculateActiveCustomerAssignmentsCount();
     }
-    public function test_calculateActiveCustomerAssignmentsCount_returnCustomerAssignmentCount()
+    public function test_calculateActiveCustomerAssignmentsCount_returnFactFindingAssignmentCount()
     {
-        $this->assertEquals(2, $this->calculateActiveCustomerAssignmentsCount());
+        $this->assertEquals(1, $this->calculateActiveCustomerAssignmentsCount());
     }
-    public function test_calculateActiveCustomerAssignmentsCount_containInactiveAssignment_returnActiveCustomerAssignmentCount()
+    public function test_calculateActiveCustomerAssignmentsCount_containInactiveAssignment_excludeInactiveAssignmentCount()
     {
-        $this->customerAssignmentTwo->expects($this->any())
+        $this->factFindingAssignment->expects($this->any())
                 ->method('getStatus')
                 ->willReturn(CustomerAssignmentStatus::CANCELLED);
+        $this->assertEquals(0, $this->calculateActiveCustomerAssignmentsCount());
+    }
+    public function test_calculateActiveCustomerAssignmentsCount_greeterRole_returnGreetingAssignmentCount()
+    {
+        $this->sales->role = SalesRole::GREETER;
+        $this->strikingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
+        $this->factFindingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
+        $this->assertEquals(1, $this->calculateActiveCustomerAssignmentsCount());
+    }
+    public function test_calculateActiveCustomerAssignmentsCount_strikerRole_returnGreetingAssignmentCount()
+    {
+        $this->sales->role = SalesRole::STRIKER;
+        $this->greetingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
+        $this->factFindingAssignment->expects($this->any())->method('getStatus')->willReturn(CustomerAssignmentStatus::CANCELLED_BY_SYSTEM);
         $this->assertEquals(1, $this->calculateActiveCustomerAssignmentsCount());
     }
     public function test_calculateActiveCustomerAssignmentsCount_setActiveAssignmentCount()
     {
         $this->calculateActiveCustomerAssignmentsCount();
-        $this->assertEquals(2, $this->sales->activeCustomerAssignmentCount);
+        $this->assertEquals(1, $this->sales->activeCustomerAssignmentCount);
     }
     public function test_calculateActiveCustomerAssignmentsCount_activeAssignmentCountAlreadyExist_returnExistingCount()
     {
@@ -143,63 +159,15 @@ class SalesTest extends TestBase
     }
     
     //
-    protected function receiveCustomerAssignment()
-    {
-        return $this->sales->receiveCustomerAssignment($this->customerAssignmentId, $this->customer, $this->customerJourney);
-    }
-    public function test_receiveCustomerAssignment_returnCustomerAssignment()
-    {
-        $this->assertInstanceOf(CustomerAssignment::class, $this->receiveCustomerAssignment());
-    }
-    public function test_receiveCustomerAssignment_storeEvent()
-    {
-        $this->receiveCustomerAssignment();
-        $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addCustomerAssignmentId($this->customerAssignmentId);
-        $this->assertEquals($event, $this->sales->recordedEvents[0]);
-    }
-    public function test_receiveCustomerAssignment_consecutiveAssignmentReceived_storeEvent()
-    {
-        $otherCustomer = $this->buildMockOfClass(Customer::class);
-        $this->sales->receiveCustomerAssignment($customerAssignmentId = 'assignedCusstomerId', $this->customer, $this->customerJourney);
-        $this->sales->receiveCustomerAssignment($otherCustomerAssignmentId = 'otherCustomerAssignmentId', $otherCustomer, $this->customerJourney);
-        $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addCustomerAssignmentId($customerAssignmentId)
-                ->addCustomerAssignmentId($otherCustomerAssignmentId);
-        $this->assertEquals($event, $this->sales->recordedEvents[0]);
-    }
-    public function test_receiveCustomerAssignment_consecutiveAssignmentReceived_storeOnlySingleEvent()
-    {
-        $otherCustomer = $this->buildMockOfClass(Customer::class);
-        $this->sales->receiveCustomerAssignment($customerAssignmentId = 'assignedCusstomerId', $this->customer, $this->customerJourney);
-        $this->sales->receiveCustomerAssignment($otherCustomerAssignmentId = 'otherCustomerAssignmentId', $otherCustomer, $this->customerJourney);
-        $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addCustomerAssignmentId($customerAssignmentId)
-                ->addCustomerAssignmentId($otherCustomerAssignmentId);
-        $this->assertEquals($event, $this->sales->recordedEvents[0]);
-        $this->assertEquals(1, count($this->sales->recordedEvents));
-    }
-    public function test_receiveCustomerAssignment_incrementActiveAssignmentValue()
-    {
-        $this->receiveCustomerAssignment();
-        $this->assertSame(1, $this->sales->activeCustomerAssignmentCount);
-        $this->sales->activeCustomerAssignmentCount = 3;
-        $this->receiveCustomerAssignment();
-        $this->assertSame(4, $this->sales->activeCustomerAssignmentCount);
-    }
-    public function test_receiveCustomerAssignment_consecutiveAssignmentReceived_assignmentCausedError_ignoreFailAssignment()
+    protected function incrementActiveAssignmentCount()
     {
         $this->sales->activeCustomerAssignmentCount = 3;
-        $this->customer->expects($this->any())
-                ->method('assertHasNoActiveAssignment')
-                ->willThrowException(RegularException::forbidden('unassignable customer'));
-        $this->receiveCustomerAssignment();
-        $otherCustomer = $this->buildMockOfClass(Customer::class);
-        $this->sales->receiveCustomerAssignment($otherCustomerAssignmentId = 'otherCustomerAssignmentId', $otherCustomer, $this->customerJourney);
-        $event = (new MultipleCustomerAssignmentReceivedBySales($this->sales->id))
-                ->addCustomerAssignmentId($otherCustomerAssignmentId);
-        $this->assertEquals($event, $this->sales->recordedEvents[0]);
-        $this->assertSame(4, $this->sales->activeCustomerAssignmentCount);
+        $this->sales->incrementActiveAssignmentCount();
+    }
+    public function test_incrementActiveAssignmentCount_incrementActiveAssignmentCount()
+    {
+        $this->incrementActiveAssignmentCount();
+        $this->assertEquals(4, $this->sales->activeCustomerAssignmentCount);
     }
 }
 
@@ -210,14 +178,13 @@ class TestableSales extends Sales
     public DateTimeImmutable $createdTime;
     public ?DateTimeImmutable $contractTerminatedTime;
     public bool $contractTerminated = false;
-    public SalesType $type = SalesType::IN_HOUSE;
     public AccountInfo $accountInfo;
-    public Collection $customerAssignments;
-    //
-    public $recordedEvents;
+    public SalesRole $role;
+    public Collection $greetingAssignments;
+    public Collection $factFindingAssignments;
+    public Collection $strikingAssignments;
     //
     public ?int $activeCustomerAssignmentCount = null;
-    public ?MultipleCustomerAssignmentReceivedBySales $multipleCustomerAssignmentReceivedBySalesEvent;
     
     function __construct()
     {

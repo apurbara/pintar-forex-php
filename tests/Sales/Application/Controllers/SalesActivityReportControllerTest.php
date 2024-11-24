@@ -8,6 +8,9 @@ use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
+use Sales\Domain\Model\Sales\FactFindingAssignment;
+use Sales\Domain\Model\Sales\GreetingAssignment;
+use Sales\Domain\Model\Sales\StrikingAssignment;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
@@ -18,14 +21,15 @@ class SalesActivityReportControllerTest extends SalesControllerTestCase
     
     protected $customer;
     
-    protected $customerAssignment;
+    protected $greetingAssignment, $factFindingAssignment, $strikingAssignment, $customerAssignment;
     
     protected $salesActivitySchedule;
     
     protected $salesActivityReportOne;
     protected $salesActivityReportTwo;
     
-    protected $submitReportRequest;
+    protected $submitNonScheduledSalesActivityReportPayload;
+    protected $submitSalesActivityReportPayload;
 
     protected function setUp(): void
     {
@@ -33,6 +37,9 @@ class SalesActivityReportControllerTest extends SalesControllerTestCase
         $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('GreetingAssignment')->truncate();
+        $this->connection->table('FactFindingAssignment')->truncate();
+        $this->connection->table('StrikingAssignment')->truncate();
         $this->connection->table('SalesActivitySchedule')->truncate();
         $this->connection->table('SalesActivityReport')->truncate();
         
@@ -41,11 +48,27 @@ class SalesActivityReportControllerTest extends SalesControllerTestCase
         $this->customer = new EntityRecord(Customer::class, 'main');
         
         $this->customerAssignment = new EntityRecord(CustomerAssignment::class, 'main');
-        $this->customerAssignment->columns['Customer_id'] = $this->customer->columns['id'];
-        $this->customerAssignment->columns['Sales_id'] = $this->sales->columns['id'];
+        
+        $this->greetingAssignment = new EntityRecord(GreetingAssignment::class, 'main');
+        $this->greetingAssignment->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->greetingAssignment->columns['id'] = $this->customerAssignment->columns['id'];
+        $this->greetingAssignment->columns['Customer_id'] = $this->customer->columns['id'];
+        $this->greetingAssignment->columns['Sales_id'] = $this->sales->columns['id'];
+        
+        $this->factFindingAssignment = new EntityRecord(FactFindingAssignment::class, 'main');
+        $this->factFindingAssignment->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->factFindingAssignment->columns['id'] = $this->customerAssignment->columns['id'];
+        $this->factFindingAssignment->columns['Customer_id'] = $this->customer->columns['id'];
+        $this->factFindingAssignment->columns['Sales_id'] = $this->sales->columns['id'];
+        
+        $this->strikingAssignment = new EntityRecord(StrikingAssignment::class, 'main');
+        $this->strikingAssignment->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->strikingAssignment->columns['id'] = $this->customerAssignment->columns['id'];
+        $this->strikingAssignment->columns['Customer_id'] = $this->customer->columns['id'];
+        $this->strikingAssignment->columns['Sales_id'] = $this->sales->columns['id'];
         
         $this->salesActivitySchedule = new EntityRecord(SalesActivitySchedule::class, 'main');
-        $this->salesActivitySchedule->columns['CustomerAssignment_id'] = $this->customerAssignment->columns['id'];
+        $this->salesActivitySchedule->columns['CustomerAssignment_id'] = $this->greetingAssignment->columns['id'];
         $this->salesActivitySchedule->columns['SalesActivity_id'] = $this->salesActivity->columns['id'];
         
         $this->salesActivityReportOne = new EntityRecord(SalesActivityReport::class, 1);
@@ -53,57 +76,77 @@ class SalesActivityReportControllerTest extends SalesControllerTestCase
         $this->salesActivityReportTwo = new EntityRecord(SalesActivityReport::class, 2);
         $this->salesActivityReportTwo->columns['SalesActivitySchedule_id'] = $this->salesActivitySchedule->columns['id'];
         
-        $this->submitReportRequest = [
-            'content' => 'next report content',
+        $this->submitNonScheduledSalesActivityReportPayload = [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'SalesActivity_id' => $this->salesActivity->columns['id'],
+            'content' => 'new report content',
+        ];
+        
+        $this->submitSalesActivityReportPayload = [
+            'SalesActivitySchedule_id' => $this->salesActivitySchedule->columns['id'],
+            'content' => 'report content',
         ];
     }
     protected function tearDown(): void
     {
-        parent::tearDown();
-        $this->connection->table('SalesActivity')->truncate();
-        $this->connection->table('Customer')->truncate();
-        $this->connection->table('CustomerAssignment')->truncate();
-        $this->connection->table('SalesActivitySchedule')->truncate();
-        $this->connection->table('SalesActivityReport')->truncate();
+//        parent::tearDown();
+//        $this->connection->table('SalesActivity')->truncate();
+//        $this->connection->table('Customer')->truncate();
+//        $this->connection->table('CustomerAssignment')->truncate();
+//        $this->connection->table('GreetingAssignment')->truncate();
+//        $this->connection->table('FactFindingAssignment')->truncate();
+//        $this->connection->table('StrikingAssignment')->truncate();
+//        $this->connection->table('SalesActivitySchedule')->truncate();
+//        $this->connection->table('SalesActivityReport')->truncate();
     }
     
-    protected function submitInitialSalesActivityReport()
+    //
+    protected function submitNonScheduleGreetingActivityReport()
     {
         $this->prepareSalesDependency();
-        $this->salesActivity->columns['initial'] = true;
         $this->salesActivity->insert($this->connection);
+        
         $this->customerAssignment->insert($this->connection);
+        $this->greetingAssignment->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $CustomerAssignment_id: ID, $content: String ) {
-    submitInitialSalesActivityReport ( CustomerAssignment_id: $CustomerAssignment_id, content: $content ) {
-        id, status, startTime, endTime,
-        salesActivity { name }
-        salesActivityReport { content }
+mutation (
+    $CustomerAssignment_id: ID, 
+    $SalesActivity_id: ID, 
+    $content: String
+) {
+    submitNonScheduleGreetingActivityReport (
+        CustomerAssignment_id: $CustomerAssignment_id, 
+        SalesActivity_id: $SalesActivity_id, 
+        content: $content
+    ) {
+        id, content, submitTime,
+        salesActivitySchedule {
+            startTime, endTime, status
+            salesActivity { name },
+        }
     }
 }
 _QUERY;
-        $this->graphqlVariables = [
-            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
-            'content' => 'new report content',
-        ];
+        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
         $this->postGraphqlRequest($this->sales->token);
     }
-    public function test_submitInitialSalesActivityReport_200()
+    public function test_submitNonScheduleGreetingActivityReport_200()
     {
 $this->disableExceptionHandling();
-        $this->submitInitialSalesActivityReport();
+        $this->submitNonScheduleGreetingActivityReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
-            'status' => SalesActivityScheduleStatus::COMPLETED->value,
-            'startTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s')),
-            'endTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H') + 1, 00)->format('Y-m-d H:i:s')),
-            'salesActivity' => [
-                'name' => $this->salesActivity->columns['name'],
-            ],
-            'salesActivityReport' => [
-                'content' => $this->graphqlVariables['content'],
+            'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
+            'submitTime' => $this->jakartaDateTimeFormat((new DateTime())->format('Y-m-d H:i:s')),
+            'salesActivitySchedule' => [
+                'startTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s')),
+                'endTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H') + 1, 00)->format('Y-m-d H:i:s')),
+                'status' => SalesActivityScheduleStatus::COMPLETED->value,
+                'salesActivity' => [
+                    'name' => $this->salesActivity->columns['name'],
+                ],
             ],
         ]);
         
@@ -116,16 +159,143 @@ $this->disableExceptionHandling();
         
         $this->seeInDatabase('SalesActivityReport', [
             'submitTime' => $this->stringOfCurrentTime(),
-            'content' => $this->graphqlVariables['content'],
+            'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
         ]);
     }
     
     //
-    protected function submitReport()
+    protected function submitNonScheduleFactFindingActivityReport()
+    {
+        $this->prepareSalesDependency();
+        $this->salesActivity->insert($this->connection);
+        
+        $this->customerAssignment->insert($this->connection);
+        $this->factFindingAssignment->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $CustomerAssignment_id: ID, 
+    $SalesActivity_id: ID, 
+    $content: String
+) {
+    submitNonScheduleFactFindingActivityReport (
+        CustomerAssignment_id: $CustomerAssignment_id, 
+        SalesActivity_id: $SalesActivity_id, 
+        content: $content
+    ) {
+        id, content, submitTime,
+        salesActivitySchedule {
+            startTime, endTime, status
+            salesActivity { name },
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_submitNonScheduleFactFindingActivityReport_200()
+    {
+$this->disableExceptionHandling();
+        $this->submitNonScheduleFactFindingActivityReport();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
+            'submitTime' => $this->jakartaDateTimeFormat((new DateTime())->format('Y-m-d H:i:s')),
+            'salesActivitySchedule' => [
+                'startTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s')),
+                'endTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H') + 1, 00)->format('Y-m-d H:i:s')),
+                'status' => SalesActivityScheduleStatus::COMPLETED->value,
+                'salesActivity' => [
+                    'name' => $this->salesActivity->columns['name'],
+                ],
+            ],
+        ]);
+        
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'status' => SalesActivityScheduleStatus::COMPLETED->value,
+            'startTime' => (new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s'),
+            'endTime' => (new DateTime())->setTime((new DateTime())->format('H')+1, 00)->format('Y-m-d H:i:s'),
+        ]);
+        
+        $this->seeInDatabase('SalesActivityReport', [
+            'submitTime' => $this->stringOfCurrentTime(),
+            'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
+        ]);
+    }
+    
+    //
+    protected function submitNonScheduleStrikingActivityReport()
+    {
+        $this->prepareSalesDependency();
+        $this->salesActivity->insert($this->connection);
+        
+        $this->customerAssignment->insert($this->connection);
+        $this->strikingAssignment->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $CustomerAssignment_id: ID, 
+    $SalesActivity_id: ID, 
+    $content: String
+) {
+    submitNonScheduleStrikingActivityReport (
+        CustomerAssignment_id: $CustomerAssignment_id, 
+        SalesActivity_id: $SalesActivity_id, 
+        content: $content
+    ) {
+        id, content, submitTime,
+        salesActivitySchedule {
+            startTime, endTime, status
+            salesActivity { name },
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_submitNonScheduleStrikingActivityReport_200()
+    {
+$this->disableExceptionHandling();
+        $this->submitNonScheduleStrikingActivityReport();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
+            'submitTime' => $this->jakartaDateTimeFormat((new DateTime())->format('Y-m-d H:i:s')),
+            'salesActivitySchedule' => [
+                'startTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s')),
+                'endTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H') + 1, 00)->format('Y-m-d H:i:s')),
+                'status' => SalesActivityScheduleStatus::COMPLETED->value,
+                'salesActivity' => [
+                    'name' => $this->salesActivity->columns['name'],
+                ],
+            ],
+        ]);
+        
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'status' => SalesActivityScheduleStatus::COMPLETED->value,
+            'startTime' => (new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s'),
+            'endTime' => (new DateTime())->setTime((new DateTime())->format('H')+1, 00)->format('Y-m-d H:i:s'),
+        ]);
+        
+        $this->seeInDatabase('SalesActivityReport', [
+            'submitTime' => $this->stringOfCurrentTime(),
+            'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
+        ]);
+    }
+    
+    //
+    protected function submitSalesActivityReport()
     {
         $this->prepareSalesDependency();
         $this->salesActivity->insert($this->connection);
         $this->customerAssignment->insert($this->connection);
+        $this->greetingAssignment->insert($this->connection);
         $this->salesActivitySchedule->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
@@ -135,104 +305,23 @@ mutation ( $SalesActivitySchedule_id: ID!, $content: String ) {
     }
 }
 _QUERY;
-        $this->graphqlVariables = [
-            'SalesActivitySchedule_id' => $this->salesActivitySchedule->columns['id'],
-            ...$this->submitReportRequest
-        ];
+        $this->graphqlVariables = $this->submitSalesActivityReportPayload;
         $this->postGraphqlRequest($this->sales->token);
     }
-    public function test_submitSchedule_200()
+    public function test_submitSalesActivityReport_200()
     {
-        $this->submitReport();
+        $this->submitSalesActivityReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
-            'content' => $this->submitReportRequest['content'],
+            'content' => $this->submitSalesActivityReportPayload['content'],
             'submitTime' => $this->stringOfJakartaCurrentTime(),
         ]);
         
         $this->seeInDatabase('SalesActivityReport', [
             'SalesActivitySchedule_id' => $this->salesActivitySchedule->columns['id'],
-            'content' => $this->submitReportRequest['content'],
+            'content' => $this->submitSalesActivityReportPayload['content'],
             'submitTime' => $this->stringOfJakartaCurrentTime(),
-        ]);
-    }
-    
-    //
-    protected function viewList()
-    {
-        $this->prepareSalesDependency();
-        
-        $this->salesActivity->insert($this->connection);
-        $this->customer->insert($this->connection);
-        $this->customerAssignment->insert($this->connection);
-        $this->salesActivitySchedule->insert($this->connection);
-        
-        $this->salesActivityReportOne->insert($this->connection);
-        $this->salesActivityReportTwo->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-query {
-    salesActivityReportList {
-        list { id, submitTime, content },
-        cursorLimit { total, cursorToNextPage }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = $this->getPaginationInput();
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_viewList_200()
-    {
-        $this->viewList();
-        $this->seeJsonContains([
-            'list' => [
-                [
-                    'id' => $this->salesActivityReportOne->columns['id'],
-                    'content' => $this->salesActivityReportOne->columns['content'],
-                    'submitTime' => $this->jakartaDateTimeFormat($this->salesActivityReportOne->columns['submitTime']),
-                ],
-                [
-                    'id' => $this->salesActivityReportTwo->columns['id'],
-                    'content' => $this->salesActivityReportTwo->columns['content'],
-                    'submitTime' => $this->jakartaDateTimeFormat($this->salesActivityReportTwo->columns['submitTime']),
-                ],
-            ],
-            'cursorLimit' => [
-                'total' => 2,
-                'cursorToNextPage' => null,
-            ],
-        ]);
-    }
-    
-    //
-    protected function viewDetail()
-    {
-        $this->prepareSalesDependency();
-        $this->salesActivity->insert($this->connection);
-        $this->customer->insert($this->connection);
-        $this->customerAssignment->insert($this->connection);
-        $this->salesActivitySchedule->insert($this->connection);
-        
-        $this->salesActivityReportOne->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-query ( $id: ID!) {
-    salesActivityReportDetail ( id: $id ) {
-        id, content, submitTime
-    }
-}
-_QUERY;
-        $this->graphqlVariables['id'] = $this->salesActivityReportOne->columns['id'];
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_viewDetail_200()
-    {
-        $this->viewDetail();
-        $this->seeJsonContains([
-            'id' => $this->salesActivityReportOne->columns['id'],
-            'content' => $this->salesActivityReportOne->columns['content'],
-            'submitTime' => $this->jakartaDateTimeFormat($this->salesActivityReportOne->columns['submitTime']),
         ]);
     }
 }

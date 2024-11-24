@@ -3,16 +3,16 @@
 namespace Sales\Domain\Task\ClosingRequest;
 
 use Sales\Domain\Model\Sales;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
-use Sales\Domain\Task\CustomerAssignment\CustomerAssignmentRepository;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequestData;
 use Sales\Domain\Task\SalesTask;
+use Sales\Domain\Task\StrikingAssignment\StrikingAssignmentRepository;
 
 class SubmitClosingRequestTask implements SalesTask
 {
 
     public function __construct(
             protected ClosingRequestRepository $closingRequestRepository,
-            protected CustomerAssignmentRepository $customerAssignmentRepository)
+            protected StrikingAssignmentRepository $strikingAssignmentRepository)
     {
         
     }
@@ -27,10 +27,10 @@ class SubmitClosingRequestTask implements SalesTask
     {
         $payload->setId($this->closingRequestRepository->nextIdentity());
 
-        $customerAssignment = $this->customerAssignmentRepository->ofId($payload->customerAssignmentId);
-        $customerAssignment->assertBelongsToSales($sales);
+        $strikingAssignment = $this->strikingAssignmentRepository->ofId($payload->strikingAssignmentId);
+        $strikingAssignment->assertBelongsToSales($sales);
 
-        $closingRequest = $customerAssignment->submitClosingRequest($payload);
+        $closingRequest = new Sales\StrikingAssignment\ClosingRequest($strikingAssignment, $payload->id, $payload);
         $this->closingRequestRepository->add($closingRequest);
     }
 }

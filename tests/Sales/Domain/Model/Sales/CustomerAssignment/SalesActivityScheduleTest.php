@@ -6,9 +6,6 @@ use DateTimeImmutable;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment;
-use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
-use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
-use Sales\Domain\Service\SalesActivitySchedulerService;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Shared\Domain\ValueObject\HourlyTimeInterval;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
@@ -24,8 +21,6 @@ class SalesActivityScheduleTest extends TestBase
     protected $id = 'newId', $hourlyTimeIntervalData;
     //
     protected $sales;
-    //
-    protected $schedulerService, $startTime;
 
     protected function setUp(): void
     {
@@ -36,28 +31,24 @@ class SalesActivityScheduleTest extends TestBase
         $this->hourlyTimeIntervalData = new HourlyTimeIntervalData('next week');
         $data = (new SalesActivityScheduleData(new HourlyTimeIntervalData('tomorrow')))->setId('id');
         $this->salesActivitySchedule = new TestableSalesActivitySchedule($this->customerAssignment,
-                $this->salesActivity, $data);
+                $this->salesActivity, 'id', $data);
         
         $this->schedule = $this->buildMockOfClass(HourlyTimeInterval::class);
         $this->salesActivitySchedule->schedule = $this->schedule;
         //
         $this->sales = $this->buildMockOfClass(Sales::class);
-        //
-        $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
-        $this->startTime = new DateTimeImmutable('tomorrow');
     }
 
     //
     protected function createData()
     {
-        return (new SalesActivityScheduleData($this->hourlyTimeIntervalData))
-                ->setId($this->id);
+        return (new SalesActivityScheduleData($this->hourlyTimeIntervalData));
     }
     
     //
     protected function construct()
     {
-        return new TestableSalesActivitySchedule($this->customerAssignment, $this->salesActivity, $this->createData());
+        return new TestableSalesActivitySchedule($this->customerAssignment, $this->salesActivity, $this->id, $this->createData());
     }
     public function test_construct_setProperties()
     {
@@ -88,39 +79,19 @@ class SalesActivityScheduleTest extends TestBase
     }
     
     //
-    protected function getActivityDuration()
+    protected function assertIncomplete()
     {
-        return $this->salesActivitySchedule->getActivityDuration();
+        $this->salesActivitySchedule->assertIncomplete();
     }
-    public function test_getActivityDuration_returnSalesActivityDuration()
+    public function test_assertIncomplete_nonScheduled_forbidden()
     {
-        $this->salesActivity->expects($this->once())
-                ->method('getDuration')
-                ->willReturn(7);
-        $this->assertSame(7, $this->getActivityDuration());
+        $this->salesActivitySchedule->status = SalesActivityScheduleStatus::COMPLETED;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertIncomplete(), 'Forbidden', 'schedule already completed');
     }
-    
-    //
-    protected function isRelocateable()
+    public function test_assertIncompleted_scheduledStatus_void()
     {
-        return $this->salesActivitySchedule->isRelocateable();
-    }
-    public function test_isRelocateable_returnSalesActivityInitialStatus()
-    {
-        $this->salesActivity->expects($this->once())
-                ->method('isInitial');
-        $this->isRelocateable();
-    }
-    
-    //
-    protected function relocateTo()
-    {
-        $this->salesActivitySchedule->relocateTo($this->startTime);
-    }
-    public function test_relocateTo_updateSchedule()
-    {
-        $this->relocateTo();
-        $this->assertEquals(new HourlyTimeInterval(new HourlyTimeIntervalData($this->startTime->format('Y-m-d H:i:s'))), $this->salesActivitySchedule->schedule);
+        $this->assertIncomplete();
+        $this->markAsSuccess();
     }
     
     //
@@ -128,79 +99,19 @@ class SalesActivityScheduleTest extends TestBase
     {
         $this->salesActivitySchedule->assertBelongsToSales($this->sales);
     }
-    public function test_assertBelongsToSales_assetCustomerAssignmentBelongsToSales()
+    public function test_assertBelongsToSales_customerAssignmentDoesNotBelongsToSales_forbidden()
+    {
+        $this->assertRegularExceptionThrowed(fn() => $this->assertBelongsToSales(), 'Forbidden', 'unmanaged schedule');
+    }
+    public function test_assertBelongsToSales_customerAssignmentBelongsToSales_void()
     {
         $this->customerAssignment->expects($this->once())
-                ->method('assertBelongsToSales')
-                ->with($this->sales);
+                ->method('isBelongsToSales')
+                ->with($this->sales)
+                ->willReturn(true);
         $this->assertBelongsToSales();
     }
     
-    //
-    protected function submitReport()
-    {
-        $salesActivityReportData = (new SalesActivityReportData('report content'))->setId('reportId');
-        return $this->salesActivitySchedule->submitReport($salesActivityReportData);
-    }
-    public function test_submitReport_returnReport()
-    {
-        $this->assertInstanceOf(SalesActivityReport::class, $this->submitReport());
-    }
-    public function test_submitReport_setStatusCompleted()
-    {
-        $this->submitReport();
-        $this->assertSame(SalesActivityScheduleStatus::COMPLETED, $this->salesActivitySchedule->status);
-    }
-    public function test_submitReport_nonScheduledStatus_forbidden()
-    {
-        $this->salesActivitySchedule->status = SalesActivityScheduleStatus::COMPLETED;
-        $this->assertRegularExceptionThrowed(fn() => $this->submitReport(), 'Forbidden', 'schedule concluded');
-    }
-    
-    //
-    protected function includeInSchedulerService()
-    {
-        $this->schedule->expects($this->any())
-                ->method('getStartTime')
-                ->willReturn($this->startTime);
-        $this->salesActivitySchedule->includeInSchedulerService($this->schedulerService);
-    }
-    public function test_includeInSchedulerService_addToScheduler()
-    {
-        $this->schedulerService->expects($this->once())
-                ->method('add')
-                ->with($this->startTime, $this->salesActivitySchedule);
-        $this->includeInSchedulerService();
-    }
-    public function test_includeInSchedulerService_notUpcomingScheduler_excludeFromScheduler()
-    {
-        $this->startTime = new DateTimeImmutable('yesterday');
-        $this->schedulerService->expects($this->never())
-                ->method('add')
-                ->with($this->startTime, $this->salesActivitySchedule);
-        $this->includeInSchedulerService();
-    }
-    
-    //
-    protected function relocateConflictedInitialScheduleIfDurationNotEnough()
-    {
-        $this->salesActivitySchedule->relocateConflictedInitialScheduleIfDurationNotEnough($this->schedulerService);
-    }
-    public function test_relocateConflictedInitialScheduleIfDurationNotEnough_attemptToReleaseRequiredDurationFromSchedulerService()
-    {
-        $startTime = new DateTimeImmutable();
-        $duration = 25;
-        $this->schedule->expects($this->once())
-                ->method('getStartTime')
-                ->willReturn($startTime);
-        $this->salesActivity->expects($this->once())
-                ->method('getDuration')
-                ->willReturn($duration);
-        $this->schedulerService->expects($this->once())
-                ->method('releaseRequiredDurationInTimeSlotOrDie')
-                ->with($startTime, $duration);
-        $this->relocateConflictedInitialScheduleIfDurationNotEnough();
-    }
 }
 
 class TestableSalesActivitySchedule extends SalesActivitySchedule

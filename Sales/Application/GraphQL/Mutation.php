@@ -11,17 +11,16 @@ use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Application\Controllers\AccountController;
 use Sales\Application\Controllers\ClosingRequestController;
-use Sales\Application\Controllers\CustomerAssignmentController;
-use Sales\Application\Controllers\CustomerController;
+use Sales\Application\Controllers\FactFindingAssignmentController;
+use Sales\Application\Controllers\GreetingAssignmentController;
 use Sales\Application\Controllers\LoginController;
-use Sales\Application\Controllers\RecycleRequestController;
 use Sales\Application\Controllers\SalesActivityReportController;
 use Sales\Application\Controllers\SalesActivityScheduleController;
-use Sales\Application\Controllers\VerificationReportController;
+use Sales\Application\Controllers\StrikingAssignmentController;
 use Sales\Application\GraphQL\Object\SalesLoginResponse;
 use Sales\Domain\DependencyModel\Customer\VerificationReport;
 use Sales\Domain\Model\Sales;
-use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
+use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use function app;
 
 class Mutation extends ObjectType
@@ -40,35 +39,26 @@ class Mutation extends ObjectType
             ...$this->login(),
             ...$this->accountMutation(),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(AccountController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(CustomerAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(GreetingAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(FactFindingAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(StrikingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityReportController::class),
+            ...$this->submitNonScheduleActivityReport(),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityScheduleController::class),
-            ...ControllerToGraphqlFieldsMapper::mapMutationFields(VerificationReportController::class),
             'submitCustomerVerificationReport' => [
                 'type' => TypeRegistry::objectType(VerificationReport::class),
                 'args' => [
                     ...DoctrineEntityToGraphqlFieldMapper::mapInputFields(VerificationReport::class),
-                    'CustomerAssignment_id' => Type::id(),
+                    'FactFindingAssignment_id' => Type::id(),
                 ],
-                'resolve' => fn($root, $args) => app(VerificationReportController::class)
-                        ->submitCustomerVerificationReport(app(Sales::class), $args['CustomerAssignment_id'],
+                'resolve' => fn($root, $args) => app(FactFindingAssignmentController::class)
+                        ->submitCustomerVerificationReport(app(Sales::class), $args['FactFindingAssignment_id'],
                                 new GraphqlInputRequest($args))
-            ],
-            'submitInitialSalesActivityReport' => [
-                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
-                'args' => [
-                    'content' => Type::string(),
-                    'CustomerAssignment_id' => Type::id(),
-                ],
-                'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
-                        ->submitInitialSalesActivityReport(app(Sales::class), new GraphqlInputRequest($args))
             ],
         ];
     }
-    
+
     protected function login(): array
     {
         return [
@@ -94,6 +84,45 @@ class Mutation extends ObjectType
                 ],
                 'resolve' => fn($root, $args) => app(AccountController::class)
                         ->changePassword(app(Sales::class), new GraphqlInputRequest($args))
+            ],
+        ];
+    }
+
+    protected function submitNonScheduleActivityReport(): array
+    {
+        return [
+            'submitNonScheduleGreetingActivityReport' => [
+                'type' => TypeRegistry::objectType(SalesActivityReport::class),
+                'args' => [
+                    'content' => Type::string(),
+                    'CustomerAssignment_id' => Type::id(),
+                    'SalesActivity_id' => Type::id(),
+                ],
+                'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
+                        ->submitNonScheduleGreetingActivityReport(
+                                app(Sales::class), $args['CustomerAssignment_id'], new GraphqlInputRequest($args)),
+            ],
+            'submitNonScheduleFactFindingActivityReport' => [
+                'type' => TypeRegistry::objectType(SalesActivityReport::class),
+                'args' => [
+                    'content' => Type::string(),
+                    'CustomerAssignment_id' => Type::id(),
+                    'SalesActivity_id' => Type::id(),
+                ],
+                'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
+                        ->submitNonScheduleFactFindingActivityReport(
+                                app(Sales::class), $args['CustomerAssignment_id'], new GraphqlInputRequest($args)),
+            ],
+            'submitNonScheduleStrikingActivityReport' => [
+                'type' => TypeRegistry::objectType(SalesActivityReport::class),
+                'args' => [
+                    'content' => Type::string(),
+                    'CustomerAssignment_id' => Type::id(),
+                    'SalesActivity_id' => Type::id(),
+                ],
+                'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
+                        ->submitNonScheduleStrikingActivityReport(
+                                app(Sales::class), $args['CustomerAssignment_id'], new GraphqlInputRequest($args)),
             ],
         ];
     }

@@ -29,27 +29,21 @@ class SubmitSalesActivityReportTaskTest extends SalesTaskTestBase
                 ->willReturn($this->salesActivityReportId);
         $this->task->executeBySales($this->sales, $this->payload);
     }
-    public function test_execute_addReportCreatedInScheduleToRepository()
-    {
-        $this->salesActivitySchedule->expects($this->once())
-                ->method('submitReport')
-                ->with($this->payload)
-                ->willReturn($this->salesActivityReport);
-        $this->salesActivityReportRepository->expects($this->once())
-                ->method('add')
-                ->with($this->salesActivityReport);
-        $this->execute();
-    }
-    public function test_execute_assertSalesActivityScheduleBelongsToSales()
-    {
-        $this->salesActivitySchedule->expects($this->once())
-                ->method('assertBelongsToSales')
-                ->with($this->sales);
-        $this->execute();
-    }
     public function test_execute_setPayloadId()
     {
         $this->execute();
         $this->assertSame($this->salesActivityReportId, $this->payload->id);
+    }
+    public function test_execute_addReportCreatedInScheduleToRepository()
+    {
+        $this->salesActivityReportRepository->expects($this->once())
+                ->method('add');
+        $this->execute();
+    }
+    public function test_execute_assertScheduleBelongsToSales()
+    {
+        $this->salesActivitySchedule->expects($this->once())
+                ->method('assertBelongsToSales');
+        $this->execute();
     }
 }

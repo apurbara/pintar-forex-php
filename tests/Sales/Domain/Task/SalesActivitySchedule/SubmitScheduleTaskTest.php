@@ -2,29 +2,33 @@
 
 namespace Sales\Domain\Task\SalesActivitySchedule;
 
+use Sales\Domain\Model\Sales\ContainCustomerAssignmentInterface;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
-use Sales\Domain\Service\SalesActivitySchedulerService;
+use Sales\Domain\Task\Dependency\ContainCustomerAssignmentRepository;
 use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class SubmitScheduleTaskTest extends SalesTaskTestBase
 {
-
-    protected $task, $schedulerService;
+    protected $containCustomerAssignmentRepository, $containCustomerAssignment, $customerAssignmentId = 'customerAssignmentId';
+    protected $task;
     protected $payload;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->prepareSalesActivityScheduleDependency();
-        $this->prepareCustomerAssignmentDependency();
         $this->prepareSalesActivityDependency();
+        $this->containCustomerAssignmentRepository = $this->buildMockOfInterface(ContainCustomerAssignmentRepository::class);
+        $this->containCustomerAssignment = $this->buildMockOfInterface(ContainCustomerAssignmentInterface::class);
+        $this->containCustomerAssignmentRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerAssignmentId)
+                ->willReturn($this->containCustomerAssignment);
         
-        $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
-
         $this->task = new SubmitScheduleTask($this->salesActivityScheduleRepository,
-                $this->customerAssignmentRepository, $this->salesActivityRepository, $this->schedulerService);
+                $this->containCustomerAssignmentRepository, $this->salesActivityRepository);
 
         //
         $timeIntervalData = new HourlyTimeIntervalData('next week');
@@ -42,11 +46,16 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
         
         $this->task->executeBySales($this->sales, $this->payload);
     }
+    public function test_execute_setPayloadId()
+    {
+        $this->execute();
+        $this->assertSame($this->salesActivityScheduleId, $this->payload->id);
+    }
     public function test_execute_addScheduledCreatedInCustomerAssignmentToRepository()
     {
-        $this->customerAssignment->expects($this->once())
+        $this->containCustomerAssignment->expects($this->once())
                 ->method('submitSalesActivitySchedule')
-                ->with($this->salesActivity, $this->payload)
+                ->with($this->salesActivity, $this->salesActivityScheduleId, $this->payload)
                 ->willReturn($this->salesActivitySchedule);
         $this->salesActivityScheduleRepository->expects($this->once())
                 ->method('add')
@@ -55,32 +64,9 @@ class SubmitScheduleTaskTest extends SalesTaskTestBase
     }
     public function test_execute_assertCustomerAssignmentBelongsToSales()
     {
-        $this->customerAssignment->expects($this->once())
+        $this->containCustomerAssignment->expects($this->once())
                 ->method('assertBelongsToSales')
                 ->with($this->sales);
-        $this->execute();
-    }
-    public function test_execute_setPayloadId()
-    {
-        $this->execute();
-        $this->assertSame($this->salesActivityScheduleId, $this->payload->id);
-    }
-    public function test_execute_registerAllUpcomingScheduleToScheduler()
-    {
-        $this->sales->expects($this->once())
-                ->method('registerAllUpcomingScheduleToScheduler')
-                ->with($this->schedulerService);
-        $this->execute();
-    }
-    public function test_execute_attemptToRelocateConflictedInitialScheduleIfDurationNotEnough()
-    {
-        $this->customerAssignment->expects($this->once())
-                ->method('submitSalesActivitySchedule')
-                ->with($this->salesActivity, $this->payload)
-                ->willReturn($this->salesActivitySchedule);
-        $this->salesActivitySchedule->expects($this->once())
-                ->method('relocateConflictedInitialScheduleIfDurationNotEnough')
-                ->with($this->schedulerService);
         $this->execute();
     }
 }

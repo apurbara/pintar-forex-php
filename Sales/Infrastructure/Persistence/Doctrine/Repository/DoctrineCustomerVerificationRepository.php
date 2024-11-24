@@ -13,4 +13,12 @@ class DoctrineCustomerVerificationRepository extends DoctrineEntityRepository im
     {
         return $this->findOneByIdOrDie($id);
     }
+
+    public function allActiveCustomerVerification(): array
+    {
+        $criteria = [
+            'disabled' => false,
+        ];
+        return $this->findBy($criteria);
+    }
 }

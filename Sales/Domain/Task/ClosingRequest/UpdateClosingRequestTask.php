@@ -3,7 +3,7 @@
 namespace Sales\Domain\Task\ClosingRequest;
 
 use Sales\Domain\Model\Sales;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequestData;
 use Sales\Domain\Task\SalesTask;
 
 class UpdateClosingRequestTask implements SalesTask

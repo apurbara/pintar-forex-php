@@ -22,7 +22,8 @@ class VerificationReport
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
 
-    #[FetchableObject(targetEntity: FetchableCustomerVerificationFromCompanyBC::class, joinColumnName: "CustomerVerification_id")]
+    #[FetchableObject(targetEntity: FetchableCustomerVerificationFromCompanyBC::class,
+                joinColumnName: "CustomerVerification_id")]
     #[ManyToOne(targetEntity: CustomerVerification::class)]
     #[JoinColumn(name: "CustomerVerification_id", referencedColumnName: "id")]
     protected CustomerVerification $customerVerification;
@@ -35,6 +36,11 @@ class VerificationReport
 
     #[Column(type: "text", nullable: true)]
     protected ?string $note;
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
 
     public function __construct(
             Customer $customer, CustomerVerification $customerVerification, string $id, VerificationReportData $data)

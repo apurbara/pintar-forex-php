@@ -2,7 +2,7 @@
 
 namespace Manager\Domain\Task\ClosingRequest;
 
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequest;
 
 interface ClosingRequestRepository
 {

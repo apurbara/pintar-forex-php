@@ -3,7 +3,7 @@
 namespace Manager\Domain\Task\ClosingRequest;
 
 use Manager\Domain\Model\Manager;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequestData;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequestData;
 use Manager\Domain\Task\ManagerTask;
 
 class RejectClosingRequestTask implements ManagerTask
@@ -24,7 +24,7 @@ class RejectClosingRequestTask implements ManagerTask
     {
         $closingRequest = $this->repository->ofId($payload->id);
         $closingRequest->assertBelongsToManager($manager);
-        
+
         $closingRequest->reject($payload);
     }
 }

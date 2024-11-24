@@ -8,10 +8,12 @@ use Resources\Domain\TaskPayload\ViewSummaryPayload;
 
 class ViewCustomerAssignmentCount implements ManagerTask
 {
+
     public function __construct(protected CustomerAssignmentRepository $repository)
     {
+        
     }
-    
+
     /**
      * 
      * @param ViewSummaryPayload $payload
@@ -19,8 +21,7 @@ class ViewCustomerAssignmentCount implements ManagerTask
      */
     public function executeByManager(Manager $manager, $payload): void
     {
-        $result = $this->repository->assignmentCountBelongsToManager($manager->getId(), $payload->searchSchema);
+        $result = $this->repository->assignmentCountBelongsByManager($manager->getId(), $payload->searchSchema);
         $payload->setResult($result);
     }
-
 }

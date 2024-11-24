@@ -8,7 +8,7 @@ use Resources\Domain\TaskPayload\ViewDetailPayload;
 class ViewCustomerAssignmentDetail implements AdminTaskInCompany
 {
 
-    public function __construct(protected CustomerAssignmentRepository $assignedCustomerRepository)
+    public function __construct(protected CustomerAssignmentRepository $customerAssignmentRepository)
     {
         
     }
@@ -20,7 +20,7 @@ class ViewCustomerAssignmentDetail implements AdminTaskInCompany
      */
     public function executeInCompany($payload): void
     {
-        $result = $this->assignedCustomerRepository->aCustomerAssignment($payload->id);
+        $result = $this->customerAssignmentRepository->aCustomerAssignment($payload->id);
         $payload->setResult($result);
     }
 }

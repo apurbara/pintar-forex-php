@@ -8,7 +8,6 @@ use Sales\Domain\DependencyModel\CustomerJourney;
 use Sales\Domain\Model\Sales\CustomerAssignment;
 use Sales\Domain\Service\SalesActivitySchedulerService;
 use Sales\Domain\Task\SalesTask;
-use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\ValueObject\AccountInfo;
 use Shared\Domain\ValueObject\ChangeUserPasswordData;
 use Tests\TestBase;
@@ -25,10 +24,6 @@ class SalesTest extends TestBase
     protected $task, $payload = 'string represent task payload';
     //
     protected $customerJourney;
-    //
-    protected $schedulerService;
-    //
-    //
 
     protected function setUp(): void
     {
@@ -48,8 +43,6 @@ class SalesTest extends TestBase
         $this->task = $this->buildMockOfInterface(SalesTask::class);
         //
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
-        //
-        $this->schedulerService = $this->buildMockOfClass(SalesActivitySchedulerService::class);
     }
     
     //
@@ -140,31 +133,6 @@ class SalesTest extends TestBase
     {
         $this->sales->contractTerminated = true;
         $this->assertRegularExceptionThrowed(fn() => $this->executeTask(), 'Forbidden', 'only active sales can make this request');
-    }
-    
-    //
-    protected function registerAllUpcomingScheduleToScheduler()
-    {
-        $this->customerAssignment->expects($this->any())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::ACTIVE);
-        $this->sales->registerAllUpcomingScheduleToScheduler($this->schedulerService);
-    }
-    public function test_registerAllUpcomingScheduleToScheduler_addCustomerAssignmentUpcomingScheduleToScheduler()
-    {
-        $this->customerAssignment->expects($this->once())
-                ->method('addUpcomingScheduleToSchedulerService')
-                ->with($this->schedulerService);
-        $this->registerAllUpcomingScheduleToScheduler();
-    }
-    public function test_registerAllUpcomingScheduleToScheduler_containInactiveCustomerAssignment_excludeFromScheduler()
-    {
-        $this->customerAssignment->expects($this->once())
-                ->method('getStatus')
-                ->willReturn(CustomerAssignmentStatus::RECYCLED);
-        $this->customerAssignment->expects($this->never())
-                ->method('addUpcomingScheduleToSchedulerService');
-        $this->registerAllUpcomingScheduleToScheduler();
     }
 }
 

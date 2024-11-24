@@ -7,13 +7,13 @@ use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 readonly class VerificationReportData extends AbstractEntityMutationPayload
 {
 
-    public ?string $customerAssignmentId;
+    public ?string $factFindingAssignmentId;
     public ?string $customerVerificationId;
     public ?string $note;
 
-    public function setCustomerAssignmentId(?string $customerAssignmentId)
+    public function setFactFindingAssignmentId(?string $factFindingAssignmentId)
     {
-        $this->customerAssignmentId = $customerAssignmentId;
+        $this->factFindingAssignmentId = $factFindingAssignmentId;
         return $this;
     }
 

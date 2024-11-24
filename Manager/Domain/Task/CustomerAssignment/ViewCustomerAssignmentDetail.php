@@ -21,7 +21,7 @@ class ViewCustomerAssignmentDetail implements ManagerTask
      */
     public function executeByManager(Manager $manager, $payload): void
     {
-        $result = $this->repository->aCustomerAssignmentBelongsToManager($manager->getId(), $payload->id);
+        $result = $this->repository->aCustomerAssignmentBelongsByManager($manager->getId(), $payload->id);
 
         $payload->setResult($result);
     }

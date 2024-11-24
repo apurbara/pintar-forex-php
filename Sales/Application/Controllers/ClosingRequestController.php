@@ -8,9 +8,9 @@ use Resources\Infrastructure\GraphQL\Attributes\GraphqlMapableController;
 use Resources\Infrastructure\GraphQL\Attributes\Mutation;
 use Resources\Infrastructure\GraphQL\Attributes\Query;
 use Sales\Domain\Model\Sales;
-use Sales\Domain\Model\Sales\CustomerAssignment;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
+use Sales\Domain\Model\Sales\StrikingAssignment;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequest;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequestData;
 use Sales\Domain\Task\ClosingRequest\SubmitClosingRequestTask;
 use Sales\Domain\Task\ClosingRequest\UpdateClosingRequestTask;
 use Sales\Domain\Task\ClosingRequest\ViewClosingRequestDetail;
@@ -31,13 +31,13 @@ class ClosingRequestController extends BaseController
     public function submitClosingRequest(Sales $sales, InputRequest $input)
     {
         $repository = $this->repository();
-        $customerAssignmentRepository = $this->em->getRepository(CustomerAssignment::class);
-        $task = new SubmitClosingRequestTask($repository, $customerAssignmentRepository);
+        $strikingAssignmentRepository = $this->em->getRepository(StrikingAssignment::class);
+        $task = new SubmitClosingRequestTask($repository, $strikingAssignmentRepository);
 
         $transactionValue = $input->get('transactionValue');
         $note = $input->get('note');
         $payload = (new ClosingRequestData($transactionValue, $note))
-                ->setCustomerAssignmentId($input->get('CustomerAssignment_id'));
+                ->setStrikingAssignmentId($input->get('StrikingAssignment_id'));
 
         $this->executeSalesMutationTask($sales, $task, $payload);
         return $repository->queryOneById($payload->id);

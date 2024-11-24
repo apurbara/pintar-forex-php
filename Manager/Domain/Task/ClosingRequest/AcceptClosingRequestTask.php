@@ -3,8 +3,9 @@
 namespace Manager\Domain\Task\ClosingRequest;
 
 use Manager\Domain\Model\Manager;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequestData;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequestData;
 use Manager\Domain\Task\ManagerTask;
+
 
 class AcceptClosingRequestTask implements ManagerTask
 {

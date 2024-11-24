@@ -2,7 +2,7 @@
 
 namespace Manager\Domain\Task\ClosingRequest;
 
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequestData;
+use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequestData;
 use Tests\Manager\Domain\Task\ManagerTaskTestBase;
 
 

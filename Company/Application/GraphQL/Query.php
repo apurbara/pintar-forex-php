@@ -6,17 +6,18 @@ use Company\Application\Controllers\CityController;
 use Company\Application\Controllers\ClosingRequestController;
 use Company\Application\Controllers\CommonSalesMetricController;
 use Company\Application\Controllers\CompanyMetricController;
-use Company\Application\Controllers\CustomerAssignmentController;
 use Company\Application\Controllers\CustomerController;
 use Company\Application\Controllers\CustomerJourneyController;
 use Company\Application\Controllers\CustomerVerificationController;
+use Company\Application\Controllers\FactFindingAssignmentController;
+use Company\Application\Controllers\GreetingAssignmentController;
 use Company\Application\Controllers\ManagerController;
 use Company\Application\Controllers\ProvinceController;
-use Company\Application\Controllers\RecycleRequestController;
 use Company\Application\Controllers\SalesActivityController;
 use Company\Application\Controllers\SalesController;
 use Company\Application\Controllers\SalesPerformanceMetricController;
 use Company\Application\Controllers\SalesRankController;
+use Company\Application\Controllers\StrikingAssignmentController;
 use Company\Domain\Model\CompanyUser;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -45,8 +46,9 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ManagerController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerController::class),
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentController::class),
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(GreetingAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(FactFindingAssignmentController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(StrikingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CompanyMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesRankController::class),
@@ -57,17 +59,29 @@ class Query extends ObjectType
             ...$this->customerAssignmentQuery(),
         ];
     }
-    
+
     //
     private function customerAssignmentQuery(): array
     {
         return [
-            'viewCustomerAssignmentCount' => [
+            'viewGreetingAssignmentCount' => [
                 'type' => Type::int(),
                 'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class))],
-                'resolve' => fn($root, $args) => (new CustomerAssignmentController())
-                        ->viewCustomerAssignmentCount(app(CompanyUser::class), new GraphqlInputRequest($args))
-            ]
+                'resolve' => fn($root, $args) => (new GreetingAssignmentController())
+                        ->viewGreetingAssignmentCount(app(CompanyUser::class), new GraphqlInputRequest($args))
+            ],
+            'viewFactFindingAssignmentCount' => [
+                'type' => Type::int(),
+                'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class))],
+                'resolve' => fn($root, $args) => (new FactFindingAssignmentController())
+                        ->viewFactFindingAssignmentCount(app(CompanyUser::class), new GraphqlInputRequest($args))
+            ],
+            'viewStrikingAssignmentCount' => [
+                'type' => Type::int(),
+                'args' => ['filters' => Type::listOf(TypeRegistry::inputType(FilterInput::class))],
+                'resolve' => fn($root, $args) => (new StrikingAssignmentController())
+                        ->viewStrikingAssignmentCount(app(CompanyUser::class), new GraphqlInputRequest($args))
+            ],
         ];
     }
 }

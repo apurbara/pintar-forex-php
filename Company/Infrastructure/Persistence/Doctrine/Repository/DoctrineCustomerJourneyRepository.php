@@ -2,6 +2,7 @@
 
 namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
+use Company\Application\EventHandler\CustomerJourneyRepository as CustomerJourneyRepository2;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Task\CustomerJourney\CustomerJourneyRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
@@ -9,7 +10,7 @@ use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepos
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
 
-class DoctrineCustomerJourneyRepository extends DoctrineEntityRepository implements CustomerJourneyRepository
+class DoctrineCustomerJourneyRepository extends DoctrineEntityRepository implements CustomerJourneyRepository, CustomerJourneyRepository2
 {
 
     public function ofId(string $id): CustomerJourney

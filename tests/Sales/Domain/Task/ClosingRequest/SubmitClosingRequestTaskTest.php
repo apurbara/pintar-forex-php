@@ -2,7 +2,7 @@
 
 namespace Sales\Domain\Task\ClosingRequest;
 
-use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
+use Sales\Domain\Model\Sales\StrikingAssignment\ClosingRequestData;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class SubmitClosingRequestTaskTest extends SalesTaskTestBase
@@ -13,12 +13,12 @@ class SubmitClosingRequestTaskTest extends SalesTaskTestBase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->prepareCustomerAssignmentDependency();
+        $this->prepareStrikingAssignmentDependency();
         $this->prepareClosingRequestDependency();
         //
-        $this->task = new SubmitClosingRequestTask($this->closingRequestRepository, $this->customerAssignmentRepository);
+        $this->task = new SubmitClosingRequestTask($this->closingRequestRepository, $this->strikingAssignmentRepository);
         $this->payload = (new ClosingRequestData('35000000', 'new note'))
-                ->setCustomerAssignmentId($this->customerAssignmentId);
+                ->setStrikingAssignmentId($this->strikingAssignmentId);
     }
     
     //
@@ -29,20 +29,15 @@ class SubmitClosingRequestTaskTest extends SalesTaskTestBase
                 ->willReturn($this->closingRequestId);
         $this->task->executeBySales($this->sales, $this->payload);
     }
-    public function test_execute_addClosingRequestSubmittedInCustomerAssignmentToRepository()
+    public function test_execute_addClosingRequestSubmittedInStrikingAssignmentToRepository()
     {
-        $this->customerAssignment->expects($this->once())
-                ->method('submitClosingRequest')
-                ->with($this->payload)
-                ->willReturn($this->closingRequest);
         $this->closingRequestRepository->expects($this->once())
-                ->method('add')
-                ->with($this->closingRequest);
+                ->method('add');
         $this->execute();
     }
-    public function test_execute_assertCustomerAssignmentBelongsToSales()
+    public function test_execute_assertStrikingAssignmentBelongsToSales()
     {
-        $this->customerAssignment->expects($this->once())
+        $this->strikingAssignment->expects($this->once())
                 ->method('assertBelongsToSales')
                 ->with($this->sales);
         $this->execute();

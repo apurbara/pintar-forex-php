@@ -6,7 +6,6 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Manager\Application\Controllers\ClosingRequestController;
 use Manager\Application\Controllers\CustomerAssignmentController;
-use Manager\Application\Controllers\RecycleRequestController;
 use Manager\Application\Controllers\SalesController;
 use Manager\Domain\Model\Manager;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
@@ -30,7 +29,6 @@ class Query extends ObjectType
         return [
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
-            ...ControllerToGraphqlFieldsMapper::mapQueryFields(RecycleRequestController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
             ...$this->customerAssignmentQuery(),
         ];

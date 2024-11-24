@@ -5,7 +5,7 @@ namespace Company\Application\Controllers;
 use Company\Application\GraphQL\Object\ClosingRequestMonthlyCountSummaryGraphqlObjectType;
 use Company\Application\GraphQL\Object\ClosingRequestMonthlyTotalTransactionSummaryGraphqlObjectType;
 use Company\Domain\Model\CompanyUser;
-use Company\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequest;
 use Company\Domain\Task\ClosingRequest\ViewClosingRequestCount;
 use Company\Domain\Task\ClosingRequest\ViewClosingRequestDetail;
 use Company\Domain\Task\ClosingRequest\ViewClosingRequestList;

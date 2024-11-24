@@ -4,7 +4,6 @@ namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\Customer;
 use Company\Domain\Task\Customer\CustomerRepository;
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
@@ -32,40 +31,42 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
     private function applyFilter(QueryBuilder $qb, &$searchSchema): void
     {
         foreach ($searchSchema['filters'] as $key => $filter) {
-            if (($filter['column'] ?? null) === 'CustomerAssignment.status') {
-                $customerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
-                $customerAssignmentQB->select('1')
-                        ->from('CustomerAssignment')
-                        ->andWhere($customerAssignmentQB->expr()->eq('CustomerAssignment.Customer_id', 'Customer.id'))
-                        ->andWhere($customerAssignmentQB->expr()->in('CustomerAssignment.status', ':status'));
-
-                $qb->andWhere("EXISTS ({$customerAssignmentQB->getSQL()})")
-                        ->setParameter('status', $filter['value'], ArrayParameterType::STRING);
-                unset($searchSchema['filters'][$key]);
-            }
-            if (($filter['column'] ?? null) === 'hasActiveAssignment') {
-                $activeCustomerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
-                $activeCustomerAssignmentQB->select('1')
-                        ->from('CustomerAssignment')
-                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('CustomerAssignment.Customer_id', 'Customer.id'))
-                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('CustomerAssignment.status',
-                                        "'" . CustomerAssignmentStatus::ACTIVE->value . "'"));
+            if (($filter['column'] ?? null) === 'hasActiveGreetingAssignment') {
+                $activeGreetingAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
+                $activeGreetingAssignmentQB->select('1')
+                        ->from('GreetingAssignment')
+                        ->andWhere($activeGreetingAssignmentQB->expr()->eq('GreetingAssignment.Customer_id', 'Customer.id'))
+                        ->andWhere($activeGreetingAssignmentQB->expr()->eq('GreetingAssignment.status', "'" . CustomerAssignmentStatus::ACTIVE->value . "'"));
                 if ($filter['value'] == true) {
-                    $qb->andWhere("EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
+                    $qb->andWhere("EXISTS ({$activeGreetingAssignmentQB->getSQL()})");
                 } else {
-                    $qb->andWhere("NOT EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
+                    $qb->andWhere("NOT EXISTS ({$activeGreetingAssignmentQB->getSQL()})");
                 }
                 unset($searchSchema['filters'][$key]);
             }
-            if (($filter['column'] ?? null) === 'hasAssignment') {
-                $activeCustomerAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
-                $activeCustomerAssignmentQB->select('1')
-                        ->from('CustomerAssignment')
-                        ->andWhere($activeCustomerAssignmentQB->expr()->eq('CustomerAssignment.Customer_id', 'Customer.id'));
+            if (($filter['column'] ?? null) === 'hasActiveFactFindingAssignment') {
+                $activeFactFindingAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
+                $activeFactFindingAssignmentQB->select('1')
+                        ->from('FactFindingAssignment')
+                        ->andWhere($activeFactFindingAssignmentQB->expr()->eq('FactFindingAssignment.Customer_id', 'Customer.id'))
+                        ->andWhere($activeFactFindingAssignmentQB->expr()->eq('FactFindingAssignment.status', "'" . CustomerAssignmentStatus::ACTIVE->value . "'"));
                 if ($filter['value'] == true) {
-                    $qb->andWhere("EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
+                    $qb->andWhere("EXISTS ({$activeFactFindingAssignmentQB->getSQL()})");
                 } else {
-                    $qb->andWhere("NOT EXISTS ({$activeCustomerAssignmentQB->getSQL()})");
+                    $qb->andWhere("NOT EXISTS ({$activeFactFindingAssignmentQB->getSQL()})");
+                }
+                unset($searchSchema['filters'][$key]);
+            }
+            if (($filter['column'] ?? null) === 'hasActiveStrikingAssignment') {
+                $activeStrikingAssignmentQB = $this->getEntityManager()->getConnection()->createQueryBuilder();
+                $activeStrikingAssignmentQB->select('1')
+                        ->from('StrikingAssignment')
+                        ->andWhere($activeStrikingAssignmentQB->expr()->eq('StrikingAssignment.Customer_id', 'Customer.id'))
+                        ->andWhere($activeStrikingAssignmentQB->expr()->eq('StrikingAssignment.status', "'" . CustomerAssignmentStatus::ACTIVE->value . "'"));
+                if ($filter['value'] == true) {
+                    $qb->andWhere("EXISTS ({$activeStrikingAssignmentQB->getSQL()})");
+                } else {
+                    $qb->andWhere("NOT EXISTS ({$activeStrikingAssignmentQB->getSQL()})");
                 }
                 unset($searchSchema['filters'][$key]);
             }

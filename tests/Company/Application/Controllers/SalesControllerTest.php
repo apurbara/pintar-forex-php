@@ -5,7 +5,7 @@ namespace Company\Application\Controllers;
 use Company\Domain\Model\Manager;
 use Company\Domain\Model\Manager\Sales;
 use Company\Domain\Model\Province\City;
-use Shared\Domain\Enum\SalesType;
+use Shared\Domain\Enum\SalesRole;
 use Tests\Company\Application\Controllers\CompanyControllerTestCase;
 use Tests\resources\Application\EntityRecord;
 
@@ -39,7 +39,7 @@ class SalesControllerTest extends CompanyControllerTestCase
             'name' => 'new sales name',
             'email' => 'newsales@email.org',
             'password' => 'password123',
-            'type' => SalesType::IN_HOUSE->value,
+            'role' => SalesRole::STRIKER->value,
             'City_id' => $this->city->columns['id'],
             'Manager_id' => $this->managerOne->columns['id'],
         ];
@@ -60,9 +60,9 @@ class SalesControllerTest extends CompanyControllerTestCase
         $this->city->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $name: String, $email: String, $password: String, $type: String, $City_id: ID, $Manager_id: ID ){
-    addSales ( name: $name, email: $email, password: $password, type: $type, City_id: $City_id, Manager_id: $Manager_id ) {
-        id, name, email, type,
+mutation ( $role: String, $name: String, $email: String, $password: String, $City_id: ID, $Manager_id: ID ){
+    addSales ( role: $role, name: $name, email: $email, password: $password, City_id: $City_id, Manager_id: $Manager_id ) {
+        id, name, email,
         city { id, name }
         manager { id, name }
     }
@@ -79,7 +79,6 @@ $this->disableExceptionHandling();
         $this->seeJsonContains([
             'name' => $this->salesPayload['name'],
             'email' => $this->salesPayload['email'],
-            'type' => $this->salesPayload['type'],
             'city' => [
                 'id' => $this->city->columns['id'],
                 'name' => $this->city->columns['name'],
@@ -94,8 +93,8 @@ $this->disableExceptionHandling();
             'contractTerminated' => false,
             'createdTime' => $this->stringOfJakartaCurrentTime(),
             'name' => $this->salesPayload['name'],
+            'role' => $this->salesPayload['role'],
             'email' => $this->salesPayload['email'],
-            'type' => $this->salesPayload['type'],
             'City_id' => $this->salesPayload['City_id'],
             'Manager_id' => $this->salesPayload['Manager_id'],
         ]);
@@ -113,9 +112,9 @@ $this->disableExceptionHandling();
         $this->salesOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
-mutation ( $id: ID, $type: String, $City_id: ID, $Manager_id: ID ){
-    updateSales ( id: $id, type: $type, City_id: $City_id, Manager_id: $Manager_id ) {
-        id, name, email, type,
+mutation ( $id: ID, $role: String, $City_id: ID, $Manager_id: ID ){
+    updateSales ( id: $id, role: $role, City_id: $City_id, Manager_id: $Manager_id ) {
+        id, name, email, role
         city { id, name }
         manager { id, name }
     }
@@ -133,7 +132,7 @@ $this->disableExceptionHandling();
         $this->updateSales();
         $this->seeStatusCode(200);
         $this->seeJsonContains([
-            'type' => $this->salesPayload['type'],
+            'role' => $this->salesPayload['role'],
             'city' => [
                 'id' => $this->city->columns['id'],
                 'name' => $this->city->columns['name'],
@@ -144,8 +143,8 @@ $this->disableExceptionHandling();
             ],
         ]);
         
-            $this->seeInDatabase('Sales', [
-            'type' => $this->salesPayload['type'],
+        $this->seeInDatabase('Sales', [
+            'role' => $this->salesPayload['role'],
             'City_id' => $this->salesPayload['City_id'],
             'Manager_id' => $this->salesPayload['Manager_id'],
         ]);

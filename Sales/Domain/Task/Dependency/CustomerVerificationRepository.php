@@ -8,4 +8,10 @@ interface CustomerVerificationRepository
 {
 
     public function ofId(string $id): CustomerVerification;
+
+    /**
+     * 
+     * @return CustomerVerification[]
+     */
+    public function allActiveCustomerVerification();
 }
