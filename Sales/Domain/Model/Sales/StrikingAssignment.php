@@ -2,6 +2,7 @@
 
 namespace Sales\Domain\Model\Sales;
 
+use Company\Domain\Model\Customer as Customer2;
 use Company\Domain\Model\CustomerJourney as CustomerJourney2;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -37,7 +38,7 @@ class StrikingAssignment implements ContainCustomerAssignmentInterface
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
 
-    #[FetchableObject(targetEntity: Customer::class, joinColumnName: "Customer_id")]
+    #[FetchableObject(targetEntity: Customer2::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Customer::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Customer_id", referencedColumnName: "id")]
     protected Customer $customer;
