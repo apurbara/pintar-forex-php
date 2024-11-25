@@ -27,17 +27,17 @@ class SalesActivityScheduleGraphqlObjectInSalesBC extends GraphqlObjectType
             'GreetingAssignment_id' => Type::id(),
             'greetingAssignment' => [
                 'type' => TypeRegistry::objectType(GreetingAssignment::class),
-                'resolve' => fn($root) => app(EntityManager::class)->getRepository(GreetingAssignment::class)->queryOneById($root['GreetingAssignment_id']),
+                'resolve' => fn($root) => isset($root['GreetingAssignment_id']) ? app(EntityManager::class)->getRepository(GreetingAssignment::class)->queryOneById($root['GreetingAssignment_id']) : null,
             ],
             'FactFindingAssignment_id' => Type::id(),
             'factFindingAssignment' => [
                 'type' => TypeRegistry::objectType(FactFindingAssignment::class),
-                'resolve' => fn($root) => app(EntityManager::class)->getRepository(FactFindingAssignment::class)->queryOneById($root['FactFindingAssignment_id']),
+                'resolve' => fn($root) => isset($root['FactFindingAssignment_id']) ? app(EntityManager::class)->getRepository(FactFindingAssignment::class)->queryOneById($root['FactFindingAssignment_id']) : null,
             ],
             'StrikingAssignment_id' => Type::id(),
             'strikingAssignment' => [
                 'type' => TypeRegistry::objectType(StrikingAssignment::class),
-                'resolve' => fn($root) => app(EntityManager::class)->getRepository(StrikingAssignment::class)->queryOneById($root['StrikingAssignment_id']),
+                'resolve' => fn($root) => isset($root['StrikingAssignment_id']) ? app(EntityManager::class)->getRepository(StrikingAssignment::class)->queryOneById($root['StrikingAssignment_id']) : null,
             ],
         ];
     }
