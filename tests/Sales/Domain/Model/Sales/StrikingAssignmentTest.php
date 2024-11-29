@@ -25,6 +25,7 @@ class StrikingAssignmentTest extends TestBase
     protected $strikingAssignment;
     protected $closingRequest;
     //
+    protected $rating = 3;
     protected $customerJourney;
     protected $salesActivity;
     protected $reportId = 'reportId', $salesActivityReportData;
@@ -51,6 +52,24 @@ class StrikingAssignmentTest extends TestBase
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
         $this->salesActivityReportData = new SalesActivityReportData('content');
         $this->salesActivityScheduleData = new SalesActivityScheduleData(new HourlyTimeIntervalData('new week'));
+    }
+    
+    //
+    protected function updateCustomerRating()
+    {
+        $this->strikingAssignment->updateCustomerRating($this->rating);
+    }
+    public function test_updateCustomerRating_updateCustomer()
+    {
+        $this->customer->expects($this->once())
+                ->method('updateRating')
+                ->with($this->rating);
+        $this->updateCustomerRating();
+    }
+    public function test_updateCustomerRating_inactiveAssignment_forbidden()
+    {
+        $this->strikingAssignment->status = CustomerAssignmentStatus::COMPLETED;
+        $this->assertRegularExceptionThrowed(fn() => $this->updateCustomerRating(), 'Forbidden', 'inactive assignment');
     }
     
     //

@@ -17,16 +17,17 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Domain\Model\Sales\FactFindingAssignment;
 use Sales\Domain\Model\Sales\GreetingAssignment;
 use Sales\Domain\Model\Sales\StrikingAssignment;
-use Sales\Domain\Task\Dependency\ContainCustomerAssignmentRepository;
 use Sales\Domain\Task\SalesActivitySchedule\SubmitScheduleTask;
 use Sales\Domain\Task\SalesActivitySchedule\ViewAllOngoingSchedule;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleDetail;
 use Sales\Domain\Task\SalesActivitySchedule\ViewSalesActivityScheduleList;
 use Sales\Domain\Task\SalesActivitySchedule\ViewTotalSalesActivitySchedule;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityScheduleRepository;
+use Shared\Domain\Enum\SalesRole;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 
-#[GraphqlMapableController(entity: SalesActivitySchedule::class, responseType: SalesActivityScheduleGraphqlObjectInSalesBC::class)]
+#[GraphqlMapableController(entity: SalesActivitySchedule::class,
+            responseType: SalesActivityScheduleGraphqlObjectInSalesBC::class)]
 class SalesActivityScheduleController extends BaseController
 {
 
@@ -36,44 +37,28 @@ class SalesActivityScheduleController extends BaseController
     }
 
     //
-    private function submitSalesActivitySchedule(
-            Sales $sales, string $CustomerAssignment_id, InputRequest $input,
-            ContainCustomerAssignmentRepository $customerAssignmentRepository)
+    #[Mutation]
+    public function submitSalesActivitySchedule(
+            Sales $sales, string $CustomerAssignment_id, InputRequest $input)
     {
         $repository = $this->repository();
+        $customerAssignmentRepository = match ($sales->getRole()) {
+            SalesRole::GREETER => $this->em->getRepository(GreetingAssignment::class),
+            SalesRole::FACT_FINDER => $this->em->getRepository(FactFindingAssignment::class),
+            SalesRole::STRIKER => $this->em->getRepository(StrikingAssignment::class),
+        };
         $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
         $task = new SubmitScheduleTask($repository, $customerAssignmentRepository, $salesActivityRepository);
-        
+
         $hourlyTimeIntervalData = new HourlyTimeIntervalData($input->get('startTime'));
         $payload = (new SalesActivityScheduleData($hourlyTimeIntervalData))
                 ->setCustomerAssignmentId($CustomerAssignment_id)
                 ->setSalesActivityId($input->get('SalesActivity_id'));
-        
+
         $sales->executeTask($task, $payload);
         $this->em->flush();
-        
+
         return $repository->queryOneById($payload->id);
-    }
-
-    #[Mutation]
-    public function submitGreetingActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
-    {
-        $greetingAssignmentRepository = $this->em->getRepository(GreetingAssignment::class);
-        return $this->submitSalesActivitySchedule($sales, $CustomerAssignment_id, $input, $greetingAssignmentRepository);
-    }
-
-    #[Mutation]
-    public function submitFactFindingActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
-    {
-        $factFindingAssignmentRepository = $this->em->getRepository(FactFindingAssignment::class);
-        return $this->submitSalesActivitySchedule($sales, $CustomerAssignment_id, $input, $factFindingAssignmentRepository);
-    }
-
-    #[Mutation]
-    public function submitStrikingActivitySchedule(Sales $sales, string $CustomerAssignment_id, InputRequest $input)
-    {
-        $strikingAssignmentRepository = $this->em->getRepository(StrikingAssignment::class);
-        return $this->submitSalesActivitySchedule($sales, $CustomerAssignment_id, $input, $strikingAssignmentRepository);
     }
 
     #[Query(responseWrapper: Query::PAGINATION_RESPONSE_WRAPPER)]
@@ -96,7 +81,7 @@ class SalesActivityScheduleController extends BaseController
         return $payload->result;
     }
 
-    #[Query(responseWrapper:Query::SUMMARY_RESPONSE_WRAPPER, responseType:IntType::class)]
+    #[Query(responseWrapper: Query::SUMMARY_RESPONSE_WRAPPER, responseType: IntType::class)]
     public function totalSalesActivitySchedule(Sales $sales, InputRequest $input)
     {
         $task = new ViewTotalSalesActivitySchedule($this->repository());

@@ -1,11 +1,11 @@
 <?php
 
-namespace Sales\Domain\Task\GreetingAssignment;
+namespace Sales\Domain\Task\Customer;
 
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Task\Dependency\CityRepository;
+use Sales\Domain\Task\GreetingAssignment\GreetingAssignmentRepository;
 use Sales\Domain\Task\SalesTask;
-
 
 class UpdateCustomer implements SalesTask
 {

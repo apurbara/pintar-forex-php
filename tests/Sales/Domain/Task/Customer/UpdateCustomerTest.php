@@ -1,6 +1,6 @@
 <?php
 
-namespace Sales\Domain\Task\GreetingAssignment;
+namespace Sales\Domain\Task\Customer;
 
 use Sales\Domain\DependencyModel\CustomerData;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;

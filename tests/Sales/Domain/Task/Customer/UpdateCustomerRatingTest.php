@@ -1,41 +1,48 @@
 <?php
 
-namespace Sales\Domain\Task\FactFindingAssignment;
+namespace Sales\Domain\Task\Customer;
 
-use Sales\Domain\DependencyModel\Customer\VerificationReportData;
+use Sales\Domain\Model\Sales\ContainCustomerAssignmentInterface;
+use Sales\Domain\Task\Dependency\ContainCustomerAssignmentRepository;
 use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class UpdateCustomerRatingTest extends SalesTaskTestBase
 {
+    protected $repository, $customerAssignment, $customerAssignmentId = 'customerAssignmentId';
     protected $task;
     protected $payload, $rating = 4;
     
     protected function setUp(): void
     {
         parent::setUp();
-        $this->prepareFactFindingAssignmentDependency();
+        $this->repository = $this->buildMockOfInterface(ContainCustomerAssignmentRepository::class);
+        $this->customerAssignment = $this->buildMockOfInterface(ContainCustomerAssignmentInterface::class);
         //
-        $this->task = new UpdateCustomerRating($this->factFindingAssignmentRepository);
+        $this->task = new UpdateCustomerRating($this->repository);
         $this->payload = (new UpdateCustomerRatingPayload())
-                ->setId($this->factFindingAssignmentId)
+                ->setId($this->customerAssignmentId)
                 ->setRating($this->rating);
     }
     
     //
     protected function execute()
     {
+        $this->repository->expects($this->any())
+                ->method('ofId')
+                ->with($this->customerAssignmentId)
+                ->willReturn($this->customerAssignment);
         $this->task->executeBySales($this->sales, $this->payload);
     }
     public function test_execute_submitVerificationReportOnFactFindingAssignment()
     {
-        $this->factFindingAssignment->expects($this->once())
+        $this->customerAssignment->expects($this->once())
                 ->method('updateCustomerRating')
                 ->with($this->rating);
         $this->execute();
     }
     public function test_execute_assertFactFindingAssignmentManageableBySales()
     {
-        $this->factFindingAssignment->expects($this->once())
+        $this->customerAssignment->expects($this->once())
                 ->method('assertBelongsToSales')
                 ->with($this->sales);
         $this->execute();

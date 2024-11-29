@@ -1,6 +1,6 @@
 <?php
 
-namespace Sales\Domain\Task\FactFindingAssignment;
+namespace Sales\Domain\Task\Customer;
 
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 

@@ -28,10 +28,10 @@ class Sales
 
     #[Embedded(class: AccountInfo::class, columnPrefix: false)]
     protected AccountInfo $accountInfo;
-    
+
     #[Column(type: "string", enumType: SalesRole::class)]
     protected SalesRole $role;
-    
+
     //
     #[FetchableObject(targetEntity: FetchableManagerFromCompanyBC::class, joinColumnName: "Manager_id")]
     #[JoinColumn(name: "Manager_id", referencedColumnName: "id")]
@@ -42,11 +42,16 @@ class Sales
         return $this->id;
     }
 
+    public function getRole(): SalesRole
+    {
+        return $this->role;
+    }
+
     protected function __construct()
     {
         
     }
-    
+
     public function changePassword(ChangeUserPasswordData $changePasswordData): void
     {
         $this->accountInfo = $this->accountInfo->changePassword($changePasswordData);
@@ -64,7 +69,7 @@ class Sales
         }
         return $this->id;
     }
-    
+
     //
     public function assertActive(): void
     {
@@ -72,7 +77,7 @@ class Sales
             throw RegularException::forbidden('inactive sales');
         }
     }
-    
+
     //
     public function executeTask(SalesTask $task, $payload): void
     {

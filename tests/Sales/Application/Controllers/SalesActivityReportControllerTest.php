@@ -12,6 +12,7 @@ use Sales\Domain\Model\Sales\FactFindingAssignment;
 use Sales\Domain\Model\Sales\GreetingAssignment;
 use Sales\Domain\Model\Sales\StrikingAssignment;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Enum\SalesRole;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 
@@ -101,40 +102,40 @@ class SalesActivityReportControllerTest extends SalesControllerTestCase
     }
     
     //
-    protected function submitNonScheduleGreetingActivityReport()
+    protected function submitNonScheduledActivityReport()
     {
         $this->prepareSalesDependency();
         $this->salesActivity->insert($this->connection);
         
         $this->customerAssignment->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation (
+    $CustomerAssignment_id: ID, 
+    $SalesActivity_id: ID, 
+    $content: String
+) {
+    submitNonScheduledActivityReport (
+        CustomerAssignment_id: $CustomerAssignment_id, 
+        SalesActivity_id: $SalesActivity_id, 
+        content: $content
+    ) {
+        id, content, submitTime,
+        salesActivitySchedule {
+            startTime, endTime, status
+            salesActivity { name },
+        }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_submitNonScheduledActivityReport_greetingAcitivity_200()
+    {
+$this->disableExceptionHandling();
         $this->greetingAssignment->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $CustomerAssignment_id: ID, 
-    $SalesActivity_id: ID, 
-    $content: String
-) {
-    submitNonScheduleGreetingActivityReport (
-        CustomerAssignment_id: $CustomerAssignment_id, 
-        SalesActivity_id: $SalesActivity_id, 
-        content: $content
-    ) {
-        id, content, submitTime,
-        salesActivitySchedule {
-            startTime, endTime, status
-            salesActivity { name },
-        }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_submitNonScheduleGreetingActivityReport_200()
-    {
-$this->disableExceptionHandling();
-        $this->submitNonScheduleGreetingActivityReport();
+        $this->submitNonScheduledActivityReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
@@ -162,42 +163,12 @@ $this->disableExceptionHandling();
             'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
         ]);
     }
-    
-    //
-    protected function submitNonScheduleFactFindingActivityReport()
+    public function test_submitNonScheduledActivityReport_factFindingAcitivity_200()
     {
-        $this->prepareSalesDependency();
-        $this->salesActivity->insert($this->connection);
-        
-        $this->customerAssignment->insert($this->connection);
+$this->disableExceptionHandling();
+        $this->sales->columns['role'] = SalesRole::FACT_FINDER->value;
         $this->factFindingAssignment->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $CustomerAssignment_id: ID, 
-    $SalesActivity_id: ID, 
-    $content: String
-) {
-    submitNonScheduleFactFindingActivityReport (
-        CustomerAssignment_id: $CustomerAssignment_id, 
-        SalesActivity_id: $SalesActivity_id, 
-        content: $content
-    ) {
-        id, content, submitTime,
-        salesActivitySchedule {
-            startTime, endTime, status
-            salesActivity { name },
-        }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_submitNonScheduleFactFindingActivityReport_200()
-    {
-$this->disableExceptionHandling();
-        $this->submitNonScheduleFactFindingActivityReport();
+        $this->submitNonScheduledActivityReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
@@ -225,42 +196,12 @@ $this->disableExceptionHandling();
             'content' => $this->submitNonScheduledSalesActivityReportPayload['content'],
         ]);
     }
-    
-    //
-    protected function submitNonScheduleStrikingActivityReport()
-    {
-        $this->prepareSalesDependency();
-        $this->salesActivity->insert($this->connection);
-        
-        $this->customerAssignment->insert($this->connection);
-        $this->strikingAssignment->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $CustomerAssignment_id: ID, 
-    $SalesActivity_id: ID, 
-    $content: String
-) {
-    submitNonScheduleStrikingActivityReport (
-        CustomerAssignment_id: $CustomerAssignment_id, 
-        SalesActivity_id: $SalesActivity_id, 
-        content: $content
-    ) {
-        id, content, submitTime,
-        salesActivitySchedule {
-            startTime, endTime, status
-            salesActivity { name },
-        }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = $this->submitNonScheduledSalesActivityReportPayload;
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_submitNonScheduleStrikingActivityReport_200()
+    public function test_submitNonScheduledActivityReport_strikingAcitivity_200()
     {
 $this->disableExceptionHandling();
-        $this->submitNonScheduleStrikingActivityReport();
+        $this->sales->columns['role'] = SalesRole::STRIKER->value;
+        $this->strikingAssignment->insert($this->connection);
+        $this->submitNonScheduledActivityReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([

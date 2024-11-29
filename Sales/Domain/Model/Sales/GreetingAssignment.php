@@ -27,6 +27,7 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineGreetingAssignmentRepository;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\GreetingResult;
 
 #[Entity(repositoryClass: DoctrineGreetingAssignmentRepository::class)]
 class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssignmentInterface
@@ -49,6 +50,9 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
 
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
+    
+    #[Column(type: "string", enumType: GreetingResult::class, nullable: true)]
+    protected GreetingResult $greetingResult;
 
     #[Composed(class: CustomerAssignment::class)]
     #[OneToOne(targetEntity: CustomerAssignment::class, inversedBy: "greetingAssignment", cascade: ["persist"])]
@@ -86,12 +90,19 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
         $this->assertActive();
         $this->customer->update($city, $customerData);
     }
+    
+    public function updateCustomerRating(int $rating): void
+    {
+        $this->assertActive();
+        $this->customer->updateRating($rating);
+    }
 
     public function validateCustomer(): void
     {
         $this->assertActive();
         $this->customer->validate();
         $this->status = CustomerAssignmentStatus::COMPLETED;
+        $this->greetingResult = GreetingResult::VALIDATED;
         
         $event = new CustomerValidated($this->id);
         $this->recordEvent($event);
@@ -102,6 +113,7 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
         $this->assertActive();
         $this->customer->recycle();
         $this->status = CustomerAssignmentStatus::COMPLETED;
+        $this->greetingResult = GreetingResult::RECYCLED;
     }
 
     public function submitNonScheduledSalesActivityReport(

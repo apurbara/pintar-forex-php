@@ -4,7 +4,7 @@ namespace Sales\Domain\Model\Sales;
 
 use Company\Domain\Model\Customer as Customer2;
 use Company\Domain\Model\CustomerJourney as CustomerJourney2;
-use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Collection; 
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -70,6 +70,12 @@ class StrikingAssignment implements ContainCustomerAssignmentInterface
     }
 
     //
+    public function updateCustomerRating(int $rating)
+    {
+        $this->assertActive();
+        $this->customer->updateRating($rating);
+    }
+    
     public function updateJourney(CustomerJourney $customerJourney): void
     {
         $this->assertActive();

@@ -20,4 +20,24 @@ class DoctrineCustomerRepository extends DoctrineEntityRepository implements Cus
         $filters = [new Filter($phone, 'Customer.phone')];
         return empty($this->fetchOneBy($filters));
     }
+
+    //
+    public function aCustomerAssociateWithAssignment(string $customerAssignmentId)
+    {
+        $qb = $this->createCoreQueryBuilder();
+        $qb->leftJoin('Customer', 'GreetingAssignment', 'GreetingAssignment',
+                        'GreetingAssignment.Customer_id = Customer.id')
+                ->leftJoin('Customer', 'FactFindingAssignment', 'FactFindingAssignment',
+                        'FactFindingAssignment.Customer_id = Customer.id')
+                ->leftJoin('Customer', 'StrikingAssignment', 'StrikingAssignment',
+                        'StrikingAssignment.Customer_id = Customer.id')
+                ->andWhere($qb->expr()->or(
+                                $qb->expr()->eq('GreetingAssignment.id', ':customerAssignmentId'),
+                                $qb->expr()->eq('FactFindingAssignment.id', ':customerAssignmentId'),
+                                $qb->expr()->eq('StrikingAssignment.id', ':customerAssignmentId')
+                        ))
+                ->setParameter('customerAssignmentId', $customerAssignmentId)
+                ->setMaxResults(1);
+        return $qb->executeQuery()->fetchAssociative() ?: null;
+    }
 }

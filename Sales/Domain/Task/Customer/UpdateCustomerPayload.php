@@ -1,6 +1,6 @@
 <?php
 
-namespace Sales\Domain\Task\GreetingAssignment;
+namespace Sales\Domain\Task\Customer;
 
 use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 use Sales\Domain\DependencyModel\CustomerData;

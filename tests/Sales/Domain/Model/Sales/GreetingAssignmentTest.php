@@ -13,6 +13,7 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\GreetingResult;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 
@@ -26,6 +27,7 @@ class GreetingAssignmentTest extends TestBase
     protected $salesActivity;
     protected $reportId = 'reportId', $salesActivityReportData;
     protected $scheduleId = 'scheduleId', $salesActivityScheduleData;
+    protected $rating = 3;
 
     protected function setUp(): void
     {
@@ -97,6 +99,24 @@ class GreetingAssignmentTest extends TestBase
     }
     
     //
+    protected function updateCustomerRating()
+    {
+        $this->greetingAssignment->updateCustomerRating($this->rating);
+    }
+    public function test_updateCustomerRating_updateCustomer()
+    {
+        $this->customer->expects($this->once())
+                ->method('updateRating')
+                ->with($this->rating);
+        $this->updateCustomerRating();
+    }
+    public function test_updateCustomerRating_inactiveAssignment_forbidden()
+    {
+        $this->greetingAssignment->status = CustomerAssignmentStatus::COMPLETED;
+        $this->assertRegularExceptionThrowed(fn() => $this->updateCustomerRating(), 'Forbidden', 'inactive assignment');
+    }
+    
+    //
     protected function markCustomerValid()
     {
         $this->greetingAssignment->validateCustomer();
@@ -123,27 +143,37 @@ class GreetingAssignmentTest extends TestBase
         $this->markCustomerValid();
         $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->greetingAssignment->status);
     }
+    public function test_markCustomerValid_setGreetingResultValidated()
+    {
+        $this->markCustomerValid();
+        $this->assertEquals(GreetingResult::VALIDATED, $this->greetingAssignment->greetingResult);
+    }
     
     //
-    protected function markCustomerInvalid()
+    protected function recycleCustomer()
     {
         $this->greetingAssignment->recycleCustomer();
     }
-    public function test_markCustomerInvalid_markCustomerAsInvalid()
+    public function test_recycleCustomer_markCustomerAsInvalid()
     {
         $this->customer->expects($this->once())
                 ->method('recycle');
-        $this->markCustomerInvalid();
+        $this->recycleCustomer();
     }
-    public function test_markCustomerInvalid_inactiveAssignment_forbidden()
+    public function test_recycleCustomer_inactiveAssignment_forbidden()
     {
         $this->greetingAssignment->status = CustomerAssignmentStatus::COMPLETED;
-        $this->assertRegularExceptionThrowed(fn() => $this->markCustomerInvalid(), 'Forbidden', 'inactive assignment');
+        $this->assertRegularExceptionThrowed(fn() => $this->recycleCustomer(), 'Forbidden', 'inactive assignment');
     }
-    public function test_markCustomerInvalid_setAssignmentCompleted()
+    public function test_recycleCustomer_setAssignmentCompleted()
     {
-        $this->markCustomerInvalid();
+        $this->recycleCustomer();
         $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->greetingAssignment->status);
+    }
+    public function test_recycleCustomer_setGreetingResultRecycled()
+    {
+        $this->recycleCustomer();
+        $this->assertEquals(GreetingResult::RECYCLED, $this->greetingAssignment->greetingResult);
     }
 
     //
@@ -193,6 +223,7 @@ class TestableGreetingAssignment extends GreetingAssignment
     public Customer $customer;
     public string $id = 'greetingAssignmentId';
     public CustomerAssignmentStatus $status;
+    public GreetingResult $greetingResult;
     public CustomerAssignment $customerAssignment;
     public $recordedEvents;
 

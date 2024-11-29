@@ -13,11 +13,11 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\FactFindingAssignment;
 use Sales\Domain\Model\Sales\GreetingAssignment;
 use Sales\Domain\Model\Sales\StrikingAssignment;
-use Sales\Domain\Task\Dependency\ContainCustomerAssignmentRepository;
 use Sales\Domain\Task\SalesActivityReport\SubmitNonScheduleSalesActivityReport;
 use Sales\Domain\Task\SalesActivityReport\SubmitNonScheduleSalesActivityReportPayload;
 use Sales\Domain\Task\SalesActivityReport\SubmitSalesActivityReportTask;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityReportRepository;
+use Shared\Domain\Enum\SalesRole;
 
 #[GraphqlMapableController(entity: SalesActivityReport::class)]
 class SalesActivityReportController extends BaseController
@@ -29,11 +29,15 @@ class SalesActivityReportController extends BaseController
     }
 
     //
-    private function submitNonScheduledSalesActivityReport(
-            Sales $sales, string $customerAssignmentId, InputRequest $input,
-            ContainCustomerAssignmentRepository $customerAssignmentRepository)
+    public function submitNonScheduledActivityReport(
+            Sales $sales, string $customerAssignmentId, InputRequest $input)
     {
         $repository = $this->repository();
+        $customerAssignmentRepository = match ($sales->getRole()) {
+            SalesRole::GREETER => $this->em->getRepository(GreetingAssignment::class),
+            SalesRole::FACT_FINDER => $this->em->getRepository(FactFindingAssignment::class),
+            SalesRole::STRIKER => $this->em->getRepository(StrikingAssignment::class),
+        };
         $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
         $task = new SubmitNonScheduleSalesActivityReport(
                 $repository, $customerAssignmentRepository, $salesActivityRepository);
@@ -43,30 +47,6 @@ class SalesActivityReportController extends BaseController
 
         $this->executeSalesMutationTask($sales, $task, $payload);
         return $repository->queryOneById($payload->id);
-    }
-
-    public function submitNonScheduleGreetingActivityReport(Sales $sales, string $CustomerAssignment_id,
-            InputRequest $input)
-    {
-        $greetingAssignmentRepository = $this->em->getRepository(GreetingAssignment::class);
-        return $this->submitNonScheduledSalesActivityReport(
-                        $sales, $CustomerAssignment_id, $input, $greetingAssignmentRepository);
-    }
-
-    public function submitNonScheduleFactFindingActivityReport(Sales $sales, string $CustomerAssignment_id,
-            InputRequest $input)
-    {
-        $factFindingAssignmentRepository = $this->em->getRepository(FactFindingAssignment::class);
-        return $this->submitNonScheduledSalesActivityReport(
-                        $sales, $CustomerAssignment_id, $input, $factFindingAssignmentRepository);
-    }
-
-    public function submitNonScheduleStrikingActivityReport(Sales $sales, string $CustomerAssignment_id,
-            InputRequest $input)
-    {
-        $strikingAssignmentRepository = $this->em->getRepository(StrikingAssignment::class);
-        return $this->submitNonScheduledSalesActivityReport(
-                        $sales, $CustomerAssignment_id, $input, $strikingAssignmentRepository);
     }
 
     #[Mutation]

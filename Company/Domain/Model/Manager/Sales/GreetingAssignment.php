@@ -16,6 +16,7 @@ use Resources\Attributes\Composed;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
+use Shared\Domain\Enum\GreetingResult;
 use Shared\Domain\Enum\SalesRole;
 
 #[Entity(repositoryClass: DoctrineGreetingAssignmentRepository::class)]
@@ -37,6 +38,9 @@ class GreetingAssignment
 
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
+
+    #[Column(type: "string", enumType: GreetingResult::class, nullable: true)]
+    protected GreetingResult $greetingResult;
 
     #[Composed(class: CustomerAssignment::class)]
     #[OneToOne(targetEntity: CustomerAssignment::class, cascade: ["persist"])]

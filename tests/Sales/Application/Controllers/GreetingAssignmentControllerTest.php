@@ -11,6 +11,8 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\FactFindingAssignment;
 use Sales\Domain\Model\Sales\GreetingAssignment;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerStatus;
+use Shared\Domain\Enum\GreetingResult;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
 use Shared\Domain\Enum\SalesRole;
 use Tests\Http\Record\EntityRecord;
@@ -218,10 +220,11 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('GreetingAssignment', [
             'id' => $this->greetingAssignmentOne->columns['id'],
             'status' => CustomerAssignmentStatus::COMPLETED->value,
+            'greetingResult' => GreetingResult::VALIDATED->value,
         ]);
         $this->seeInDatabase('Customer', [
             'id' => $this->greetingAssignmentOne->columns['Customer_id'],
-            'status' => \Shared\Domain\Enum\CustomerStatus::FACT_FINDING_REQUIRED->value,
+            'status' => CustomerStatus::FACT_FINDING_REQUIRED->value,
         ]);
     }
     public function test_validateCustomer_handoverToLeastOccupiedFactFinder()
@@ -281,10 +284,11 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('GreetingAssignment', [
             'id' => $this->greetingAssignmentOne->columns['id'],
             'status' => CustomerAssignmentStatus::COMPLETED->value,
+            'greetingResult' => GreetingResult::RECYCLED->value,
         ]);
         $this->seeInDatabase('Customer', [
             'id' => $this->greetingAssignmentOne->columns['Customer_id'],
-            'status' => \Shared\Domain\Enum\CustomerStatus::RECYCLED->value,
+            'status' => CustomerStatus::RECYCLED->value,
         ]);
     }
 

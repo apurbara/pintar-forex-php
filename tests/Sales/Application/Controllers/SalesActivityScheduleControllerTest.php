@@ -12,6 +12,7 @@ use Sales\Domain\Model\Sales\FactFindingAssignment;
 use Sales\Domain\Model\Sales\GreetingAssignment;
 use Sales\Domain\Model\Sales\StrikingAssignment;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
+use Shared\Domain\Enum\SalesRole;
 use Tests\Http\Record\EntityRecord;
 use Tests\Sales\Application\Controllers\SalesControllerTestCase;
 
@@ -155,12 +156,11 @@ class SalesActivityScheduleControllerTest extends SalesControllerTestCase
     }
     
     //
-    protected function submitGreetingActivitySchedule()
+    protected function submitSalesActivitySchedule()
     {
         $this->prepareSalesDependency();
         $this->salesActivity->insert($this->connection);
         $this->customerAssignmentOne->insert($this->connection);
-        $this->greetingAssignmentOne->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
@@ -168,7 +168,7 @@ mutation (
     $SalesActivity_id: ID!, 
     $startTime: DateTimeZ
 ) {
-    submitGreetingActivitySchedule (
+    submitSalesActivitySchedule (
         CustomerAssignment_id: $CustomerAssignment_id, 
         SalesActivity_id: $SalesActivity_id, 
         startTime: $startTime
@@ -184,9 +184,10 @@ _QUERY;
         ];
         $this->postGraphqlRequest($this->sales->token);
     }
-    public function test_submitGreetingActivitySchedule_200()
+    public function test_submitSalesActivitySchedule_greetingAssignment_200()
     {
-        $this->submitGreetingActivitySchedule();
+        $this->greetingAssignmentOne->insert($this->connection);
+        $this->submitSalesActivitySchedule();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
@@ -205,40 +206,11 @@ _QUERY;
             'status' => 'SCHEDULED',
         ]);
     }
-    
-    //
-    protected function submitFactFindingActivitySchedule()
+    public function test_submitSalesActivitySchedule_factFindingAssignment_200()
     {
-        $this->prepareSalesDependency();
-        $this->salesActivity->insert($this->connection);
-        $this->customerAssignmentOne->insert($this->connection);
+        $this->sales->columns['role'] = SalesRole::FACT_FINDER->value;
         $this->factFindingAssignmentOne->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $CustomerAssignment_id: ID!, 
-    $SalesActivity_id: ID!, 
-    $startTime: DateTimeZ
-) {
-    submitFactFindingActivitySchedule (
-        CustomerAssignment_id: $CustomerAssignment_id, 
-        SalesActivity_id: $SalesActivity_id, 
-        startTime: $startTime
-    ) {
-        id, status, startTime
-        salesActivity { id, name, duration }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = [
-            'CustomerAssignment_id' => $this->factFindingAssignmentOne->columns['id'],
-            ...$this->submitScheduleRequest
-        ];
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_submitFactFindingActivitySchedule_200()
-    {
-        $this->submitFactFindingActivitySchedule();
+        $this->submitSalesActivitySchedule();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
@@ -257,40 +229,11 @@ _QUERY;
             'status' => 'SCHEDULED',
         ]);
     }
-    
-    //
-    protected function submitStrikingActivitySchedule()
+    public function test_submitSalesActivitySchedule_strikingAssignment_200()
     {
-        $this->prepareSalesDependency();
-        $this->salesActivity->insert($this->connection);
-        $this->customerAssignmentOne->insert($this->connection);
+        $this->sales->columns['role'] = SalesRole::STRIKER->value;
         $this->strikingAssignmentOne->insert($this->connection);
-        
-        $this->graphqlQuery = <<<'_QUERY'
-mutation (
-    $CustomerAssignment_id: ID!, 
-    $SalesActivity_id: ID!, 
-    $startTime: DateTimeZ
-) {
-    submitStrikingActivitySchedule (
-        CustomerAssignment_id: $CustomerAssignment_id, 
-        SalesActivity_id: $SalesActivity_id, 
-        startTime: $startTime
-    ) {
-        id, status, startTime
-        salesActivity { id, name, duration }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = [
-            'CustomerAssignment_id' => $this->strikingAssignmentOne->columns['id'],
-            ...$this->submitScheduleRequest
-        ];
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_submitStrikingActivitySchedule_200()
-    {
-        $this->submitStrikingActivitySchedule();
+        $this->submitSalesActivitySchedule();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([

@@ -17,6 +17,8 @@ interface ContainCustomerAssignmentInterface
 
     public function submitSalesActivitySchedule(
             SalesActivity $salesActivity, string $scheduleId, SalesActivityScheduleData $salesActivityScheduleData): SalesActivitySchedule;
+    
+    public function updateCustomerRating(int $rating);
 
     public function assertBelongsToSales(Sales $sales): void;
 }
