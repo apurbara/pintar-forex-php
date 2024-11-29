@@ -59,6 +59,7 @@ class Customer
     #[Column(type: "smallint", nullable: true)]
     protected ?int $rating;
 
+    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: VerificationReport::class, mappedBy: "customer", cascade: ["persist"])]
     protected Collection $verificationReports;
     
