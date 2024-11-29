@@ -34,7 +34,7 @@ use Shared\Domain\Enum\ManagementApprovalStatus;
 class StrikingAssignment implements ContainCustomerAssignmentInterface
 {
 
-    #[FetchableObject(targetEntity: Sales2::class, joinColumnName: "Customer_id")]
+    #[FetchableObject(targetEntity: Sales2::class, joinColumnName: "Sales_id")]
     #[ManyToOne(targetEntity: Sales::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
