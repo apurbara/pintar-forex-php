@@ -2,6 +2,7 @@
 
 namespace Sales\Domain\Model\Sales;
 
+use Company\Domain\Model\Manager\Sales as Sales2;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
@@ -31,6 +32,7 @@ class FactFindingAssignment implements ContainEventsInterface, ContainCustomerAs
 {
     use ContainEventsTrait;
 
+    #[FetchableObject(targetEntity: Sales2::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Sales::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;

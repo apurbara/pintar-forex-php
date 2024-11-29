@@ -3,6 +3,7 @@
 namespace Sales\Domain\Model\Sales;
 
 use Company\Domain\Model\CustomerJourney as CustomerJourney2;
+use Company\Domain\Model\Manager\Sales as Sales2;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
@@ -33,6 +34,7 @@ use Shared\Domain\Enum\ManagementApprovalStatus;
 class StrikingAssignment implements ContainCustomerAssignmentInterface
 {
 
+    #[FetchableObject(targetEntity: Sales2::class, joinColumnName: "Customer_id")]
     #[ManyToOne(targetEntity: Sales::class, fetch: "EXTRA_LAZY")]
     #[JoinColumn(name: "Sales_id", referencedColumnName: "id")]
     protected Sales $sales;
