@@ -13,12 +13,16 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\Uuid;
 use Resources\ValidationRule;
 use Resources\ValidationService;
 use Sales\Domain\DependencyModel\Customer\VerificationReport;
 use Sales\Domain\DependencyModel\Customer\VerificationReportData;
 use Sales\Domain\DependencyModel\Province\City;
+use Sales\Domain\Model\Sales\FactFindingAssignment;
+use Sales\Domain\Model\Sales\GreetingAssignment;
+use Sales\Domain\Model\Sales\StrikingAssignment;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use Shared\Domain\Enum\CustomerStatus;
 
@@ -57,6 +61,14 @@ class Customer
 
     #[OneToMany(targetEntity: VerificationReport::class, mappedBy: "customer", cascade: ["persist"])]
     protected Collection $verificationReports;
+    
+    //QUERY
+    #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    protected $greetingAssignments;
+    #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    protected $factFindingAssignments;
+    #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    protected $strikingAssignments;
 
     protected function setName(string $name)
     {

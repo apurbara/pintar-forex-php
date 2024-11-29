@@ -59,17 +59,17 @@ class Customer
     protected ?int $rating;
 
     #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Customer_id",
-                paginationRequired: true)]
+                paginationRequired: false)]
     #[OneToMany(targetEntity: GreetingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $greetingAssignments;
 
     #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Customer_id",
-                paginationRequired: true)]
+                paginationRequired: false)]
     #[OneToMany(targetEntity: FactFindingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $factFindingAssignments;
 
     #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Customer_id",
-                paginationRequired: true)]
+                paginationRequired: false)]
     #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $strikingAssignments;
 
