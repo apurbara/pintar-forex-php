@@ -10,6 +10,8 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
 use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
@@ -63,7 +65,7 @@ class Customer
 
     //QUERY ONLY
     #[FetchableObject(targetEntity: City::class, joinColumnName: "City_id")]
-    #[ManyToOne(targetEntity: City::class)]
+//    #[ManyToOne(targetEntity: City::class)]
     #[JoinColumn(name: "City_id", referencedColumnName: "id")]
     protected ?City $city;
     
