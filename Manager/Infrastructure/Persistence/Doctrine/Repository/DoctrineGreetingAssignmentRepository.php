@@ -29,7 +29,7 @@ class DoctrineGreetingAssignmentRepository extends DoctrineEntityRepository impl
     {
         $filters = [
             new Filter($managerId, 'Sales.Manager_id'),
-            new Filter($id, 'FactFindingAssignment.id'),
+            new Filter($id, 'GreetingAssignment.id'),
         ];
         return $this->fetchOneBy($filters);
     }
@@ -47,7 +47,7 @@ class DoctrineGreetingAssignmentRepository extends DoctrineEntityRepository impl
         $hasActiveSalesActivityScheduleSubquery->select("1")
                 ->from('SalesActivitySchedule')
                 ->where($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id",
-                                "GreetingAssignment.CustomerAssignment.id"))
+                                "GreetingAssignment.CustomerAssignment_id"))
                 ->andWhere($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.status",
                                 "'{$activeSalesActivityScheduleStatus}'"));
 

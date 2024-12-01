@@ -14,9 +14,5 @@ interface ClosingRequestRepository
 
     public function aClosingRequestBelongsToManager(string $managerId, string $id): ?array;
 
-    public function monthlyTotalClosingBelongsToManager(string $managerId, array $searchSchema): array;
-
-    public function monthlyClosingCountBelongsToManager(string $managerId, array $searchSchema): array;
-
     public function closingRequestCountBelongsToManager(string $managerId, array $searchSchema);
 }

@@ -8,7 +8,7 @@ use Shared\Application\Controllers\Controller;
 
 class BaseController extends Controller
 {
-    protected function executeManagerTask(Manager $manager, ManagerTask $task, $payload): void
+    protected function executeManagerMutationTask(Manager $manager, ManagerTask $task, $payload): void
     {
         $manager->executeTask($task, $payload);
         $this->em->flush();

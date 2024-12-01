@@ -48,7 +48,7 @@ class DoctrineFactFindingAssignmentRepository extends DoctrineEntityRepository
         $hasActiveSalesActivityScheduleSubquery->select("1")
                 ->from('SalesActivitySchedule')
                 ->where($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id",
-                                "FactFindingAssignment.CustomerAssignment.id"))
+                                "FactFindingAssignment.CustomerAssignment_id"))
                 ->andWhere($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.status",
                                 "'{$activeSalesActivityScheduleStatus}'"));
 

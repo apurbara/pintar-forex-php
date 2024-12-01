@@ -143,11 +143,6 @@ class GreetingAssignmentTest extends TestBase
         $this->markCustomerValid();
         $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->greetingAssignment->status);
     }
-    public function test_markCustomerValid_setGreetingResultValidated()
-    {
-        $this->markCustomerValid();
-        $this->assertEquals(GreetingResult::VALIDATED, $this->greetingAssignment->greetingResult);
-    }
     
     //
     protected function recycleCustomer()
@@ -165,15 +160,10 @@ class GreetingAssignmentTest extends TestBase
         $this->greetingAssignment->status = CustomerAssignmentStatus::COMPLETED;
         $this->assertRegularExceptionThrowed(fn() => $this->recycleCustomer(), 'Forbidden', 'inactive assignment');
     }
-    public function test_recycleCustomer_setAssignmentCompleted()
+    public function test_recycleCustomer_setAssignmentRecycled()
     {
         $this->recycleCustomer();
-        $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->greetingAssignment->status);
-    }
-    public function test_recycleCustomer_setGreetingResultRecycled()
-    {
-        $this->recycleCustomer();
-        $this->assertEquals(GreetingResult::RECYCLED, $this->greetingAssignment->greetingResult);
+        $this->assertEquals(CustomerAssignmentStatus::RECYCLED, $this->greetingAssignment->status);
     }
 
     //
@@ -223,7 +213,6 @@ class TestableGreetingAssignment extends GreetingAssignment
     public Customer $customer;
     public string $id = 'greetingAssignmentId';
     public CustomerAssignmentStatus $status;
-    public GreetingResult $greetingResult;
     public CustomerAssignment $customerAssignment;
     public $recordedEvents;
 

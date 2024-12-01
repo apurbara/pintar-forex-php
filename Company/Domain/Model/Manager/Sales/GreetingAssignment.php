@@ -39,9 +39,6 @@ class GreetingAssignment
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
 
-    #[Column(type: "string", enumType: GreetingResult::class, nullable: true)]
-    protected GreetingResult $greetingResult;
-
     #[Composed(class: CustomerAssignment::class)]
     #[OneToOne(targetEntity: CustomerAssignment::class, cascade: ["persist"])]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]

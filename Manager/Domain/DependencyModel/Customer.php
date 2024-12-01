@@ -2,6 +2,8 @@
 
 namespace Manager\Domain\DependencyModel;
 
+use Company\Domain\Model\Province\City;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
@@ -13,6 +15,8 @@ use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
 use Manager\Domain\Model\Manager\Sales\StrikingAssignment;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerRepository;
 use Resources\Exception\RegularException;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
 
@@ -23,18 +27,43 @@ class Customer
     #[Id, Column(type: "guid")]
     protected string $id;
 
+    #[Column(type: "datetimetz_immutable", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
+    protected DateTimeImmutable $createdTime;
+
     #[Column(type: "string", enumType: CustomerStatus::class, options: ["default" => CustomerStatus::NEW->value])]
     protected CustomerStatus $status;
 
+    #[Column(type: "string", length: 255, nullable: false)]
+    protected string $name;
+
+    #[Column(type: "string", length: 255, nullable: true)]
+    protected ?string $email;
+
+    #[Column(type: "string", length: 255, nullable: false)]
+    protected string $phone;
+
+    #[Column(type: "string", length: 255, nullable: true)]
+    protected ?string $source;
+
+    #[Column(type: "smallint", nullable: true)]
+    protected ?int $rating;
+
+    #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: GreetingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $greetingAssignments;
 
+    #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: FactFindingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $factFindingAssignments;
 
+    #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
     #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $strikingAssignments;
 
+    //QUERY
+    #[FetchableObject(targetEntity: City::class, joinColumnName: "City_id")]
+    protected ?City $city;
+    
     public function getId(): string
     {
         return $this->id;

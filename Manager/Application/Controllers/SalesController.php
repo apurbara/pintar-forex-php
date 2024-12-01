@@ -28,7 +28,7 @@ class SalesController extends BaseController
         $task = new ViewSalesList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
 
-        $this->executeManagerTask($manager, $task, $payload);
+        $this->executeManagerMutationTask($manager, $task, $payload);
         return $payload->result;
     }
     
@@ -38,7 +38,7 @@ class SalesController extends BaseController
         $task = new ViewAllSales($this->repository());
         $payload = $this->buildViewAllListPayload($input);
 
-        $this->executeManagerTask($manager, $task, $payload);
+        $this->executeManagerMutationTask($manager, $task, $payload);
         return $payload->result;
     }
 
@@ -48,7 +48,7 @@ class SalesController extends BaseController
         $task = new \Manager\Domain\Task\Sales\ViewSalesDetail($this->repository());
         $payload = new ViewDetailPayload($id);
 
-        $this->executeManagerTask($manager, $task, $payload);
+        $this->executeManagerMutationTask($manager, $task, $payload);
         return $payload->result;
     }
 }

@@ -3,15 +3,16 @@
 namespace Manager\Application\Controllers;
 
 use Company\Domain\Model\Customer;
-use Company\Domain\Model\CustomerJourney;
-use Company\Domain\Model\SalesActivity;
-use Manager\Domain\Model\Manager\Sales;
-use Manager\Domain\Model\Manager\Sales\CustomerAssignment;
-use Manager\Domain\Service\CustomerAssignmentDistributionServiceBuilder;
-use Tests\Http\Record\EntityRecord;
+use Company\Domain\Model\Manager\Sales;
+use Company\Domain\Model\Manager\Sales\CustomerAssignment;
+use Company\Domain\Model\Manager\Sales\GreetingAssignment;
+use Company\Domain\Service\CustomerAssignmentDistributionServiceBuilder;
+use Shared\Domain\Enum\CustomerStatus;
+use Shared\Domain\Enum\SalesRole;
 use Tests\Manager\Application\Controllers\ManagerControllerTestCase;
+use Tests\resources\Application\EntityRecord;
 
-class CustomerAssignmentControllerTest extends ManagerControllerTestCase
+class GreetingAssignmentControllerTest extends ManagerControllerTestCase
 {
     protected EntityRecord $customerOne;
     protected EntityRecord $customerTwo;
@@ -21,12 +22,9 @@ class CustomerAssignmentControllerTest extends ManagerControllerTestCase
     protected EntityRecord $salesOne;
     protected EntityRecord $salesTwo;
     
-    protected EntityRecord $customerAssignment_11;
-    protected EntityRecord $customerAssignment_12;
-    protected EntityRecord $customerAssignment_23;
-    
-    protected EntityRecord $customerJourneyInitial;
-    protected EntityRecord $salesActivityInitial;
+    protected EntityRecord $greetingAssignment_11, $customerAssignment_11;
+    protected EntityRecord $greetingAssignment_12, $customerAssignment_12;
+    protected EntityRecord $greetingAssignment_23, $customerAssignment_23;
     
     protected $assignedMultipleCustomerToMultipleSalesInput = [];
     
@@ -35,45 +33,49 @@ class CustomerAssignmentControllerTest extends ManagerControllerTestCase
         parent::setUp();
         $this->connection->table('Sales')->truncate();
         $this->connection->table('Customer')->truncate();
+        $this->connection->table('GreetingAssignment')->truncate();
+        $this->connection->table('FactFindingAssignment')->truncate();
+        $this->connection->table('StrikingAssignment')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
-        $this->connection->table('CustomerJourney')->truncate();
-        $this->connection->table('SalesActivity')->truncate();
-        $this->connection->table('SalesActivitySchedule')->truncate();
         
         //
         $this->customerOne = new EntityRecord(Customer::class, 1);
+        $this->customerOne->columns['status'] = CustomerStatus::NEW->value;
         $this->customerTwo = new EntityRecord(Customer::class, 2);
+        $this->customerTwo->columns['status'] = CustomerStatus::NEW->value;
         $this->customerThree = new EntityRecord(Customer::class, 3);
+        $this->customerThree->columns['status'] = CustomerStatus::NEW->value;
         $this->customerFour = new EntityRecord(Customer::class, 4);
+        $this->customerFour->columns['status'] = CustomerStatus::NEW->value;
         
         $this->salesOne = new EntityRecord(Sales::class, 1);
+        $this->salesOne->columns['role'] = SalesRole::GREETER->value;
         $this->salesOne->columns['Manager_id'] = $this->manager->columns['id'];
         $this->salesTwo = new EntityRecord(Sales::class, 2);
+        $this->salesTwo->columns['role'] = SalesRole::GREETER->value;
         $this->salesTwo->columns['Manager_id'] = $this->manager->columns['id'];
         
-        $this->customerJourneyInitial = new EntityRecord(CustomerJourney::class, 'initial');
-        $this->customerJourneyInitial->columns['initial'] = true;
-        
         $this->customerAssignment_11 = new EntityRecord(CustomerAssignment::class, 11);
-        $this->customerAssignment_11->columns['Sales_id'] = $this->salesOne->columns['id'];
-        $this->customerAssignment_11->columns['Customer_id'] = $this->customerOne->columns['id'];
-        $this->customerAssignment_11->columns['CustomerJourney_id'] = $this->customerJourneyInitial->columns['id'];
+        $this->greetingAssignment_11 = new EntityRecord(GreetingAssignment::class, 11);
+        $this->greetingAssignment_11->columns['CustomerAssignment_id'] = $this->customerAssignment_11->columns['id'];
+        $this->greetingAssignment_11->columns['id'] = $this->customerAssignment_11->columns['id'];
+        $this->greetingAssignment_11->columns['Sales_id'] = $this->salesOne->columns['id'];
+        $this->greetingAssignment_11->columns['Customer_id'] = $this->customerOne->columns['id'];
         $this->customerAssignment_12 = new EntityRecord(CustomerAssignment::class, 12);
-        $this->customerAssignment_12->columns['Sales_id'] = $this->salesOne->columns['id'];
-        $this->customerAssignment_12->columns['Customer_id'] = $this->customerTwo->columns['id'];
-        $this->customerAssignment_12->columns['CustomerJourney_id'] = $this->customerJourneyInitial->columns['id'];
+        $this->greetingAssignment_12 = new EntityRecord(GreetingAssignment::class, 12);
+        $this->greetingAssignment_12->columns['CustomerAssignment_id'] = $this->customerAssignment_12->columns['id'];
+        $this->greetingAssignment_12->columns['id'] = $this->customerAssignment_12->columns['id'];
+        $this->greetingAssignment_12->columns['Sales_id'] = $this->salesOne->columns['id'];
+        $this->greetingAssignment_12->columns['Customer_id'] = $this->customerTwo->columns['id'];
         $this->customerAssignment_23 = new EntityRecord(CustomerAssignment::class, 23);
-        $this->customerAssignment_23->columns['Sales_id'] = $this->salesTwo->columns['id'];
-        $this->customerAssignment_23->columns['Customer_id'] = $this->customerThree->columns['id'];
-        $this->customerAssignment_23->columns['CustomerJourney_id'] = $this->customerJourneyInitial->columns['id'];
-        
-        $this->salesActivityInitial = new EntityRecord(SalesActivity::class, 'initial');
-        $this->salesActivityInitial->columns['initial'] = true;
-        $this->salesActivityInitial->columns['duration'] = 20;
+        $this->greetingAssignment_23 = new EntityRecord(GreetingAssignment::class, 23);
+        $this->greetingAssignment_23->columns['CustomerAssignment_id'] = $this->customerAssignment_23->columns['id'];
+        $this->greetingAssignment_23->columns['id'] = $this->customerAssignment_23->columns['id'];
+        $this->greetingAssignment_23->columns['Sales_id'] = $this->salesTwo->columns['id'];
+        $this->greetingAssignment_23->columns['Customer_id'] = $this->customerThree->columns['id'];
         
         $this->assignedMultipleCustomerToMultipleSalesInput = [
             'distributionStrategy' => CustomerAssignmentDistributionServiceBuilder::EVEN_DISTRIBUTION,
-            'initiateSchedules' => false,
             'salesList' => [
                 $this->salesOne->columns['id'],
                 $this->salesTwo->columns['id'],
@@ -91,14 +93,12 @@ class CustomerAssignmentControllerTest extends ManagerControllerTestCase
         parent::tearDown();
         $this->connection->table('Sales')->truncate();
         $this->connection->table('Customer')->truncate();
+        $this->connection->table('GreetingAssignment')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
-        $this->connection->table('CustomerJourney')->truncate();
-        $this->connection->table('SalesActivity')->truncate();
-        $this->connection->table('SalesActivitySchedule')->truncate();
     }
     
     //
-    protected function assignedMultipleCustomerToMultipleSales()
+    protected function assignGreetingActivityOfCustomerListToSales()
     {
         $this->persistManagerDependency();
         
@@ -110,16 +110,12 @@ class CustomerAssignmentControllerTest extends ManagerControllerTestCase
         $this->salesOne->insert($this->connection);
         $this->salesTwo->insert($this->connection);
         
-        $this->customerJourneyInitial->insert($this->connection);
-        $this->salesActivityInitial->insert($this->connection);
-        
         $this->graphqlQuery = <<<'_QUERY'
 mutation ( 
-    $salesList: [ID], $customerList: [ID], $distributionStrategy: String, $initiateSchedules: Boolean
+    $salesList: [ID], $customerList: [ID], $distributionStrategy: String,
 ) {
-    assignMultipleCustomerToMultipleSales (
+    assignGreetingActivityOfCustomerListToSales (
         salesList: $salesList, customerList: $customerList, distributionStrategy: $distributionStrategy, 
-        initiateSchedules: $initiateSchedules
     )
 }
 _QUERY;
@@ -129,59 +125,44 @@ _QUERY;
     public function test_assignedMultipleCustomerToMultipleSales_distributeAssignment()
     {
 $this->disableExceptionHandling();
-        $this->assignedMultipleCustomerToMultipleSales();
+        $this->assignGreetingActivityOfCustomerListToSales();
         $this->seeStatusCode(200);
         
-        $this->seeInDatabase('CustomerAssignment', [
+        $this->seeInDatabase('GreetingAssignment', [
             'Sales_id' => $this->salesOne->columns['id'],
             'Customer_id' => $this->customerOne->columns['id'],
-            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
         ]);
         
-        $this->seeInDatabase('CustomerAssignment', [
+        $this->seeInDatabase('GreetingAssignment', [
             'Sales_id' => $this->salesOne->columns['id'],
             'Customer_id' => $this->customerThree->columns['id'],
-            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
         ]);
         
-        $this->seeInDatabase('CustomerAssignment', [
+        $this->seeInDatabase('GreetingAssignment', [
             'Sales_id' => $this->salesTwo->columns['id'],
             'Customer_id' => $this->customerTwo->columns['id'],
-            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
         ]);
         
-        $this->seeInDatabase('CustomerAssignment', [
+        $this->seeInDatabase('GreetingAssignment', [
             'Sales_id' => $this->salesTwo->columns['id'],
             'Customer_id' => $this->customerFour->columns['id'],
-            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
         ]);
-    }
-    public function test_assignedMultipleCustomerToMultipleSales_initiateSchedulesTrue_allocateInitialSalesActivity()
-    {
-$this->disableExceptionHandling();
-        $this->assignedMultipleCustomerToMultipleSalesInput['initiateSchedules'] = true;
-        $this->assignedMultipleCustomerToMultipleSalesInput['salesList'] = [$this->salesOne->columns['id']];
-        $this->assignedMultipleCustomerToMultipleSales();
-        $this->seeStatusCode(200);
-        
-        $this->seeInDatabase('SalesActivitySchedule', [
-            'SalesActivity_id' => $this->salesActivityInitial->columns['id'],
-        ]);
-//check db manually to see if contain sales activity schedule in 11.00
     }
     
     //
-    protected function customerAssignmentDetail()
+    protected function greetingAssignmentDetail()
     {
+$this->disableExceptionHandling();
         $this->persistManagerDependency();
         $this->customerOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         
         $this->customerAssignment_11->insert($this->connection);
+        $this->greetingAssignment_11->insert($this->connection);
         
         $this->graphqlQuery = <<<'_QUERY'
 query ( $id: ID) {
-    customerAssignmentDetail ( id: $id ) {
+    greetingAssignmentDetail ( id: $id ) {
         id, 
         sales { name }
         customer { name, phone }
@@ -189,17 +170,17 @@ query ( $id: ID) {
 }
 _QUERY;
         $this->graphqlVariables = [
-            'id' => $this->customerAssignment_11->columns['id'],
+            'id' => $this->greetingAssignment_11->columns['id'],
         ];
         $this->postGraphqlRequest($this->manager->token);
     }
-    public function test_customerAssignmentDetail_200()
+    public function test_greetingAssignmentDetail_200()
     {
-        $this->customerAssignmentDetail();
+        $this->greetingAssignmentDetail();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
-            'id' => $this->customerAssignment_11->columns['id'],
+            'id' => $this->greetingAssignment_11->columns['id'],
             'sales' => [
                     'name' => $this->salesOne->columns['name'],
             ],
@@ -211,10 +192,9 @@ _QUERY;
     }
     
     //
-    protected function customerAssignmentList()
+    protected function greetingAssignmentList()
     {
         $this->persistManagerDependency();
-        $this->customerJourneyInitial->insert($this->connection);
         
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
@@ -227,9 +207,13 @@ _QUERY;
         $this->customerAssignment_12->insert($this->connection);
         $this->customerAssignment_23->insert($this->connection);
         
+        $this->greetingAssignment_11->insert($this->connection);
+        $this->greetingAssignment_12->insert($this->connection);
+        $this->greetingAssignment_23->insert($this->connection);
+        
         $this->graphqlQuery = <<<'_QUERY'
 query ( $filters: [FilterInput] ) {
-    customerAssignmentList ( filters: $filters ) {
+    greetingAssignmentList ( filters: $filters ) {
         list {
             id, 
             sales { name }
@@ -242,15 +226,15 @@ _QUERY;
         $this->graphqlVariables = $this->getPaginationInput();
         $this->postGraphqlRequest($this->manager->token);
     }
-    public function test_customerAssignmentList_200()
+    public function test_greetingAssignmentList_200()
     {
-        $this->customerAssignmentList();
+        $this->greetingAssignmentList();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
             'list' => [
                 [
-                    'id' => $this->customerAssignment_11->columns['id'],
+                    'id' => $this->greetingAssignment_11->columns['id'],
                     'sales' => [
                         'name' => $this->salesOne->columns['name'],
                     ],
@@ -260,7 +244,7 @@ _QUERY;
                     ],
                 ],
                 [
-                    'id' => $this->customerAssignment_12->columns['id'],
+                    'id' => $this->greetingAssignment_12->columns['id'],
                     'sales' => [
                         'name' => $this->salesOne->columns['name'],
                     ],
@@ -270,7 +254,7 @@ _QUERY;
                     ],
                 ],
                 [
-                    'id' => $this->customerAssignment_23->columns['id'],
+                    'id' => $this->greetingAssignment_23->columns['id'],
                     'sales' => [
                         'name' => $this->salesTwo->columns['name'],
                     ],
@@ -283,18 +267,18 @@ _QUERY;
             'cursorLimit' => ['total' => 3],
         ]);
     }
-    public function test_customerAssignmentList_hasSalesActivityScheduleFilter()
+    public function test_greetingAssignmentList_hasSalesActivityScheduleFilter()
     {
         $this->filters = [
             ['column' => 'hasSalesActivitySchedule', 'value' => false],
         ];
-        $this->customerAssignmentList();
+        $this->greetingAssignmentList();
         $this->seeStatusCode(200);
         $this->seeJsonContains(['total' => 3]);
     }
     
     //
-    protected function viewCustomerAssignmentCount()
+    protected function viewGreetingAssignmentCount()
     {
         $this->persistManagerDependency();
         $this->customerOne->insert($this->connection);
@@ -308,20 +292,24 @@ _QUERY;
         $this->customerAssignment_12->insert($this->connection);
         $this->customerAssignment_23->insert($this->connection);
         
+        $this->greetingAssignment_11->insert($this->connection);
+        $this->greetingAssignment_12->insert($this->connection);
+        $this->greetingAssignment_23->insert($this->connection);
+        
         $this->graphqlQuery = <<<'_QUERY'
 query ($filters: [FilterInput]) {
-    viewCustomerAssignmentCount(filters: $filters)
+    viewGreetingAssignmentCount(filters: $filters)
 }
 _QUERY;
         $this->graphqlVariables = $this->getPaginationInput();
         $this->postGraphqlRequest($this->manager->token);
     }
-    public function test_viewCustomerAssignmentCount_200()
+    public function test_viewGreetingAssignmentCount_200()
     {
-        $this->viewCustomerAssignmentCount();
+        $this->viewGreetingAssignmentCount();
         $this->seeStatusCode(200);
         
-        $this->seeJsonContains(['viewCustomerAssignmentCount' => 3]);
+        $this->seeJsonContains(['viewGreetingAssignmentCount' => 3]);
     }
     
 }

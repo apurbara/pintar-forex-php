@@ -52,9 +52,6 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
     #[Column(type: "string", enumType: CustomerAssignmentStatus::class)]
     protected CustomerAssignmentStatus $status;
     
-    #[Column(type: "string", enumType: GreetingResult::class, nullable: true)]
-    protected GreetingResult $greetingResult;
-
     #[Composed(class: CustomerAssignment::class)]
     #[OneToOne(targetEntity: CustomerAssignment::class, inversedBy: "greetingAssignment", cascade: ["persist"])]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
@@ -103,7 +100,6 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
         $this->assertActive();
         $this->customer->validate();
         $this->status = CustomerAssignmentStatus::COMPLETED;
-        $this->greetingResult = GreetingResult::VALIDATED;
         
         $event = new CustomerValidated($this->id);
         $this->recordEvent($event);
@@ -113,8 +109,7 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
     {
         $this->assertActive();
         $this->customer->recycle();
-        $this->status = CustomerAssignmentStatus::COMPLETED;
-        $this->greetingResult = GreetingResult::RECYCLED;
+        $this->status = CustomerAssignmentStatus::RECYCLED;
     }
 
     public function submitNonScheduledSalesActivityReport(

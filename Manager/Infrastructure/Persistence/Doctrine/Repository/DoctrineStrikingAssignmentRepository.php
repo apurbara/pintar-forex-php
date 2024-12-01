@@ -41,14 +41,14 @@ class DoctrineStrikingAssignmentRepository extends DoctrineEntityRepository impl
         $hasSalesActivityScheduleSubquery->select("1")
                 ->from('SalesActivitySchedule')
                 ->where($hasSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id",
-                                "StrikingAssignment.CustomerAssignment.id"));
+                                "StrikingAssignment.CustomerAssignment_id"));
 
         $activeSalesActivityScheduleStatus = SalesActivityScheduleStatus::SCHEDULED->value;
         $hasActiveSalesActivityScheduleSubquery = $this->dbalQueryBuilder();
         $hasActiveSalesActivityScheduleSubquery->select("1")
                 ->from('SalesActivitySchedule')
                 ->where($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id",
-                                "StrikingAssignment.CustomerAssignment.id"))
+                                "StrikingAssignment.CustomerAssignment_id"))
                 ->andWhere($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.status",
                                 "'{$activeSalesActivityScheduleStatus}'"));
 
@@ -95,14 +95,14 @@ class DoctrineStrikingAssignmentRepository extends DoctrineEntityRepository impl
         $hasSalesActivityScheduleSubquery->select("1")
                 ->from('SalesActivitySchedule')
                 ->where($hasSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id",
-                                "StrikingAssignment.CustomerAssignment.id"));
+                                "StrikingAssignment.CustomerAssignment_id"));
 
         $activeSalesActivityScheduleStatus = SalesActivityScheduleStatus::SCHEDULED->value;
         $hasActiveSalesActivityScheduleSubquery = $this->dbalQueryBuilder();
         $hasActiveSalesActivityScheduleSubquery->select("1")
                 ->from('SalesActivitySchedule')
                 ->where($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.CustomerAssignment_id",
-                                "StrikingAssignment.CustomerAssignment.id"))
+                                "StrikingAssignment.CustomerAssignment_id"))
                 ->andWhere($hasActiveSalesActivityScheduleSubquery->expr()->eq("SalesActivitySchedule.status",
                                 "'{$activeSalesActivityScheduleStatus}'"));
 
@@ -116,8 +116,7 @@ class DoctrineStrikingAssignmentRepository extends DoctrineEntityRepository impl
                                 "'{$pendingRequestStatus}'"));
 
         $qb = $this->createCoreQueryBuilder();
-        $qb->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id')
-                ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
+        $qb->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
                 ->setParameter('managerId', $managerId);
 
         foreach ($paginationSchema['filters'] ?? [] as $key => $filterSchema) {

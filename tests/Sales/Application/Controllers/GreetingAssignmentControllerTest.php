@@ -220,7 +220,6 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('GreetingAssignment', [
             'id' => $this->greetingAssignmentOne->columns['id'],
             'status' => CustomerAssignmentStatus::COMPLETED->value,
-            'greetingResult' => GreetingResult::VALIDATED->value,
         ]);
         $this->seeInDatabase('Customer', [
             'id' => $this->greetingAssignmentOne->columns['Customer_id'],
@@ -278,13 +277,12 @@ $this->disableExceptionHandling();
 
         $this->seeJsonContains([
             'id' => $this->greetingAssignmentOne->columns['id'],
-            'status' => CustomerAssignmentStatus::COMPLETED->value,
+            'status' => CustomerAssignmentStatus::RECYCLED->value,
         ]);
 
         $this->seeInDatabase('GreetingAssignment', [
             'id' => $this->greetingAssignmentOne->columns['id'],
-            'status' => CustomerAssignmentStatus::COMPLETED->value,
-            'greetingResult' => GreetingResult::RECYCLED->value,
+            'status' => CustomerAssignmentStatus::RECYCLED->value,
         ]);
         $this->seeInDatabase('Customer', [
             'id' => $this->greetingAssignmentOne->columns['Customer_id'],
