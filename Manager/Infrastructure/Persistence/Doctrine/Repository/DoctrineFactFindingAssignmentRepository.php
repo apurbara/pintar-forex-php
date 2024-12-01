@@ -24,7 +24,8 @@ class DoctrineFactFindingAssignmentRepository extends DoctrineEntityRepository
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         return parent::createCoreQueryBuilder()
-                ->innerJoin('FactFindingAssignment', 'Sales', 'Sales', 'FactFindingAssignment.Sales_id = Sales.id');
+                ->innerJoin('FactFindingAssignment', 'Sales', 'Sales', 'FactFindingAssignment.Sales_id = Sales.id')
+                ->innerJoin('FactFindingAssignment', 'Customer', 'Customer', 'FactFindingAssignment.Customer_id = Customer.id');
     }
     public function aCustomerAssignmentBelongsByManager(string $managerId, string $id): array
     {

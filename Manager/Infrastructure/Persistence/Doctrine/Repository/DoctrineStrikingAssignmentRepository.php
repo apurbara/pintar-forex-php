@@ -23,7 +23,8 @@ class DoctrineStrikingAssignmentRepository extends DoctrineEntityRepository impl
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         return parent::createCoreQueryBuilder()
-                        ->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id');
+                        ->innerJoin('StrikingAssignment', 'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id')
+                        ->innerJoin('StrikingAssignment', 'Customer', 'Customer', 'StrikingAssignment.Customer_id = Customer.id');
     }
 
     public function aCustomerAssignmentBelongsByManager(string $managerId, string $id): array

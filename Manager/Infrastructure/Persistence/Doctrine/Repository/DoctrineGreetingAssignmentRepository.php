@@ -22,7 +22,8 @@ class DoctrineGreetingAssignmentRepository extends DoctrineEntityRepository impl
     protected function createCoreQueryBuilder(): QueryBuilder
     {
         return parent::createCoreQueryBuilder()
-                        ->innerJoin('GreetingAssignment', 'Sales', 'Sales', 'GreetingAssignment.Sales_id = Sales.id');
+                        ->innerJoin('GreetingAssignment', 'Sales', 'Sales', 'GreetingAssignment.Sales_id = Sales.id')
+                        ->innerJoin('GreetingAssignment', 'Customer', 'Customer', 'GreetingAssignment.Customer_id = Customer.id');
     }
 
     public function aCustomerAssignmentBelongsByManager(string $managerId, string $id): array
