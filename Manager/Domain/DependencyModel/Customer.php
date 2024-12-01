@@ -63,9 +63,10 @@ class Customer
 
     //QUERY ONLY
     #[FetchableObject(targetEntity: City::class, joinColumnName: "City_id")]
+    #[JoinColumn(name: "City_id", referencedColumnName: "id")]
     protected ?City $city;
-    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id",
-                paginationRequired: false)]
+    
+    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id", paginationRequired: false)]
     protected $verificationReports;
     
     public function getId(): string
