@@ -2,6 +2,7 @@
 
 namespace Manager\Domain\DependencyModel;
 
+use Company\Domain\Model\Customer\VerificationReport;
 use Company\Domain\Model\Province\City;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
@@ -60,9 +61,12 @@ class Customer
     #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $strikingAssignments;
 
-    //QUERY
+    //QUERY ONLY
     #[FetchableObject(targetEntity: City::class, joinColumnName: "City_id")]
     protected ?City $city;
+    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
+    protected $verificationReports;
     
     public function getId(): string
     {
