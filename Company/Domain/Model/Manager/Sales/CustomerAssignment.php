@@ -24,6 +24,9 @@ class CustomerAssignment
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
 
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected DateTimeImmutable $completedTime;
+
     #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "CustomerAssignment_id",
                 paginationRequired: false)]
     #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "customerAssignment", fetch: "EXTRA_LAZY")]

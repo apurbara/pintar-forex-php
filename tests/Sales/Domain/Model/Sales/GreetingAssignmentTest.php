@@ -117,31 +117,37 @@ class GreetingAssignmentTest extends TestBase
     }
     
     //
-    protected function markCustomerValid()
+    protected function validateCustomer()
     {
         $this->greetingAssignment->validateCustomer();
     }
-    public function test_markCustomerValid_markCustomerAsInvalid()
+    public function test_validateCustomer_markCustomerAsInvalid()
     {
         $this->customer->expects($this->once())
                 ->method('validate');
-        $this->markCustomerValid();
+        $this->validateCustomer();
     }
-    public function test_markCustomerValid_inactiveAssignment_forbidden()
+    public function test_validateCustomer_inactiveAssignment_forbidden()
     {
         $this->greetingAssignment->status = CustomerAssignmentStatus::COMPLETED;
-        $this->assertRegularExceptionThrowed(fn() => $this->markCustomerValid(), 'Forbidden', 'inactive assignment');
+        $this->assertRegularExceptionThrowed(fn() => $this->validateCustomer(), 'Forbidden', 'inactive assignment');
     }
-    public function test_markCustomerValid_recordCustomerValidatedEvent()
+    public function test_validateCustomer_recordCustomerValidatedEvent()
     {
         $event = new CustomerValidated($this->greetingAssignment->id);
-        $this->markCustomerValid();
+        $this->validateCustomer();
         $this->assertEquals($event, $this->greetingAssignment->recordedEvents[0]);
     }
-    public function test_markCustomerValid_setAssignmentCompleted()
+    public function test_validateCustomer_setAssignmentCompleted()
     {
-        $this->markCustomerValid();
+        $this->validateCustomer();
         $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->greetingAssignment->status);
+    }
+    public function test_validateCustomer_completeCustomerAssignment()
+    {
+        $this->customerAssignment->expects($this->once())
+                ->method('completeAssignment');
+        $this->validateCustomer();
     }
     
     //
@@ -164,6 +170,12 @@ class GreetingAssignmentTest extends TestBase
     {
         $this->recycleCustomer();
         $this->assertEquals(CustomerAssignmentStatus::RECYCLED, $this->greetingAssignment->status);
+    }
+    public function test_recycleCustomer_completeAssignment()
+    {
+        $this->customerAssignment->expects($this->once())
+                ->method('completeAssignment');
+        $this->recycleCustomer();
     }
 
     //

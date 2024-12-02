@@ -109,7 +109,6 @@ class FactFindingAssignmentTest extends TestBase
     {
         $this->factFindingAssignment->updateCustomerRating($this->rating);
     }
-
     public function test_updateCustomerRating_setCustomerRating()
     {
         $this->customer->expects($this->once())
@@ -117,7 +116,6 @@ class FactFindingAssignmentTest extends TestBase
                 ->with($this->rating);
         $this->updateCustomerRating();
     }
-
     public function test_updateCustomerRating_inactiveAssignment_forbidden()
     {
         $this->factFindingAssignment->status = CustomerAssignmentStatus::COMPLETED;
@@ -129,7 +127,6 @@ class FactFindingAssignmentTest extends TestBase
     {
         $this->factFindingAssignment->markCustomerVerified($this->allActiveCustomerVerifications);
     }
-
     public function test_markCustomerVerified_updateCustomerStatus()
     {
         $this->customer->expects($this->once())
@@ -137,24 +134,27 @@ class FactFindingAssignmentTest extends TestBase
                 ->with($this->allActiveCustomerVerifications);
         $this->markCustomerVerified();
     }
-
     public function test_markCustomerVerified_setAssignmentCompleted()
     {
         $this->markCustomerVerified();
         $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->factFindingAssignment->status);
     }
-
     public function test_markCustomerVerified_inactiveAssignment_forbidden()
     {
         $this->factFindingAssignment->status = CustomerAssignmentStatus::COMPLETED;
         $this->assertRegularExceptionThrowed(fn() => $this->markCustomerVerified(), 'Forbidden', 'inactive assignment');
     }
-    
     public function test_markCustomerVerified_recordCustomerVerifiedEvent()
     {
         $this->markCustomerVerified();
         $event = new \Sales\Domain\Event\CustomerVerified($this->factFindingAssignment->id);
         $this->assertEquals($event, $this->factFindingAssignment->recordedEvents[0]);
+    }
+    public function test_markCustomerVerified_completeAssignment()
+    {
+        $this->customerAssignment->expects($this->once())
+                ->method('completeAssignment');
+        $this->markCustomerVerified();
     }
 
     //
@@ -163,7 +163,6 @@ class FactFindingAssignmentTest extends TestBase
         return $this->factFindingAssignment->submitNonScheduledSalesActivityReport($this->salesActivity, $this->reportId,
                         $this->salesActivityReportData);
     }
-
     public function test_submitNonScheduleSalesActivityReport_returnReportCreatedInCustomerAssignment()
     {
         $this->customerAssignment->expects($this->once())
@@ -171,7 +170,6 @@ class FactFindingAssignmentTest extends TestBase
                 ->with($this->salesActivity, $this->reportId, $this->salesActivityReportData);
         $this->assertInstanceOf(SalesActivityReport::class, $this->submitNonScheduledSalesActivityReport());
     }
-
     public function test_submitNonScheduledSalesActivityReport_inactiveAssignment_forbidden()
     {
         $this->factFindingAssignment->status = CustomerAssignmentStatus::COMPLETED;
@@ -187,12 +185,10 @@ class FactFindingAssignmentTest extends TestBase
         return $this->factFindingAssignment->submitSalesActivitySchedule($this->salesActivity, $this->scheduleId,
                         $scheduledSalesActivityData);
     }
-
     public function test_submitSalesActivitySchedule_returnScheduledSalesActivity()
     {
         $this->assertInstanceOf(SalesActivitySchedule::class, $this->submitSalesActivitySchedule());
     }
-
     public function test_submitSalesActivitySchedule_inactiveAssignment_forbidden()
     {
         $this->factFindingAssignment->status = CustomerAssignmentStatus::COMPLETED;

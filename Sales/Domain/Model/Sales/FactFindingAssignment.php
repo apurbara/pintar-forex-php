@@ -96,6 +96,7 @@ class FactFindingAssignment implements ContainEventsInterface, ContainCustomerAs
         $this->assertActive();
         $this->customer->markVerificationComplete($allActiveCustomerVerifications);
         $this->status = CustomerAssignmentStatus::COMPLETED;
+        $this->customerAssignment->completeAssignment();
         
         $event = new CustomerVerified($this->id);
         $this->recordEvent($event);

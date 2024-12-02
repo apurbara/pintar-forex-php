@@ -106,6 +106,12 @@ class StrikingAssignmentTest extends TestBase
         $this->closeAssignment();
         $this->assertEquals(new NegotiationClosed($this->strikingAssignment->id), $this->strikingAssignment->recordedEvents[0]);
     }
+    public function test_closeAssignment_completeAssignment()
+    {
+        $this->assignment->expects($this->once())
+                ->method('completeAssignment');
+        $this->closeAssignment();
+    }
     
     //
     protected function belongsToManager()

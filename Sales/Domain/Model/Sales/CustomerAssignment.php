@@ -37,6 +37,9 @@ class CustomerAssignment
 
     #[Column(type: "datetimetz_immutable", nullable: true)]
     protected DateTimeImmutable $createdTime;
+    
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected DateTimeImmutable $completedTime;
 
     #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "CustomerAssignment_id",
                 paginationRequired: false)]
@@ -47,6 +50,11 @@ class CustomerAssignment
     protected function __construct()
     {
         
+    }
+    
+    public function completeAssignment(): void
+    {
+        $this->completedTime = new DateTimeImmutable();
     }
 
     //

@@ -87,6 +87,8 @@ class StrikingAssignment implements ContainEventsInterface
     public function closeAssignment(): void
     {
         $this->status = CustomerAssignmentStatus::COMPLETED;
+        $this->customerAssignment->completeAssignment();
+        
         $event = new NegotiationClosed($this->id);
         $this->recordEvent($event);
     }

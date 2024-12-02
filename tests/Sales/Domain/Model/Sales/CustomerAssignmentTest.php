@@ -40,6 +40,17 @@ class CustomerAssignmentTest extends TestBase
         //
         $this->sales = $this->buildMockOfClass(Sales::class);
     }
+    
+    //
+    protected function completeAssignment()
+    {
+        $this->customerAssignment->completeAssignment();
+    }
+    public function test_completeAssignment_setCompletedTime()
+    {
+        $this->completeAssignment();
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($this->customerAssignment->completedTime);
+    }
 
     //
     protected function submitNonScheduledSalesActivityReport()
@@ -95,6 +106,7 @@ class TestableCustomerAssignment extends CustomerAssignment
     public ?StrikingAssignment $strikingAssignment;
     public string $id;
     public DateTimeImmutable $createdTime;
+    public DateTimeImmutable $completedTime;
     public Collection $salesActivitySchedules;
 
     public function __construct()

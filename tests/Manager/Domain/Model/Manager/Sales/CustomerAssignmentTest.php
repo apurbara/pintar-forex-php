@@ -39,6 +39,17 @@ class CustomerAssignmentTest extends TestBase
     }
     
     //
+    protected function completeAssignment()
+    {
+        $this->customerAssignment->completeAssignment();
+    }
+    public function test_completeAssignment_setCompletedTime()
+    {
+        $this->completeAssignment();
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($this->customerAssignment->completedTime);
+    }
+    
+    //
     protected function cancelAllActiveSchedule()
     {
         $this->salesActivitySchedule->expects($this->any())
@@ -67,5 +78,6 @@ class TestableCustomerAssignment extends CustomerAssignment
 {
     public string $id;
     public DateTimeImmutable $createdTime;
+    public DateTimeImmutable $completedTime;
     public Collection $salesActivitySchedules;
 }

@@ -27,7 +27,6 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineGreetingAssignmentRepository;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
-use Shared\Domain\Enum\GreetingResult;
 
 #[Entity(repositoryClass: DoctrineGreetingAssignmentRepository::class)]
 class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssignmentInterface
@@ -100,6 +99,7 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
         $this->assertActive();
         $this->customer->validate();
         $this->status = CustomerAssignmentStatus::COMPLETED;
+        $this->customerAssignment->completeAssignment();
         
         $event = new CustomerValidated($this->id);
         $this->recordEvent($event);
@@ -110,6 +110,7 @@ class GreetingAssignment implements ContainEventsInterface, ContainCustomerAssig
         $this->assertActive();
         $this->customer->recycle();
         $this->status = CustomerAssignmentStatus::RECYCLED;
+        $this->customerAssignment->completeAssignment();
     }
 
     public function submitNonScheduledSalesActivityReport(
