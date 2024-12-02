@@ -10,6 +10,7 @@ use Company\Application\Controllers\CustomerController;
 use Company\Application\Controllers\CustomerJourneyController;
 use Company\Application\Controllers\CustomerVerificationController;
 use Company\Application\Controllers\FactFindingAssignmentController;
+use Company\Application\Controllers\GreeterMetricController;
 use Company\Application\Controllers\GreetingAssignmentController;
 use Company\Application\Controllers\ManagerController;
 use Company\Application\Controllers\ProvinceController;
@@ -56,6 +57,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesPerformanceMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ProvinceController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CityController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(GreeterMetricController::class),
             ...$this->customerAssignmentQuery(),
         ];
     }

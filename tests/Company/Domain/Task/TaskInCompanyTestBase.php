@@ -7,6 +7,7 @@ use Company\Domain\Model\CompanyMetric;
 use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
+use Company\Domain\Model\GreeterMetric;
 use Company\Domain\Model\Manager;
 use Company\Domain\Model\Manager\Sales;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
@@ -28,6 +29,7 @@ use Company\Domain\Task\CustomerAssignment\GreetingAssignmentRepository;
 use Company\Domain\Task\CustomerAssignment\StrikingAssignmentRepository;
 use Company\Domain\Task\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\CustomerVerification\CustomerVerificationRepository;
+use Company\Domain\Task\GreeterMetric\GreeterMetricRepository;
 use Company\Domain\Task\Manager\ManagerRepository;
 use Company\Domain\Task\Province\ProvinceRepository;
 use Company\Domain\Task\Sales\SalesRepository;
@@ -271,5 +273,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->cityId)
                 ->willReturn($this->city);
+    }
+
+    protected MockObject $greeterMetricRepository;
+    protected MockObject $greeterMetric;
+    protected string $greeterMetricId = 'greeterMetricId';
+
+    protected function prepareGreeterMetricDependency(): void
+    {
+        $this->greeterMetricRepository = $this->buildMockOfInterface(GreeterMetricRepository::class);
+        $this->greeterMetric = $this->buildMockOfClass(GreeterMetric::class);
+        //
+        $this->greeterMetricRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->greeterMetricId)
+                ->willReturn($this->greeterMetric);
     }
 }
