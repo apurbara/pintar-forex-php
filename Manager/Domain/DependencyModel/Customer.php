@@ -65,7 +65,6 @@ class Customer
 
     //QUERY ONLY
     #[FetchableObject(targetEntity: City::class, joinColumnName: "City_id")]
-//    #[ManyToOne(targetEntity: City::class)]
     #[JoinColumn(name: "City_id", referencedColumnName: "id")]
     protected ?City $city;
     
