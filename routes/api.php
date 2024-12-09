@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Manager\Application\Controllers\PerformanceSummaryController as PerformanceSummaryController2;
 use Sales\Application\Controllers\FactFindingMetricAchievementController;
 use Sales\Application\Controllers\GreetingMetricAchievementController;
+use Sales\Application\Controllers\StrikingMetricAchievementController;
 
 /*
   |--------------------------------------------------------------------------
@@ -41,3 +42,4 @@ Route::get('/manager/view-all-sales-performance-metric-summary', [PerformanceSum
 //Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
 Route::get('/view-all-greeting-metric-achievement', [GreetingMetricAchievementController::class, 'viewAllGreetingMetricAchievement']);
 Route::get('/view-all-fact-finding-metric-achievement', [FactFindingMetricAchievementController::class, 'viewAllFactFindingMetricAchievement']);
+Route::get('/view-all-striking-metric-achievement', [StrikingMetricAchievementController::class, 'viewAllStrikingMetricAchievement']);
