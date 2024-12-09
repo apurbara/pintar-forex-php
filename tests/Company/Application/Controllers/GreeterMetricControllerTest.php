@@ -23,7 +23,8 @@ class GreeterMetricControllerTest extends CompanyControllerTestCase
         $this->greeterMetricTwo = new EntityRecord(GreeterMetric::class, 'Two');
         //
         $this->greeterMetricPayload = [
-            'monthlyTarget' => 2250,
+            'name' => 'new greeter metric',
+            'target' => 2250,
             'dailyReminderTarget' => 75,
             'evaluationType' => EvaluationType::COUNT->value,
             'recurrenceType' => RecurrenceType::MONTHLY->value,
@@ -43,7 +44,8 @@ class GreeterMetricControllerTest extends CompanyControllerTestCase
         $this->prepareAdminDependency();
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
-    $monthlyTarget: Int,
+    $name: String,
+    $target: Int,
     $dailyReminderTarget: Int,
     $evaluationType: String,
     $recurrenceType: String,
@@ -51,14 +53,15 @@ mutation (
     $recurrenceCount: Int,
 ) {
     createGreeterMetric (
-        monthlyTarget: $monthlyTarget,
+        name: $name,
+        target: $target,
         dailyReminderTarget: $dailyReminderTarget,
         evaluationType: $evaluationType,
         recurrenceType: $recurrenceType,
         salesMetricType: $salesMetricType,
         recurrenceCount: $recurrenceCount,
     ) {
-        id, disabled, monthlyTarget, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount,
+        id, disabled, name, target, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount,
     }
 }
 _QUERY;
@@ -73,7 +76,8 @@ $this->disableExceptionHandling();
         
         $this->seeJsonContains([
             'disabled' => false,
-            'monthlyTarget' => $this->greeterMetricPayload['monthlyTarget'],
+            'name' => $this->greeterMetricPayload['name'],
+            'target' => $this->greeterMetricPayload['target'],
             'dailyReminderTarget' => $this->greeterMetricPayload['dailyReminderTarget'],
             'evaluationType' => $this->greeterMetricPayload['evaluationType'],
             'recurrenceType' => $this->greeterMetricPayload['recurrenceType'],
@@ -84,7 +88,8 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('GreeterMetric', [
             'disabled' => false,
             'createdTime' => $this->stringOfCurrentTime(),
-            'monthlyTarget' => $this->greeterMetricPayload['monthlyTarget'],
+            'name' => $this->greeterMetricPayload['name'],
+            'target' => $this->greeterMetricPayload['target'],
             'dailyReminderTarget' => $this->greeterMetricPayload['dailyReminderTarget'],
             'evaluationType' => $this->greeterMetricPayload['evaluationType'],
             'recurrenceType' => $this->greeterMetricPayload['recurrenceType'],
@@ -101,7 +106,8 @@ $this->disableExceptionHandling();
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
     $id: ID,
-    $monthlyTarget: Int,
+    $name: String,
+    $target: Int,
     $dailyReminderTarget: Int,
     $evaluationType: String,
     $recurrenceType: String,
@@ -110,14 +116,15 @@ mutation (
 ) {
     updateGreeterMetric (
         id: $id,
-        monthlyTarget: $monthlyTarget,
+        name: $name,
+        target: $target,
         dailyReminderTarget: $dailyReminderTarget,
         evaluationType: $evaluationType,
         recurrenceType: $recurrenceType,
         salesMetricType: $salesMetricType,
         recurrenceCount: $recurrenceCount,
     ) {
-        monthlyTarget, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount,
+        target, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount,
     }
 }
 _QUERY;
@@ -134,7 +141,7 @@ $this->disableExceptionHandling();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
-            'monthlyTarget' => $this->greeterMetricPayload['monthlyTarget'],
+            'target' => $this->greeterMetricPayload['target'],
             'dailyReminderTarget' => $this->greeterMetricPayload['dailyReminderTarget'],
             'evaluationType' => $this->greeterMetricPayload['evaluationType'],
             'recurrenceType' => $this->greeterMetricPayload['recurrenceType'],
@@ -144,7 +151,7 @@ $this->disableExceptionHandling();
         
         $this->seeInDatabase('GreeterMetric', [
             'id' => $this->greeterMetricOne->columns['id'],
-            'monthlyTarget' => $this->greeterMetricPayload['monthlyTarget'],
+            'target' => $this->greeterMetricPayload['target'],
             'dailyReminderTarget' => $this->greeterMetricPayload['dailyReminderTarget'],
             'evaluationType' => $this->greeterMetricPayload['evaluationType'],
             'recurrenceType' => $this->greeterMetricPayload['recurrenceType'],
@@ -240,7 +247,7 @@ query (
     viewGreeterMetricDetail (
         id: $id,
     ) {
-        monthlyTarget, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount,
+        target, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount,
     }
 }
 _QUERY;
@@ -256,7 +263,7 @@ $this->disableExceptionHandling();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([
-            'monthlyTarget' => $this->greeterMetricOne->columns['monthlyTarget'],
+            'target' => $this->greeterMetricOne->columns['target'],
             'dailyReminderTarget' => $this->greeterMetricOne->columns['dailyReminderTarget'],
             'evaluationType' => $this->greeterMetricOne->columns['evaluationType'],
             'recurrenceType' => $this->greeterMetricOne->columns['recurrenceType'],
@@ -275,7 +282,7 @@ $this->disableExceptionHandling();
 query {
     viewGreeterMetricList {
         list {
-            id, disabled, monthlyTarget, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount 
+            id, disabled, target, dailyReminderTarget, evaluationType, recurrenceType, salesMetricType, recurrenceCount 
         },
         cursorLimit { total }
     }
@@ -294,7 +301,7 @@ $this->disableExceptionHandling();
                 [
                     'id' => $this->greeterMetricOne->columns['id'],
                     'disabled' => $this->greeterMetricOne->columns['disabled'],
-                    'monthlyTarget' => $this->greeterMetricOne->columns['monthlyTarget'],
+                    'target' => $this->greeterMetricOne->columns['target'],
                     'dailyReminderTarget' => $this->greeterMetricOne->columns['dailyReminderTarget'],
                     'evaluationType' => $this->greeterMetricOne->columns['evaluationType'],
                     'recurrenceType' => $this->greeterMetricOne->columns['recurrenceType'],
@@ -304,7 +311,7 @@ $this->disableExceptionHandling();
                 [
                     'id' => $this->greeterMetricTwo->columns['id'],
                     'disabled' => $this->greeterMetricTwo->columns['disabled'],
-                    'monthlyTarget' => $this->greeterMetricTwo->columns['monthlyTarget'],
+                    'target' => $this->greeterMetricTwo->columns['target'],
                     'dailyReminderTarget' => $this->greeterMetricTwo->columns['dailyReminderTarget'],
                     'evaluationType' => $this->greeterMetricTwo->columns['evaluationType'],
                     'recurrenceType' => $this->greeterMetricTwo->columns['recurrenceType'],

@@ -33,7 +33,8 @@ class GreeterMetricController extends BaseController
         return (new GreeterMetricData())
                         ->setDailyReminderTarget($input->get('dailyReminderTarget'))
                         ->setEvaluationType($input->get('evaluationType'))
-                        ->setMonthlyTarget($input->get('monthlyTarget'))
+                        ->setName($input->get('name'))
+                        ->setTarget($input->get('target'))
                         ->setRecurrenceCount($input->get('recurrenceCount'))
                         ->setRecurrenceType($input->get('recurrenceType'))
                         ->setSalesMetricType($input->get('salesMetricType'));

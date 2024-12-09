@@ -7,16 +7,23 @@ use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 readonly class GreeterMetricData extends AbstractEntityMutationPayload
 {
 
-    public ?int $monthlyTarget;
+    public ?string $name;
+    public ?int $target;
     public ?int $dailyReminderTarget;
     public ?string $salesMetricType;
     public ?string $evaluationType;
     public ?string $recurrenceType;
     public ?int $recurrenceCount;
 
-    public function setMonthlyTarget(?int $monthlyTarget)
+    public function setName(?string $name)
     {
-        $this->monthlyTarget = $monthlyTarget;
+        $this->name = $name;
+        return $this;
+    }
+
+    public function setTarget(?int $target)
+    {
+        $this->target = $target;
         return $this;
     }
 

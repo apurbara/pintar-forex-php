@@ -9,7 +9,7 @@ use Company\Application\Controllers\PerformanceSummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Manager\Application\Controllers\PerformanceSummaryController as PerformanceSummaryController2;
-use Sales\Application\Controllers\CommonSalesMetricSummaryController;
+use Sales\Application\Controllers\GreetingMetricAchievementController;
 
 /*
   |--------------------------------------------------------------------------
@@ -37,4 +37,5 @@ Route::get('/manager/view-all-company-metric-summary', [PerformanceSummaryContro
 Route::get('/manager/view-all-sales-rank-summary', [PerformanceSummaryController2::class, 'viewAllSalesRankSummary']);
 Route::get('/manager/view-all-sales-performance-metric-summary', [PerformanceSummaryController2::class, 'viewAllSalesPerformanceMetricSummary']);
 //
-Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
+//Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
+Route::get('/view-all-greeting-metric-achievement', [GreetingMetricAchievementController::class, 'viewAllGreetingMetricAchievement']);

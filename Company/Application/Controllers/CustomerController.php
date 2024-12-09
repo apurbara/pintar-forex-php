@@ -40,10 +40,14 @@ class CustomerController extends BaseController
         
         $insertIntoValues = "";
         foreach ($reader->getRecords() as $record) {
-            $value = "('{$record['name']}', '{$record['phone']}', '{$record['email']}', '{$record['source']}')";
+            $name = $record['name'] ?? '';
+            $phone = $record['phone'] ?? '';
+            $email = $record['email'] ?? '';
+            $source = $record['source'] ?? '';
+            $value = "('{$name}', '{$phone}', '{$email}', '{$source}')";
             $insertIntoValues .= empty($insertIntoValues) ? "{$value}" : ", {$value}";
+var_dump($insertIntoValues);
         }
-        
         $this->repository()->importFromCsvFile($insertIntoValues);
     }
 

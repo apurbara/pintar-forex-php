@@ -16,7 +16,6 @@ use Resources\Attributes\Composed;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
-use Shared\Domain\Enum\GreetingResult;
 use Shared\Domain\Enum\SalesRole;
 
 #[Entity(repositoryClass: DoctrineGreetingAssignmentRepository::class)]

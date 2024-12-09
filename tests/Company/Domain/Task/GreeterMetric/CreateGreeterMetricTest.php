@@ -20,7 +20,7 @@ class CreateGreeterMetricTest extends TaskInCompanyTestBase
         
         $this->task = new CreateGreeterMetric($this->greeterMetricRepository);
         $this->payload = (new GreeterMetricData())
-                ->setMonthlyTarget(999)
+                ->setTarget(999)
                 ->setDailyReminderTarget(33)
                 ->setEvaluationType(EvaluationType::SUM->value)
                 ->setRecurrenceCount(12)

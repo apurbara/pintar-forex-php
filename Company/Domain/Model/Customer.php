@@ -34,7 +34,8 @@ class Customer
     #[JoinColumn(name: "City_id", referencedColumnName: "id")]
     protected ?City $city;
 
-    #[Id, Column(type: "guid")]
+//    #[Id, Column(type: "guid")]
+    #[Id, Column(type: "guid", options: ["default" => "uuid()"])]
     protected string $id;
 
     #[Column(type: "datetimetz_immutable", nullable: true, options: ["default" => "CURRENT_TIMESTAMP"])]

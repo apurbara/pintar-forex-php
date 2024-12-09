@@ -7,6 +7,8 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Resources\ValidationRule;
+use Resources\ValidationService;
 use Shared\Domain\Enum\EvaluationType;
 use Shared\Domain\Enum\RecurrenceType;
 use Shared\Domain\Enum\SalesMetricType;
@@ -24,8 +26,11 @@ class GreeterMetric
     #[Column(type: "datetimetz_immutable", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
     protected DateTimeImmutable $createdTime;
 
+    #[Column(type: "string", length: 255, nullable: false)]
+    protected string $name;
+    
     #[Column(type: "integer", nullable: true)]
-    protected int $monthlyTarget;
+    protected int $target;
 
     #[Column(type: "integer", nullable: true)]
     protected ?int $dailyReminderTarget;
@@ -42,6 +47,14 @@ class GreeterMetric
     #[Column(type: "smallint", nullable: true)]
     protected ?int $recurrenceCount;
 
+    
+    private function setName(?string $name): void
+    {
+        ValidationService::build()
+                ->addRule(ValidationRule::notEmpty())
+                ->execute($name, 'name is mandatory');
+        $this->name = $name;
+    }
     public function __construct(string $id, GreeterMetricData $data)
     {
         $this->id = $id;
@@ -52,7 +65,8 @@ class GreeterMetric
 
     public function update(GreeterMetricData $data): void
     {
-        $this->monthlyTarget = $data->monthlyTarget;
+        $this->setName($data->name);
+        $this->target = $data->target;
         $this->dailyReminderTarget = $data->dailyReminderTarget;
         $this->salesMetricType = SalesMetricType::from($data->salesMetricType);
         $this->evaluationType = EvaluationType::from($data->evaluationType);
