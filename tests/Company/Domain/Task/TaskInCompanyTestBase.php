@@ -7,6 +7,7 @@ use Company\Domain\Model\CompanyMetric;
 use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\CustomerVerification;
+use Company\Domain\Model\FactFinderMetric;
 use Company\Domain\Model\GreeterMetric;
 use Company\Domain\Model\Manager;
 use Company\Domain\Model\Manager\Sales;
@@ -29,6 +30,7 @@ use Company\Domain\Task\CustomerAssignment\GreetingAssignmentRepository;
 use Company\Domain\Task\CustomerAssignment\StrikingAssignmentRepository;
 use Company\Domain\Task\CustomerJourney\CustomerJourneyRepository;
 use Company\Domain\Task\CustomerVerification\CustomerVerificationRepository;
+use Company\Domain\Task\FactFinderMetric\FactFinderMetricRepository;
 use Company\Domain\Task\GreeterMetric\GreeterMetricRepository;
 use Company\Domain\Task\Manager\ManagerRepository;
 use Company\Domain\Task\Province\ProvinceRepository;
@@ -288,5 +290,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->greeterMetricId)
                 ->willReturn($this->greeterMetric);
+    }
+
+    protected MockObject $factFinderMetricRepository;
+    protected MockObject $factFinderMetric;
+    protected string $factFinderMetricId = 'factFinderMetricId';
+
+    protected function prepareFactFinderMetricDependency(): void
+    {
+        $this->factFinderMetricRepository = $this->buildMockOfInterface(FactFinderMetricRepository::class);
+        $this->factFinderMetric = $this->buildMockOfClass(FactFinderMetric::class);
+        //
+        $this->factFinderMetricRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->factFinderMetricId)
+                ->willReturn($this->factFinderMetric);
     }
 }

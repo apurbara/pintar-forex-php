@@ -7,6 +7,7 @@ use Company\Application\Controllers\CommonSalesMetricController;
 use Company\Application\Controllers\CompanyMetricController;
 use Company\Application\Controllers\CustomerJourneyController;
 use Company\Application\Controllers\CustomerVerificationController;
+use Company\Application\Controllers\FactFinderMetricController;
 use Company\Application\Controllers\FactFindingAssignmentController;
 use Company\Application\Controllers\GreeterMetricController;
 use Company\Application\Controllers\GreetingAssignmentController;
@@ -51,6 +52,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ProvinceController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CityController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(GreeterMetricController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(FactFinderMetricController::class),
             ...$this->customerAssignmentMutation(),
         ];
     }

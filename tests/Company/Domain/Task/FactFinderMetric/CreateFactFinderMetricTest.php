@@ -1,14 +1,14 @@
 <?php
 
-namespace Company\Domain\Task\GreeterMetric;
+namespace Company\Domain\Task\FactFinderMetric;
 
-use Company\Domain\Model\GreeterMetricData;
+use Company\Domain\Model\FactFinderMetricData;
 use Shared\Domain\Enum\EvaluationType;
 use Shared\Domain\Enum\RecurrenceType;
 use Shared\Domain\Enum\SalesMetricType;
 use Tests\Company\Domain\Task\TaskInCompanyTestBase;
 
-class CreateGreeterMetricTest extends TaskInCompanyTestBase
+class CreateFactFinderMetricTest extends TaskInCompanyTestBase
 {
     protected $task;
     protected $payload;
@@ -16,10 +16,10 @@ class CreateGreeterMetricTest extends TaskInCompanyTestBase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->prepareGreeterMetricDependency();
+        $this->prepareFactFinderMetricDependency();
         
-        $this->task = new CreateGreeterMetric($this->greeterMetricRepository);
-        $this->payload = (new GreeterMetricData())
+        $this->task = new CreateFactFinderMetric($this->factFinderMetricRepository);
+        $this->payload = (new FactFinderMetricData())
                 ->setName('name')
                 ->setTarget(999)
                 ->setDailyReminderTarget(33)
@@ -32,19 +32,19 @@ class CreateGreeterMetricTest extends TaskInCompanyTestBase
     //
     protected function execute()
     {
-        $this->greeterMetricRepository->expects($this->once())
+        $this->factFinderMetricRepository->expects($this->once())
                 ->method('nextIdentity')
-                ->willReturn($this->greeterMetricId);
+                ->willReturn($this->factFinderMetricId);
         $this->task->executeInCompany($this->payload);
     }
     public function test_execute_setPayloadId()
     {
         $this->execute();
-        $this->assertSame($this->greeterMetricId, $this->payload->id);
+        $this->assertSame($this->factFinderMetricId, $this->payload->id);
     }
-    public function test_execute_addGreeterMetricToRepository()
+    public function test_execute_addFactFinderMetricToRepository()
     {
-        $this->greeterMetricRepository->expects($this->once())
+        $this->factFinderMetricRepository->expects($this->once())
                 ->method('add');
         $this->execute();
     }
