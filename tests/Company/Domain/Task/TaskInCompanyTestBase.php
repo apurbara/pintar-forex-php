@@ -20,6 +20,7 @@ use Company\Domain\Model\Province\City;
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Model\SalesPerformanceMetric;
 use Company\Domain\Model\SalesRank;
+use Company\Domain\Model\StrikerMetric;
 use Company\Domain\Task\City\CityRepository;
 use Company\Domain\Task\ClosingRequest\ClosingRequestRepository;
 use Company\Domain\Task\CommonSalesMetric\CommonSalesMetricRepository;
@@ -38,6 +39,7 @@ use Company\Domain\Task\Sales\SalesRepository;
 use Company\Domain\Task\SalesActivity\SalesActivityRepository;
 use Company\Domain\Task\SalesPerformanceMetric\SalesPerformanceMetricRepository;
 use Company\Domain\Task\SalesRank\SalesRankRepository;
+use Company\Domain\Task\StrikerMetric\StrikerMetricRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestBase;
 
@@ -305,5 +307,20 @@ class TaskInCompanyTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->factFinderMetricId)
                 ->willReturn($this->factFinderMetric);
+    }
+
+    protected MockObject $strikerMetricRepository;
+    protected MockObject $strikerMetric;
+    protected string $strikerMetricId = 'strikerMetricId';
+
+    protected function prepareStrikerMetricDependency(): void
+    {
+        $this->strikerMetricRepository = $this->buildMockOfInterface(StrikerMetricRepository::class);
+        $this->strikerMetric = $this->buildMockOfClass(StrikerMetric::class);
+        //
+        $this->strikerMetricRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->strikerMetricId)
+                ->willReturn($this->strikerMetric);
     }
 }

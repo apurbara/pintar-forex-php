@@ -17,6 +17,7 @@ use Company\Application\Controllers\SalesActivityController;
 use Company\Application\Controllers\SalesController;
 use Company\Application\Controllers\SalesPerformanceMetricController;
 use Company\Application\Controllers\SalesRankController;
+use Company\Application\Controllers\StrikerMetricController;
 use Company\Application\Controllers\StrikingAssignmentController;
 use Company\Domain\Model\CompanyUser;
 use GraphQL\Type\Definition\ObjectType;
@@ -53,6 +54,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(CityController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(GreeterMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(FactFinderMetricController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(StrikerMetricController::class),
             ...$this->customerAssignmentMutation(),
         ];
     }

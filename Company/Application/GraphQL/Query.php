@@ -19,6 +19,7 @@ use Company\Application\Controllers\SalesActivityController;
 use Company\Application\Controllers\SalesController;
 use Company\Application\Controllers\SalesPerformanceMetricController;
 use Company\Application\Controllers\SalesRankController;
+use Company\Application\Controllers\StrikerMetricController;
 use Company\Application\Controllers\StrikingAssignmentController;
 use Company\Domain\Model\CompanyUser;
 use GraphQL\Type\Definition\ObjectType;
@@ -60,6 +61,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(CityController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(GreeterMetricController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(FactFinderMetricController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(StrikerMetricController::class),
             ...$this->customerAssignmentQuery(),
         ];
     }
