@@ -18,7 +18,9 @@ use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Sales\Domain\DependencyModel\Customer;
+use Sales\Domain\DependencyModel\CustomerData;
 use Sales\Domain\DependencyModel\CustomerJourney;
+use Sales\Domain\DependencyModel\Province\City;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -75,6 +77,12 @@ class StrikingAssignment implements ContainCustomerAssignmentInterface
     {
         $this->assertActive();
         $this->customer->updateRating($rating);
+    }
+    
+    public function updateCustomer(CustomerData $customerData, ?City $city): void
+    {
+        $this->assertActive();
+        $this->customer->update($city, $customerData);
     }
     
     public function updateJourney(CustomerJourney $customerJourney): void

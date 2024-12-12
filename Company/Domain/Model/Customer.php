@@ -47,6 +47,9 @@ class Customer
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $name;
 
+    #[Column(type: "text", nullable: true)]
+    protected ?string $bio;
+
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $email;
 

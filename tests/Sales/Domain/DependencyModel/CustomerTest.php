@@ -20,7 +20,7 @@ class CustomerTest extends TestBase
     protected $customer;
     protected $verificationReport;
     //
-    protected $id = 'newId', $name = 'new customer name', $email = 'newcustomer@email.org', $phone = '+6281324312123', $source = 'wa-forex-bdg';
+    protected $id = 'newId', $name = 'new customer name', $bio = 'new customer bio', $email = 'newcustomer@email.org', $phone = '+6281324312123', $source = 'wa-forex-bdg';
     protected $rating = 4;
     //
     protected $customerVerification, $verificationReportData;
@@ -55,6 +55,7 @@ class CustomerTest extends TestBase
     {
         return (new CustomerData())
                 ->setName($this->name)
+                ->setBio($this->bio)
                 ->setEmail($this->email)
                 ->setPhone($this->phone)
                 ->setSource($this->source);
@@ -75,6 +76,7 @@ class CustomerTest extends TestBase
     {
         $this->update();
         $this->assertSame($this->name, $this->customer->name);
+        $this->assertSame($this->bio, $this->customer->bio);
         $this->assertSame($this->email, $this->customer->email);
     }
     public function test_update_preventUpdatePhone()
@@ -248,6 +250,7 @@ class TestableCustomer extends Customer
     public DateTimeImmutable $createdTime;
     public CustomerStatus $status;
     public string $name;
+    public ?string $bio;
     public ?string $email;
     public string $phone = '08123123123';
     public ?string $source = 'source';

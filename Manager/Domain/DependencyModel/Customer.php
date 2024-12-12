@@ -11,7 +11,6 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
 use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
@@ -39,6 +38,9 @@ class Customer
     #[Column(type: "string", length: 255, nullable: false)]
     protected string $name;
 
+    #[Column(type: "text", nullable: true)]
+    protected ?string $bio;
+
     #[Column(type: "string", length: 255, nullable: true)]
     protected ?string $email;
 
@@ -51,15 +53,18 @@ class Customer
     #[Column(type: "smallint", nullable: true)]
     protected ?int $rating;
 
-    #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    #[FetchableObjectList(targetEntity: GreetingAssignment::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
     #[OneToMany(targetEntity: GreetingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $greetingAssignments;
 
-    #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    #[FetchableObjectList(targetEntity: FactFindingAssignment::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
     #[OneToMany(targetEntity: FactFindingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $factFindingAssignments;
 
-    #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Customer_id", paginationRequired: false)]
+    #[FetchableObjectList(targetEntity: StrikingAssignment::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
     #[OneToMany(targetEntity: StrikingAssignment::class, mappedBy: "customer", fetch: "EXTRA_LAZY")]
     protected Collection $strikingAssignments;
 
@@ -67,10 +72,11 @@ class Customer
     #[FetchableObject(targetEntity: City::class, joinColumnName: "City_id")]
     #[JoinColumn(name: "City_id", referencedColumnName: "id")]
     protected ?City $city;
-    
-    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id", paginationRequired: false)]
+
+    #[FetchableObjectList(targetEntity: VerificationReport::class, joinColumnName: "Customer_id",
+                paginationRequired: false)]
     protected $verificationReports;
-    
+
     public function getId(): string
     {
         return $this->id;
@@ -87,9 +93,7 @@ class Customer
     {
         $criteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('status', CustomerAssignmentStatus::ACTIVE));
-        $hasActiveAssignment = !$this->greetingAssignments->matching($criteria)->isEmpty() 
-                || !$this->factFindingAssignments->matching($criteria)->isEmpty()
-                || !$this->strikingAssignments->matching($criteria)->isEmpty();
+        $hasActiveAssignment = !$this->greetingAssignments->matching($criteria)->isEmpty() || !$this->factFindingAssignments->matching($criteria)->isEmpty() || !$this->strikingAssignments->matching($criteria)->isEmpty();
         if ($hasActiveAssignment) {
             throw RegularException::forbidden('customer already being maintained');
         }

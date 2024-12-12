@@ -4,14 +4,14 @@ namespace Sales\Domain\Task\Customer;
 
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Task\Dependency\CityRepository;
-use Sales\Domain\Task\GreetingAssignment\GreetingAssignmentRepository;
+use Sales\Domain\Task\Dependency\ContainCustomerAssignmentRepository;
 use Sales\Domain\Task\SalesTask;
 
 class UpdateCustomer implements SalesTask
 {
 
     public function __construct(
-            protected GreetingAssignmentRepository $greetingAssignmentRepository,
+            protected ContainCustomerAssignmentRepository $customerAssignmentRepository,
             protected CityRepository $cityRepository)
     {
         
@@ -30,9 +30,9 @@ class UpdateCustomer implements SalesTask
             $city = $this->cityRepository->ofId($payload->customerData->cityId);
         }
 
-        $greetingAssignment = $this->greetingAssignmentRepository->ofId($payload->id);
-        $greetingAssignment->assertBelongsToSales($sales);
+        $assignment = $this->customerAssignmentRepository->ofId($payload->id);
+        $assignment->assertBelongsToSales($sales);
 
-        $greetingAssignment->updateCustomer($payload->customerData, $city);
+        $assignment->updateCustomer($payload->customerData, $city);
     }
 }

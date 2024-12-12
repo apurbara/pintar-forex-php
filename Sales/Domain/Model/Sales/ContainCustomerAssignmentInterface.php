@@ -2,6 +2,8 @@
 
 namespace Sales\Domain\Model\Sales;
 
+use Sales\Domain\DependencyModel\CustomerData;
+use Sales\Domain\DependencyModel\Province\City;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -18,7 +20,9 @@ interface ContainCustomerAssignmentInterface
     public function submitSalesActivitySchedule(
             SalesActivity $salesActivity, string $scheduleId, SalesActivityScheduleData $salesActivityScheduleData): SalesActivitySchedule;
     
-    public function updateCustomerRating(int $rating);
+    public function updateCustomerRating(int $rating): void;
+    
+    public function updateCustomer(CustomerData $customerData, ?City $city): void;
 
     public function assertBelongsToSales(Sales $sales): void;
 }

@@ -8,17 +8,17 @@ use Tests\Sales\Domain\Task\SalesTaskTestBase;
 
 class UpdateCustomerRatingTest extends SalesTaskTestBase
 {
-    protected $repository, $customerAssignment, $customerAssignmentId = 'customerAssignmentId';
+    protected $customerAssignmentRepository, $customerAssignment, $customerAssignmentId = 'customerAssignmentId';
     protected $task;
     protected $payload, $rating = 4;
     
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = $this->buildMockOfInterface(ContainCustomerAssignmentRepository::class);
+        $this->customerAssignmentRepository= $this->buildMockOfInterface(ContainCustomerAssignmentRepository::class);
         $this->customerAssignment = $this->buildMockOfInterface(ContainCustomerAssignmentInterface::class);
         //
-        $this->task = new UpdateCustomerRating($this->repository);
+        $this->task = new UpdateCustomerRating($this->customerAssignmentRepository);
         $this->payload = (new UpdateCustomerRatingPayload())
                 ->setId($this->customerAssignmentId)
                 ->setRating($this->rating);
@@ -27,7 +27,7 @@ class UpdateCustomerRatingTest extends SalesTaskTestBase
     //
     protected function execute()
     {
-        $this->repository->expects($this->any())
+        $this->customerAssignmentRepository->expects($this->any())
                 ->method('ofId')
                 ->with($this->customerAssignmentId)
                 ->willReturn($this->customerAssignment);

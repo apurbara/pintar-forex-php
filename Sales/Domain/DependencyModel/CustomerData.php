@@ -9,6 +9,7 @@ readonly class CustomerData extends AbstractEntityMutationPayload
 
     public ?string $cityId;
     public ?string $name;
+    public ?string $bio;
     public ?string $email;
     public ?string $phone;
     public ?string $source;
@@ -28,6 +29,12 @@ readonly class CustomerData extends AbstractEntityMutationPayload
     public function setEmail(?string $email)
     {
         $this->email = $email;
+        return $this;
+    }
+
+    public function setBio(?string $bio)
+    {
+        $this->bio = $bio;
         return $this;
     }
 

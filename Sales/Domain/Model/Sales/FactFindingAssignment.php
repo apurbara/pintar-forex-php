@@ -16,7 +16,9 @@ use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\DependencyModel\Customer\VerificationReportData;
+use Sales\Domain\DependencyModel\CustomerData;
 use Sales\Domain\DependencyModel\CustomerVerification;
+use Sales\Domain\DependencyModel\Province\City;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Event\CustomerVerified;
 use Sales\Domain\Model\Sales;
@@ -90,6 +92,12 @@ class FactFindingAssignment implements ContainEventsInterface, ContainCustomerAs
         $this->assertActive();
         $this->customer->updateRating($rating);
     }
+    
+    public function updateCustomer(CustomerData $customerData, ?City $city): void
+    {
+        $this->assertActive();
+        $this->customer->update($city, $customerData);
+    }
 
     public function markCustomerVerified(array $allActiveCustomerVerifications): void
     {
@@ -117,4 +125,5 @@ class FactFindingAssignment implements ContainEventsInterface, ContainCustomerAs
         return new SalesActivitySchedule(
                 $this->customerAssignment, $salesActivity, $scheduleId, $salesActivityScheduleData);
     }
+    
 }

@@ -9,7 +9,7 @@ use Sales\Domain\Task\SalesTask;
 class UpdateCustomerRating implements SalesTask
 {
 
-    public function __construct(protected ContainCustomerAssignmentRepository $repository)
+    public function __construct(protected ContainCustomerAssignmentRepository $customerAssignmentRepository)
     {
         
     }
@@ -22,7 +22,7 @@ class UpdateCustomerRating implements SalesTask
      */
     public function executeBySales(Sales $sales, $payload): void
     {
-        $assignment = $this->repository->ofId($payload->id);
+        $assignment = $this->customerAssignmentRepository->ofId($payload->id);
 
         $assignment->assertBelongsToSales($sales);
         $assignment->updateCustomerRating($payload->rating);
