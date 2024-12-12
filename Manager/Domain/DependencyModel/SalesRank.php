@@ -125,7 +125,7 @@ class SalesRank
     {
         $completedAssignmentValue = CustomerAssignmentStatus::COMPLETED->value;
         $qb->leftJoin('Sales', 'GreetingAssignment', 'GreetingAssignment',
-                        "GreetingAssignment.Sales_id = Sales.id AND GreetingAssignment.status = '${$completedAssignmentValue}'")
+                        "GreetingAssignment.Sales_id = Sales.id AND GreetingAssignment.status = '{$completedAssignmentValue}'")
                 ->leftJoin('GreetingAssignment', 'CustomerAssignment', 'CustomerAssignment',
                         'GreetingAssignment.CustomerAssignment_id = CustomerAssignment.id');
         $this->recurrenceType->applyToQuery($qb, 'CustomerAssignment.completedTime', 1);
@@ -136,7 +136,7 @@ class SalesRank
     {
         $completedAssignmentValue = CustomerAssignmentStatus::COMPLETED->value;
         $qb->leftJoin('Sales', 'FactFindingAssignment', 'FactFindingAssignment',
-                        "FactFindingAssignment.Sales_id = Sales.id AND FactFindingAssignment.status = '${$completedAssignmentValue}'")
+                        "FactFindingAssignment.Sales_id = Sales.id AND FactFindingAssignment.status = '{$completedAssignmentValue}'")
                 ->leftJoin('FactFindingAssignment', 'CustomerAssignment', 'CustomerAssignment',
                         'FactFindingAssignment.CustomerAssignment_id = CustomerAssignment.id');
         $this->recurrenceType->applyToQuery($qb, 'CustomerAssignment.completedTime', 1);
