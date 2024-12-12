@@ -46,9 +46,16 @@ class CustomerController extends BaseController
             $source = $record['source'] ?? '';
             $value = "('{$name}', '{$phone}', '{$email}', '{$source}')";
             $insertIntoValues .= empty($insertIntoValues) ? "{$value}" : ", {$value}";
-var_dump($insertIntoValues);
+// var_dump($insertIntoValues);
         }
         $this->repository()->importFromCsvFile($insertIntoValues);
+        // $insertIntoValues = "";
+        // foreach ($reader->getRecords() as $record) {
+        //     $value = "('{$record['name']}', '{$record['phone']}', '{$record['email']}', '{$record['source']}')";
+        //     $insertIntoValues .= empty($insertIntoValues) ? "{$value}" : ", {$value}";
+        // }
+        
+        // $this->repository()->importFromCsvFile($insertIntoValues);
     }
 
     public function exportCustomerToCsv(CompanyUser $user, Request $request)
