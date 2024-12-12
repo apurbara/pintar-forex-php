@@ -22,7 +22,7 @@ class UpdateCustomerRating implements SalesTask
      */
     public function executeBySales(Sales $sales, $payload): void
     {
-        $assignment = $this->customerAssignmentRepository->ofId($payload->id);
+        $assignment = $this->customerAssignmentRepository->ofId($payload->customerAssignmentId);
 
         $assignment->assertBelongsToSales($sales);
         $assignment->updateCustomerRating($payload->rating);

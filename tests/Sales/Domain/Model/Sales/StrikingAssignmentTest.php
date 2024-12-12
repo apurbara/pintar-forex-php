@@ -5,7 +5,9 @@ namespace Sales\Domain\Model\Sales;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sales\Domain\DependencyModel\Customer;
+use Sales\Domain\DependencyModel\CustomerData;
 use Sales\Domain\DependencyModel\CustomerJourney;
+use Sales\Domain\DependencyModel\Province\City;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -26,6 +28,7 @@ class StrikingAssignmentTest extends TestBase
     protected $closingRequest;
     //
     protected $rating = 3;
+    protected $customerData, $city;
     protected $customerJourney;
     protected $salesActivity;
     protected $reportId = 'reportId', $salesActivityReportData;
@@ -47,6 +50,8 @@ class StrikingAssignmentTest extends TestBase
         $this->strikingAssignment->closingRequests = new ArrayCollection();
         $this->strikingAssignment->closingRequests->add($this->closingRequest);
         //
+        $this->customerData = new CustomerData();
+        $this->city = $this->buildMockOfClass(City::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
         
         $this->salesActivity = $this->buildMockOfClass(SalesActivity::class);
@@ -70,6 +75,24 @@ class StrikingAssignmentTest extends TestBase
     {
         $this->strikingAssignment->status = CustomerAssignmentStatus::COMPLETED;
         $this->assertRegularExceptionThrowed(fn() => $this->updateCustomerRating(), 'Forbidden', 'inactive assignment');
+    }
+    
+    //
+    protected function updateCustomer()
+    {
+        $this->strikingAssignment->updateCustomer($this->customerData, $this->city);
+    }
+    public function test_updateCustomer_updateCustomer()
+    {
+        $this->customer->expects($this->once())
+                ->method('update')
+                ->with($this->city, $this->customerData);
+        $this->updateCustomer();
+    }
+    public function test_updateCustomer_inactiveAssignment_forbidden()
+    {
+        $this->strikingAssignment->status = CustomerAssignmentStatus::COMPLETED;
+        $this->assertRegularExceptionThrowed(fn() => $this->updateCustomer(), 'Forbidden', 'inactive assignment');
     }
     
     //

@@ -30,7 +30,7 @@ class UpdateCustomer implements SalesTask
             $city = $this->cityRepository->ofId($payload->customerData->cityId);
         }
 
-        $assignment = $this->customerAssignmentRepository->ofId($payload->id);
+        $assignment = $this->customerAssignmentRepository->ofId($payload->customerAssignmentId);
         $assignment->assertBelongsToSales($sales);
 
         $assignment->updateCustomer($payload->customerData, $city);

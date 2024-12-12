@@ -39,26 +39,26 @@ class GreetingAssignmentController extends Controller
     }
 
     //
-    #[Mutation]
-    public function updateCustomerBio(Sales $sales, InputRequest $input)
-    {
-        $cityRepository = $this->em->getRepository(City::class);
-        $task = new UpdateCustomer($this->repository(), $cityRepository);
-
-        $customerInput = $input->get('customer');
-        $customerData = (new CustomerData())
-                ->setCityId($customerInput['City_id'])
-                ->setEmail($customerInput['email'])
-                ->setName($customerInput['name']);
-        $payload = (new UpdateCustomerPayload())
-                ->setCustomerData($customerData)
-                ->setId($input->get('id'));
-
-        $sales->executeTask($task, $payload);
-        $this->em->flush();
-
-        return $this->repository()->queryOneById($payload->id);
-    }
+//    #[Mutation]
+//    public function updateCustomerBio(Sales $sales, InputRequest $input)
+//    {
+//        $cityRepository = $this->em->getRepository(City::class);
+//        $task = new UpdateCustomer($this->repository(), $cityRepository);
+//
+//        $customerInput = $input->get('customer');
+//        $customerData = (new CustomerData())
+//                ->setCityId($customerInput['City_id'])
+//                ->setEmail($customerInput['email'])
+//                ->setName($customerInput['name']);
+//        $payload = (new UpdateCustomerPayload())
+//                ->setCustomerData($customerData)
+//                ->setId($input->get('id'));
+//
+//        $sales->executeTask($task, $payload);
+//        $this->em->flush();
+//
+//        return $this->repository()->queryOneById($payload->id);
+//    }
 
     private function buildCustomerValidatedEventHandler()
     {

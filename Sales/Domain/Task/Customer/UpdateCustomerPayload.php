@@ -2,13 +2,19 @@
 
 namespace Sales\Domain\Task\Customer;
 
-use Resources\Domain\TaskPayload\AbstractEntityMutationPayload;
 use Sales\Domain\DependencyModel\CustomerData;
 
-readonly class UpdateCustomerPayload extends AbstractEntityMutationPayload
+readonly class UpdateCustomerPayload
 {
 
+    public ?string $customerAssignmentId;
     public CustomerData $customerData;
+
+    public function setCustomerAssignmentId(?string $customerAssignmentId)
+    {
+        $this->customerAssignmentId = $customerAssignmentId;
+        return $this;
+    }
 
     public function setCustomerData(CustomerData $customerData)
     {

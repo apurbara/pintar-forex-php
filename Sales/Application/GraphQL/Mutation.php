@@ -4,6 +4,7 @@ namespace Sales\Application\GraphQL;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Resources\Infrastructure\GraphQL\AppContext;
 use Resources\Infrastructure\GraphQL\ControllerToGraphqlFieldsMapper;
 use Resources\Infrastructure\GraphQL\CustomTypes\NoResponse;
 use Resources\Infrastructure\GraphQL\DoctrineEntityToGraphqlFieldMapper;
@@ -11,7 +12,6 @@ use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Application\Controllers\AccountController;
 use Sales\Application\Controllers\ClosingRequestController;
-use Sales\Application\Controllers\CustomerController;
 use Sales\Application\Controllers\FactFindingAssignmentController;
 use Sales\Application\Controllers\GreetingAssignmentController;
 use Sales\Application\Controllers\LoginController;
@@ -19,7 +19,6 @@ use Sales\Application\Controllers\SalesActivityReportController;
 use Sales\Application\Controllers\SalesActivityScheduleController;
 use Sales\Application\Controllers\StrikingAssignmentController;
 use Sales\Application\GraphQL\Object\SalesLoginResponse;
-use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\DependencyModel\Customer\VerificationReport;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
@@ -48,7 +47,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityReportController::class),
             ...$this->submitNonScheduleActivityReport(),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityScheduleController::class),
-            ...$this->updateCustomer(),
+//            ...$this->updateCustomer(),
             'submitCustomerVerificationReport' => [
                 'type' => TypeRegistry::objectType(VerificationReport::class),
                 'args' => [
@@ -58,6 +57,14 @@ class Mutation extends ObjectType
                 'resolve' => fn($root, $args) => app(FactFindingAssignmentController::class)
                         ->submitCustomerVerificationReport(app(Sales::class), $args['FactFindingAssignment_id'],
                                 new GraphqlInputRequest($args))
+            ],
+            'customerAssignment' => [
+                'type' => TypeRegistry::objectType(MutationAggregatedInCustomerAssignment::class),
+                'args' => ['customerAssignmentId' => Type::id()],
+                'resolve' => function($root, $args, AppContext $appContext) {
+                    $appContext->storeParameter('customerAssignmentId', $args['customerAssignmentId']);
+                    return TypeRegistry::objectType(MutationAggregatedInCustomerAssignment::class);
+                },
             ],
         ];
     }
@@ -91,20 +98,20 @@ class Mutation extends ObjectType
         ];
     }
 
-    public function updateCustomer(): array
-    {
-        return [
-            'updateCustomerRating' => [
-                'type' => TypeRegistry::objectType(Customer::class),
-                'args' => [
-                    'CustomerAssignment_id' => Type::id(),
-                    'rating' => Type::int(),
-                ],
-                'resolve' => fn($root, $args) => app(CustomerController::class)
-                        ->updateCustomerRating(app(Sales::class), $args['CustomerAssignment_id'], $args['rating'])
-            ],
-        ];
-    }
+//    public function updateCustomer(): array
+//    {
+//        return [
+//            'updateCustomerRating' => [
+//                'type' => TypeRegistry::objectType(Customer::class),
+//                'args' => [
+//                    'CustomerAssignment_id' => Type::id(),
+//                    'rating' => Type::int(),
+//                ],
+//                'resolve' => fn($root, $args) => app(CustomerController::class)
+//                        ->updateCustomerRating(app(Sales::class), $args['CustomerAssignment_id'], $args['rating'])
+//            ],
+//        ];
+//    }
 
     protected function submitNonScheduleActivityReport(): array
     {

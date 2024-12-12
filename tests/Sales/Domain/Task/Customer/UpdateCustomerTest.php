@@ -30,7 +30,7 @@ class UpdateCustomerTest extends SalesTaskTestBase
         $this->customerData = (new CustomerData())
                 ->setCityId($this->cityId);
         $this->payload = (new UpdateCustomerPayload())
-                ->setId($this->customerAssignmentId)
+                ->setCustomerAssignmentId($this->customerAssignmentId)
                 ->setCustomerData($this->customerData);
     }
     
@@ -57,7 +57,7 @@ class UpdateCustomerTest extends SalesTaskTestBase
     {
         $this->customerData = (new CustomerData);
         $this->payload = (new UpdateCustomerPayload())
-                ->setId($this->customerAssignmentId)
+                ->setCustomerAssignmentId($this->customerAssignmentId)
                 ->setCustomerData($this->customerData);
         $this->customerAssignment->expects($this->once())
                 ->method('updateCustomer')

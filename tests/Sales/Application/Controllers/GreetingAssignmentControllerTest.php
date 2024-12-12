@@ -134,56 +134,56 @@ class GreetingAssignmentControllerTest extends SalesControllerTestCase
         $this->connection->table('SalesActivitySchedule')->truncate();
     }
 
-    //
-    protected function updateCustomerBio()
-    {
-        $this->prepareSalesDependency();
-
-        $this->cityOne->insert($this->connection);
-        $this->customerOne->insert($this->connection);
-
-        $this->customerAssignmentOne->insert($this->connection);
-        $this->greetingAssignmentOne->insert($this->connection);
-
-        $this->graphqlQuery = <<<'_QUERY'
-mutation ( $id: ID, $customer: CustomerInput ) {
-    updateCustomerBio ( id: $id, customer: $customer ) {
-        id, customer { name, email, source, city { id } }
-    }
-}
-_QUERY;
-        $this->graphqlVariables = [
-            'id' => $this->greetingAssignmentOne->columns['id'],
-            'customer' => $this->customerPayload,
-        ];
-        $this->postGraphqlRequest($this->sales->token);
-    }
-    public function test_udpateCustomerBio_200()
-    {
-$this->disableExceptionHandling();
-        $this->updateCustomerBio();
-        $this->seeStatusCode(200);
-
-        $this->seeJsonContains([
-            'id' => $this->greetingAssignmentOne->columns['id'],
-            'customer' => [
-                'name' => $this->customerPayload['name'],
-                'email' => $this->customerPayload['email'],
-                'source' => $this->customerOne->columns['source'],
-                'city' => [
-                    'id' => $this->customerPayload['City_id'],
-                ],
-            ],
-        ]);
-
-        $this->seeInDatabase('Customer', [
-            'id' => $this->greetingAssignmentOne->columns['Customer_id'],
-            'name' => $this->customerPayload['name'],
-            'email' => $this->customerPayload['email'],
-            'source' => $this->customerOne->columns['source'],
-            'City_id' => $this->customerPayload['City_id'],
-        ]);
-    }
+//    //
+//    protected function updateCustomerBio()
+//    {
+//        $this->prepareSalesDependency();
+//
+//        $this->cityOne->insert($this->connection);
+//        $this->customerOne->insert($this->connection);
+//
+//        $this->customerAssignmentOne->insert($this->connection);
+//        $this->greetingAssignmentOne->insert($this->connection);
+//
+//        $this->graphqlQuery = <<<'_QUERY'
+//mutation ( $id: ID, $customer: CustomerInput ) {
+//    updateCustomerBio ( id: $id, customer: $customer ) {
+//        id, customer { name, email, source, city { id } }
+//    }
+//}
+//_QUERY;
+//        $this->graphqlVariables = [
+//            'id' => $this->greetingAssignmentOne->columns['id'],
+//            'customer' => $this->customerPayload,
+//        ];
+//        $this->postGraphqlRequest($this->sales->token);
+//    }
+//    public function test_udpateCustomerBio_200()
+//    {
+//$this->disableExceptionHandling();
+//        $this->updateCustomerBio();
+//        $this->seeStatusCode(200);
+//
+//        $this->seeJsonContains([
+//            'id' => $this->greetingAssignmentOne->columns['id'],
+//            'customer' => [
+//                'name' => $this->customerPayload['name'],
+//                'email' => $this->customerPayload['email'],
+//                'source' => $this->customerOne->columns['source'],
+//                'city' => [
+//                    'id' => $this->customerPayload['City_id'],
+//                ],
+//            ],
+//        ]);
+//
+//        $this->seeInDatabase('Customer', [
+//            'id' => $this->greetingAssignmentOne->columns['Customer_id'],
+//            'name' => $this->customerPayload['name'],
+//            'email' => $this->customerPayload['email'],
+//            'source' => $this->customerOne->columns['source'],
+//            'City_id' => $this->customerPayload['City_id'],
+//        ]);
+//    }
 
     //
     protected function validateCustomer()

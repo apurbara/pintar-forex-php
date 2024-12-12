@@ -13,7 +13,6 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
-use Shared\Domain\Enum\GreetingResult;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 

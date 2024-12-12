@@ -4,7 +4,9 @@ namespace Sales\Domain\Model\Sales;
 
 use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\DependencyModel\Customer\VerificationReportData;
+use Sales\Domain\DependencyModel\CustomerData;
 use Sales\Domain\DependencyModel\CustomerVerification;
+use Sales\Domain\DependencyModel\Province\City;
 use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -12,7 +14,6 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
-use Shared\Domain\Enum\CustomerStatus;
 use Shared\Domain\ValueObject\HourlyTimeIntervalData;
 use Tests\TestBase;
 
@@ -24,6 +25,7 @@ class FactFindingAssignmentTest extends TestBase
     //
     protected $customerVerification, $verificationReportData;
     protected $rating = 4;
+    protected $customerData, $city;
     //
     protected $salesActivity;
     protected $reportId = 'reportId', $salesActivityReportData;
@@ -42,6 +44,10 @@ class FactFindingAssignmentTest extends TestBase
         $this->factFindingAssignment->sales = $this->sales;
         $this->factFindingAssignment->customer = $this->customer;
         $this->factFindingAssignment->customerAssignment = $this->customerAssignment;
+        
+        //
+        $this->customerData = new CustomerData();
+        $this->city = $this->buildMockOfClass(City::class);
         //
         $this->customerVerification = $this->buildMockOfClass(CustomerVerification::class);
         $this->verificationReportData = new VerificationReportData('note');
@@ -120,6 +126,24 @@ class FactFindingAssignmentTest extends TestBase
     {
         $this->factFindingAssignment->status = CustomerAssignmentStatus::COMPLETED;
         $this->assertRegularExceptionThrowed(fn() => $this->updateCustomerRating(), 'Forbidden', 'inactive assignment');
+    }
+    
+    //
+    protected function updateCustomer()
+    {
+        $this->factFindingAssignment->updateCustomer($this->customerData, $this->city);
+    }
+    public function test_updateCustomer_updateCustomer()
+    {
+        $this->customer->expects($this->once())
+                ->method('update')
+                ->with($this->city, $this->customerData);
+        $this->updateCustomer();
+    }
+    public function test_updateCustomer_inactiveAssignment_forbidden()
+    {
+        $this->factFindingAssignment->status = CustomerAssignmentStatus::COMPLETED;
+        $this->assertRegularExceptionThrowed(fn() => $this->updateCustomer(), 'Forbidden', 'inactive assignment');
     }
 
     //

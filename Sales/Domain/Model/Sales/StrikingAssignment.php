@@ -73,7 +73,7 @@ class StrikingAssignment implements ContainCustomerAssignmentInterface
     }
 
     //
-    public function updateCustomerRating(int $rating)
+    public function updateCustomerRating(int $rating): void
     {
         $this->assertActive();
         $this->customer->updateRating($rating);

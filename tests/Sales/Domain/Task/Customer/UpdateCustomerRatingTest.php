@@ -20,7 +20,7 @@ class UpdateCustomerRatingTest extends SalesTaskTestBase
         //
         $this->task = new UpdateCustomerRating($this->customerAssignmentRepository);
         $this->payload = (new UpdateCustomerRatingPayload())
-                ->setId($this->customerAssignmentId)
+                ->setCustomerAssignmentId($this->customerAssignmentId)
                 ->setRating($this->rating);
     }
     
