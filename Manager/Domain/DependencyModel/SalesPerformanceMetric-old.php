@@ -1,24 +1,21 @@
 <?php
 
-namespace Company\Domain\Model;
+namespace Manager\Domain\DependencyModel;
 
-use Company\Domain\Model\SalesPerformanceMetric\SalesPerformanceMetricEvaluation;
-use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesPerformanceMetricRepository;
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToMany;
-use Resources\Exception\RegularException;
+use Manager\Domain\DependencyModel\SalesPerformanceMetric\SalesPerformanceMetricEvaluation;
+use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesPerformanceMetricRepository;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Resources\Infrastructure\GraphQL\Attributes\IncludeAsInputList;
-use Resources\Uuid;
-use Resources\ValidationRule;
-use Resources\ValidationService;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 use Shared\Domain\Enum\RecurrenceType;
 use Shared\Domain\Enum\SalesPerformanceMetricType;
 
@@ -60,82 +57,23 @@ class SalesPerformanceMetric
                 cascade: ["persist"], fetch: "EXTRA_LAZY")]
     protected Collection $evaluations;
 
-    private function setName(?string $name): void
+    protected function __construct()
     {
-        ValidationService::build()
-                ->addRule(ValidationRule::notEmpty())
-                ->execute($name, 'name is mandatory');
-        $this->name = $name;
-    }
-
-    private function addEvaluation(SalesPerformanceMetricData $data): void
-    {
-        foreach ($data->getEvaluations() as $evaluationData) {
-            $evaluation = new SalesPerformanceMetricEvaluation($this, Uuid::generateUuid4(), $evaluationData);
-            $this->evaluations->add($evaluation);
-        }
-    }
-
-    private function assertEvaluationExist(): void
-    {
-        $criteria = Criteria::create()
-                ->andWhere(Criteria::expr()->eq('removed', false));
-        if (empty($this->evaluations->matching($criteria)->count())) {
-            throw RegularException::badRequest('at least one evaluation is required');
-        }
-    }
-
-    public function __construct(string $id, SalesPerformanceMetricData $data)
-    {
-        $this->id = $id;
-        $this->disabled = false;
-        $this->createdTime = new DateTimeImmutable();
-        $this->lastModifiedTime = new DateTimeImmutable();
-        $this->setName($data->name);
-        $this->salesPerformanceMetricType = SalesPerformanceMetricType::from($data->salesPerformanceMetricType);
-        $this->recurrenceType = RecurrenceType::from($data->recurrenceType);
-        $this->recurrenceCount = $data->recurrenceCount;
-        $this->displaySchema = $data->displaySchema;
-        //
-        $this->evaluations = new ArrayCollection();
-        $this->addEvaluation($data);
-        $this->assertEvaluationExist();
-    }
-
-    public function update(SalesPerformanceMetricData $data): void
-    {
-        $this->lastModifiedTime = new DateTimeImmutable();
-        $this->setName($data->name);
-        $this->salesPerformanceMetricType = SalesPerformanceMetricType::from($data->salesPerformanceMetricType);
-        $this->recurrenceType = RecurrenceType::from($data->recurrenceType);
-        $this->recurrenceCount = $data->recurrenceCount;
-        $this->displaySchema = $data->displaySchema;
-
-        foreach ($this->evaluations->getIterator() as $evaluation) {
-            $evaluation->update($data);
-        }
-        $this->addEvaluation($data);
-        $this->assertEvaluationExist();
-    }
-
-    public function disable(): void
-    {
-        $this->disabled = true;
-    }
-
-    public function enable(): void
-    {
-        $this->disabled = false;
     }
 
     //
-    public function fetchSummaryResult(Connection $connection): array
+    public function fetchSummaryResult(Connection $connection, string $managerId): array
     {
         $salesSubquery = $connection->createQueryBuilder();
-        $this->salesPerformanceMetricType->applyToQuery($salesSubquery, $this->recurrenceType, $this->recurrenceCount);
+        match ($this->metricType) {
+            SalesPerformanceMetricType::GREETING_ACTIVITY_REPORT_COUNT => $this->applySalesActivityReportMetric($salesSubquery),
+            SalesPerformanceMetricType::APPROVED_CLOSING_REQUEST_SUM => $this->applyApprovedClosingRequestSumMetric($salesSubquery),
+            SalesPerformanceMetricType::APPROVED_CLOSING_REQUEST_COUNT => $this->applyApprovedClosingRequestCountMetric($salesSubquery)
+        };
 
         $qb = $connection->createQueryBuilder();
         $qb->from(sprintf('(%s)', $salesSubquery->getSQL()), 'salesPerformance')
+                ->setParameter('managerId', $managerId)
                 ->addSelect('salesPerformance.evaluationTime')
                 ->addGroupBy('salesPerformance.evaluationTime');
         match ($this->recurrenceType){
@@ -156,5 +94,48 @@ class SalesPerformanceMetric
             'name' => $this->name,
             'result' => $qb->executeQuery()->fetchAllAssociative(),
         ];
+    }
+
+    protected function applySalesActivityReportMetric(QueryBuilder $salesSubquery): void
+    {
+        $salesSubquery->select("COUNT(SalesActivityReport.id) achievement")
+                ->addSelect('Sales.id')
+                ->from('Sales')
+                ->andWhere($salesSubquery->expr()->eq('Sales.Manager_id', ':managerId'))
+                ->leftJoin('Sales', 'CustomerAssignment', 'CustomerAssignment', 'CustomerAssignment.Sales_id = Sales.id')
+                ->leftJoin('CustomerAssignment', 'SalesActivitySchedule', 'SalesActivitySchedule',
+                        'SalesActivitySchedule.CustomerAssignment_id = CustomerAssignment.id')
+                ->leftJoin('SalesActivitySchedule', 'SalesActivityReport', 'SalesActivityReport',
+                        'SalesActivityReport.SalesActivitySchedule_id = SalesActivitySchedule.id')
+                ->addGroupBy('Sales.id');
+        $this->recurrenceType->applyToQuery($salesSubquery, 'SalesActivityReport.submitTime', $this->recurrenceCount);
+    }
+
+    protected function applyApprovedClosingRequestSumMetric(QueryBuilder $salesSubquery): void
+    {
+        $approvedClosingRequestStatus = ManagementApprovalStatus::APPROVED->value;
+        $salesSubquery->select("SUM(ClosingRequest.transactionValue) achievement")
+                ->addSelect('Sales.id')
+                ->from('Sales')
+                ->andWhere($salesSubquery->expr()->eq('Sales.Manager_id', ':managerId'))
+                ->leftJoin('Sales', 'CustomerAssignment', 'CustomerAssignment', 'CustomerAssignment.Sales_id = Sales.id')
+                ->leftJoin('CustomerAssignment', 'ClosingRequest', 'ClosingRequest',
+                        "ClosingRequest.CustomerAssignment_id = CustomerAssignment.id AND ClosingRequest.status = '{$approvedClosingRequestStatus}'")
+                ->addGroupBy('Sales.id');
+        $this->recurrenceType->applyToQuery($salesSubquery, 'ClosingRequest.createdTime', $this->recurrenceCount);
+    }
+
+    protected function applyApprovedClosingRequestCountMetric(QueryBuilder $salesSubquery): void
+    {
+        $approvedClosingRequestStatus = ManagementApprovalStatus::APPROVED->value;
+        $salesSubquery->select("COUNT(ClosingRequest.transactionValue) achievement")
+                ->addSelect('Sales.id')
+                ->from('Sales')
+                ->andWhere($salesSubquery->expr()->eq('Sales.Manager_id', ':managerId'))
+                ->leftJoin('Sales', 'CustomerAssignment', 'CustomerAssignment', 'CustomerAssignment.Sales_id = Sales.id')
+                ->leftJoin('CustomerAssignment', 'ClosingRequest', 'ClosingRequest',
+                        "ClosingRequest.CustomerAssignment_id = CustomerAssignment.id AND ClosingRequest.status = '{$approvedClosingRequestStatus}'")
+                ->addGroupBy('Sales.id');
+        $this->recurrenceType->applyToQuery($salesSubquery, 'ClosingRequest.createdTime', $this->recurrenceCount);
     }
 }

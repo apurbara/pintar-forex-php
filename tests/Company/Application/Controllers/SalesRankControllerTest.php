@@ -5,9 +5,10 @@ namespace Company\Application\Controllers;
 use Company\Domain\Model\SalesRank;
 use DateTime;
 use Shared\Domain\Enum\EvaluationType;
-use Shared\Domain\Enum\MetricType;
 use Shared\Domain\Enum\QueryOrder;
 use Shared\Domain\Enum\RecurrenceType;
+use Shared\Domain\Enum\SalesMetricType;
+use Shared\Domain\Enum\SalesRole;
 use Tests\Company\Application\Controllers\CompanyControllerTestCase;
 use Tests\resources\Application\EntityRecord;
 
@@ -29,7 +30,8 @@ class SalesRankControllerTest extends CompanyControllerTestCase
         //
         $this->salesRankPayload = [
             'name' => 'new company metric name',
-            'metricType' => MetricType::SALES_ACTIVITY_REPORT->value,
+            'salesMetricType' => SalesMetricType::SUCCESSFULL_ASSIGNMENT->value,
+            'salesRole' => SalesRole::GREETER->value,
             'evaluationType' => EvaluationType::SUM->value,
             'recurrenceType' => RecurrenceType::MONTHLY->value,
             'displaySalesNumber' => 6,
@@ -50,14 +52,27 @@ class SalesRankControllerTest extends CompanyControllerTestCase
         
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
-    $displaySchema: String, $evaluationType: String, $metricType: String, $name: String!, 
-    $displaySalesNumber: Int, $recurrenceType: String, $queryOrder: String
+    $displaySchema: String, 
+    $evaluationType: String, 
+    $salesMetricType: String, 
+    $salesRole: String, 
+    $name: String!, 
+    $displaySalesNumber: Int, 
+    $recurrenceType: String, 
+    $queryOrder: String
 ) {
     createSalesRank (
-        displaySchema: $displaySchema, evaluationType: $evaluationType, metricType: $metricType, name: $name, 
-        displaySalesNumber: $displaySalesNumber, recurrenceType: $recurrenceType, queryOrder: $queryOrder
+        displaySchema: $displaySchema, 
+        evaluationType: $evaluationType, 
+        salesMetricType: $salesMetricType, 
+        salesRole: $salesRole, 
+        name: $name, 
+        displaySalesNumber: 
+        $displaySalesNumber, 
+        recurrenceType: $recurrenceType, 
+        queryOrder: $queryOrder
     ) {
-        id, displaySchema, evaluationType, metricType, name, displaySalesNumber, recurrenceType, queryOrder
+        id, displaySchema, evaluationType, salesMetricType, salesRole, name, displaySalesNumber, recurrenceType, queryOrder
     }
 }
 _QUERY;
@@ -73,7 +88,8 @@ $this->disableExceptionHandling();
         $this->seeJsonContains([
             'displaySchema' => $this->salesRankPayload['displaySchema'],
             'evaluationType' => $this->salesRankPayload['evaluationType'],
-            'metricType' => $this->salesRankPayload['metricType'],
+            'salesMetricType' => $this->salesRankPayload['salesMetricType'],
+            'salesRole' => $this->salesRankPayload['salesRole'],
             'name' => $this->salesRankPayload['name'],
             'displaySalesNumber' => $this->salesRankPayload['displaySalesNumber'],
             'recurrenceType' => $this->salesRankPayload['recurrenceType'],
@@ -85,7 +101,8 @@ $this->disableExceptionHandling();
             'lastModifiedTime' => $this->stringOfCurrentTime(),
             'displaySchema' => $this->salesRankPayload['displaySchema'],
             'evaluationType' => $this->salesRankPayload['evaluationType'],
-            'metricType' => $this->salesRankPayload['metricType'],
+            'salesMetricType' => $this->salesRankPayload['salesMetricType'],
+            'salesRole' => $this->salesRankPayload['salesRole'],
             'name' => $this->salesRankPayload['name'],
             'displaySalesNumber' => $this->salesRankPayload['displaySalesNumber'],
             'recurrenceType' => $this->salesRankPayload['recurrenceType'],
@@ -102,15 +119,27 @@ $this->disableExceptionHandling();
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
     $id: ID,
-    $displaySchema: String, $evaluationType: String, $metricType: String, $name: String!, 
-    $displaySalesNumber: Int, $recurrenceType: String, $queryOrder: String
+    $displaySchema: String, 
+    $evaluationType: String, 
+    $salesMetricType: String, 
+    $salesRole: String, 
+    $name: String!, 
+    $displaySalesNumber: Int, 
+    $recurrenceType: String, 
+    $queryOrder: String
 ) {
     updateSalesRank (
         id: $id,
-        displaySchema: $displaySchema, evaluationType: $evaluationType, metricType: $metricType, name: $name, 
-        displaySalesNumber: $displaySalesNumber, recurrenceType: $recurrenceType, queryOrder: $queryOrder
+        displaySchema: $displaySchema, 
+        evaluationType: $evaluationType, 
+        salesMetricType: $salesMetricType, 
+        salesRole: $salesRole, 
+        name: $name, 
+        displaySalesNumber: $displaySalesNumber, 
+        recurrenceType: $recurrenceType, 
+        queryOrder: $queryOrder
     ) {
-        id, displaySchema, evaluationType, metricType, name, displaySalesNumber, recurrenceType, queryOrder
+        id, displaySchema, evaluationType, salesMetricType, salesRole, name, displaySalesNumber, recurrenceType, queryOrder
     }
 }
 _QUERY;
@@ -130,7 +159,8 @@ $this->disableExceptionHandling();
             'id' => $this->salesRankOne->columns['id'],
             'displaySchema' => $this->salesRankPayload['displaySchema'],
             'evaluationType' => $this->salesRankPayload['evaluationType'],
-            'metricType' => $this->salesRankPayload['metricType'],
+            'salesMetricType' => $this->salesRankPayload['salesMetricType'],
+            'salesRole' => $this->salesRankPayload['salesRole'],
             'name' => $this->salesRankPayload['name'],
             'displaySalesNumber' => $this->salesRankPayload['displaySalesNumber'],
             'recurrenceType' => $this->salesRankPayload['recurrenceType'],
@@ -142,7 +172,8 @@ $this->disableExceptionHandling();
             'lastModifiedTime' => $this->stringOfCurrentTime(),
             'displaySchema' => $this->salesRankPayload['displaySchema'],
             'evaluationType' => $this->salesRankPayload['evaluationType'],
-            'metricType' => $this->salesRankPayload['metricType'],
+            'salesMetricType' => $this->salesRankPayload['salesMetricType'],
+            'salesRole' => $this->salesRankPayload['salesRole'],
             'name' => $this->salesRankPayload['name'],
             'displaySalesNumber' => $this->salesRankPayload['displaySalesNumber'],
             'recurrenceType' => $this->salesRankPayload['recurrenceType'],
@@ -229,7 +260,7 @@ $this->disableExceptionHandling();
         $this->graphqlQuery = <<<'_QUERY'
 query ( $id: ID ) {
     viewSalesRankDetail ( id: $id ) {
-        id, displaySchema, evaluationType, metricType, name, displaySalesNumber, recurrenceType, queryOrder
+        id, displaySchema, evaluationType, salesMetricType, salesRole, name, displaySalesNumber, recurrenceType, queryOrder
     }
 }
 _QUERY;
@@ -248,7 +279,8 @@ $this->disableExceptionHandling();
             'id' => $this->salesRankOne->columns['id'],
             'displaySchema' => $this->salesRankOne->columns['displaySchema'],
             'evaluationType' => $this->salesRankOne->columns['evaluationType'],
-            'metricType' => $this->salesRankOne->columns['metricType'],
+            'salesMetricType' => $this->salesRankOne->columns['salesMetricType'],
+            'salesRole' => $this->salesRankOne->columns['salesRole'],
             'name' => $this->salesRankOne->columns['name'],
             'displaySalesNumber' => $this->salesRankOne->columns['displaySalesNumber'],
             'recurrenceType' => $this->salesRankOne->columns['recurrenceType'],
@@ -267,7 +299,7 @@ $this->disableExceptionHandling();
 query {
     viewSalesRankList {
         list {
-            id, evaluationType, metricType, name, displaySalesNumber, recurrenceType, queryOrder
+            id, evaluationType, salesMetricType, salesRole, name, displaySalesNumber, recurrenceType, queryOrder
         },
         cursorLimit { total }
     }
@@ -287,7 +319,8 @@ $this->disableExceptionHandling();
                 [
                     'id' => $this->salesRankOne->columns['id'],
                     'evaluationType' => $this->salesRankOne->columns['evaluationType'],
-                    'metricType' => $this->salesRankOne->columns['metricType'],
+                    'salesMetricType' => $this->salesRankOne->columns['salesMetricType'],
+                    'salesRole' => $this->salesRankOne->columns['salesRole'],
                     'name' => $this->salesRankOne->columns['name'],
                     'displaySalesNumber' => $this->salesRankOne->columns['displaySalesNumber'],
                     'recurrenceType' => $this->salesRankOne->columns['recurrenceType'],
@@ -296,7 +329,8 @@ $this->disableExceptionHandling();
                 [
                     'id' => $this->salesRankTwo->columns['id'],
                     'evaluationType' => $this->salesRankTwo->columns['evaluationType'],
-                    'metricType' => $this->salesRankTwo->columns['metricType'],
+                    'salesMetricType' => $this->salesRankTwo->columns['salesMetricType'],
+                    'salesRole' => $this->salesRankTwo->columns['salesRole'],
                     'name' => $this->salesRankTwo->columns['name'],
                     'displaySalesNumber' => $this->salesRankTwo->columns['displaySalesNumber'],
                     'recurrenceType' => $this->salesRankTwo->columns['recurrenceType'],

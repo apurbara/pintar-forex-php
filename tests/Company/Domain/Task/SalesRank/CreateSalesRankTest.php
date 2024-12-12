@@ -24,7 +24,7 @@ class CreateSalesRankTest extends TaskInCompanyTestBase
                 ->setDisplaySalesNumber(5)
                 ->setDisplaySchema('display schema')
                 ->setEvaluationType(EvaluationType::COUNT->value)
-                ->setMetricType(MetricType::APPROVED_CLOSING_REQUEST->value)
+                ->setSalesMetricType(MetricType::APPROVED_CLOSING_REQUEST->value)
                 ->setName('name')
                 ->setOrder(QueryOrder::ASC->value)
                 ->setRecurrenceType(RecurrenceType::DAILY->value);

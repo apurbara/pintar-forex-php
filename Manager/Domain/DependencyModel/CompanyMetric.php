@@ -4,13 +4,11 @@ namespace Manager\Domain\DependencyModel;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineCompanyMetricRepository;
 use Shared\Domain\Enum\EvaluationType;
-use Shared\Domain\Enum\ManagementApprovalStatus;
 use Shared\Domain\Enum\MetricType;
 use Shared\Domain\Enum\RecurrenceType;
 
@@ -60,43 +58,21 @@ class CompanyMetric
     public function fetchSummaryResult(Connection $connection, string $managerId): array
     {
         $qb = $connection->createQueryBuilder();
+        $this->metricType->applyToQuery($qb, $this->recurrenceType, $this->evaluationType, $this->recurrenceCount);
         match ($this->metricType) {
-            MetricType::SALES_ACTIVITY_REPORT => $this->applySalesActivityReportMetric($qb, $managerId),
-            MetricType::APPROVED_CLOSING_REQUEST => $this->applyApprovedClosingRequestMetric($qb, $managerId)
+            MetricType::GREETING_ACTIVITY_REPORT, MetricType::SUCCESSFULL_GREETING => $qb->innerJoin('GreetingAssignment',
+                    'Sales', 'Sales', 'GreetingAssignment.Sales_id = Sales.id AND Sales.Manager_id = :managerId'),
+            MetricType::FACT_FINDING_ACTIVITY_REPORT, MetricType::SUCCESSFULL_FACT_FINDING => $qb->innerJoin('FactFindingAssignment',
+                    'Sales', 'Sales', 'FactFindingAssignment.Sales_id = Sales.id AND Sales.Manager_id = :managerId'),
+            MetricType::STRIKING_ACTIVITY_REPORT, MetricType::APPROVED_CLOSING_REQUEST => $qb->innerJoin('StrikingAssignment',
+                    'Sales', 'Sales', 'StrikingAssignment.Sales_id = Sales.id AND Sales.Manager_id = :managerId'),
         };
+        $qb->setParameter('managerId', $managerId);
 
         return [
             'name' => $this->name,
             'target' => $this->target,
             'result' => $qb->executeQuery()->fetchAllAssociative(),
         ];
-    }
-
-    protected function applySalesActivityReportMetric(QueryBuilder $qb, string $managerId): void
-    {
-        $qb->from('SalesActivityReport')
-                ->innerJoin('SalesActivityReport', 'SalesActivitySchedule', 'SalesActivitySchedule',
-                        'SalesActivityReport.SalesActivitySchedule_id = SalesActivitySchedule.id')
-                ->innerJoin('SalesActivitySchedule', 'CustomerAssignment', 'CustomerAssignment',
-                        'SalesActivitySchedule.CustomerAssignment_id = CustomerAssignment.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
-                ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
-                ->setParameter('managerId', $managerId);
-        $this->recurrenceType->applyToQuery($qb, 'SalesActivityReport.submitTime', $this->recurrenceCount);
-        $this->evaluationType->applyToQuery($qb, 'SalesActivityReport.id');
-    }
-
-    protected function applyApprovedClosingRequestMetric(QueryBuilder $qb, string $managerId): void
-    {
-        $approvedClosingRequestStatus = ManagementApprovalStatus::APPROVED->value;
-        $qb->from('ClosingRequest')
-                ->andWhere($qb->expr()->eq('ClosingRequest.status', "'{$approvedClosingRequestStatus}'"))
-                ->innerJoin('ClosingRequest', 'CustomerAssignment', 'CustomerAssignment',
-                        'ClosingRequest.CustomerAssignment_id = CustomerAssignment.id')
-                ->innerJoin('CustomerAssignment', 'Sales', 'Sales', 'CustomerAssignment.Sales_id = Sales.id')
-                ->andWhere($qb->expr()->eq('Sales.Manager_id', ':managerId'))
-                ->setParameter('managerId', $managerId);
-        $this->recurrenceType->applyToQuery($qb, 'ClosingRequest.createdTime', $this->recurrenceCount);
-        $this->evaluationType->applyToQuery($qb, 'ClosingRequest.transactionValue');
     }
 }

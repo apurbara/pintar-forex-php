@@ -40,7 +40,7 @@ class SalesPerformanceMetricControllerTest extends CompanyControllerTestCase
         //
         $this->salesPerformanceMetricPayload = [
             'displaySchema' => 'new display schema',
-            'metricType' => SalesPerformanceMetricType::SALES_ACTIVITY_REPORT->value,
+            'salesPerformanceMetricType' => SalesPerformanceMetricType::GREETING_ACTIVITY_REPORT_COUNT->value,
             'name' => 'new company metric name',
             'recurrenceCount' => 6,
             'recurrenceType' => RecurrenceType::MONTHLY->value,
@@ -70,15 +70,15 @@ class SalesPerformanceMetricControllerTest extends CompanyControllerTestCase
         
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
-    $displaySchema: String, $metricType: String, $name: String!, $recurrenceCount: Int, $recurrenceType: String,
+    $displaySchema: String, $salesPerformanceMetricType: String, $name: String!, $recurrenceCount: Int, $recurrenceType: String,
     $evaluations: [SalesPerformanceMetricEvaluationInput]
 ) {
     createSalesPerformanceMetric (
-        displaySchema: $displaySchema, metricType: $metricType, name: $name, recurrenceCount: $recurrenceCount, 
+        displaySchema: $displaySchema, salesPerformanceMetricType: $salesPerformanceMetricType, name: $name, recurrenceCount: $recurrenceCount, 
         recurrenceType: $recurrenceType,
         evaluations: $evaluations
     ) {
-        id, displaySchema, metricType, name, recurrenceCount, recurrenceType,
+        id, displaySchema, salesPerformanceMetricType, name, recurrenceCount, recurrenceType,
         evaluations { alias, evaluationType }
     }
 }
@@ -94,7 +94,7 @@ $this->disableExceptionHandling();
         
         $this->seeJsonContains([
             'displaySchema' => $this->salesPerformanceMetricPayload['displaySchema'],
-            'metricType' => $this->salesPerformanceMetricPayload['metricType'],
+            'salesPerformanceMetricType' => $this->salesPerformanceMetricPayload['salesPerformanceMetricType'],
             'name' => $this->salesPerformanceMetricPayload['name'],
             'recurrenceCount' => $this->salesPerformanceMetricPayload['recurrenceCount'],
             'recurrenceType' => $this->salesPerformanceMetricPayload['recurrenceType'],
@@ -104,7 +104,7 @@ $this->disableExceptionHandling();
             'createdTime' => $this->stringOfCurrentTime(),
             'lastModifiedTime' => $this->stringOfCurrentTime(),
             'displaySchema' => $this->salesPerformanceMetricPayload['displaySchema'],
-            'metricType' => $this->salesPerformanceMetricPayload['metricType'],
+            'salesPerformanceMetricType' => $this->salesPerformanceMetricPayload['salesPerformanceMetricType'],
             'name' => $this->salesPerformanceMetricPayload['name'],
             'recurrenceCount' => $this->salesPerformanceMetricPayload['recurrenceCount'],
             'recurrenceType' => $this->salesPerformanceMetricPayload['recurrenceType'],
@@ -145,16 +145,16 @@ $this->disableExceptionHandling();
         $this->graphqlQuery = <<<'_QUERY'
 mutation (
     $id: ID,
-    $displaySchema: String, $metricType: String, $name: String!, $recurrenceCount: Int, $recurrenceType: String,
+    $displaySchema: String, $salesPerformanceMetricType: String, $name: String!, $recurrenceCount: Int, $recurrenceType: String,
     $evaluations: [SalesPerformanceMetricEvaluationInput]
 ) {
     updateSalesPerformanceMetric (
         id: $id,
-        displaySchema: $displaySchema, metricType: $metricType, name: $name, 
+        displaySchema: $displaySchema, salesPerformanceMetricType: $salesPerformanceMetricType, name: $name, 
         recurrenceCount: $recurrenceCount, recurrenceType: $recurrenceType,
         evaluations: $evaluations
     ) {
-        id, displaySchema, metricType, name, recurrenceCount, recurrenceType,
+        id, displaySchema, salesPerformanceMetricType, name, recurrenceCount, recurrenceType,
         evaluations { alias, evaluationType }
     }
 }
@@ -174,7 +174,7 @@ $this->disableExceptionHandling();
         $this->seeJsonContains([
             'id' => $this->salesPerformanceMetricOne->columns['id'],
             'displaySchema' => $this->salesPerformanceMetricPayload['displaySchema'],
-            'metricType' => $this->salesPerformanceMetricPayload['metricType'],
+            'salesPerformanceMetricType' => $this->salesPerformanceMetricPayload['salesPerformanceMetricType'],
             'name' => $this->salesPerformanceMetricPayload['name'],
             'recurrenceCount' => $this->salesPerformanceMetricPayload['recurrenceCount'],
             'recurrenceType' => $this->salesPerformanceMetricPayload['recurrenceType'],
@@ -184,7 +184,7 @@ $this->disableExceptionHandling();
             'id' => $this->salesPerformanceMetricOne->columns['id'],
             'lastModifiedTime' => $this->stringOfCurrentTime(),
             'displaySchema' => $this->salesPerformanceMetricPayload['displaySchema'],
-            'metricType' => $this->salesPerformanceMetricPayload['metricType'],
+            'salesPerformanceMetricType' => $this->salesPerformanceMetricPayload['salesPerformanceMetricType'],
             'name' => $this->salesPerformanceMetricPayload['name'],
             'recurrenceCount' => $this->salesPerformanceMetricPayload['recurrenceCount'],
             'recurrenceType' => $this->salesPerformanceMetricPayload['recurrenceType'],
@@ -321,7 +321,7 @@ $this->disableExceptionHandling();
         $this->graphqlQuery = <<<'_QUERY'
 query ( $id: ID ) {
     viewSalesPerformanceMetricDetail ( id: $id ) {
-        id, displaySchema, metricType, name, recurrenceCount, recurrenceType,
+        id, displaySchema, salesPerformanceMetricType, name, recurrenceCount, recurrenceType,
         evaluations { alias, evaluationType }
     }
 }
@@ -340,7 +340,7 @@ $this->disableExceptionHandling();
         $this->seeJsonContains([
             'id' => $this->salesPerformanceMetricOne->columns['id'],
             'displaySchema' => $this->salesPerformanceMetricOne->columns['displaySchema'],
-            'metricType' => $this->salesPerformanceMetricOne->columns['metricType'],
+            'salesPerformanceMetricType' => $this->salesPerformanceMetricOne->columns['salesPerformanceMetricType'],
             'name' => $this->salesPerformanceMetricOne->columns['name'],
             'recurrenceCount' => $this->salesPerformanceMetricOne->columns['recurrenceCount'],
             'recurrenceType' => $this->salesPerformanceMetricOne->columns['recurrenceType'],
@@ -368,7 +368,7 @@ $this->disableExceptionHandling();
 query {
     viewSalesPerformanceMetricList {
         list {
-            id, metricType, name, recurrenceCount, recurrenceType
+            id, salesPerformanceMetricType, name, recurrenceCount, recurrenceType
         },
         cursorLimit { total }
     }
@@ -387,14 +387,14 @@ $this->disableExceptionHandling();
             'list' => [
                 [
                     'id' => $this->salesPerformanceMetricOne->columns['id'],
-                    'metricType' => $this->salesPerformanceMetricOne->columns['metricType'],
+                    'salesPerformanceMetricType' => $this->salesPerformanceMetricOne->columns['salesPerformanceMetricType'],
                     'name' => $this->salesPerformanceMetricOne->columns['name'],
                     'recurrenceCount' => $this->salesPerformanceMetricOne->columns['recurrenceCount'],
                     'recurrenceType' => $this->salesPerformanceMetricOne->columns['recurrenceType'],
                 ],
                 [
                     'id' => $this->salesPerformanceMetricTwo->columns['id'],
-                    'metricType' => $this->salesPerformanceMetricTwo->columns['metricType'],
+                    'salesPerformanceMetricType' => $this->salesPerformanceMetricTwo->columns['salesPerformanceMetricType'],
                     'name' => $this->salesPerformanceMetricTwo->columns['name'],
                     'recurrenceCount' => $this->salesPerformanceMetricTwo->columns['recurrenceCount'],
                     'recurrenceType' => $this->salesPerformanceMetricTwo->columns['recurrenceType'],

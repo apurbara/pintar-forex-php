@@ -9,7 +9,7 @@ class SalesPerformanceMetricData
 
     public readonly ?string $id;
     public readonly ?string $name;
-    public readonly ?string $metricType;
+    public readonly ?string $salesPerformanceMetricType;
     public readonly ?string $recurrenceType;
     public readonly ?int $recurrenceCount;
     public readonly ?string $displaySchema;
@@ -28,9 +28,9 @@ class SalesPerformanceMetricData
         return $this;
     }
 
-    public function setMetricType(?string $metricType)
+    public function setSalesPerformanceMetricType(?string $salesPerformanceMetricType)
     {
-        $this->metricType = $metricType;
+        $this->salesPerformanceMetricType = $salesPerformanceMetricType;
         return $this;
     }
 

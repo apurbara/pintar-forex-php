@@ -32,7 +32,7 @@ class SalesPerformanceMetricController extends BaseController
     {
         $data = (new SalesPerformanceMetricData())
                         ->setDisplaySchema($input->get('displaySchema'))
-                        ->setMetricType($input->get('metricType'))
+                        ->setSalesPerformanceMetricType($input->get('salesPerformanceMetricType'))
                         ->setName($input->get('name'))
                         ->setRecurrenceCount($input->get('recurrenceCount'))
                         ->setRecurrenceType($input->get('recurrenceType'));

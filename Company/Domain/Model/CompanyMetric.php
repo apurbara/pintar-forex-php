@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Resources\ValidationRule;
 use Resources\ValidationService;
+use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\EvaluationType;
 use Shared\Domain\Enum\ManagementApprovalStatus;
 use Shared\Domain\Enum\MetricType;
@@ -95,31 +96,12 @@ class CompanyMetric
     public function fetchSummaryResult(Connection $connection): array
     {
         $qb = $connection->createQueryBuilder();
-        match ($this->metricType) {
-            MetricType::SALES_ACTIVITY_REPORT => $this->applySalesActivityReportMetric($qb),
-            MetricType::APPROVED_CLOSING_REQUEST => $this->applyApprovedClosingRequestMetric($qb)
-        };
+        $this->metricType->applyToQuery($qb, $this->recurrenceType, $this->evaluationType, $this->recurrenceCount);
 
         return [
             'name' => $this->name,
-            'target' => $this->target,
+//            'target' => $this->target,
             'result' => $qb->executeQuery()->fetchAllAssociative(),
         ];
-    }
-
-    protected function applySalesActivityReportMetric(QueryBuilder $qb): void
-    {
-        $qb->from('SalesActivityReport');
-        $this->recurrenceType->applyToQuery($qb, 'SalesActivityReport.submitTime', $this->recurrenceCount);
-        $this->evaluationType->applyToQuery($qb, 'SalesActivityReport.id');
-    }
-
-    protected function applyApprovedClosingRequestMetric(QueryBuilder $qb): void
-    {
-        $approvedClosingRequestStatus = ManagementApprovalStatus::APPROVED->value;
-        $qb->from('ClosingRequest')
-                ->andWhere($qb->expr()->eq('ClosingRequest.status', "'{$approvedClosingRequestStatus}'"));
-        $this->recurrenceType->applyToQuery($qb, 'ClosingRequest.createdTime', $this->recurrenceCount);
-        $this->evaluationType->applyToQuery($qb, 'ClosingRequest.transactionValue');
     }
 }

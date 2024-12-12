@@ -30,7 +30,7 @@ class SalesPerformanceMetricTest extends TestBase
         //
         $data = (new SalesPerformanceMetricData())
                 ->setDisplaySchema('display schema')
-                ->setMetricType(SalesPerformanceMetricType::APPROVED_CLOSING_REQUEST_COUNT->value)
+                ->setSalesPerformanceMetricType(SalesPerformanceMetricType::APPROVED_CLOSING_REQUEST_COUNT->value)
                 ->setName('name')
                 ->setRecurrenceCount(3)
                 ->setRecurrenceType(RecurrenceType::YEARLY->value);
@@ -52,7 +52,7 @@ class SalesPerformanceMetricTest extends TestBase
     {
         return (new SalesPerformanceMetricData())
                 ->setDisplaySchema($this->displaySchema)
-                ->setMetricType($this->metricType)
+                ->setSalesPerformanceMetricType($this->metricType)
                 ->setName($this->name)
                 ->setRecurrenceCount($this->recurrenceCount)
                 ->setRecurrenceType($this->recurrenceType)
@@ -72,7 +72,7 @@ class SalesPerformanceMetricTest extends TestBase
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($salesPerformanceMetric->createdTime);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($salesPerformanceMetric->lastModifiedTime);
         $this->assertSame($this->name, $salesPerformanceMetric->name);
-        $this->assertSame(SalesPerformanceMetricType::from($this->metricType), $salesPerformanceMetric->metricType);
+        $this->assertSame(SalesPerformanceMetricType::from($this->metricType), $salesPerformanceMetric->salesPerformanceMetricType);
         $this->assertSame(RecurrenceType::from($this->recurrenceType), $salesPerformanceMetric->recurrenceType);
         $this->assertSame($this->recurrenceCount, $salesPerformanceMetric->recurrenceCount);
         $this->assertSame($this->displaySchema, $salesPerformanceMetric->displaySchema);
@@ -105,7 +105,7 @@ class SalesPerformanceMetricTest extends TestBase
     {
         $this->update();
         $this->assertSame($this->name, $this->salesPerformanceMetric->name);
-        $this->assertSame(SalesPerformanceMetricType::from($this->metricType), $this->salesPerformanceMetric->metricType);
+        $this->assertSame(SalesPerformanceMetricType::from($this->metricType), $this->salesPerformanceMetric->salesPerformanceMetricType);
         $this->assertSame(RecurrenceType::from($this->recurrenceType), $this->salesPerformanceMetric->recurrenceType);
         $this->assertSame($this->recurrenceCount, $this->salesPerformanceMetric->recurrenceCount);
         $this->assertSame($this->displaySchema, $this->salesPerformanceMetric->displaySchema);
@@ -175,7 +175,7 @@ class TestableSalesPerformanceMetric extends SalesPerformanceMetric
     public DateTimeImmutable $createdTime;
     public DateTimeImmutable $lastModifiedTime;
     public string $name;
-    public SalesPerformanceMetricType $metricType;
+    public SalesPerformanceMetricType $salesPerformanceMetricType;
     public RecurrenceType $recurrenceType;
     public ?int $recurrenceCount;
     public ?string $displaySchema;

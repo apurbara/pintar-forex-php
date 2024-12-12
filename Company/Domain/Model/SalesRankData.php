@@ -8,7 +8,8 @@ readonly class SalesRankData extends AbstractEntityMutationPayload
 {
 
     public ?string $name;
-    public ?string $metricType;
+    public ?string $salesRole;
+    public ?string $salesMetricType;
     public ?string $evaluationType;
     public ?string $recurrenceType;
     public ?int $displaySalesNumber;
@@ -21,9 +22,9 @@ readonly class SalesRankData extends AbstractEntityMutationPayload
         return $this;
     }
 
-    public function setMetricType(?string $metricType)
+    public function setSalesMetricType(?string $salesMetricType)
     {
-        $this->metricType = $metricType;
+        $this->salesMetricType = $salesMetricType;
         return $this;
     }
 
@@ -54,6 +55,12 @@ readonly class SalesRankData extends AbstractEntityMutationPayload
     public function setDisplaySchema(?string $displaySchema)
     {
         $this->displaySchema = $displaySchema;
+        return $this;
+    }
+
+    public function setSalesRole(?string $salesRole)
+    {
+        $this->salesRole = $salesRole;
         return $this;
     }
 }

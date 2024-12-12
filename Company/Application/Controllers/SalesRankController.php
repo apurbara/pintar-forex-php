@@ -33,7 +33,8 @@ class SalesRankController extends BaseController
                         ->setDisplaySalesNumber($input->get('displaySalesNumber'))
                         ->setDisplaySchema($input->get('displaySchema'))
                         ->setEvaluationType($input->get('evaluationType'))
-                        ->setMetricType($input->get('metricType'))
+                        ->setSalesMetricType($input->get('salesMetricType'))
+                        ->setSalesRole($input->get('salesRole'))
                         ->setName($input->get('name'))
                         ->setOrder($input->get('queryOrder'))
                         ->setRecurrenceType($input->get('recurrenceType'));

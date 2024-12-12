@@ -29,7 +29,7 @@ class CommonSalesMetricControllerTest extends CompanyControllerTestCase
         $this->commonSalesMetricPayload = [
             'displaySchema' => 'new display schema',
             'evaluationType' => EvaluationType::SUM->value,
-            'metricType' => MetricType::SALES_ACTIVITY_REPORT->value,
+            'metricType' => MetricType::GREETING_ACTIVITY_REPORT->value,
             'name' => 'new company metric name',
             'recurrenceCount' => 6,
             'recurrenceType' => RecurrenceType::MONTHLY->value,

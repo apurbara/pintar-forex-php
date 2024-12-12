@@ -25,7 +25,7 @@ class CreateSalesPerformanceMetricTest extends TaskInCompanyTestBase
                 ->setEvaluationType(EvaluationType::AVG->value);
         $this->payload = (new SalesPerformanceMetricData())
                 ->setDisplaySchema('display schema')
-                ->setMetricType(SalesPerformanceMetricType::APPROVED_CLOSING_REQUEST_COUNT->value)
+                ->setSalesPerformanceMetricType(SalesPerformanceMetricType::APPROVED_CLOSING_REQUEST_COUNT->value)
                 ->setName('name')
                 ->setRecurrenceCount(4)
                 ->setRecurrenceType(RecurrenceType::DAILY->value)

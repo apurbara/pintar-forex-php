@@ -28,7 +28,7 @@ class CompanyMetricTest extends TestBase
         $this->companyMetric->lastModifiedTime = new \DateTimeImmutable('-1 months');
         //
         $this->evaluationType = EvaluationType::SUM->value;
-        $this->metricType = MetricType::SALES_ACTIVITY_REPORT->value;
+        $this->metricType = MetricType::GREETING_ACTIVITY_REPORT->value;
         $this->recurrenceType = RecurrenceType::MONTHLY->value;
     }
     

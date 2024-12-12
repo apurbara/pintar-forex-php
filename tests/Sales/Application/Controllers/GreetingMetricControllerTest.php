@@ -61,7 +61,7 @@ class CommonSalesMetricSummaryControllerTest extends SalesControllerTestCase
         $this->commonSalesMetricOne->columns['recurrenceCount'] = 3;
         $this->commonSalesMetricTwo = new EntityRecord(CommonSalesMetric::class, 2);
         $this->commonSalesMetricTwo->columns['target'] = 222;
-        $this->commonSalesMetricTwo->columns['metricType'] = MetricType::SALES_ACTIVITY_REPORT->value;
+        $this->commonSalesMetricTwo->columns['metricType'] = MetricType::GREETING_ACTIVITY_REPORT->value;
         $this->commonSalesMetricTwo->columns['evaluationType'] = EvaluationType::COUNT->value;
         $this->commonSalesMetricTwo->columns['recurrenceType'] = RecurrenceType::MONTHLY->value;
         $this->commonSalesMetricTwo->columns['recurrenceCount'] = 3;

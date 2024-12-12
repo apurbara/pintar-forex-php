@@ -4,16 +4,17 @@ namespace Company\Domain\Model;
 
 use DateTimeImmutable;
 use Shared\Domain\Enum\EvaluationType;
-use Shared\Domain\Enum\MetricType;
 use Shared\Domain\Enum\QueryOrder;
 use Shared\Domain\Enum\RecurrenceType;
+use Shared\Domain\Enum\SalesMetricType;
+use Shared\Domain\Enum\SalesRole;
 use Tests\TestBase;
 
 class SalesRankTest extends TestBase
 {
 
     protected $salesRank;
-    protected $id = 'newId', $name = 'new name', $metricType, $evaluationType, $recurrenceType,
+    protected $id = 'newId', $name = 'new name', $salesRole, $salesMetricType, $evaluationType, $recurrenceType,
             $displaySalesNumber = 5, $order, $displaySchema = 'new display schema';
 
     protected function setUp(): void
@@ -23,14 +24,16 @@ class SalesRankTest extends TestBase
                 ->setDisplaySalesNumber(3)
                 ->setDisplaySchema('display schema')
                 ->setEvaluationType(EvaluationType::AVG->value)
-                ->setMetricType(MetricType::APPROVED_CLOSING_REQUEST->value)
+                ->setSalesRole(SalesRole::STRIKER->value)
+                ->setSalesMetricType(SalesMetricType::SUCCESSFULL_ASSIGNMENT->value)
                 ->setName('name')
                 ->setOrder(QueryOrder::ASC->value)
                 ->setRecurrenceType(RecurrenceType::DAILY->value);
         $this->salesRank = new TestableSalesRank('id', $data);
         $this->salesRank->lastModifiedTime = new DateTimeImmutable('-1 months');
         //
-        $this->metricType = MetricType::SALES_ACTIVITY_REPORT->value;
+        $this->salesRole = SalesRole::FACT_FINDER->value;
+        $this->salesMetricType = SalesMetricType::SALES_ACTIVITY->value;
         $this->evaluationType = EvaluationType::COUNT->value;
         $this->recurrenceType = RecurrenceType::MONTHLY->value;
         $this->order = QueryOrder::DESC->value;
@@ -43,7 +46,8 @@ class SalesRankTest extends TestBase
                         ->setDisplaySalesNumber($this->displaySalesNumber)
                         ->setDisplaySchema($this->displaySchema)
                         ->setEvaluationType($this->evaluationType)
-                        ->setMetricType($this->metricType)
+                        ->setSalesRole($this->salesRole)
+                        ->setSalesMetricType($this->salesMetricType)
                         ->setName($this->name)
                         ->setOrder($this->order)
                         ->setRecurrenceType($this->recurrenceType);
@@ -62,7 +66,8 @@ class SalesRankTest extends TestBase
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($salesRank->createdTime);
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($salesRank->lastModifiedTime);
         $this->assertSame($this->name, $salesRank->name);
-        $this->assertSame(MetricType::from($this->metricType), $salesRank->metricType);
+        $this->assertSame(SalesRole::from($this->salesRole), $salesRank->salesRole);
+        $this->assertSame(SalesMetricType::from($this->salesMetricType), $salesRank->salesMetricType);
         $this->assertSame(EvaluationType::from($this->evaluationType), $salesRank->evaluationType);
         $this->assertSame(RecurrenceType::from($this->recurrenceType), $salesRank->recurrenceType);
         $this->assertSame($this->displaySalesNumber, $salesRank->displaySalesNumber);
@@ -90,7 +95,8 @@ class SalesRankTest extends TestBase
         $this->update();
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($this->salesRank->lastModifiedTime);
         $this->assertSame($this->name, $this->salesRank->name);
-        $this->assertSame(MetricType::from($this->metricType), $this->salesRank->metricType);
+        $this->assertSame(SalesRole::from($this->salesRole), $this->salesRank->salesRole);
+        $this->assertSame(SalesMetricType::from($this->salesMetricType), $this->salesRank->salesMetricType);
         $this->assertSame(EvaluationType::from($this->evaluationType), $this->salesRank->evaluationType);
         $this->assertSame(RecurrenceType::from($this->recurrenceType), $this->salesRank->recurrenceType);
         $this->assertSame($this->displaySalesNumber, $this->salesRank->displaySalesNumber);
@@ -130,7 +136,8 @@ class TestableSalesRank extends SalesRank
     public DateTimeImmutable $createdTime;
     public DateTimeImmutable $lastModifiedTime;
     public string $name;
-    public MetricType $metricType;
+    public SalesRole $salesRole;
+    public SalesMetricType $salesMetricType;
     public EvaluationType $evaluationType;
     public RecurrenceType $recurrenceType;
     public int $displaySalesNumber;
