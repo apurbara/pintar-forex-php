@@ -52,7 +52,8 @@ class DoctrineStrikingAssignmentRepository extends DoctrineEntityRepository impl
                 ->andWhere($hasPendingClosingRequestSubquery->expr()->eq("ClosingRequest.status", "'{$pendingRequestStatus}'"));
         
         $qb = $this->createCoreQueryBuilder();
-        $qb->andWhere($qb->expr()->eq('StrikingAssignment.Sales_id', ":salesId"))
+        $qb->leftJoin('StrikingAssignment', 'Customer', 'Customer', 'StrikingAssignment.Customer_id = Customer.id')
+                ->andWhere($qb->expr()->eq('StrikingAssignment.Sales_id', ":salesId"))
                 ->setParameter('salesId', $salesId);
         
         foreach ($paginationSchema['filters'] ?? [] as $key =>  $filterSchema) {

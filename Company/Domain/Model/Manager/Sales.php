@@ -119,7 +119,7 @@ class Sales implements CompanyUser
         //
         $this->manager->assertActive();
         $this->city?->assertActive();
-
+        
         if ($this->role != SalesRole::from($data->role)) {
             $this->cancelAllActiveAssignments();
             $this->role = SalesRole::from($data->role);

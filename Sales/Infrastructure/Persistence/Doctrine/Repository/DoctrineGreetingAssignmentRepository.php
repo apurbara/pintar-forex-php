@@ -44,7 +44,8 @@ class DoctrineGreetingAssignmentRepository extends DoctrineEntityRepository impl
         
         
         $qb = $this->createCoreQueryBuilder();
-        $qb->andWhere($qb->expr()->eq('GreetingAssignment.Sales_id', ":salesId"))
+        $qb->leftJoin('GreetingAssignment', 'Customer', 'Customer', 'GreetingAssignment.Customer_id = Customer.id')
+                ->andWhere($qb->expr()->eq('GreetingAssignment.Sales_id', ":salesId"))
                 ->setParameter('salesId', $salesId);
         
         foreach ($paginationSchema['filters'] ?? [] as $key =>  $filterSchema) {

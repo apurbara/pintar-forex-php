@@ -45,7 +45,8 @@ class DoctrineFactFindingAssignmentRepository extends DoctrineEntityRepository i
         
         
         $qb = $this->createCoreQueryBuilder();
-        $qb->andWhere($qb->expr()->eq('FactFindingAssignment.Sales_id', ":salesId"))
+        $qb->leftJoin('FactFindingAssignment', 'Customer', 'Customer', 'FactFindingAssignment.Customer_id = Customer.id')
+                ->andWhere($qb->expr()->eq('FactFindingAssignment.Sales_id', ":salesId"))
                 ->setParameter('salesId', $salesId);
         
         foreach ($paginationSchema['filters'] ?? [] as $key =>  $filterSchema) {
