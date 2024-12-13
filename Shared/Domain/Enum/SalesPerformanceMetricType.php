@@ -86,6 +86,7 @@ enum SalesPerformanceMetricType: string
                 ->from('Sales')
                 ->leftJoin('Sales', 'GreetingAssignment', 'GreetingAssignment', 'GreetingAssignment.Sales_id = Sales.id')
                 ->leftJoin('GreetingAssignment', 'CustomerAssignment', 'CustomerAssignment', 'GreetingAssignment.CustomerAssignment_id = CustomerAssignment.id')
+                ->andWhere($qb->expr()->eq('GreetingAssignment.status', "'{$successfullGreetingStatus}'"))
                 ->addGroupBy('Sales.id');
         $recurrenceType->applyToQuery($qb, 'CustomerAssignment.completedTime', $recurrenceCount);
     }
@@ -99,6 +100,7 @@ enum SalesPerformanceMetricType: string
                 ->from('Sales')
                 ->leftJoin('Sales', 'FactFindingAssignment', 'FactFindingAssignment', 'FactFindingAssignment.Sales_id = Sales.id')
                 ->leftJoin('FactFindingAssignment', 'CustomerAssignment', 'CustomerAssignment', 'FactFindingAssignment.CustomerAssignment_id = CustomerAssignment.id')
+                ->andWhere($qb->expr()->eq('FactFindingAssignment.status', "'{$successfullGreetingStatus}'"))
                 ->addGroupBy('Sales.id');
         $recurrenceType->applyToQuery($qb, 'CustomerAssignment.completedTime', $recurrenceCount);
     }
