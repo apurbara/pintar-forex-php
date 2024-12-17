@@ -59,7 +59,7 @@ class GreetingAssignment
         $this->sales->assertActive();
         $this->sales->assertRoleEquals(SalesRole::GREETER);
         $this->customer->assertHasNoActiveAssignment();
-        $this->customer->assertStatusEquals(CustomerStatus::NEW);
+        $this->customer->assertStatusIn([CustomerStatus::NEW, CustomerStatus::RECYCLED]);
     }
 
     public function cancel(): void

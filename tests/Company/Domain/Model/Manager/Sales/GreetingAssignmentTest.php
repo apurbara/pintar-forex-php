@@ -65,11 +65,11 @@ class GreetingAssignmentTest extends TestBase
                 ->method('assertHasNoActiveAssignment');
         $this->construct();
     }
-    public function test_construct_assertCustomerStatusEqualsNew()
+    public function test_construct_assertCustomerStatusWithinNewOnRecycleStatus()
     {
         $this->customer->expects($this->once())
-                ->method('assertStatusEquals')
-                ->with(CustomerStatus::NEW);
+                ->method('assertStatusIn')
+                ->with([CustomerStatus::NEW, CustomerStatus::RECYCLED]);
         $this->construct();
     }
     

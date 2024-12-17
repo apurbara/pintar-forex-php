@@ -23,6 +23,7 @@ class CustomerTest extends TestBase
     protected MockObject $greetingAssignment, $factFindingAssignment, $strikingAssignment;
     //
     protected $id = 'newId', $name = 'new name', $phone = '0823123131', $email = 'newAddress@email.org', $source = 'new source';
+    protected $statusList;
 
     protected function setUp(): void
     {
@@ -46,6 +47,11 @@ class CustomerTest extends TestBase
         $this->strikingAssignment = $this->buildMockOfClass(StrikingAssignment::class);
         $this->customer->strikingAssignments = new ArrayCollection();
         $this->customer->strikingAssignments->add($this->strikingAssignment);
+        
+        $this->statusList = [
+            CustomerStatus::NEW,
+            CustomerStatus::RECYCLED,
+        ];
     }
 
     //
@@ -151,6 +157,22 @@ class CustomerTest extends TestBase
     public function test_assertStatusEquals_samesStatus_void()
     {
         $this->assertStatusEquals();
+        $this->markAsSuccess();
+    }
+    
+    //
+    protected function assertStatusIn()
+    {
+        $this->customer->assertStatusIn($this->statusList);
+    }
+    public function test_assertStatusIn_statusNotInList_forbidden()
+    {
+        $this->customer->status = CustomerStatus::STRIKING_REQUIRED;
+        $this->assertRegularExceptionThrowed(fn() => $this->assertStatusIn(), 'Forbidden', 'invalid customer status');
+    }
+    public function test_assertStatusIN_statusInList_void()
+    {
+        $this->assertStatusIn();
         $this->markAsSuccess();
     }
 }

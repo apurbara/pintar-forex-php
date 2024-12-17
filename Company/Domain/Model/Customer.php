@@ -148,4 +148,16 @@ class Customer
             throw RegularException::forbidden('unmatch customer status');
         }
     }
+    
+    /**
+     * 
+     * @param CustomerStatus[] $statuses
+     * @return void
+     */
+    public function assertStatusIn(array $statusList): void
+    {
+        if (!in_array($this->status, $statusList)) {
+            throw RegularException::forbidden('invalid customer status');
+        }
+    }
 }
