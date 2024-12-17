@@ -100,7 +100,7 @@ enum SalesPerformanceMetricType: string
                 ->from('Sales')
                 ->leftJoin('Sales', 'FactFindingAssignment', 'FactFindingAssignment', 'FactFindingAssignment.Sales_id = Sales.id')
                 ->leftJoin('FactFindingAssignment', 'CustomerAssignment', 'CustomerAssignment', 'FactFindingAssignment.CustomerAssignment_id = CustomerAssignment.id')
-                ->andWhere($qb->expr()->eq('FactFindingAssignment.status', "'{$successfullGreetingStatus}'"))
+                ->andWhere($qb->expr()->eq('FactFindingAssignment.status', "'{$successfullFactFindingStatus}'"))
                 ->addGroupBy('Sales.id');
         $recurrenceType->applyToQuery($qb, 'CustomerAssignment.completedTime', $recurrenceCount);
     }
