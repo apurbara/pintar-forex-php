@@ -143,6 +143,15 @@ _QUERY;
             'CustomerJourney_id' => $this->customerJourneyOne->columns['id'],
         ]);
     }
+    public function test_updateJourney_addCustomerAssignmentJourney()
+    {
+        $this->updateJourney();
+        $this->seeStatusCode(200);
+        $this->seeInDatabase('CustomerAssignmentJourney', [
+            'CustomerAssignment_id' => $this->customerAssignmentOne->columns['id'],
+            'CustomerJourney_id' => $this->customerJourneyOne->columns['id'],
+        ]);
+    }
 
     //
     protected function updateCustomerBio()

@@ -3,9 +3,10 @@
 namespace Company\Domain\Task\CustomerAssignment;
 
 use Company\Domain\Model\AdminTaskInCompany;
+use Company\Domain\Model\ManagerTaskInCompany;
 use Resources\Domain\TaskPayload\ViewDetailPayload;
 
-class ViewCustomerAssignmentDetail implements AdminTaskInCompany
+class ViewCustomerAssignmentDetail implements AdminTaskInCompany, ManagerTaskInCompany
 {
 
     public function __construct(protected CustomerAssignmentRepository $assignedCustomerRepository)

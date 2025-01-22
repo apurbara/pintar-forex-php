@@ -35,10 +35,10 @@ class CustomerAssignmentJourney
     
     public function __construct(CustomerAssignment $customerAssignment, CustomerJourney $customerJourney, string $id)
     {
-//        $this->customerAssignment = $customerAssignment;
-//        $this->customerJourney = $customerJourney;
-//        $this->id = $id;
-//        $this->createdTime = $createdTime;
+        $this->customerAssignment = $customerAssignment;
+        $this->customerJourney = $customerJourney;
+        $this->id = $id;
+        $this->createdTime = new \DateTimeImmutable();
     }
 
 }

@@ -36,6 +36,7 @@ class CustomerAssignmentControllerTest extends CompanyControllerTestCase
         $this->connection->table('Sales')->truncate();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('CustomerAssignmentJourney')->truncate();
         $this->connection->table('CustomerJourney')->truncate();
         $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('SalesActivitySchedule')->truncate();
@@ -90,6 +91,7 @@ class CustomerAssignmentControllerTest extends CompanyControllerTestCase
         $this->connection->table('Sales')->truncate();
         $this->connection->table('Customer')->truncate();
         $this->connection->table('CustomerAssignment')->truncate();
+        $this->connection->table('CustomerAssignmentJourney')->truncate();
         $this->connection->table('CustomerJourney')->truncate();
         $this->connection->table('SalesActivity')->truncate();
         $this->connection->table('SalesActivitySchedule')->truncate();
@@ -174,7 +176,7 @@ $this->disableExceptionHandling();
     //
     protected function customerAssignmentDetail()
     {
-        $this->prepareManagerDependency();
+        $this->prepareAdminDependency();
         $this->customerOne->insert($this->connection);
         $this->salesOne->insert($this->connection);
         
@@ -192,7 +194,7 @@ _QUERY;
         $this->graphqlVariables = [
             'id' => $this->customerAssignment_11->columns['id'],
         ];
-        $this->postGraphqlRequest($this->manager->token);
+        $this->postGraphqlRequest($this->admin->token);
     }
     public function test_customerAssignmentDetail_200()
     {
@@ -214,7 +216,7 @@ _QUERY;
     //
     protected function customerAssignmentList()
     {
-        $this->prepareManagerDependency();
+        $this->prepareAdminDependency();
         $this->customerJourneyInitial->insert($this->connection);
         
         $this->customerOne->insert($this->connection);
@@ -241,7 +243,7 @@ query ( $filters: [FilterInput] ) {
 }
 _QUERY;
         $this->graphqlVariables = $this->getPaginationInput();
-        $this->postGraphqlRequest($this->manager->token);
+        $this->postGraphqlRequest($this->admin->token);
     }
     public function test_customerAssignmentList_200()
     {
@@ -297,7 +299,7 @@ _QUERY;
     //
     protected function viewCustomerAssignmentCount()
     {
-        $this->prepareManagerDependency();
+        $this->prepareAdminDependency();
         $this->customerOne->insert($this->connection);
         $this->customerTwo->insert($this->connection);
         $this->customerThree->insert($this->connection);
@@ -315,7 +317,7 @@ query ($filters: [FilterInput]) {
 }
 _QUERY;
         $this->graphqlVariables = $this->getPaginationInput();
-        $this->postGraphqlRequest($this->manager->token);
+        $this->postGraphqlRequest($this->admin->token);
     }
     public function test_viewCustomerAssignmentCount_200()
     {
