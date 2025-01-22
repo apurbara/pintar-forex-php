@@ -15,6 +15,7 @@ use Manager\Domain\DependencyModel\CustomerJourney;
 use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
+use Manager\Domain\Model\Manager\Sales\CustomerAssignment\CustomerAssignmentJourney;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment\RecycleRequest;
 use Manager\Domain\Model\Manager\Sales\CustomerAssignment\SalesActivitySchedule;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
@@ -69,6 +70,10 @@ class CustomerAssignment implements ContainEventsInterface
     #[FetchableObjectList(targetEntity: SalesActivitySchedule::class, joinColumnName: "CustomerAssignment_id",
                 paginationRequired: false)]
     protected $salesActivitySchedules;
+    
+    #[FetchableObjectList(targetEntity: CustomerAssignmentJourney::class, joinColumnName: "CustomerAssignment_id",
+                paginationRequired: false)]
+    protected $customerAssignmentJourneys;
 
     public function getStatus(): CustomerAssignmentStatus
     {

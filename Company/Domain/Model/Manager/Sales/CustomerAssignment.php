@@ -6,10 +6,12 @@ use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Manager\Sales;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Manager\Sales\CustomerAssignment\CustomerAssignmentJourney;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\SalesActivitySchedule;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignmentRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
@@ -23,6 +25,7 @@ use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
+use Resources\Uuid;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\ManagementApprovalStatus;
 use Shared\Domain\Enum\SalesActivityScheduleStatus;
@@ -72,6 +75,12 @@ class CustomerAssignment implements ContainEventsInterface
     #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "customerAssignment", fetch: "EXTRA_LAZY")]
     protected Collection $salesActivitySchedules;
 
+    #[FetchableObjectList(targetEntity: CustomerAssignmentJourney::class, joinColumnName: "CustomerAssignment_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: CustomerAssignmentJourney::class, mappedBy: "customerAssignment", cascade: ["persist"],
+                fetch: "EXTRA_LAZY")]
+    protected Collection $customerAssignmentJourneys;
+
     public function getStatus(): CustomerAssignmentStatus
     {
         return $this->status;
@@ -89,6 +98,12 @@ class CustomerAssignment implements ContainEventsInterface
         $this->sales->assertActive();
         $this->customer->assertHasNoActiveAssignment();
         $this->customerJourney?->assertActive();
+        
+        $this->customerAssignmentJourneys = new ArrayCollection();
+        if (isset($customerJourney)) {
+            $customerAssignmentJourney = new CustomerAssignmentJourney($this, $customerJourney, Uuid::generateUuid4());
+            $this->customerAssignmentJourneys->add($customerAssignmentJourney);
+        }
     }
 
     public function cancel(): void
@@ -97,9 +112,7 @@ class CustomerAssignment implements ContainEventsInterface
                 ->andWhere(Criteria::expr()->eq('status', ManagementApprovalStatus::WAITING_FOR_APPROVAL));
         $scheduledActivityCriteria = Criteria::create()
                 ->andWhere(Criteria::expr()->eq('status', SalesActivityScheduleStatus::SCHEDULED));
-        $hasPendingRequestOrSchedule = !$this->closingRequests->matching($pendingRequestCriteria)->isEmpty() 
-                || !$this->recycleRequests->matching($pendingRequestCriteria)->isEmpty() 
-                || !$this->salesActivitySchedules->matching($scheduledActivityCriteria)->isEmpty();
+        $hasPendingRequestOrSchedule = !$this->closingRequests->matching($pendingRequestCriteria)->isEmpty() || !$this->recycleRequests->matching($pendingRequestCriteria)->isEmpty() || !$this->salesActivitySchedules->matching($scheduledActivityCriteria)->isEmpty();
         if ($hasPendingRequestOrSchedule) {
             throw RegularException::forbidden('customer assignment has pending request or schedule');
         }

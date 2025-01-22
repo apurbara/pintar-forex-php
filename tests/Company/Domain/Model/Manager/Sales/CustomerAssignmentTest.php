@@ -6,6 +6,7 @@ use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Manager\Sales;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\ClosingRequest;
+use Company\Domain\Model\Manager\Sales\CustomerAssignment\CustomerAssignmentJourney;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\RecycleRequest;
 use Company\Domain\Model\Manager\Sales\CustomerAssignment\SalesActivitySchedule;
 use DateTimeImmutable;
@@ -88,6 +89,12 @@ class CustomerAssignmentTest extends TestBase
         $this->customerJourney = null;
         $this->construct();
         $this->markAsSuccess();
+    }
+    public function test_construct_addCustomerAssignmentJourney()
+    {
+        $assignment = $this->construct();
+        $this->assertEquals(1, $assignment->customerAssignmentJourneys->count());
+        $this->assertInstanceOf(CustomerAssignmentJourney::class, $assignment->customerAssignmentJourneys->first());
     }
     
     //
@@ -208,4 +215,5 @@ class TestableCustomerAssignment extends CustomerAssignment
     public Collection $closingRequests;
     public Collection $recycleRequests;
     public Collection $salesActivitySchedules;
+    public Collection $customerAssignmentJourneys;
 }

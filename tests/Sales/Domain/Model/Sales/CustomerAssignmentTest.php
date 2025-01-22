@@ -15,6 +15,7 @@ use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
 use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
+use Sales\Domain\Model\Sales\CustomerAssignment\CustomerAssignmentJourney;
 use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
 use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -121,6 +122,13 @@ class CustomerAssignmentTest extends TestBase
                 ->method('assertActive');
         $this->construct();
     }
+    public function test_construct_addJourney()
+    {
+        $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        $customerAssignment = $this->construct();
+        $this->assertEquals(1, $customerAssignment->customerAssignmentJourneys->count());
+        $this->assertInstanceOf(CustomerAssignmentJourney::class, $customerAssignment->customerAssignmentJourneys->first());
+    }
     
     //
     protected function updateCustomer()
@@ -155,6 +163,13 @@ class CustomerAssignmentTest extends TestBase
         $this->customerJourney->expects($this->once())
                 ->method('assertActive');
         $this->updateJourney();
+    }
+    public function test_updateJourney_addCustomerAssignmentJourney()
+    {
+        $this->assertEquals(1, $this->customerAssignment->customerAssignmentJourneys->count());
+        $this->updateJourney();
+        $this->assertEquals(2, $this->customerAssignment->customerAssignmentJourneys->count());
+        $this->assertInstanceOf(CustomerAssignmentJourney::class, $this->customerAssignment->customerAssignmentJourneys->last());
     }
     
     //
@@ -344,4 +359,5 @@ class TestableCustomerAssignment extends CustomerAssignment
     public Collection $recycleRequests;
     public $recordedEvents = [];
     public Collection $salesActivitySchedules;
+    public Collection $customerAssignmentJourneys;
 }

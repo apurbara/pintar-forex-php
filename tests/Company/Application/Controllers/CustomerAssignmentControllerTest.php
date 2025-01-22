@@ -135,6 +135,9 @@ $this->disableExceptionHandling();
             'Customer_id' => $this->customerOne->columns['id'],
             'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
         ]);
+        $this->seeInDatabase('CustomerAssignmentJourney', [
+            'CustomerJourney_id' => $this->customerJourneyInitial->columns['id'],
+        ]);
         
         $this->seeInDatabase('CustomerAssignment', [
             'Sales_id' => $this->salesOne->columns['id'],

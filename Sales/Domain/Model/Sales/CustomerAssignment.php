@@ -31,6 +31,7 @@ use Sales\Domain\DependencyModel\SalesActivity;
 use Sales\Domain\Model\Sales;
 use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequest;
 use Sales\Domain\Model\Sales\CustomerAssignment\ClosingRequestData;
+use Sales\Domain\Model\Sales\CustomerAssignment\CustomerAssignmentJourney;
 use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequest;
 use Sales\Domain\Model\Sales\CustomerAssignment\RecycleRequestData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
@@ -87,6 +88,11 @@ class CustomerAssignment implements ContainEventsInterface
     #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "customerAssignment", cascade: ["persist"],
                 fetch: 'EXTRA_LAZY')]
     protected Collection $salesActivitySchedules;
+    
+    #[FetchableObjectList(targetEntity: CustomerAssignmentJourney::class, joinColumnName: "CustomerAssignment_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: CustomerAssignmentJourney::class, mappedBy: "customerAssignment", cascade: ["persist"], fetch: "EXTRA_LAZY")]
+    protected Collection $customerAssignmentJourneys;
 
     public function getStatus(): CustomerAssignmentStatus
     {
@@ -106,6 +112,12 @@ class CustomerAssignment implements ContainEventsInterface
         $this->customerJourney?->assertActive();
         //
         $this->salesActivitySchedules = new ArrayCollection();
+        $this->customerAssignmentJourneys = new ArrayCollection();
+        
+        if (isset($customerJourney)) {
+            $customerAssignmentJourney = new CustomerAssignmentJourney($this, $customerJourney, Uuid::generateUuid4());
+            $this->customerAssignmentJourneys->add($customerAssignmentJourney);
+        }
 
         $this->recordEvent(new CustomerAssignedEvent($this->id));
     }
@@ -114,6 +126,9 @@ class CustomerAssignment implements ContainEventsInterface
     {
         $customerJourney->assertActive();
         $this->customerJourney = $customerJourney;
+        
+        $customerJourneyJourney = new CustomerAssignmentJourney($this, $customerJourney, Uuid::generateUuid4());
+        $this->customerAssignmentJourneys->add($customerJourneyJourney);
     }
 
     public function updateCustomer(City $city, CustomerData $customerData): void
