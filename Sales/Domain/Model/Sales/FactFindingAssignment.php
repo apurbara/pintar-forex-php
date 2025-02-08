@@ -3,17 +3,20 @@
 namespace Sales\Domain\Model\Sales;
 
 use Company\Domain\Model\Manager\Sales as Sales2;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Resources\Attributes\Composed;
 use Resources\Event\ContainEventsInterface;
 use Resources\Event\ContainEventsTrait;
 use Resources\Exception\RegularException;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Sales\Domain\DependencyModel\Customer;
 use Sales\Domain\DependencyModel\Customer\VerificationReportData;
 use Sales\Domain\DependencyModel\CustomerData;
@@ -26,6 +29,7 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReport;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivityScheduleData;
+use Sales\Domain\Model\Sales\FactFindingAssignment\ClosingRequestByFactFinder;
 use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineFactFindingAssignmentRepository;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 
@@ -54,6 +58,12 @@ class FactFindingAssignment implements ContainEventsInterface, ContainCustomerAs
     #[OneToOne(targetEntity: CustomerAssignment::class, inversedBy: "factFindingAssignment", cascade: ["persist"])]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
     protected CustomerAssignment $customerAssignment;
+    
+    //
+    #[FetchableObjectList(targetEntity: ClosingRequestByFactFinder::class, joinColumnName: "FactFindingAssignment_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: ClosingRequestByFactFinder::class, mappedBy: "factFindingAssignment", fetch: "EXTRA_LAZY")]
+    protected Collection $closingRequestByFactFinders;
 
     protected function __construct()
     {

@@ -7,10 +7,12 @@ use Manager\Domain\DependencyModel\CustomerJourney;
 use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales;
 use Manager\Domain\Model\Manager\Sales\FactFindingAssignment;
+use Manager\Domain\Model\Manager\Sales\FactFindingAssignment\ClosingRequestByFactFinder;
 use Manager\Domain\Model\Manager\Sales\GreetingAssignment;
 use Manager\Domain\Model\Manager\Sales\StrikingAssignment;
 use Manager\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequest;
 use Manager\Domain\Task\ClosingRequest\ClosingRequestRepository;
+use Manager\Domain\Task\ClosingRequestByFactFinder\ClosingRequestByFactFinderRepository;
 use Manager\Domain\Task\Dependency\CustomerJourneyRepository;
 use Manager\Domain\Task\Dependency\CustomerRepository;
 use Manager\Domain\Task\FactFindingAssignment\FactFindingAssignmentRepository;
@@ -65,6 +67,19 @@ class ManagerTaskTestBase extends TestBase
                 ->method('ofId')
                 ->with($this->closingRequestId)
                 ->willReturn($this->closingRequest);
+    }
+
+    //
+    protected MockObject $closingRequestByFactFinderRepository, $closingRequestByFactFinder;
+    protected string $closingRequestByFactFinderId = 'closingRequestByFactFinderId';
+    protected function prepareClosingRequestByFactFinderDependency(): void
+    {
+        $this->closingRequestByFactFinderRepository = $this->buildMockOfInterface(ClosingRequestByFactFinderRepository::class);
+        $this->closingRequestByFactFinder = $this->buildMockOfClass(ClosingRequestByFactFinder::class);
+        $this->closingRequestByFactFinderRepository->expects($this->any())
+                ->method('ofId')
+                ->with($this->closingRequestByFactFinderId)
+                ->willReturn($this->closingRequestByFactFinder);
     }
     
     protected MockObject $greetingAssignmentRepository, $greetingAssignment;

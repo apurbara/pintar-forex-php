@@ -4,6 +4,7 @@ namespace Manager\Application\GraphQL;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use Manager\Application\Controllers\ClosingRequestByFactFinderController;
 use Manager\Application\Controllers\ClosingRequestController;
 use Manager\Application\Controllers\FactFindingAssignmentController;
 use Manager\Application\Controllers\GreetingAssignmentController;
@@ -33,6 +34,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(FactFindingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(StrikingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestByFactFinderController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesController::class),
             ...$this->customerAssignmentQuery(),
         ];

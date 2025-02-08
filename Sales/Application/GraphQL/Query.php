@@ -10,8 +10,8 @@ use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\InputListSchema;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
+use Sales\Application\Controllers\ClosingRequestByFactFinderController;
 use Sales\Application\Controllers\ClosingRequestController;
-use Sales\Application\Controllers\CustomerAssignmentController;
 use Sales\Application\Controllers\FactFindingAssignmentController;
 use Sales\Application\Controllers\GreetingAssignmentController;
 use Sales\Application\Controllers\SalesActivityReportController;
@@ -39,6 +39,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(FactFindingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(StrikingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(ClosingRequestByFactFinderController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityReportController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityScheduleController::class),
             ...$this->salesActivityScheduleCustomQuery(),

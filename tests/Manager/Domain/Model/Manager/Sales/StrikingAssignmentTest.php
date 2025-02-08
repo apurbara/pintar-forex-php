@@ -112,6 +112,13 @@ class StrikingAssignmentTest extends TestBase
                 ->method('completeAssignment');
         $this->closeAssignment();
     }
+    public function test_closeAssignment_updateCustomerStatusToGoodFund()
+    {
+        $this->customer->expects($this->once())
+                ->method('updateStatus')
+                ->with(CustomerStatus::GOOD_FUND);
+        $this->closeAssignment();
+    }
     
     //
     protected function belongsToManager()

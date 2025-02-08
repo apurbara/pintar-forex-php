@@ -55,7 +55,7 @@ class StrikingAssignment implements ContainEventsInterface
 
     #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "StrikingAssignment_id",
                 paginationRequired: false)]
-    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "customerAssignment", fetch: "EXTRA_LAZY")]
+    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "strikingAssignment", fetch: "EXTRA_LAZY")]
     protected Collection $closingRequests;
 
     #[FetchableObject(targetEntity: CustomerJourney::class, joinColumnName: "CustomerJourney_id")]
@@ -88,6 +88,7 @@ class StrikingAssignment implements ContainEventsInterface
     {
         $this->status = CustomerAssignmentStatus::COMPLETED;
         $this->customerAssignment->completeAssignment();
+        $this->customer->updateStatus(CustomerStatus::GOOD_FUND);
         
         $event = new NegotiationClosed($this->id);
         $this->recordEvent($event);

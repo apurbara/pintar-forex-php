@@ -51,7 +51,7 @@ class StrikingAssignment
 
     #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "StrikingAssignment_id",
                 paginationRequired: false)]
-    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "customerAssignment", fetch: "EXTRA_LAZY")]
+    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "strikingAssignment", fetch: "EXTRA_LAZY")]
     protected Collection $closingRequests;
 
     #[FetchableObject(targetEntity: CustomerJourney::class, joinColumnName: "CustomerJourney_id")]

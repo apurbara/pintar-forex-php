@@ -3,6 +3,7 @@
 namespace Manager\Domain\Model\Manager\Sales;
 
 use Manager\Domain\DependencyModel\Customer;
+use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
@@ -15,6 +16,8 @@ class FactFindingAssignmentTest extends TestBase
     protected $factFindingAssignment, $assignment;
     //
     protected $id = 'newId';
+    //
+    protected $manager;
     
     protected function setUp(): void
     {
@@ -25,6 +28,8 @@ class FactFindingAssignmentTest extends TestBase
         $this->factFindingAssignment = new TestableFactFindingAssignment($this->sales, $this->customer, 'id');
         $this->assignment = $this->buildMockOfClass(CustomerAssignment::class);
         $this->factFindingAssignment->customerAssignment = $this->assignment;
+        //
+        $this->manager = $this->buildMockOfClass(Manager::class);
     }
     
     //
@@ -66,6 +71,44 @@ class FactFindingAssignmentTest extends TestBase
                 ->method('assertStatusEquals')
                 ->with(CustomerStatus::FACT_FINDING_REQUIRED);
         $this->construct();
+    }
+    
+    //
+    protected function closeAssignment()
+    {
+        $this->factFindingAssignment->closeAssignment();
+    }
+    public function test_closeAssignment_setAssignmentCompleted()
+    {
+        $this->closeAssignment();
+        $this->assertEquals(CustomerAssignmentStatus::COMPLETED, $this->factFindingAssignment->status);
+    }
+    public function test_closeAssignment_completeAssignment()
+    {
+        $this->assignment->expects($this->once())
+                ->method('completeAssignment');
+        $this->closeAssignment();
+    }
+    public function test_closeAssignment_updateCustomerStatus()
+    {
+        $this->customer->expects($this->once())
+                ->method('updateStatus')
+                ->with(CustomerStatus::TRANSACTION_BY_FACT_FINDER);
+        $this->closeAssignment();
+    }
+    
+    //
+    protected function belongsToManager()
+    {
+        return $this->factFindingAssignment->belongsToManager($this->manager);
+    }
+    public function test_belongsToManager_returnSalesComparisonResult()
+    {
+        $this->sales->expects($this->once())
+                ->method('belongsToManager')
+                ->with($this->manager)
+                ->willReturn(true);
+        $this->assertTrue($this->belongsToManager());
     }
     
 }

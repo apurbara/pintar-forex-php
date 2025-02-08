@@ -2,17 +2,22 @@
 
 namespace Manager\Domain\Model\Manager\Sales;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Manager\Domain\DependencyModel\Customer;
+use Manager\Domain\Model\Manager;
 use Manager\Domain\Model\Manager\Sales;
+use Manager\Domain\Model\Manager\Sales\FactFindingAssignment\ClosingRequestByFactFinder;
 use Manager\Infrastructure\Persistence\Doctrine\Repository\DoctrineFactFindingAssignmentRepository;
 use Resources\Attributes\Composed;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
 use Shared\Domain\Enum\SalesRole;
@@ -41,6 +46,12 @@ class FactFindingAssignment
     #[OneToOne(targetEntity: CustomerAssignment::class, cascade: ["persist"])]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
     protected CustomerAssignment $customerAssignment;
+    
+    //
+    #[FetchableObjectList(targetEntity: ClosingRequestByFactFinder::class, joinColumnName: "FactFindingAssignment_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: ClosingRequestByFactFinder::class, mappedBy: "factFindingAssignment", fetch: "EXTRA_LAZY")]
+    protected Collection $closingRequestByFactFinders;
 
     public function getStatus(): CustomerAssignmentStatus
     {
@@ -59,5 +70,18 @@ class FactFindingAssignment
         $this->sales->assertRoleEquals(SalesRole::FACT_FINDER);
         $this->customer->assertHasNoActiveAssignment();
         $this->customer->assertStatusEquals(CustomerStatus::FACT_FINDING_REQUIRED);
+    }
+    
+    //
+    public function closeAssignment(): void
+    {
+        $this->customerAssignment->completeAssignment();
+        $this->customer->updateStatus(CustomerStatus::TRANSACTION_BY_FACT_FINDER);
+        $this->status = CustomerAssignmentStatus::COMPLETED;
+    }
+    
+    public function belongsToManager(Manager $manager): bool
+    {
+        return $this->sales->belongsToManager($manager);
     }
 }

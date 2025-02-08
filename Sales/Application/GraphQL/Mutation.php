@@ -11,6 +11,7 @@ use Resources\Infrastructure\GraphQL\DoctrineEntityToGraphqlFieldMapper;
 use Resources\Infrastructure\GraphQL\GraphqlInputRequest;
 use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Sales\Application\Controllers\AccountController;
+use Sales\Application\Controllers\ClosingRequestByFactFinderController;
 use Sales\Application\Controllers\ClosingRequestController;
 use Sales\Application\Controllers\FactFindingAssignmentController;
 use Sales\Application\Controllers\GreetingAssignmentController;
@@ -44,6 +45,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(FactFindingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(StrikingAssignmentController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestByFactFinderController::class),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityReportController::class),
             ...$this->submitNonScheduleActivityReport(),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(SalesActivityScheduleController::class),

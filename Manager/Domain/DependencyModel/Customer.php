@@ -87,6 +87,11 @@ class Customer
     {
         
     }
+    
+    public function updateStatus(CustomerStatus $status): void
+    {
+        $this->status = $status;
+    }
 
     //
     public function assertHasNoActiveAssignment(): void

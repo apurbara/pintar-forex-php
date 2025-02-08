@@ -33,11 +33,6 @@ class CustomerAssignment
     #[OneToMany(targetEntity: SalesActivitySchedule::class, mappedBy: "customerAssignment", fetch: "EXTRA_LAZY")]
     protected Collection $salesActivitySchedules;
 
-    public function getStatus(): CustomerAssignmentStatus
-    {
-        return $this->status;
-    }
-
     public function __construct(string $id)
     {
         $this->id = $id;

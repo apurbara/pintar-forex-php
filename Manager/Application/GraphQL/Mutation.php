@@ -5,6 +5,7 @@ namespace Manager\Application\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Manager\Application\Controllers\AccountController;
+use Manager\Application\Controllers\ClosingRequestByFactFinderController;
 use Manager\Application\Controllers\ClosingRequestController;
 use Manager\Application\Controllers\FactFindingAssignmentController;
 use Manager\Application\Controllers\GreetingAssignmentController;
@@ -36,6 +37,7 @@ class Mutation extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(AccountController::class),
             ...$this->customerAssignmentMutation(),
             ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestController::class),
+            ...ControllerToGraphqlFieldsMapper::mapMutationFields(ClosingRequestByFactFinderController::class),
         ];
     }
 

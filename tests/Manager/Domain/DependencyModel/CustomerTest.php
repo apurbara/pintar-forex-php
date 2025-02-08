@@ -18,6 +18,7 @@ class CustomerTest extends TestBase
     protected MockObject $greetingAssignment, $factFindingAssignment, $strikingAssignment;
     //
     protected $id = 'newId', $name = 'new name', $phone = '0823123131', $email = 'newAddress@email.org', $source = 'new source';
+    protected $status = CustomerStatus::GOOD_FUND;
 
     protected function setUp(): void
     {
@@ -37,6 +38,17 @@ class CustomerTest extends TestBase
         $this->customer->strikingAssignments = new ArrayCollection();
         $this->customer->strikingAssignments->add($this->strikingAssignment);
         
+    }
+    
+    //
+    protected function updateStatus()
+    {
+        $this->customer->updateStatus($this->status);
+    }
+    public function test_updateStatus_updateStatus()
+    {
+        $this->updateStatus();
+        $this->assertEquals($this->status, $this->customer->status);
     }
     
     //

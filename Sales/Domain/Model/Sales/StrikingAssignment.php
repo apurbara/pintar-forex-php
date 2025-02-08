@@ -59,7 +59,7 @@ class StrikingAssignment implements ContainCustomerAssignmentInterface
 
     #[FetchableObjectList(targetEntity: ClosingRequest::class, joinColumnName: "StrikingAssignment_id",
                 paginationRequired: false)]
-    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "customerAssignment", fetch: "EXTRA_LAZY")]
+    #[OneToMany(targetEntity: ClosingRequest::class, mappedBy: "strikingAssignment", fetch: "EXTRA_LAZY")]
     protected Collection $closingRequests;
 
     #[FetchableObject(targetEntity: CustomerJourney2::class, joinColumnName: "CustomerJourney_id")]

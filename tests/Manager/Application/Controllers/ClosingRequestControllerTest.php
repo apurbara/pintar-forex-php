@@ -8,6 +8,7 @@ use Company\Domain\Model\Manager\Sales\CustomerAssignment;
 use Company\Domain\Model\Manager\Sales\StrikingAssignment;
 use Company\Domain\Model\Manager\Sales\StrikingAssignment\ClosingRequest;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
+use Shared\Domain\Enum\CustomerStatus;
 use Shared\Domain\Enum\ManagementApprovalStatus;
 use Tests\Manager\Application\Controllers\ManagerControllerTestCase;
 use Tests\resources\Application\EntityRecord;
@@ -117,6 +118,10 @@ $this->disableExceptionHandling();
         $this->seeInDatabase('StrikingAssignment', [
             'id' => $this->strikingAssignmentOne->columns['id'],
             'status' => CustomerAssignmentStatus::COMPLETED->value,
+        ]);
+        $this->seeInDatabase('Customer', [
+            'id' => $this->customerOne->columns['id'],
+            'status' => CustomerStatus::GOOD_FUND->value,
         ]);
     }
     

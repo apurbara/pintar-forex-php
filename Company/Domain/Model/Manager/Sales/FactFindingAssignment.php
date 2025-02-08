@@ -5,18 +5,24 @@ namespace Company\Domain\Model\Manager\Sales;
 use Company\Domain\Model\Customer;
 use Company\Domain\Model\CustomerJourney;
 use Company\Domain\Model\Manager\Sales;
+use Company\Domain\Model\Manager\Sales\FactFindingAssignment\ClosingRequestByFactFinder;
 use Company\Domain\Service\SalesFinderService;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineFactFindingAssignmentRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Resources\Attributes\Composed;
 use Resources\Infrastructure\GraphQL\Attributes\FetchableObject;
+use Resources\Infrastructure\GraphQL\Attributes\FetchableObjectList;
 use Shared\Domain\Enum\CustomerAssignmentStatus;
 use Shared\Domain\Enum\CustomerStatus;
+use Shared\Domain\Enum\ManagementApprovalStatus;
 use Shared\Domain\Enum\SalesRole;
 
 #[Entity(repositoryClass: DoctrineFactFindingAssignmentRepository::class)]
@@ -43,6 +49,12 @@ class FactFindingAssignment
     #[OneToOne(targetEntity: CustomerAssignment::class, cascade: ["persist"])]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
     protected CustomerAssignment $customerAssignment;
+    
+    //
+    #[FetchableObjectList(targetEntity: ClosingRequestByFactFinder::class, joinColumnName: "FactFindingAssignment_id",
+                paginationRequired: false)]
+    #[OneToMany(targetEntity: ClosingRequestByFactFinder::class, mappedBy: "factFindingAssignment", fetch: "EXTRA_LAZY")]
+    protected Collection $closingRequestByFactFinders;
 
     public function getStatus(): CustomerAssignmentStatus
     {
@@ -62,17 +74,28 @@ class FactFindingAssignment
         $this->customer->assertHasNoActiveAssignment();
         $this->customer->assertStatusEquals(CustomerStatus::FACT_FINDING_REQUIRED);
     }
+    
+    private function cancelPendingClosingRequestByFactFinders()
+    {
+        $pendingRequestCriteria = Criteria::create()
+                ->andWhere(Criteria::expr()->eq('status', ManagementApprovalStatus::WAITING_FOR_APPROVAL));
+        foreach ($this->closingRequestByFactFinders->matching($pendingRequestCriteria)->getIterator() as $pendingClosingRequestByFactFinder) {
+            $pendingClosingRequestByFactFinder->cancelBySystem();
+        }
+    }
 
     public function cancel(): void
     {
         $this->status = CustomerAssignmentStatus::CANCELLED;
         $this->customerAssignment->cancelAllActiveSchedule();
+        $this->cancelPendingClosingRequestByFactFinders();
     }
 
     public function cancelBySystem(): void
     {
         $this->status = CustomerAssignmentStatus::CANCELLED_BY_SYSTEM;
         $this->customerAssignment->cancelAllActiveSchedule();
+        $this->cancelPendingClosingRequestByFactFinders();
     }
 
     //
