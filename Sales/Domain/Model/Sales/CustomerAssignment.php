@@ -125,13 +125,22 @@ class CustomerAssignment implements ContainEventsInterface
     public function updateJourney(CustomerJourney $customerJourney): void
     {
         $customerJourney->assertActive();
-        $this->customerJourney = $customerJourney;
         
-        $customerJourneyJourney = new CustomerAssignmentJourney($this, $customerJourney, Uuid::generateUuid4());
-        $this->customerAssignmentJourneys->add($customerJourneyJourney);
+        if ($this->customerJourney !== $customerJourney) {
+            $p = fn(CustomerAssignmentJourney $journey) => $journey->ongoingJourneyAssociateWith($this->customerJourney);
+            $ongoingCustomerAssignmentJourney = $this->customerAssignmentJourneys->filter($p)->first();
+            if ($ongoingCustomerAssignmentJourney) {
+                $ongoingCustomerAssignmentJourney->completeJourney();
+            }
+
+            $this->customerJourney = $customerJourney;
+
+            $customerAssignmentJourney = new CustomerAssignmentJourney($this, $customerJourney, Uuid::generateUuid4());
+            $this->customerAssignmentJourneys->add($customerAssignmentJourney);
+        }
     }
 
-    public function updateCustomer(City $city, CustomerData $customerData): void
+    public function updateCustomer(?City $city, CustomerData $customerData): void
     {
         $this->assertActive();
         $this->customer->update($city, $customerData);

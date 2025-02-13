@@ -33,7 +33,7 @@ class CustomerAssignmentTest extends TestBase
     protected $sales;
     protected $customer;
     protected $customerJourney;
-    protected $customerAssignment;
+    protected $customerAssignment, $customerAssignmentJourney;
     protected $salesActivitySchedule, $schedule;
     //
     protected $id = 'newId';
@@ -55,6 +55,9 @@ class CustomerAssignmentTest extends TestBase
         
         $this->customerAssignment = new TestableCustomerAssignment($this->sales, $this->customer, $this->customerJourney, 'id');
         $this->customerAssignment->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        $this->customerAssignmentJourney = $this->buildMockOfClass(CustomerAssignmentJourney::class);
+        $this->customerAssignment->customerAssignmentJourneys = new ArrayCollection();
+        $this->customerAssignment->customerAssignmentJourneys->add($this->customerAssignmentJourney);
         
         $this->salesActivitySchedule = $this->buildMockOfClass(SalesActivitySchedule::class);
         $this->schedule = $this->buildMockOfClass(HourlyTimeInterval::class);
@@ -147,6 +150,12 @@ class CustomerAssignmentTest extends TestBase
         $this->customerAssignment->status = CustomerAssignmentStatus::RECYCLED;
         $this->assertRegularExceptionThrowed(fn() => $this->updateCustomer(), 'Forbidden', 'inactive customer assignment');
     }
+    public function test_updateCustomer_emptyCity()
+    {
+        $this->city = null;
+        $this->updateCustomer();
+        $this->markAsSuccess();
+    }
     
     //
     protected function updateJourney()
@@ -170,6 +179,24 @@ class CustomerAssignmentTest extends TestBase
         $this->updateJourney();
         $this->assertEquals(2, $this->customerAssignment->customerAssignmentJourneys->count());
         $this->assertInstanceOf(CustomerAssignmentJourney::class, $this->customerAssignment->customerAssignmentJourneys->last());
+    }
+    public function test_updateJourney_completeCurrentJourney()
+    {
+        $this->customerAssignmentJourney->expects($this->once())
+                ->method('ongoingJourneyAssociateWith')
+                ->with($this->customerAssignment->customerJourney)
+                ->willReturn(true);
+        $this->customerAssignmentJourney->expects($this->once())
+                ->method('completeJourney');
+        $this->updateJourney();
+    }
+    public function test_updateJourney_noJourneyChange_NOP()
+    {
+        $this->customerJourney = $this->customerAssignment->customerJourney;
+        $this->customerAssignmentJourney->expects($this->never())
+                ->method('ongoingJourneyAssociateWith');
+        $this->updateJourney();
+        $this->assertEquals(1, $this->customerAssignment->customerAssignmentJourneys->count());
     }
     
     //

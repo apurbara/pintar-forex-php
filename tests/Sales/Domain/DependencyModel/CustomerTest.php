@@ -133,6 +133,12 @@ class CustomerTest extends TestBase
         $this->assertNotSame($this->phone, $this->customer->phone);
         $this->assertNotSame($this->source, $this->customer->source);
     }
+    public function test_update_emptyCity()
+    {
+        $this->city = null;
+        $this->update();
+        $this->markAsSuccess();
+    }
     
     //
     protected function submitVerificationReport()
@@ -182,6 +188,6 @@ class TestableCustomer extends Customer
     public ?string $email;
     public string $phone;
     public ?string $source;
-    public City $city;
+    public ?City $city;
     public Collection $verificationReports;
 }

@@ -10,6 +10,7 @@ use Tests\TestBase;
 class CustomerAssignmentJourneyTest extends TestBase
 {
     protected $customerAssignment, $customerJourney;
+    protected $customerAssignmentJourney;
     protected $id = 'newId';
 
     protected function setUp(): void
@@ -17,6 +18,8 @@ class CustomerAssignmentJourneyTest extends TestBase
         parent::setUp();
         $this->customerAssignment = $this->buildMockOfClass(CustomerAssignment::class);
         $this->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        //
+        $this->customerAssignmentJourney = new TestableCustomerAssignmentJourney($this->customerAssignment, $this->customerJourney, 'id');
     }
     
     //
@@ -30,7 +33,18 @@ class CustomerAssignmentJourneyTest extends TestBase
         $this->assertSame($this->customerAssignment, $customerAssignmentJourney->customerAssignment);
         $this->assertSame($this->customerJourney, $customerAssignmentJourney->customerJourney);
         $this->assertSame($this->id, $customerAssignmentJourney->id);
-        $this->assertDateTimeImmutableYmdHisValueEqualsNow($customerAssignmentJourney->createdTime);
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($customerAssignmentJourney->startTime);
+    }
+    
+    //
+    protected function completeJourney()
+    {
+        $this->customerAssignmentJourney->completeJourney();
+    }
+    public function test_completeJourney_setEndTime()
+    {
+        $this->completeJourney();
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($this->customerAssignmentJourney->endTime);
     }
 }
 
@@ -39,5 +53,6 @@ class TestableCustomerAssignmentJourney extends CustomerAssignmentJourney
     public CustomerAssignment $customerAssignment;
     public CustomerJourney $customerJourney;
     public string $id;
-    public DateTimeImmutable $createdTime;
+    public DateTimeImmutable $startTime;
+    public ?DateTimeImmutable $endTime;
 }

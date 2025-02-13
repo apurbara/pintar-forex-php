@@ -54,9 +54,9 @@ class CustomerAssignmentController extends BaseController
 
         $customerInput = $input->get('customer');
         $customerData = (new CustomerData())
-                ->setCityId($customerInput['City_id'])
+                ->setCityId($customerInput['City_id'] ?? null)
                 ->setName($customerInput['name'])
-                ->setEmail($customerInput['email']);
+                ->setEmail($customerInput['email'] ?? null);
         $payload = (new UpdateCustomerPayload())
                 ->setId($input->get('id'))
                 ->setCustomerData($customerData);

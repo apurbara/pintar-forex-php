@@ -30,7 +30,10 @@ class CustomerAssignmentJourney
     protected string $id;
 
     #[Column(type: "datetimetz_immutable", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
-    protected DateTimeImmutable $createdTime;
+    protected DateTimeImmutable $startTime;
+
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected ?DateTimeImmutable $endTime;
 
     
     public function __construct(CustomerAssignment $customerAssignment, CustomerJourney $customerJourney, string $id)

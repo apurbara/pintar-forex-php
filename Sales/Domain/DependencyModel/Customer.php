@@ -23,7 +23,7 @@ class Customer
 {
     #[ManyToOne(targetEntity: City::class)]
     #[JoinColumn(name: "City_id", referencedColumnName: "id")]
-    protected City $city;
+    protected ?City $city;
 
     #[Id, Column(type: "guid")]
     protected string $id;
@@ -87,7 +87,7 @@ class Customer
         $this->city->assertActive();
     }
     
-    public function update(City $city, CustomerData $data): void
+    public function update(?City $city, CustomerData $data): void
     {
         $this->city = $city;
         $this->setEmail($data->email);

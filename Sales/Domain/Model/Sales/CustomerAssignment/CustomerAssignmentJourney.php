@@ -31,13 +31,27 @@ class CustomerAssignmentJourney
     protected string $id;
 
     #[Column(type: "datetimetz_immutable", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
-    protected DateTimeImmutable $createdTime;
+    protected DateTimeImmutable $startTime;
+
+    #[Column(type: "datetimetz_immutable", nullable: true)]
+    protected ?DateTimeImmutable $endTime;
 
     public function __construct(CustomerAssignment $customerAssignment, CustomerJourney $customerJourney, string $id)
     {
         $this->customerAssignment = $customerAssignment;
         $this->customerJourney = $customerJourney;
         $this->id = $id;
-        $this->createdTime = new \DateTimeImmutable();
+        $this->startTime = new \DateTimeImmutable();
+    }
+    
+    public function completeJourney(): void
+    {
+        $this->endTime = new \DateTimeImmutable();
+    }
+    
+    //
+    public function ongoingJourneyAssociateWith(CustomerJourney $customerJourney): bool
+    {
+        
     }
 }

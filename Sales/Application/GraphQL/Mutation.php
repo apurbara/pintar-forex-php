@@ -66,6 +66,16 @@ class Mutation extends ObjectType
                 'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
                         ->submitInitialSalesActivityReport(app(Sales::class), new GraphqlInputRequest($args))
             ],
+            'submitNonScheduledSalesActivityReport' => [
+                'type' => TypeRegistry::objectType(SalesActivitySchedule::class),
+                'args' => [
+                    'content' => Type::string(),
+                    'CustomerAssignment_id' => Type::id(),
+                    'SalesActivity_id' => Type::id(),
+                ],
+                'resolve' => fn($root, $args) => app(SalesActivityReportController::class)
+                        ->submitNonScheduledSalesActivityReport(app(Sales::class), new GraphqlInputRequest($args))
+            ],
         ];
     }
     

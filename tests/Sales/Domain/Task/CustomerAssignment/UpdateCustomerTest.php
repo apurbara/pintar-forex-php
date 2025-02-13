@@ -44,4 +44,13 @@ class UpdateCustomerTest extends SalesTaskTestBase
                 ->with($this->sales);
         $this->execute();
     }
+    public function test_execute_emptyCity()
+    {
+        $this->customerData = new CustomerData();
+        $this->payload = (new UpdateCustomerPayload())
+                ->setId($this->customerAssignmentId)
+                ->setCustomerData($this->customerData);
+        $this->execute();
+        $this->markAsSuccess();
+    }
 }

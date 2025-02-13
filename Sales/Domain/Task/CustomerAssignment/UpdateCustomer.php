@@ -6,7 +6,6 @@ use Sales\Domain\Model\Sales;
 use Sales\Domain\Task\Dependency\CityRepository;
 use Sales\Domain\Task\SalesTask;
 
-
 class UpdateCustomer implements SalesTask
 {
 
@@ -25,7 +24,7 @@ class UpdateCustomer implements SalesTask
      */
     public function executeBySales(Sales $sales, $payload): void
     {
-        $area = $this->cityRepository->ofId($payload->customerData->cityId);
+        $area = isset($payload->customerData->cityId) ? $this->cityRepository->ofId($payload->customerData->cityId) : null;
 
         $customerAssignment = $this->customerAssignmentRepository->ofId($payload->id);
         $customerAssignment->assertBelongsToSales($sales);

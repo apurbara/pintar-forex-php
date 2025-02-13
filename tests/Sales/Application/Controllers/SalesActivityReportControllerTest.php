@@ -67,6 +67,7 @@ class SalesActivityReportControllerTest extends SalesControllerTestCase
         $this->connection->table('SalesActivityReport')->truncate();
     }
     
+    //
     protected function submitInitialSalesActivityReport()
     {
         $this->prepareSalesDependency();
@@ -93,6 +94,69 @@ _QUERY;
     {
 $this->disableExceptionHandling();
         $this->submitInitialSalesActivityReport();
+        $this->seeStatusCode(200);
+        
+        $this->seeJsonContains([
+            'status' => SalesActivityScheduleStatus::COMPLETED->value,
+            'startTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s')),
+            'endTime' => $this->jakartaDateTimeFormat((new DateTime())->setTime((new DateTime())->format('H') + 1, 00)->format('Y-m-d H:i:s')),
+            'salesActivity' => [
+                'name' => $this->salesActivity->columns['name'],
+            ],
+            'salesActivityReport' => [
+                'content' => $this->graphqlVariables['content'],
+            ],
+        ]);
+        
+        $this->seeInDatabase('SalesActivitySchedule', [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'status' => SalesActivityScheduleStatus::COMPLETED->value,
+            'startTime' => (new DateTime())->setTime((new DateTime())->format('H'), 00)->format('Y-m-d H:i:s'),
+            'endTime' => (new DateTime())->setTime((new DateTime())->format('H')+1, 00)->format('Y-m-d H:i:s'),
+        ]);
+        
+        $this->seeInDatabase('SalesActivityReport', [
+            'submitTime' => $this->stringOfCurrentTime(),
+            'content' => $this->graphqlVariables['content'],
+        ]);
+    }
+    
+    //
+    protected function submitNonScheduledSalesActivityReport()
+    {
+        $this->prepareSalesDependency();
+        $this->salesActivity->columns['initial'] = false;
+        $this->salesActivity->insert($this->connection);
+        $this->customerAssignment->insert($this->connection);
+        
+        $this->graphqlQuery = <<<'_QUERY'
+mutation ( 
+    $CustomerAssignment_id: ID, 
+    $SalesActivity_id: ID, 
+    $content: String 
+) {
+    submitNonScheduledSalesActivityReport ( 
+        CustomerAssignment_id: $CustomerAssignment_id, 
+        SalesActivity_id: $SalesActivity_id, 
+        content: $content 
+    ) {
+        id, status, startTime, endTime,
+        salesActivity { name }
+        salesActivityReport { content }
+    }
+}
+_QUERY;
+        $this->graphqlVariables = [
+            'CustomerAssignment_id' => $this->customerAssignment->columns['id'],
+            'SalesActivity_id' => $this->salesActivity->columns['id'],
+            'content' => 'new report content',
+        ];
+        $this->postGraphqlRequest($this->sales->token);
+    }
+    public function test_submitNonScheduledSalesActivityReport_200()
+    {
+$this->disableExceptionHandling();
+        $this->submitNonScheduledSalesActivityReport();
         $this->seeStatusCode(200);
         
         $this->seeJsonContains([

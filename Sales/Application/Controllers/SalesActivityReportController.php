@@ -15,6 +15,8 @@ use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActiv
 use Sales\Domain\Model\Sales\CustomerAssignment\SalesActivitySchedule\SalesActivityReportData;
 use Sales\Domain\Task\SalesActivityReport\SubmitInitialSalesActivityReport;
 use Sales\Domain\Task\SalesActivityReport\SubmitInitialSalesActivityReportPayload;
+use Sales\Domain\Task\SalesActivityReport\SubmitNonScheduledSalesActivityReport;
+use Sales\Domain\Task\SalesActivityReport\SubmitNonScheduledSalesActivityReportPayload;
 use Sales\Domain\Task\SalesActivityReport\SubmitSalesActivityReportTask;
 use Sales\Domain\Task\SalesActivityReport\ViewSalesActivityReportDetailTask;
 use Sales\Domain\Task\SalesActivityReport\ViewSalesActivityReportListTask;
@@ -41,6 +43,22 @@ class SalesActivityReportController extends BaseController
 
         $payload = (new SubmitInitialSalesActivityReportPayload($input->get('content')))
                 ->setCustomerAssignmentId($input->get('CustomerAssignment_id'));
+
+        $this->executeSalesMutationTask($sales, $task, $payload);
+        return $salesActivityScheduleRepository->queryOneById($payload->salesActivityScheduleId);
+    }
+    public function submitNonScheduledSalesActivityReport(Sales $sales, InputRequest $input)
+    {
+        $repository = $this->repository();
+        $customerAssignmentRepository = $this->em->getRepository(CustomerAssignment::class);
+        $salesActivityScheduleRepository = $this->em->getRepository(SalesActivitySchedule::class);
+        $salesActivityRepository = $this->em->getRepository(SalesActivity::class);
+        $task = new SubmitNonScheduledSalesActivityReport(
+                $repository, $customerAssignmentRepository, $salesActivityScheduleRepository, $salesActivityRepository);
+
+        $payload = (new SubmitNonScheduledSalesActivityReportPayload($input->get('content')))
+                ->setCustomerAssignmentId($input->get('CustomerAssignment_id'))
+                ->setSalesActivityId($input->get('SalesActivity_id') ?? null);
 
         $this->executeSalesMutationTask($sales, $task, $payload);
         return $salesActivityScheduleRepository->queryOneById($payload->salesActivityScheduleId);

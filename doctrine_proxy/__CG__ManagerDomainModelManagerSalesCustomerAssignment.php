@@ -67,10 +67,10 @@ class CustomerAssignment extends \Manager\Domain\Model\Manager\Sales\CustomerAss
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'createdTime', 'status', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'recordedEvents', 'childrenContainEvents'];
+            return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'createdTime', 'status', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'customerAssignmentJourneys', 'recordedEvents', 'childrenContainEvents'];
         }
 
-        return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'createdTime', 'status', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'recordedEvents', 'childrenContainEvents'];
+        return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'createdTime', 'status', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'customerAssignmentJourneys', 'recordedEvents', 'childrenContainEvents'];
     }
 
     /**
