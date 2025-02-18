@@ -1,0 +1,29 @@
+<?php
+
+namespace Sales\Domain\Task\CustomerAssignmentJourney;
+
+use Resources\Domain\TaskPayload\ViewPaginationListPayload;
+use Sales\Domain\Model\Sales;
+use Sales\Domain\Task\SalesTask;
+
+class ViewCustomerAssignmentJourneyList implements SalesTask
+{
+
+    public function __construct(protected CustomerAssignmentJourneyRepository $repository)
+    {
+        
+    }
+
+    /**
+     * 
+     * @param Sales $sales
+     * @param ViewPaginationListPayload $payload
+     * @return void
+     */
+    public function executeBySales(Sales $sales, $payload): void
+    {
+        $result = $this->repository
+                ->customerAssignmentJourneyListBelongsToSales($sales->getId(), $payload->paginationSchema);
+        $payload->setResult($result);
+    }
+}

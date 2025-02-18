@@ -4,6 +4,7 @@ namespace Company\Infrastructure\Persistence\Doctrine\Repository;
 
 use Company\Domain\Model\SalesActivity;
 use Company\Domain\Task\SalesActivity\SalesActivityRepository;
+use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineAllListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrineEntityRepository;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaginationListCategory;
 use Resources\Infrastructure\Persistence\Doctrine\Repository\SearchCategory\Filter;
@@ -48,5 +49,12 @@ class DoctrineSalesActivityRepository extends DoctrineEntityRepository implement
             new Filter(false, 'SalesActivity.disabled'),
         ];
         return $this->fetchOneBy($filters);
+    }
+
+    public function allActiveSalesActivity(array $searchSchema): array
+    {
+        $doctrineAllListCategory = DoctrineAllListCategory::fromSchema($searchSchema)
+                ->addFilter(new Filter(false, 'SalesActivity.disabled'));
+        return $this->fetchAllList($doctrineAllListCategory);
     }
 }

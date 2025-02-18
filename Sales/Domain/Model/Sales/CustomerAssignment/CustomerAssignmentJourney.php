@@ -18,6 +18,7 @@ use Sales\Infrastructure\Persistence\Doctrine\Repository\DoctrineCustomerAssignm
 class CustomerAssignmentJourney
 {
 
+    #[FetchableObject(targetEntity: CustomerAssignment::class, joinColumnName: "CustomerAssignment_id")]
     #[ManyToOne(targetEntity: CustomerAssignment::class, inversedBy: "customerAssignmentJourneys", fetch: "LAZY")]
     #[JoinColumn(name: "CustomerAssignment_id", referencedColumnName: "id")]
     protected CustomerAssignment $customerAssignment;
@@ -52,6 +53,6 @@ class CustomerAssignmentJourney
     //
     public function ongoingJourneyAssociateWith(CustomerJourney $customerJourney): bool
     {
-        
+        return $this->customerJourney === $customerJourney;
     }
 }

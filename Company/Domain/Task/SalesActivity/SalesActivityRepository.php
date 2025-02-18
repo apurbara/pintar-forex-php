@@ -19,4 +19,6 @@ interface SalesActivityRepository
     public function salesAcivityList(array $paginationSchema): array;
 
     public function salesAcivityDetail(string $id): array;
+    
+    public function allActiveSalesActivity(array $searchSchema): array;
 }

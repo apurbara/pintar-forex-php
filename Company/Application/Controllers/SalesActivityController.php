@@ -10,6 +10,7 @@ use Company\Domain\Task\SalesActivity\DisableSalesActivity;
 use Company\Domain\Task\SalesActivity\EnableSalesActivity;
 use Company\Domain\Task\SalesActivity\SetInitialSalesActivityTask;
 use Company\Domain\Task\SalesActivity\UpdateSalesActivity;
+use Company\Domain\Task\SalesActivity\ViewAllActiveSalesActivity;
 use Company\Domain\Task\SalesActivity\ViewSalesActivityDetail;
 use Company\Domain\Task\SalesActivity\ViewSalesActivityList;
 use Company\Infrastructure\Persistence\Doctrine\Repository\DoctrineSalesActivityRepository;
@@ -94,6 +95,16 @@ class SalesActivityController extends BaseController
     {
         $task = new ViewSalesActivityList($this->repository());
         $payload = $this->buildViewPaginationListPayload($input);
+        
+        $user->executeTaskInCompany($task, $payload);
+        return $payload->result;
+    }
+    
+    #[Query(responseWrapper: Query::LIST_RESPONSE_WRAPPER)]
+    public function viewAllActiveSalesActivityList(CompanyUser $user, InputRequest $input)
+    {
+        $task = new ViewAllActiveSalesActivity($this->repository());
+        $payload = $this->buildViewAllListPayload($input);
         
         $user->executeTaskInCompany($task, $payload);
         return $payload->result;

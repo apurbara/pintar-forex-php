@@ -46,7 +46,13 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
     public function scheduledSalesActivityBelongsToSalesList(string $salesId, array $paginationSchema): array
     {
         $qb = $this->createCoreQueryBuilder()
-                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity', 'SalesActivitySchedule.SalesActivity_id = SalesActivity.id');
+                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity',
+                        'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
+                ->addSelect('SalesActivity.name salesActivityName')
+                ->innerJoin('CustomerAssignment', 'Customer', 'Customer',
+                        'CustomerAssignment.Customer_id = Customer.id')
+                ->addSelect('Customer.name customerName')
+                ->addSelect('Customer.phone customerPhone');
         $doctrinePaginationListCategory = DoctrinePaginationListCategory::fromSchema($paginationSchema)
                 ->addFilter(new Filter($salesId, 'CustomerAssignment.Sales_id'));
         return $doctrinePaginationListCategory->paginateResult($qb, $this->getTableName());
@@ -88,13 +94,13 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
         return DoctrineAllListCategory::fromSchema($searchSchema)
                         ->fetchResult($qb);
     }
-    
+
     public function queryAllList(array $searchSchema): array
     {
         $qb = $this->createCoreQueryBuilder()
                 ->addOrderBy('SalesActivitySchedule.startTime', 'DESC');
         return DoctrineAllListCategory::fromSchema($searchSchema)
-                ->fetchResult($qb);
+                        ->fetchResult($qb);
     }
 
     public function allNonInitialSchedulesInMonthBelongsToSales(string $salesId, int $year, int $month)
@@ -102,7 +108,8 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
         $monthFormat = (new DateTimeImmutable())->setDate($year, $month, 1)->format('Ym');
         $qb = $this->createCoreQueryBuilder();
         $qb->andWhere($qb->expr()->eq('CustomerAssignment.Sales_id', ':salesId'))
-                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity', 'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
+                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity',
+                        'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
                 ->andWhere($qb->expr()->eq('SalesActivity.initial', 0))
                 ->setParameter('salesId', $salesId)
                 ->andWhere($qb->expr()->eq("DATE_FORMAT(SalesActivitySchedule.startTime, '%Y%m')", "'$monthFormat'"));
@@ -113,7 +120,8 @@ class DoctrineSalesActivityScheduleRepository extends DoctrineEntityRepository
     {
         $qb = $this->createCoreQueryBuilder();
         $qb->andWhere($qb->expr()->eq('CustomerAssignment.Sales_id', ':salesId'))
-                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity', 'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
+                ->innerJoin('SalesActivitySchedule', 'SalesActivity', 'SalesActivity',
+                        'SalesActivitySchedule.SalesActivity_id = SalesActivity.id')
                 ->andWhere($qb->expr()->eq('SalesActivity.initial', 0))
                 ->setParameter('salesId', $salesId);
         return $qb->executeQuery()->fetchAllAssociative();

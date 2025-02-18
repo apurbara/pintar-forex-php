@@ -46,6 +46,21 @@ class CustomerAssignmentJourneyTest extends TestBase
         $this->completeJourney();
         $this->assertDateTimeImmutableYmdHisValueEqualsNow($this->customerAssignmentJourney->endTime);
     }
+    
+    //
+    protected function ongoingJourneyAssociateWith()
+    {
+        return $this->customerAssignmentJourney->ongoingJourneyAssociateWith($this->customerJourney);
+    }
+    public function test_ongoingJourneyAssociateWith_sameJourney_returnTrue()
+    {
+        $this->assertTrue($this->ongoingJourneyAssociateWith());
+    }
+    public function test_ongoingJourneyAssociateWith_differentJourney_returnFalse()
+    {
+        $this->customerAssignmentJourney->customerJourney = $this->buildMockOfClass(CustomerJourney::class);
+        $this->assertFalse($this->ongoingJourneyAssociateWith());
+    }
 }
 
 class TestableCustomerAssignmentJourney extends CustomerAssignmentJourney

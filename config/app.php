@@ -169,6 +169,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Shared\Application\Providers\DoctrineEntityManagerProvider::class,
+        Shared\Application\Providers\InputRequestProvider::class,
         Company\Application\Providers\CompanyUserProvider::class,
         Admin\Application\Providers\AdminProvider::class,
         Manager\Application\Providers\ManagerProvider::class,

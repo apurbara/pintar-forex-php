@@ -30,7 +30,7 @@ class CustomerAssignmentJourneyTest extends TestBase
         $this->assertSame($this->customerAssignment, $customerAssignmentJourney->customerAssignment);
         $this->assertSame($this->customerJourney, $customerAssignmentJourney->customerJourney);
         $this->assertSame($this->id, $customerAssignmentJourney->id);
-        $this->assertDateTimeImmutableYmdHisValueEqualsNow($customerAssignmentJourney->createdTime);
+        $this->assertDateTimeImmutableYmdHisValueEqualsNow($customerAssignmentJourney->startTime);
     }
 }
 
@@ -39,5 +39,5 @@ class TestableCustomerAssignmentJourney extends CustomerAssignmentJourney
     public CustomerAssignment $customerAssignment;
     public CustomerJourney $customerJourney;
     public string $id;
-    public DateTimeImmutable $createdTime;
+    public DateTimeImmutable $startTime;
 }

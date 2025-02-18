@@ -67,10 +67,10 @@ class CustomerAssignment extends \Sales\Domain\Model\Sales\CustomerAssignment im
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'status', 'createdTime', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'recordedEvents', 'childrenContainEvents'];
+            return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'status', 'createdTime', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'customerAssignmentJourneys', 'recordedEvents', 'childrenContainEvents'];
         }
 
-        return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'status', 'createdTime', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'recordedEvents', 'childrenContainEvents'];
+        return ['__isInitialized__', 'sales', 'customer', 'customerJourney', 'id', 'status', 'createdTime', 'closingRequests', 'recycleRequests', 'salesActivitySchedules', 'customerAssignmentJourneys', 'recordedEvents', 'childrenContainEvents'];
     }
 
     /**
@@ -202,7 +202,7 @@ class CustomerAssignment extends \Sales\Domain\Model\Sales\CustomerAssignment im
     /**
      * {@inheritDoc}
      */
-    public function updateCustomer(\Sales\Domain\DependencyModel\Province\City $city, \Sales\Domain\DependencyModel\CustomerData $customerData): void
+    public function updateCustomer(?\Sales\Domain\DependencyModel\Province\City $city, \Sales\Domain\DependencyModel\CustomerData $customerData): void
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'updateCustomer', [$city, $customerData]);

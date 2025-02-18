@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Manager\Application\Controllers\PerformanceSummaryController as PerformanceSummaryController2;
 use Sales\Application\Controllers\CommonSalesMetricSummaryController;
+use Sales\Application\Controllers\CustomerAssignmentController;
+use Sales\Application\Controllers\SalesActivityScheduleController;
 
 /*
   |--------------------------------------------------------------------------
@@ -38,3 +40,5 @@ Route::get('/manager/view-all-sales-rank-summary', [PerformanceSummaryController
 Route::get('/manager/view-all-sales-performance-metric-summary', [PerformanceSummaryController2::class, 'viewAllSalesPerformanceMetricSummary']);
 //
 Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
+Route::get('/sales/view-customer-assignment-list', [CustomerAssignmentController::class, 'customerAssignmentList']);
+Route::get('/sales/view-sales-activity-schedule-list', [SalesActivityScheduleController::class, 'salesActivityScheduleList']);

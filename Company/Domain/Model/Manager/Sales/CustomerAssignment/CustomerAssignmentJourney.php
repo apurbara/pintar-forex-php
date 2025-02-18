@@ -41,7 +41,7 @@ class CustomerAssignmentJourney
         $this->customerAssignment = $customerAssignment;
         $this->customerJourney = $customerJourney;
         $this->id = $id;
-        $this->createdTime = new \DateTimeImmutable();
+        $this->startTime = new \DateTimeImmutable();
     }
 
 }

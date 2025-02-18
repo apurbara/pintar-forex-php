@@ -12,6 +12,7 @@ use Resources\Infrastructure\GraphQL\TypeRegistry;
 use Resources\Infrastructure\GraphQL\ViewList\FilterInput;
 use Sales\Application\Controllers\ClosingRequestController;
 use Sales\Application\Controllers\CustomerAssignmentController;
+use Sales\Application\Controllers\CustomerAssignmentJourneyController;
 use Sales\Application\Controllers\RecycleRequestController;
 use Sales\Application\Controllers\SalesActivityReportController;
 use Sales\Application\Controllers\SalesActivityScheduleController;
@@ -46,6 +47,7 @@ class Query extends ObjectType
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityReportController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(SalesActivityScheduleController::class),
             ...ControllerToGraphqlFieldsMapper::mapQueryFields(VerificationReportController::class),
+            ...ControllerToGraphqlFieldsMapper::mapQueryFields(CustomerAssignmentJourneyController::class),
             ...$this->salesActivityScheduleCustomQuery(),
         ];
     }
