@@ -28,6 +28,8 @@ enum RecurrenceType: string
     private function applyDailyEvaluation(QueryBuilder $qb, string $metricTimeColumn, ?int $recurrenceCount): void
     {
         $qb->addSelect("DATE_FORMAT($metricTimeColumn, '%Y-%m-&d') evaluationTime")
+                ->addSelect("'DAILY' reccurenceType")
+                ->addSelect("DAILY reccurenceType")
                 ->addGroupBy("DATE_FORMAT($metricTimeColumn, '%Y-%m-&d')");
 
         $recurrenceCount = $recurrenceCount ?? 1;
@@ -40,6 +42,7 @@ enum RecurrenceType: string
     private function applyWeeklyEvaluation(QueryBuilder $qb, string $metricTimeColumn, ?int $recurrenceCount): void
     {
         $qb->addSelect("DATE_FORMAT($metricTimeColumn, '%Y-%u') evaluationTime")
+                ->addSelect("'WEEKLY' reccurenceType")
                 ->addGroupBy("DATE_FORMAT($metricTimeColumn, '%Y-%u')");
 
         $recurrenceCount = $recurrenceCount ?? 1;
@@ -53,6 +56,7 @@ enum RecurrenceType: string
     private function applyMonthlyEvaluation(QueryBuilder $qb, string $metricTimeColumn, ?int $recurrenceCount): void
     {
         $qb->addSelect("DATE_FORMAT($metricTimeColumn, '%Y-%m') evaluationTime")
+                ->addSelect("'MONTHLY' reccurenceType")
                 ->addGroupBy("DATE_FORMAT($metricTimeColumn, '%Y-%m')");
         
         $recurrenceCount = $recurrenceCount ?? 1;
@@ -65,6 +69,7 @@ enum RecurrenceType: string
     private function applyYearlyEvaluation(QueryBuilder $qb, string $metricTimeColumn, ?int $recurrenceCount): void
     {
         $qb->addSelect("DATE_FORMAT($metricTimeColumn, '%Y') evaluationTime")
+                ->addSelect("'YEARLY' reccurenceType")
                 ->addGroupBy("DATE_FORMAT($metricTimeColumn, '%Y')");
         
         $recurrenceCount = $recurrenceCount ?? 1;
