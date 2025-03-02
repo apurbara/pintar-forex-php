@@ -87,7 +87,7 @@ class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository impl
         $qb->addSelect('Customer.name customerName')
                 ->addSelect('Customer.phone customerPhone')
                 ->addSelect('Customer.email customerEmail')
-                ->addSelect('Customer.source customerSouce')
+                ->addSelect('Customer.source customerSource')
                 ->addSelect('Customer.City_id')
                 ->leftJoin('CustomerAssignment', 'CustomerJourney', 'CustomerJourney', 'CustomerAssignment.CustomerJourney_id = CustomerJourney.id')
                 ->addSelect('CustomerJourney.name customerJourneyName')

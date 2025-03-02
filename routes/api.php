@@ -8,6 +8,7 @@ use Company\Application\Controllers\CustomerController;
 use Company\Application\Controllers\PerformanceSummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Manager\Application\Controllers\CustomerAssignmentController as CustomerAssignmentController2;
 use Manager\Application\Controllers\PerformanceSummaryController as PerformanceSummaryController2;
 use Sales\Application\Controllers\CommonSalesMetricSummaryController;
 use Sales\Application\Controllers\CustomerAssignmentController;
@@ -38,6 +39,7 @@ Route::get('/view-all-sales-performance-metric-summary', [PerformanceSummaryCont
 Route::get('/manager/view-all-company-metric-summary', [PerformanceSummaryController2::class, 'viewAllCompanyMetricSummary']);
 Route::get('/manager/view-all-sales-rank-summary', [PerformanceSummaryController2::class, 'viewAllSalesRankSummary']);
 Route::get('/manager/view-all-sales-performance-metric-summary', [PerformanceSummaryController2::class, 'viewAllSalesPerformanceMetricSummary']);
+Route::get('/manager/view-customer-assignment-list', [CustomerAssignmentController2::class, 'customerAssignmentList']);
 //
 Route::get('/view-all-common-sales-metric-summary', [CommonSalesMetricSummaryController::class, 'viewAllCommonSalesMetricSummary']);
 Route::get('/sales/view-customer-assignment-list', [CustomerAssignmentController::class, 'customerAssignmentList']);

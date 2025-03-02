@@ -123,9 +123,30 @@ class DoctrineCustomerAssignmentRepository extends DoctrineEntityRepository impl
                 ->where($hasPendingClosingRequestSubquery->expr()->eq("ClosingRequest.CustomerAssignment_id", "CustomerAssignment.id"))
                 ->andWhere($hasPendingClosingRequestSubquery->expr()->eq("ClosingRequest.status", "'{$pendingRequestStatus}'"));
         
+        $verificationReportQB = $this->dbalQueryBuilder();
+        $verificationReportQB->select('SUM(CustomerVerification.weight) verificationScore')
+                ->addSelect('VerificationReport.Customer_id')
+                ->from('VerificationReport')
+                ->innerJoin('VerificationReport', 'CustomerVerification', 'CustomerVerification',
+                        'VerificationReport.CustomerVerification_id = CustomerVerification.id')
+                ->groupBy('VerificationReport.Customer_id');
+        
         $qb = $this->createManagerQueryBuilder($managerId)
+                ->addSelect('Sales.name salesName')
                 ->innerJoin('CustomerAssignment', 'Customer', 'Customer', 'CustomerAssignment.Customer_id = Customer.id')
-                ->innerJoin('CustomerAssignment', 'CustomerJourney', 'CustomerJourney', 'CustomerAssignment.CustomerJourney_id = CustomerJourney.id');
+                ->addSelect('Customer.name customerName')
+                ->addSelect('Customer.name customerName')
+                ->addSelect('Customer.phone customerPhone')
+                ->addSelect('Customer.email customerEmail')
+                ->addSelect('Customer.source customerSource')
+                ->addSelect('Customer.City_id')
+                ->leftJoin('CustomerAssignment', 'CustomerJourney', 'CustomerJourney', 'CustomerAssignment.CustomerJourney_id = CustomerJourney.id')
+                ->addSelect('CustomerJourney.name customerJourneyName')
+                ->leftJoin('CustomerAssignment', sprintf("(%s)", $verificationReportQB->getSQL()),
+                        'verificationReportSubquery',
+                        'CustomerAssignment.Customer_id = verificationReportSubquery.Customer_id')
+                ->addSelect('verificationReportSubquery.verificationScore');
+        
         foreach ($paginationSchema['filters'] ?? [] as $key =>  $filterSchema) {
             if ($filterSchema['column']  === 'hasSalesActivitySchedule') {
                 $hasSalesActivitySchedule = $filterSchema['value'] ? "EXISTS" : "NOT EXISTS";
